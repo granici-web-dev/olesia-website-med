@@ -1,0 +1,148 @@
+/* Shared brand tokens & base */
+:root {
+  --cream: #f5f1ea;
+  --cream-2: #ede6d8;
+  --paper: #faf7f1;
+  --beige: #4d3a28;
+  --beige-soft: #8a7256;
+  --sage: #7c8a4e;
+  --sage-2: #94a266;
+  --sage-soft: #c8d09e;
+  --sage-deep: #2a3315;
+  --walnut: #6b513a;
+  --gold: #c89a5e;
+  --ink: #2c2117;
+  --ink-soft: #5a4a3a;
+  --rule: rgba(44,33,23,0.16);
+}
+
+.artboard {
+  width: 100%;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Manrope', -apple-system, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0;
+}
+.artboard * { box-sizing: border-box; }
+
+.serif { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; }
+.serif-it { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 400; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.divider {
+  height: 1px;
+  background: var(--rule);
+  width: 100%;
+}
+
+.branch-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.branch-mark svg { width: 100%; height: 100%; }
+
+/* Hide scrollbars inside artboards (design canvas already does this) */
+
+/* Photo placeholder treatment */
+.photo {
+  background-image: url('assets/olesea-hero.png');
+  background-size: auto 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #e9e1d0;
+  filter: var(--photo-filter, none);
+  position: relative;
+}
+.photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--photo-overlay, transparent);
+  mix-blend-mode: var(--photo-overlay-blend, normal);
+  pointer-events: none;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-dark { background: var(--ink); color: var(--cream); }
+.btn-dark:hover { background: var(--sage); }
+.btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+.btn-outline:hover { background: var(--ink); color: var(--cream); }
+.btn-sage { background: var(--sage); color: var(--cream); }
+.btn-sage:hover { background: var(--ink); }
+
+/* Nav bar shared */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 56px;
+  border-bottom: 1px solid var(--rule);
+}
+.nav-links {
+  display: flex;
+  gap: 36px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.nav-links a { color: inherit; text-decoration: none; }
+.nav-links a:hover { color: var(--sage); }
+.lang {
+  display: inline-flex;
+  gap: 4px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.lang .active { color: var(--ink); font-weight: 600; }
+
+/* Eyebrow with branch */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.brand-mark {
+  width: 16px;
+  height: 24px;
+  color: var(--sage);
+}
+
+/* Numbered service row */
+.num {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--sage);
+}

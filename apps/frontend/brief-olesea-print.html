@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brief Olesea Jalba — Informații necesare pentru site</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #f5f1ea;
+      --paper: #faf7f1;
+      --beige: #4d3a28;
+      --sage: #7c8a4e;
+      --sage-deep: #2a3315;
+      --bronze: #9c7345;
+      --ink: #2c2117;
+      --ink-soft: #5a4a3a;
+      --rule: rgba(44,33,23,0.16);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Manrope', -apple-system, system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; }
+    .serif-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 400; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 80px 40px 120px; }
+
+    .doc-header {
+      padding-bottom: 32px;
+      margin-bottom: 56px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .doc-eyebrow {
+      font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--bronze); margin-bottom: 12px;
+    }
+    h1.doc-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 64px;
+      line-height: 1.05;
+      margin: 0;
+      letter-spacing: -0.015em;
+    }
+    h1.doc-title em { color: var(--sage); }
+    .doc-meta {
+      display: flex; gap: 32px; margin-top: 24px;
+      font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft);
+    }
+    .doc-meta strong { color: var(--ink); font-weight: 600; }
+
+    .intro {
+      font-size: 17px; line-height: 1.7; color: var(--ink-soft);
+      margin-bottom: 64px; padding: 28px; background: var(--paper);
+      border-left: 3px solid var(--sage);
+    }
+    .intro strong { color: var(--ink); }
+
+    section.block {
+      margin-bottom: 72px;
+    }
+    .block-num {
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: 56px; color: var(--sage); line-height: 1; margin-bottom: 8px;
+    }
+    .block-title {
+      font-family: 'Cormorant Garamond', serif; font-weight: 400;
+      font-size: 38px; line-height: 1.1; margin: 0 0 12px;
+      letter-spacing: -0.005em;
+    }
+    .block-title em { color: var(--sage); }
+    .block-intro {
+      font-size: 15px; line-height: 1.7; color: var(--ink-soft);
+      max-width: 640px; margin-bottom: 32px;
+    }
+
+    .question {
+      padding: 20px 0;
+      border-top: 1px solid var(--rule);
+    }
+    .question:last-child { border-bottom: 1px solid var(--rule); }
+    .q-row {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .q-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--bronze); letter-spacing: 0.04em;
+      padding-top: 6px;
+    }
+    .q-text {
+      font-size: 16px; line-height: 1.6; color: var(--ink);
+    }
+    .q-hint {
+      margin-top: 6px; font-size: 13px; line-height: 1.6;
+      color: var(--ink-soft); font-style: italic;
+    }
+    .answer-box {
+      margin-top: 14px;
+      min-height: 60px;
+      padding: 16px 18px;
+      background: var(--paper);
+      border: 1px dashed var(--rule);
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+    .answer-box::before {
+      content: 'Răspuns:';
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--bronze);
+      margin-bottom: 8px;
+    }
+
+    .check-list {
+      list-style: none; padding: 0; margin: 16px 0 0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px;
+    }
+    .check-list li {
+      padding: 8px 0;
+      font-size: 14px;
+      display: flex; align-items: center; gap: 10px;
+      color: var(--ink-soft);
+    }
+    .check-list li::before {
+      content: '';
+      width: 14px; height: 14px;
+      border: 1.5px solid var(--bronze);
+      flex-shrink: 0;
+    }
+
+    .priority {
+      display: inline-block;
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 3px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+    .priority.high { background: var(--sage); color: var(--cream); }
+    .priority.med { background: var(--bronze); color: var(--cream); }
+    .priority.low { background: transparent; color: var(--ink-soft); border: 1px solid var(--rule); }
+
+    .deliverable-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .deliverable {
+      padding: 20px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+    }
+    .deliverable .d-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .deliverable .d-format {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bronze);
+      margin-bottom: 12px;
+    }
+    .deliverable .d-desc {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+
+    .timeline {
+      margin-top: 24px;
+      border-top: 1px solid var(--ink);
+    }
+    .phase {
+      display: grid;
+      grid-template-columns: 80px 1fr 140px;
+      gap: 24px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--rule);
+      align-items: baseline;
+    }
+    .phase-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 32px;
+      color: var(--sage);
+      line-height: 1;
+    }
+    .phase-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .phase-desc {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+    .phase-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--ink-soft);
+      text-align: right;
+    }
+
+    .closing {
+      margin-top: 80px;
+      padding: 40px;
+      background: var(--sage-deep);
+      color: var(--cream);
+    }
+    .closing h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 36px;
+      margin: 0 0 16px;
+      line-height: 1.1;
+    }
+    .closing p {
+      font-size: 15px;
+      line-height: 1.7;
+      opacity: 0.88;
+      margin: 0 0 12px;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 14mm 16mm;
+      }
+      html, body {
+        background: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      body {
+        font-size: 11pt;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+      .doc-header {
+        margin-bottom: 24pt;
+        padding-bottom: 16pt;
+      }
+      h1.doc-title { font-size: 36pt; }
+      .intro {
+        font-size: 11pt;
+        padding: 14pt 16pt;
+        margin-bottom: 24pt;
+        background: var(--paper) !important;
+        border-left-color: var(--sage) !important;
+        break-inside: avoid;
+      }
+      section.block {
+        margin-bottom: 28pt;
+        break-inside: avoid-page;
+      }
+      .block-num {
+        font-size: 36pt;
+        margin-bottom: 4pt;
+        color: var(--sage) !important;
+      }
+      .block-title { font-size: 24pt; margin-bottom: 8pt; }
+      .block-intro { font-size: 10.5pt; margin-bottom: 14pt; }
+      .question {
+        padding: 10pt 0;
+        break-inside: avoid;
+      }
+      .q-text { font-size: 11pt; }
+      .q-hint { font-size: 9.5pt; }
+      .answer-box {
+        min-height: 50pt;
+        padding: 10pt 12pt;
+        background: var(--paper) !important;
+        border: 1px dashed var(--rule) !important;
+      }
+      .priority.high { background: var(--sage) !important; color: var(--cream) !important; }
+      .priority.med { background: var(--bronze) !important; color: var(--cream) !important; }
+      .priority.low { border-color: var(--rule) !important; color: var(--ink-soft) !important; }
+      .deliverable-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10pt;
+        break-inside: avoid;
+      }
+      .deliverable {
+        padding: 12pt;
+        background: var(--paper) !important;
+        break-inside: avoid;
+      }
+      .phase {
+        padding: 10pt 0;
+        break-inside: avoid;
+      }
+      .closing {
+        margin-top: 24pt;
+        padding: 20pt;
+        background: var(--sage-deep) !important;
+        color: var(--cream) !important;
+        break-inside: avoid;
+      }
+      .closing h3 { font-size: 22pt; }
+      .closing p { font-size: 11pt; }
+
+      /* Strategic page breaks between major sections */
+      section.block:nth-of-type(3),
+      section.block:nth-of-type(6),
+      section.block:nth-of-type(9) {
+        break-before: page;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 48px 24px 80px; }
+      h1.doc-title { font-size: 44px; }
+      .doc-meta { flex-direction: column; gap: 8px; }
+      .check-list { grid-template-columns: 1fr; }
+      .deliverable-grid { grid-template-columns: 1fr; }
+      .phase { grid-template-columns: 1fr; gap: 8px; }
+      .phase-time { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="doc-header">
+      <div class="doc-eyebrow">Brief proiect site · Pentru Olesea Jalba</div>
+      <h1 class="doc-title">Ce <em>mai am</em><br>nevoie de la tine,<br>ca să continuăm.</h1>
+      <div class="doc-meta">
+        <div>Versiune <strong>01</strong></div>
+        <div>Mai <strong>2026</strong></div>
+        <div>Estimat de completat <strong>2–3 ore</strong></div>
+      </div>
+    </header>
+
+    <div class="intro">
+      <strong>Olesea, hai să recapitulăm.</strong> Am construit împreună structura vizuală a site-ului
+      (logo, paletă, tipografie, layout-ul pentru homepage) și ai validat direcția
+      "Cum funcționează + Servicii editoriale" cu paletă olive + cocoa.
+      Ca să continuăm cu <strong>toate paginile</strong> și conținut real (nu placeholder), am nevoie
+      de informațiile de mai jos. Răspunde direct în acest document, sau trimite-le într-un email — cum îți e mai ușor.
+      Întrebările sunt grupate pe secțiuni; cele marcate <span class="priority high">esențial</span>
+      sunt obligatorii pentru a începe, restul le putem completa pe parcurs.
+    </div>
+
+    <!-- ─────────────────────────────────────────── 01 DESPRE -->
+    <section class="block">
+      <div class="block-num">01</div>
+      <h2 class="block-title"><em>Despre</em> tine — pagina "Despre"</h2>
+      <p class="block-intro">
+        Ăsta e cel mai important conținut pentru încredere. Vreau să scriem pagina ta "Despre" în voce naturală, nu CV-istă. Răspunde liber, eu o să restructurez.
+      </p>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.1</div>
+        <div>
+          <div class="q-text">Studii — instituții, ani, specializare, grad <span class="priority high">esențial</span></div>
+          <div class="q-hint">USMF anul? Rezidențiat pediatrie? Formare nutriție (unde, când, cu cine)? Doctorat / lucrări?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.2</div>
+        <div>
+          <div class="q-text">Experiență profesională — clinici, spitale, ani <span class="priority high">esențial</span></div>
+          <div class="q-hint">Unde ai lucrat ca pediatru? Câți ani de practică ai în total? Câte familii estimezi că ai consultat?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.3</div>
+        <div>
+          <div class="q-text">Specializări/interese — în ce ești cel mai bună? <span class="priority high">esențial</span></div>
+          <div class="q-hint">Ex: alimentația sugarului, diversificare, BLW, alergii, nutriție în sarcină, slăbire la adulți, sindrom metabolic. 3–5 subiecte.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.4</div>
+        <div>
+          <div class="q-text">Cursuri, certificări, conferințe <span class="priority med">important</span></div>
+          <div class="q-hint">Workshop-uri, masterclass-uri, congrese internaționale, certificări specifice. Listă cronologică ar fi ideală.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.5</div>
+        <div>
+          <div class="q-text">Limbi de consultație <span class="priority high">esențial</span></div>
+          <div class="q-hint">Română, rusă, engleză — care fluent, care doar conversațional?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.6</div>
+        <div>
+          <div class="q-text">"De ce" — povestea ta scurtă <span class="priority high">esențial</span></div>
+          <div class="q-hint">De ce ai ales pediatria? De ce și nutriția? Ce te diferențiază de alți medici? Răspunde liber în 5–10 propoziții — eu îl voi rescrie editorial.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.7</div>
+        <div>
+          <div class="q-text">Filosofia ta — cum lucrezi cu pacienții <span class="priority med">important</span></div>
+          <div class="q-hint">Care sunt principiile pe care nu le rupi? Ex: "nu prescriu diete restrictive copiilor", "lucrez cu familia, nu doar cu pacientul", etc.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">1.8</div>
+        <div>
+          <div class="q-text">Personal — ceva care te face mai umană <span class="priority low">opțional</span></div>
+          <div class="q-hint">Ești mama de copii? Locuiești unde? Hobby? Nu obligatoriu, dar ajută la conexiune.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 02 SERVICII -->
+    <section class="block">
+      <div class="block-num">02</div>
+      <h2 class="block-title"><em>Servicii</em> — confirmă și detaliază</h2>
+      <p class="block-intro">
+        Acum în site sunt 5 servicii cu tarife placeholder. Le validăm sau le ajustăm.
+      </p>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">2.1</div>
+        <div>
+          <div class="q-text">Tarife reale (nu placeholder-ele actuale) <span class="priority high">esențial</span></div>
+          <div class="q-hint">Pentru fiecare: consultație pediatrică, consultație nutrițională, integrativă, abonament 3 luni, întrebare rapidă. Tarife în lei / lei moldovenești / euro?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">2.2</div>
+        <div>
+          <div class="q-text">Durata reală a fiecărei consultații <span class="priority high">esențial</span></div>
+          <div class="q-hint">Pediatrică: 50 min OK? Nutrițională: 60 min? Integrativă: 90 min? Vrei să le schimbăm?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">2.3</div>
+        <div>
+          <div class="q-text">Ce primește pacientul după fiecare consultație <span class="priority high">esențial</span></div>
+          <div class="q-hint">Plan scris? Plan alimentar? Recomandări? Acces la mesagerie? Câte follow-up-uri sunt incluse?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">2.4</div>
+        <div>
+          <div class="q-text">Servicii lipsă sau în plus? <span class="priority med">important</span></div>
+          <div class="q-hint">Există tipuri de consultații pe care nu le-am inclus? Sau dimpotrivă, eliminăm unele?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">2.5</div>
+        <div>
+          <div class="q-text">Platformă video preferată <span class="priority high">esențial</span></div>
+          <div class="q-hint">Zoom, Google Meet, ceva specializat medical? Cum ajunge pacientul la link-ul de consultație?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">2.6</div>
+        <div>
+          <div class="q-text">Sistem de plată <span class="priority high">esențial</span></div>
+          <div class="q-hint">Plată online cu cardul? Transfer bancar? Plată în avans sau după consultație? Politică anulare?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">2.7</div>
+        <div>
+          <div class="q-text">Sistem de programări <span class="priority high">esențial</span></div>
+          <div class="q-hint">Vrei calendar embedded (Calendly, SetMore)? Sau formular care îți trimite cerere și răspunzi tu? Ai deja cont undeva?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 03 PEDIATRIE & NUTRIȚIE -->
+    <section class="block">
+      <div class="block-num">03</div>
+      <h2 class="block-title">Pagini dedicate <em>Pediatrie</em> și <em>Nutriție</em></h2>
+      <p class="block-intro">
+        Două pagini "vitrină" — explică în detaliu pentru părinți/adulți ce înseamnă să lucrezi cu tine pe pediatrie respectiv nutriție.
+      </p>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">3.1</div>
+        <div>
+          <div class="q-text">Pediatrie — motivele cele mai frecvente <span class="priority high">esențial</span></div>
+          <div class="q-hint">Top 5–10 motive pentru care părinții vin la tine. Ex: febră, vaccinare, curba de creștere, somn, mâncare selectivă, etc.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">3.2</div>
+        <div>
+          <div class="q-text">Pediatrie — ce NU consulți online <span class="priority high">esențial</span></div>
+          <div class="q-hint">Există situații pe care nu le poți rezolva online și recomanzi prezență fizică? (urgențe, examinări specifice etc.) E important pentru transparență.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">3.3</div>
+        <div>
+          <div class="q-text">Nutriție copii — abordarea ta <span class="priority high">esențial</span></div>
+          <div class="q-hint">BLW? Tradițional? Mixt? Cum tratezi mâncatul selectiv? Lucrezi cu copii care au probleme de creștere/greutate?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">3.4</div>
+        <div>
+          <div class="q-text">Nutriție adulți — pentru cine e potrivit <span class="priority high">esențial</span></div>
+          <div class="q-hint">Vine cineva care vrea să slăbească? Cineva cu sindrom metabolic? Sarcină? Sportivi? Pe ce profil te focusezi?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">3.5</div>
+        <div>
+          <div class="q-text">Nutriție — diete pe care NU le faci <span class="priority med">important</span></div>
+          <div class="q-hint">Ex: nu prescrii diete cetogenice copiilor, nu faci diete de eliminare fără diagnostic, etc. Transparența construiește încredere.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 04 CONTACT & DATE -->
+    <section class="block">
+      <div class="block-num">04</div>
+      <h2 class="block-title">Contact, <em>date</em>, social media</h2>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">4.1</div>
+        <div>
+          <div class="q-text">Email de contact <span class="priority high">esențial</span></div>
+          <div class="q-hint">Vrei contact@oleseajalba.md sau alt domeniu? Ai deja domeniul cumpărat?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">4.2</div>
+        <div>
+          <div class="q-text">Telefon — afișat sau nu? <span class="priority high">esențial</span></div>
+          <div class="q-hint">Vrei număr de telefon public sau preferi totul prin email/formular?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">4.3</div>
+        <div>
+          <div class="q-text">Profile social media existente <span class="priority high">esențial</span></div>
+          <div class="q-hint">Link-uri exacte la Instagram, Facebook, TikTok, YouTube — orice ai. Toate active?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">4.4</div>
+        <div>
+          <div class="q-text">Date legale — pentru footer și termeni <span class="priority med">important</span></div>
+          <div class="q-hint">Nume legal complet, CNP/IDNP, sediu fiscal, înregistrare profesională (cod parafă pediatru?). Pentru GDPR și Termeni.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">4.5</div>
+        <div>
+          <div class="q-text">Newsletter — vrei sau nu? <span class="priority low">opțional</span></div>
+          <div class="q-hint">Trimitem o dată pe lună un email cu articole + sfaturi? Dacă da, ce platformă ai prefera (Substack, MailerLite, ConvertKit)?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 05 CONȚINUT EDITORIAL -->
+    <section class="block">
+      <div class="block-num">05</div>
+      <h2 class="block-title">Articole & <em>resurse</em> (Blog)</h2>
+      <p class="block-intro">
+        Pagina de articole e una dintre cele mai puternice pentru SEO și pentru încredere. Nu trebuie să ai articole gata de Day 1, dar avem nevoie să planificăm cadența.
+      </p>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">5.1</div>
+        <div>
+          <div class="q-text">Ai deja articole/posts scrise? <span class="priority med">important</span></div>
+          <div class="q-hint">Pe Instagram, Facebook, în Word, în orice formă — orice text de minim 300 cuvinte care poate deveni articol. Trimite linkuri/atașamente.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">5.2</div>
+        <div>
+          <div class="q-text">3 articole pe care le vrei scrise primul <span class="priority med">important</span></div>
+          <div class="q-hint">Care 3 subiecte ar atrage cei mai mulți pacienți la tine? Cum încep diversificarea? Mâncatul selectiv? Curba de creștere? etc.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">5.3</div>
+        <div>
+          <div class="q-text">Cadența — câte articole pe lună? <span class="priority low">opțional</span></div>
+          <div class="q-hint">1 pe lună? 2 pe lună? Doar ad-hoc când ai timp? Setăm așteptările realist.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">5.4</div>
+        <div>
+          <div class="q-text">Resurse descărcabile <span class="priority med">important</span></div>
+          <div class="q-hint">Vrei să oferi PDF-uri gratuite (ghid diversificare, meniu săptămânal, listă cumpărături)? Sub email signup (lead magnet)? Ce ai deja gata?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 06 TESTIMONIALE -->
+    <section class="block">
+      <div class="block-num">06</div>
+      <h2 class="block-title"><em>Testimoniale</em> & dovezi sociale</h2>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">6.1</div>
+        <div>
+          <div class="q-text">3–10 testimoniale reale <span class="priority high">esențial</span></div>
+          <div class="q-hint">Cei mai buni "ambasadori" ai tăi. Trimite-le un mesaj, cere o recenzie scrisă (chiar 3–5 fraze). Nume, vârsta copilului (pentru pediatrie) sau vârsta pacientului (nutriție).</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">6.2</div>
+        <div>
+          <div class="q-text">Cifre concrete <span class="priority med">important</span></div>
+          <div class="q-hint">Câți pacienți ai consultat în total? Câte familii? În câte țări (diasporă)? Acestea apar în hero ca "trust strip".</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">6.3</div>
+        <div>
+          <div class="q-text">Apariții media, premii, recunoașteri <span class="priority low">opțional</span></div>
+          <div class="q-hint">Interviuri TV/radio, articole în reviste, premii profesionale. Logo-uri ar fi grozave.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 07 IMAGINI -->
+    <section class="block">
+      <div class="block-num">07</div>
+      <h2 class="block-title"><em>Fotografii</em> & materiale vizuale</h2>
+      <p class="block-intro">
+        Ai dat deja un portret excelent. Mai am nevoie să planific imaginile pentru articole, secțiuni dedicate, etc.
+      </p>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">7.1</div>
+        <div>
+          <div class="q-text">Sesiune foto profesională planificată? <span class="priority med">important</span></div>
+          <div class="q-hint">Avem 1 portret. Pentru un site complet ai nevoie de 5–10: tu în context de lucru (cu laptop), tu zâmbind, tu serioasă pentru "Despre", mâini pe tastatură etc. Planifici o sesiune sau folosim fotografia actuală + stock complementar?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">7.2</div>
+        <div>
+          <div class="q-text">Stock vs. fotografii proprii pentru articole <span class="priority med">important</span></div>
+          <div class="q-hint">Pentru blog ai nevoie de o imagine cover per articol. Stock (Unsplash, plătit) sau ceva mai personal?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 08 TEHNIC -->
+    <section class="block">
+      <div class="block-num">08</div>
+      <h2 class="block-title">Detalii <em>tehnice</em></h2>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">8.1</div>
+        <div>
+          <div class="q-text">Domeniu — ai deja? <span class="priority high">esențial</span></div>
+          <div class="q-hint">oleseajalba.md? .com? .ro? Cumpărat unde? Sau cumperi acum?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">8.2</div>
+        <div>
+          <div class="q-text">Hosting / platformă <span class="priority high">esențial</span></div>
+          <div class="q-hint">Vrei să-l administrezi singură (Webflow, Framer, Squarespace) sau preferi cod custom + dezvoltator? Bugetul disponibil pentru asta?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">8.3</div>
+        <div>
+          <div class="q-text">Email profesional <span class="priority med">important</span></div>
+          <div class="q-hint">Folosești Gmail acum sau ai email @oleseajalba.md? Pentru newsletter și răspunsuri la formularul de contact.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">8.4</div>
+        <div>
+          <div class="q-text">Analytics & SEO <span class="priority low">opțional</span></div>
+          <div class="q-hint">Cont Google Analytics existent? Search Console? Pixel Facebook pentru reclame? Plan SEO?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── 09 PRIORITATE & TIMING -->
+    <section class="block">
+      <div class="block-num">09</div>
+      <h2 class="block-title">Prioritate & <em>timing</em></h2>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">9.1</div>
+        <div>
+          <div class="q-text">Deadline ideal pentru lansare <span class="priority high">esențial</span></div>
+          <div class="q-hint">Există un eveniment, un concediu, ceva care face data X importantă? Sau e flexibil?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">9.2</div>
+        <div>
+          <div class="q-text">"MVP" vs. site complet de la început <span class="priority high">esențial</span></div>
+          <div class="q-hint">Preferi să lansezi rapid o versiune simplă (Home + Despre + Servicii + Contact) și să adăugăm articole/resurse pe parcurs? Sau așteptăm totul pregătit?</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+
+      <div class="question"><div class="q-row">
+        <div class="q-num">9.3</div>
+        <div>
+          <div class="q-text">Buget orientativ pentru proiect <span class="priority med">important</span></div>
+          <div class="q-hint">Setează așteptările (design + dezvoltare + hosting + fotografii). Sunt opțiuni la orice nivel.</div>
+          <div class="answer-box"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ─────────────────────────────────────────── DELIVERABLES (pentru tine, designer) -->
+    <section class="block">
+      <div class="block-num">10</div>
+      <h2 class="block-title">Ce <em>livrăm</em> după ce primim răspunsurile</h2>
+
+      <div class="deliverable-grid">
+        <div class="deliverable">
+          <div class="d-format">Design · 12 pagini</div>
+          <div class="d-name">Site complet</div>
+          <div class="d-desc">Home, Despre, Servicii (cu sub-pagini), Pediatrie, Nutriție copii, Nutriție adulți, Tarife, Articole index + template, Resurse, FAQ, Contact, GDPR/Termeni.</div>
+        </div>
+        <div class="deliverable">
+          <div class="d-format">Mobile · 320–768px</div>
+          <div class="d-name">Versiune mobile</div>
+          <div class="d-desc">Toate paginile adaptate pentru telefon. Meniu hamburger, hero re-aranjat, calendar mobil-friendly, formulare optimizate.</div>
+        </div>
+        <div class="deliverable">
+          <div class="d-format">Bilingv · RO + EN</div>
+          <div class="d-name">Două limbi</div>
+          <div class="d-desc">Toggle în nav, conținut tradus complet. EN orientat către diasporă.</div>
+        </div>
+        <div class="deliverable">
+          <div class="d-format">Conținut real</div>
+          <div class="d-name">Copy editat</div>
+          <div class="d-desc">Eu rescriu și editez tot textul tău în voce editorială coerentă, nu CV-istă. Tu validezi.</div>
+        </div>
+        <div class="deliverable">
+          <div class="d-format">Sistem</div>
+          <div class="d-name">Design system</div>
+          <div class="d-desc">Documentat: paletă, tipografie, componente. Așa orice modificare viitoare e ușoară.</div>
+        </div>
+        <div class="deliverable">
+          <div class="d-format">Handoff</div>
+          <div class="d-name">Cod sau export</div>
+          <div class="d-desc">HTML/CSS gata pentru dezvoltator, sau export către Webflow/Framer (după ce alegi platforma la 8.2).</div>
+        </div>
+      </div>
+
+      <!-- timeline -->
+      <h3 class="serif-it" style="font-size: 28px; margin: 56px 0 12px; color: var(--ink);">Plan de lucru estimativ</h3>
+      <div class="timeline">
+        <div class="phase">
+          <div class="phase-num serif-it">I</div>
+          <div>
+            <div class="phase-name">Brief & conținut</div>
+            <div class="phase-desc">Olesea completează acest document. Eu organizez răspunsurile, editez copy-ul pentru toate paginile.</div>
+          </div>
+          <div class="phase-time">săpt. 1<br>~5 zile</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num serif-it">II</div>
+          <div>
+            <div class="phase-name">Design — toate paginile</div>
+            <div class="phase-desc">Aplicăm sistemul vizual validat pe restul paginilor. Iterăm în 2–3 cicluri de feedback.</div>
+          </div>
+          <div class="phase-time">săpt. 2–3<br>~10 zile</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num serif-it">III</div>
+          <div>
+            <div class="phase-name">Mobile + EN + revizii finale</div>
+            <div class="phase-desc">Adaptare mobilă, traducere completă, ajustări copy după revizii.</div>
+          </div>
+          <div class="phase-time">săpt. 4<br>~5 zile</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num serif-it">IV</div>
+          <div>
+            <div class="phase-name">Dezvoltare & lansare</div>
+            <div class="phase-desc">Implementare pe platforma aleasă, conectare formulare/calendar, testare, lansare.</div>
+          </div>
+          <div class="phase-time">săpt. 5–6<br>~10 zile</div>
+        </div>
+      </div>
+
+      <p class="block-intro" style="margin-top: 24px; font-size: 13px;">
+        <strong>Total estimat:</strong> ~30 zile lucrătoare de la momentul în care primesc acest document complet.
+      </p>
+    </section>
+
+    <!-- closing -->
+    <div class="closing">
+      <h3>Ce trebuie să faci acum.</h3>
+      <p><strong>Pasul 1:</strong> Răspunde cel puțin la întrebările marcate <span class="priority high" style="background: rgba(245,241,234,0.18); color: var(--cream);">esențial</span> (sunt 24 din 50). Cu acestea pot începe imediat.</p>
+      <p><strong>Pasul 2:</strong> Restul răspunsurilor le poți trimite pe parcurs, pe măsură ce avansăm.</p>
+      <p><strong>Pasul 3:</strong> Confirmă datele de la blocul 09 (timing) ca să planificăm corect.</p>
+      <p style="margin-top: 20px; opacity: 0.7; font-size: 13px;">
+        Răspunde direct în acest document (dacă îl primești editabil) sau într-un email.
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    // Auto-print once fonts are loaded.
+    (async function() {
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+      } catch (e) {}
+      await new Promise(r => setTimeout(r, 500));
+      window.print();
+    })();
+  </script>
+</body>
+</html>
