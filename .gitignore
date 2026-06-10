@@ -33,3 +33,7 @@ package-lock.json
 out
 
 .nx/polygraph
+
+# Build output & TS incremental info
+dist/
+*.tsbuildinfo

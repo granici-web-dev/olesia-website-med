@@ -13,11 +13,18 @@
     "@nx/next": "22.7.5",
     "@nx/react": "22.7.5",
     "@nx/vite": "22.7.5",
+    "@swc-node/register": "~1.11.1",
+    "@swc/core": "~1.15.5",
+    "@swc/helpers": "~0.5.18",
+    "@types/node": "20.19.9",
     "nx": "22.7.5",
+    "prettier": "~3.6.2",
+    "tslib": "^2.3.0",
     "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20.18.0",
     "pnpm": ">=9"
-  }
+  },
+  "dependencies": {}
 }
