@@ -23,3 +23,13 @@ skills-lock.json
 # npm lockfiles — this repo uses pnpm
 package-lock.json
 **/package-lock.json
+
+
+.nx/cache
+.nx/workspace-data
+
+# Next.js
+.next
+out
+
+.nx/polygraph
