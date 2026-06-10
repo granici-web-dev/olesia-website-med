@@ -1,0 +1,39 @@
+# Multi-stage build for apps/api (NestJS).
+# Local/staging image: installs the workspace, builds the bundle and the Prisma
+# client, then runs migrations + the server at startup.
+
+# --- builder ---
+FROM node:22-slim AS builder
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+WORKDIR /app
+
+# OpenSSL is needed by Prisma's query engine.
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm exec prisma generate --schema apps/api/prisma/schema.prisma
+RUN pnpm nx build api
+
+# --- runtime ---
+FROM node:22-slim AS runtime
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+WORKDIR /app
+ENV NODE_ENV=production
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/apps/api/prisma.config.ts ./apps/api/prisma.config.ts
+COPY --from=builder /app/apps/api/src/generated ./apps/api/src/generated
+
+EXPOSE 3333
+
+# Apply pending migrations (run from apps/api so prisma.config.ts is found),
+# then start the server. DATABASE_URL comes from the container environment.
+CMD ["sh", "-c", "cd apps/api && /app/node_modules/.bin/prisma migrate deploy --schema prisma/schema.prisma && cd /app && node apps/api/dist/main.js"]

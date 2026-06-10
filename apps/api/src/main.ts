@@ -1,3 +1,9 @@
+import { join } from 'node:path';
+import { config as loadEnv } from 'dotenv';
+// Local dev: load apps/api/.env (dist/main.js → ../.env). In Docker the env
+// comes from compose, the file is absent, and this is a harmless no-op.
+loadEnv({ path: join(__dirname, '..', '.env') });
+
 import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

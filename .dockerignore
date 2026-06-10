@@ -1,0 +1,16 @@
+.git
+node_modules
+**/node_modules
+dist
+**/dist
+.nx
+.next
+**/.next
+out
+**/out
+**/.env
+**/.env.local
+*.log
+.playwright-mcp
+.agents
+apps/api/src/generated
