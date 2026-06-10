@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "about": "Despre",
+    "services": "Servicii",
+    "pediatrics": "Pediatrie",
+    "nutrition": "Nutriție",
+    "articles": "Articole",
+    "pricing": "Tarife",
+    "contact": "Contact",
+    "bookOnline": "Programează online →"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Consultații exclusiv online · Pediatrie & Nutriție",
+      "headline": "Consultații video, plan scris, urmărire.",
+      "sub": "Pediatrie și nutriție de calitate, fără să ieși din casă. Toate consultațiile se desfășoară online, iar planul scris ajunge la tine în 24 de ore."
+    },
+    "howItWorks": {
+      "eyebrow": "Cum funcționează",
+      "title": "Patru pași. Niciun drum.",
+      "steps": {
+        "booking": { "title": "Programare", "description": "Alegi un slot din calendar și completezi un scurt formular cu motivul vizitei." },
+        "preparation": { "title": "Pregătire", "description": "Cu 24h înainte primești instrucțiuni și o listă de informații utile (analize, jurnal alimentar etc.)." },
+        "consultation": { "title": "Consultația", "description": "Ne întâlnim pe video. Lungimea variază între 50–90 min, în funcție de tipul de consultație." },
+        "plan": { "title": "Plan scris", "description": "În 24h primești un document cu recomandări, plan alimentar (dacă e cazul) și pașii următori." }
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Cabinet online de pediatrie și nutriție. Consultații prin video-call, plan scris la final, urmărire pe termen lung.",
+    "services": "Servicii",
+    "resources": "Resurse",
+    "contact": "Contact"
+  }
+}

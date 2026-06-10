@@ -1,0 +1,131 @@
+.section {
+  padding: 90px 64px 110px;
+  background: var(--sage-deep);
+  color: var(--cream);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 64px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sage-soft);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(48px, 5.56vw, 80px);
+  margin: 0;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+}
+
+.titleAccent {
+  font-style: italic;
+  color: var(--sage-soft);
+}
+
+.subtitle {
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.7;
+  opacity: 0.8;
+  padding-top: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  position: relative;
+}
+
+.connector {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(245, 241, 234, 0.25);
+}
+
+.step {
+  position: relative;
+}
+
+.stepNumber {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--sage);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 1;
+  border: 6px solid var(--sage-deep);
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-style: italic;
+  font-size: 32px;
+  color: var(--cream);
+}
+
+.stepTitle {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: 32px;
+  margin: 0 0 12px;
+  color: var(--cream);
+  font-weight: 400;
+}
+
+.stepDesc {
+  font-size: 14px;
+  line-height: 1.65;
+  opacity: 0.78;
+  margin: 0;
+}
+
+.footer {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(245, 241, 234, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerNote {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 22px;
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--cream);
+  color: var(--ink);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: var(--sage-soft);
+}

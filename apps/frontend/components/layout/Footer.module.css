@@ -1,0 +1,88 @@
+.footer {
+  background: var(--beige);
+  color: var(--cream);
+  padding: 72px 64px 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2.6fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 56px;
+}
+
+.logo {
+  max-width: 380px;
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: brightness(1.6) saturate(0.95);
+}
+
+.tagline {
+  margin-top: 24px;
+  font-size: 14px;
+  color: rgba(245, 241, 234, 0.78);
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+.bookBtn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 24px;
+  padding: 14px 22px;
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--cream);
+  color: var(--ink);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.bookBtn:hover {
+  background: var(--sage-soft);
+}
+
+.colLabel {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sage-soft);
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.colLinks {
+  font-size: 13px;
+  line-height: 2;
+  color: rgba(245, 241, 234, 0.85);
+}
+
+.colLinks a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.colLinks a:hover {
+  color: var(--sage-soft);
+}
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid rgba(245, 241, 234, 0.18);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 241, 234, 0.62);
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+}

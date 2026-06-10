@@ -1,4 +1,19 @@
 .DS_Store
 node_modules/
 .env
+.env.local
 *.log
+
+# Next.js
+.next/
+out/
+
+# IDE
+.idea/
+.vscode/
+
+# Playwright
+.playwright-mcp/
+
+# Claude memory (local only)
+.claude/

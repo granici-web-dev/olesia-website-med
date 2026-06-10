@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "about": "About",
+    "services": "Services",
+    "pediatrics": "Pediatrics",
+    "nutrition": "Nutrition",
+    "articles": "Articles",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "bookOnline": "Book online →"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Online consultations only · Pediatrics & Nutrition",
+      "headline": "Video consultations, written plan, follow-up.",
+      "sub": "Quality pediatrics and nutrition without leaving home. All consultations are held online, and the written plan arrives within 24 hours."
+    },
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "title": "Four steps. No commute.",
+      "steps": {
+        "booking": { "title": "Booking", "description": "Choose a slot from the calendar and fill in a short form with the reason for your visit." },
+        "preparation": { "title": "Preparation", "description": "24h before, you receive instructions and a list of useful information (tests, food diary, etc.)." },
+        "consultation": { "title": "Consultation", "description": "We meet on video. Duration varies between 50–90 min depending on the type of consultation." },
+        "plan": { "title": "Written plan", "description": "Within 24h you receive a document with recommendations, meal plan (if applicable) and next steps." }
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Online pediatrics and nutrition practice. Video consultations, written plan, long-term follow-up.",
+    "services": "Services",
+    "resources": "Resources",
+    "contact": "Contact"
+  }
+}

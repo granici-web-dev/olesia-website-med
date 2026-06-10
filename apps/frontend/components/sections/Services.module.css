@@ -1,0 +1,121 @@
+.section {
+  padding: 40px 64px 100px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 40px 0 64px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(56px, 6.11vw, 88px);
+  margin: 0;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.titleAccent {
+  font-style: italic;
+  color: var(--sage);
+}
+
+.headerSub {
+  max-width: 360px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  padding-top: 24px;
+}
+
+.serviceRow {
+  display: grid;
+  grid-template-columns: 120px 1.4fr 1.6fr 220px;
+  gap: 40px;
+  padding: 64px 0;
+  border-top: 1px solid var(--rule);
+  align-items: start;
+}
+
+.serviceNum {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-style: italic;
+  font-size: 96px;
+  color: var(--sage);
+  line-height: 0.85;
+}
+
+.serviceTag {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sage);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.serviceTitle {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: 44px;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.serviceDesc {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.serviceMeta {
+  text-align: right;
+}
+
+.servicePrice {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: 36px;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.serviceDuration {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  letter-spacing: 0.06em;
+}
+
+.serviceLink {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 3px;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.serviceLink:hover {
+  color: var(--sage);
+  border-color: var(--sage);
+}

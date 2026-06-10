@@ -1,0 +1,17 @@
+{
+  "name": "olesia-website-med",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @olesia/frontend dev",
+    "build": "pnpm --filter @olesia/frontend build",
+    "start": "pnpm --filter @olesia/frontend start"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.18.0",
+    "pnpm": ">=9"
+  }
+}
