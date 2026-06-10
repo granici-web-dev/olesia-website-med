@@ -17,3 +17,9 @@ out/
 
 # Claude memory (local only)
 .claude/
+.agents/
+skills-lock.json
+
+# npm lockfiles — this repo uses pnpm
+package-lock.json
+**/package-lock.json

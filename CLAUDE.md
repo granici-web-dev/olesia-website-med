@@ -6,8 +6,8 @@ Entry point for Claude Code agents. **Procedural rules and read order live in `A
 
 - **Monorepo:** Nx + pnpm workspaces.
 - **Frontend:** Next.js 15 App Router, TypeScript strict, Tailwind CSS v4 + CSS Modules, Zustand (UI state), TanStack Query (server state), next-intl (EN/RO).
-- **CMS:** Sanity.io (managed, hosted). Content types: articles, services, pricing. Client in `apps/frontend/lib/sanity/`.
-- **Booking:** Cal.com self-hosted. Embed widget in `/contact` page.
+- **Content:** **No third-party CMS — fully custom (decided 2026-06-10).** All content (services, blog, contacts, about) is served by the **NestJS content API** (`apps/api`) and edited in the custom back office (`apps/back-office`). **Sanity is dropped** — legacy `apps/frontend/lib/sanity/` is to be removed. Rationale: the back office must also own appointments/payments/GDPR data and `admin`/`editor` roles, which a CMS can't host. See `module_calendly.md`.
+- **Booking:** **Calendly** (paid plan, ≥ Standard) — webhook-driven into the `appointments` backend module. **Replaces the earlier Cal.com plan** (legacy `apps/frontend/lib/cal/` to be removed).
 - **i18n:** Two locales — `ro` (default) and `en`. Messages in `apps/frontend/i18n/messages/{ro,en}.json`.
 - **Deploy:** Docker Compose for local/staging. Production TBD.
 
@@ -27,8 +27,8 @@ apps/
       routing.ts     Locale config (defaultLocale: ro)
       request.ts     next-intl server config
     lib/
-      sanity/        Sanity client + queries
-      cal/           Cal.com helpers
+      sanity/        LEGACY — being removed (content moves to the NestJS API)
+      cal/           LEGACY — being removed (booking moves to Calendly)
     store/           Zustand stores (ui.store.ts, …)
     hooks/           Custom React hooks
     types/           Shared TypeScript types
@@ -36,8 +36,35 @@ apps/
 libs/                Shared libs (future: shared-types, shared-utils)
 ```
 
+## Target architecture — backend + back office
+
+The repo is expanding from a frontend-only app into a **3-app monorepo + shared types package**. Binding source of truth for this work: **`module_calendly.md`** (read it before touching backend, back office, or booking).
+
+- **apps/frontend** — current public site (`@olesia/frontend`, Next.js). Will consume the backend API and type its responses via `packages/shared`. (Kept as `apps/frontend` — this **is** the spec's `apps/web`; do not rename.)
+- **apps/api** — **NestJS** backend, one module per domain: `auth`, `users`, `services`, `appointments`, `subscriptions`, `quick-questions`, `blog`, `contacts`, `about`, `dashboard`, `storage`, `health`. **PostgreSQL + Prisma**, Swagger at `/api/docs`, deployed via Docker.
+- **apps/back-office** — **React + Vite + shadcn/ui** admin panel. UI is **Romanian-only** (strings in one i18n dictionary). Build its UI with the **`impeccable`** skill.
+- **packages/shared** — single source of TS DTOs + enums (service codes, roles, statuses) imported by all apps. No manual type duplication on the frontends.
+
+**Key facts**
+
+- **Auth:** JWT (short access + refresh), roles `admin` / `editor`; closed registration (admin creates users); passwords hashed (argon2/bcrypt).
+- **Services (5):** group **A** = Calendly video slots (`pediatric`, `nutrition`, `integrative`); group **B** = portal only, no calendar (`monitoring` = sub 04, `quick_question` = 05). Map a booking to a service **by `event_type` URI only** — never by the editable `a1` answer.
+- **Content:** every content entity is bilingual RO/EN (`*_ro` / `*_en`); public GETs are read-only/unauthenticated; lists are paginated.
+- **Payments:** out of scope — manual. Entities carry `payment_status` `pending` → `confirmed` (set by hand in back office).
+- **Calendly:** env `CALENDLY_API_TOKEN`, `CALENDLY_ORG_URI`, `CALENDLY_WEBHOOK_SIGNING_KEY`; verify webhook signature; idempotency by `scheduled_event.uri`.
+- **Deploy:** multi-stage Dockerfile + docker-compose (`api`, `postgres`; volumes for PG + `uploads/`); `/health` healthcheck; Prisma migrations on container start.
+- **GDPR:** portal stores names/emails/medical attachments (EU/Moldova) — handle consent, storage, and PII-safe logging.
+
+**Decided** (overrides the spec's `[DEFAULT]`s, 2026-06-10): keep **Nx + pnpm workspaces** (not Turborepo); the site app stays **`apps/frontend`** (= the spec's `apps/web`); file storage stays **local `uploads/`** for now (→ S3/Cloudinary later, behind the `storage` abstraction); blog content is **Markdown**.
+
+## Skills
+
+- **Responsive layout & breakpoints:** Any work involving responsive design, breakpoints, container queries, mobile-first layouts, or Tailwind responsive utilities MUST use the `tailwind-responsive-design` skill. Invoke it before adding or modifying responsive styles — do not hand-roll breakpoint logic from memory.
+- **Back office UI:** When building or refining `apps/back-office` UI (shadcn/ui components, states, layout, accessibility), use the **`impeccable`** skill.
+
 ## Pointers
 
 - **Read order, binding rules, workflow, naming, glossary:** `AGENTS.md`.
+- **Backend / back office / Calendly spec:** `module_calendly.md` — binding source of truth for the NestJS API, admin panel, and booking integration.
 - **Reference design:** `apps/frontend/origin/` — HTML/JSX prototypes. Source of truth for visual design decisions.
 - **Environment variables:** `apps/frontend/.env.local.example`.
