@@ -38,3 +38,5 @@ out
 dist/
 *.tsbuildinfo
 test-output
+
+vite.config.*.timestamp*
