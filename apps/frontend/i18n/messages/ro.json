@@ -12,24 +12,105 @@
   "home": {
     "hero": {
       "eyebrow": "Consultații exclusiv online · Pediatrie & Nutriție",
-      "headline": "Consultații video, plan scris, urmărire.",
-      "sub": "Pediatrie și nutriție de calitate, fără să ieși din casă. Toate consultațiile se desfășoară online, iar planul scris ajunge la tine în 24 de ore."
+      "headline": "Consultații<br></br><accent>video</accent>, plan<br></br>scris, urmărire.",
+      "sub": "Pediatrie și nutriție de calitate, fără să ieși din casă. Toate consultațiile se desfășoară online, iar planul scris ajunge la tine în 24 de ore.",
+      "ctaBook": "Programează consultație →",
+      "ctaHow": "Cum funcționează",
+      "stats": {
+        "experience": { "value": "12+", "label": "Ani practică clinică" },
+        "specializations": { "value": "2", "label": "Specializări · Pediatrie & Nutriție" },
+        "families": { "value": "1.400+", "label": "Familii consultate" }
+      },
+      "photoName": "Dr. Olesea Jalba",
+      "photoLocation": "Online · Oriunde"
     },
     "howItWorks": {
       "eyebrow": "Cum funcționează",
-      "title": "Patru pași. Niciun drum.",
+      "title": "Patru pași<accent>.</accent><br></br><accent>Niciun drum.</accent>",
+      "subtitle": "De la programare până la planul scris, totul se întâmplă într-un singur loc — în ritmul tău.",
       "steps": {
         "booking": { "title": "Programare", "description": "Alegi un slot din calendar și completezi un scurt formular cu motivul vizitei." },
         "preparation": { "title": "Pregătire", "description": "Cu 24h înainte primești instrucțiuni și o listă de informații utile (analize, jurnal alimentar etc.)." },
         "consultation": { "title": "Consultația", "description": "Ne întâlnim pe video. Lungimea variază între 50–90 min, în funcție de tipul de consultație." },
         "plan": { "title": "Plan scris", "description": "În 24h primești un document cu recomandări, plan alimentar (dacă e cazul) și pașii următori." }
-      }
+      },
+      "footerNote": "Platforma video, formularul și planul scris — toate gestionate într-un singur portal.",
+      "cta": "Vezi calendarul →"
+    },
+    "services": {
+      "eyebrow": "Servicii · Cinci formate",
+      "title": "Cum lucrăm<br></br><accent>împreună.</accent>",
+      "headerSub": "Cinci moduri de a colabora — de la o întrebare punctuală la urmărire de trei luni. Alege ritmul potrivit pentru tine.",
+      "items": {
+        "pediatric": {
+          "tag": "Pediatrie",
+          "title": "Consultație pediatrică",
+          "description": "Evaluare clinică completă pe video, anamneză detaliată, recomandări scrise pe care le primești în 24h. Pentru copii de la naștere până la adolescență — creștere, dezvoltare, profilaxie, întrebări la zi.",
+          "price": "600 lei",
+          "duration": "50 min · video"
+        },
+        "nutrition": {
+          "tag": "Nutriție",
+          "title": "Consultație nutrițională",
+          "description": "Plan alimentar personalizat pentru copii sau adulți. Anamneză, analiza obiceiurilor existente, analize recente, obiective realiste. Include un follow-up programat la 4 săptămâni.",
+          "price": "700 lei",
+          "duration": "60 min · video"
+        },
+        "integrative": {
+          "tag": "Integrativ",
+          "title": "Consultație integrativă & monitorizare",
+          "description": "Pediatrie și nutriție într-o singură întâlnire — pentru cazuri complexe sau pentru începutul unei urmăriri pe termen lung. Plan scris, recomandări structurate, prima programare de follow-up inclusă.",
+          "price": "1.100 lei",
+          "duration": "90 min · video"
+        },
+        "subscription": {
+          "tag": "Abonament",
+          "title": "Monitorizare 3 luni",
+          "description": "Trei luni de urmărire activă: mesagerie directă pentru întrebări între consultații, ajustări periodice ale planului, două video-call-uri lunare. Recomandat pentru obiective de durată.",
+          "price": "de la 2.400 lei",
+          "duration": "3 luni"
+        },
+        "quick": {
+          "tag": "Rapid",
+          "title": "Întrebare rapidă",
+          "description": "Pentru întrebări punctuale care nu necesită o consultație completă. Trimiți întrebarea + context prin formular și primești un răspuns scris, documentat, în 48 de ore.",
+          "price": "180 lei",
+          "duration": "48h · scris"
+        }
+      },
+      "book": "Rezervă →"
+    },
+    "about": {
+      "eyebrow": "Despre",
+      "title": "Două specializări,<br></br><accent>un singur scop</accent>",
+      "body": "Sunt medic pediatru și nutriționist. Cele două roluri se completează firesc: înțeleg corpul copilului în mișcare, dar și ce îl construiește la masă. Lucrez exclusiv online, pentru ca distanța să nu mai fie o problemă — familii din toată țara și din diasporă.",
+      "details": {
+        "studies": { "label": "Studii", "body": "USMF \"N. Testemițanu\"\nRezidențiat pediatrie\nFormare nutriție clinică" },
+        "specializations": { "label": "Specializări", "body": "Nutriție pediatrică\nAlimentația sugarului\nDiversificare BLW" }
+      },
+      "link": "Citește biografia completă →"
     }
   },
   "footer": {
     "tagline": "Cabinet online de pediatrie și nutriție. Consultații prin video-call, plan scris la final, urmărire pe termen lung.",
-    "services": "Servicii",
-    "resources": "Resurse",
-    "contact": "Contact"
+    "book": "Programează →",
+    "servicesLabel": "Servicii",
+    "services": {
+      "pediatric": "Consultație pediatrică",
+      "nutrition": "Consultație nutrițională",
+      "integrative": "Integrativă",
+      "subscription": "Abonament",
+      "quick": "Întrebare rapidă"
+    },
+    "resourcesLabel": "Resurse",
+    "resources": {
+      "articles": "Articole",
+      "guides": "Ghiduri descărcabile",
+      "menus": "Meniuri săptămânale",
+      "faq": "FAQ"
+    },
+    "contactLabel": "Contact",
+    "rights": "© Olesea Jalba · 2026",
+    "legal": "GDPR · Termeni"
   }
 }

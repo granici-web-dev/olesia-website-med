@@ -1,5 +1,6 @@
 .section {
-  padding: 88px 64px 100px;
+  padding-block: 88px 100px;
+  padding-inline: max(var(--gutter), (100% - var(--container)) / 2);
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
   gap: 80px;
@@ -53,6 +54,7 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin-top: 44px;
 }
@@ -151,4 +153,70 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-family: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .section {
+    gap: 48px;
+  }
+
+  /* Narrow column — the CTAs wrap (flex-wrap on the parent); when they wrap
+     onto separate lines they grow to the same width instead of being uneven. */
+  .actions > * {
+    flex: 1 1 240px;
+    justify-content: center;
+  }
+
+  .stats {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding-block: 56px 64px;
+  }
+
+  .headline {
+    font-size: clamp(40px, 9vw, 60px);
+  }
+
+  .sub {
+    font-size: 16px;
+    margin-top: 28px;
+  }
+
+  .actions {
+    margin-top: 32px;
+  }
+
+  .stats {
+    margin-top: 48px;
+    gap: 32px;
+  }
+
+  /* Photo is full-width when stacked — cap it so it doesn't dominate. */
+  .photoWrapper {
+    max-width: 440px;
+    width: 100%;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .headline {
+    font-size: clamp(34px, 11vw, 46px);
+  }
+
+  .stats {
+    flex-wrap: wrap;
+    gap: 24px 32px;
+  }
+
+  .statNumber {
+    font-size: 30px;
+  }
 }

@@ -12,24 +12,105 @@
   "home": {
     "hero": {
       "eyebrow": "Online consultations only · Pediatrics & Nutrition",
-      "headline": "Video consultations, written plan, follow-up.",
-      "sub": "Quality pediatrics and nutrition without leaving home. All consultations are held online, and the written plan arrives within 24 hours."
+      "headline": "<accent>Video</accent> consultations,<br></br>written plan,<br></br>follow-up.",
+      "sub": "Quality pediatrics and nutrition without leaving home. All consultations are held online, and the written plan arrives within 24 hours.",
+      "ctaBook": "Book a consultation →",
+      "ctaHow": "How it works",
+      "stats": {
+        "experience": { "value": "12+", "label": "Years of clinical practice" },
+        "specializations": { "value": "2", "label": "Specializations · Pediatrics & Nutrition" },
+        "families": { "value": "1,400+", "label": "Families consulted" }
+      },
+      "photoName": "Dr. Olesea Jalba",
+      "photoLocation": "Online · Anywhere"
     },
     "howItWorks": {
       "eyebrow": "How it works",
-      "title": "Four steps. No commute.",
+      "title": "Four steps<accent>.</accent><br></br><accent>No commute.</accent>",
+      "subtitle": "From booking to the written plan, everything happens in one place — at your own pace.",
       "steps": {
         "booking": { "title": "Booking", "description": "Choose a slot from the calendar and fill in a short form with the reason for your visit." },
         "preparation": { "title": "Preparation", "description": "24h before, you receive instructions and a list of useful information (tests, food diary, etc.)." },
         "consultation": { "title": "Consultation", "description": "We meet on video. Duration varies between 50–90 min depending on the type of consultation." },
         "plan": { "title": "Written plan", "description": "Within 24h you receive a document with recommendations, meal plan (if applicable) and next steps." }
-      }
+      },
+      "footerNote": "The video platform, the form and the written plan — all managed in a single portal.",
+      "cta": "See the calendar →"
+    },
+    "services": {
+      "eyebrow": "Services · Five formats",
+      "title": "How we work<br></br><accent>together.</accent>",
+      "headerSub": "Five ways to collaborate — from a one-off question to a three-month follow-up. Choose the pace that fits you.",
+      "items": {
+        "pediatric": {
+          "tag": "Pediatrics",
+          "title": "Pediatric consultation",
+          "description": "Full clinical evaluation on video, detailed history, written recommendations delivered within 24h. For children from birth to adolescence — growth, development, prevention, day-to-day questions.",
+          "price": "600 lei",
+          "duration": "50 min · video"
+        },
+        "nutrition": {
+          "tag": "Nutrition",
+          "title": "Nutrition consultation",
+          "description": "Personalized meal plan for children or adults. History, analysis of existing habits, recent lab work, realistic goals. Includes a scheduled follow-up at 4 weeks.",
+          "price": "700 lei",
+          "duration": "60 min · video"
+        },
+        "integrative": {
+          "tag": "Integrative",
+          "title": "Integrative consultation & monitoring",
+          "description": "Pediatrics and nutrition in a single meeting — for complex cases or the start of a long-term follow-up. Written plan, structured recommendations, first follow-up appointment included.",
+          "price": "1,100 lei",
+          "duration": "90 min · video"
+        },
+        "subscription": {
+          "tag": "Subscription",
+          "title": "3-month monitoring",
+          "description": "Three months of active follow-up: direct messaging for questions between consultations, periodic plan adjustments, two monthly video calls. Recommended for long-term goals.",
+          "price": "from 2,400 lei",
+          "duration": "3 months"
+        },
+        "quick": {
+          "tag": "Quick",
+          "title": "Quick question",
+          "description": "For specific questions that don't require a full consultation. You send the question + context through a form and receive a written, documented answer within 48 hours.",
+          "price": "180 lei",
+          "duration": "48h · written"
+        }
+      },
+      "book": "Book →"
+    },
+    "about": {
+      "eyebrow": "About",
+      "title": "Two specializations,<br></br><accent>a single goal</accent>",
+      "body": "I am a pediatrician and a nutritionist. The two roles complement each other naturally: I understand a child's body in motion, but also what builds it at the table. I work exclusively online, so that distance is no longer a problem — families from across the country and the diaspora.",
+      "details": {
+        "studies": { "label": "Education", "body": "USMF \"N. Testemițanu\"\nPediatrics residency\nClinical nutrition training" },
+        "specializations": { "label": "Specializations", "body": "Pediatric nutrition\nInfant feeding\nBLW weaning" }
+      },
+      "link": "Read the full bio →"
     }
   },
   "footer": {
     "tagline": "Online pediatrics and nutrition practice. Video consultations, written plan, long-term follow-up.",
-    "services": "Services",
-    "resources": "Resources",
-    "contact": "Contact"
+    "book": "Book →",
+    "servicesLabel": "Services",
+    "services": {
+      "pediatric": "Pediatric consultation",
+      "nutrition": "Nutrition consultation",
+      "integrative": "Integrative",
+      "subscription": "Subscription",
+      "quick": "Quick question"
+    },
+    "resourcesLabel": "Resources",
+    "resources": {
+      "articles": "Articles",
+      "guides": "Downloadable guides",
+      "menus": "Weekly menus",
+      "faq": "FAQ"
+    },
+    "contactLabel": "Contact",
+    "rights": "© Olesea Jalba · 2026",
+    "legal": "GDPR · Terms"
   }
 }

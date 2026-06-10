@@ -1,5 +1,6 @@
 .section {
-  padding: 40px 64px 100px;
+  padding-block: 40px 100px;
+  padding-inline: max(var(--gutter), (100% - var(--container)) / 2);
   background: var(--paper);
   border-bottom: 1px solid var(--rule);
 }
@@ -118,4 +119,109 @@
 .serviceLink:hover {
   color: var(--sage);
   border-color: var(--sage);
+}
+
+/* Responsive */
+
+/* Small desktop: tighten the 4-column row before the tablet switch. */
+@media (max-width: 1280px) {
+  .serviceRow {
+    grid-template-columns: 100px 1.3fr 1.5fr 180px;
+    gap: 32px;
+  }
+
+  .serviceNum {
+    font-size: 80px;
+  }
+}
+
+/* Tablet: the 4-column row gets too cramped. Keep number + title + price on
+   the top row, and drop the description to a full-width row beneath them
+   (last in visual order). */
+@media (max-width: 1023px) {
+  .section {
+    padding-block: 24px 72px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 32px 0 48px;
+  }
+
+  .headerSub {
+    max-width: none;
+    padding-top: 0;
+  }
+
+  .serviceRow {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "num title meta"
+      "desc desc desc";
+    column-gap: 32px;
+    row-gap: 18px;
+    align-items: start;
+    padding: 44px 0;
+  }
+
+  .serviceRow > :nth-child(1) {
+    grid-area: num;
+  }
+
+  .serviceRow > :nth-child(2) {
+    grid-area: title;
+  }
+
+  .serviceRow > :nth-child(3) {
+    grid-area: desc;
+  }
+
+  .serviceRow > :nth-child(4) {
+    grid-area: meta;
+  }
+
+  .serviceNum {
+    font-size: 64px;
+  }
+}
+
+/* Phone: stack every block into a single column. */
+@media (max-width: 600px) {
+  .serviceRow {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "num"
+      "title"
+      "desc"
+      "meta";
+    row-gap: 12px;
+    padding: 36px 0;
+  }
+
+  .serviceNum {
+    font-size: 52px;
+  }
+
+  .serviceMeta {
+    text-align: left;
+  }
+
+  .serviceLink {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: clamp(40px, 12vw, 56px);
+  }
+
+  .serviceTitle {
+    font-size: 34px;
+  }
+
+  .serviceDesc {
+    font-size: 15px;
+  }
 }

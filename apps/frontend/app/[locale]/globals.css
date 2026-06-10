@@ -16,6 +16,12 @@
   --ink: #2c2117;
   --ink-soft: #5a4a3a;
   --rule: rgba(44, 33, 23, 0.16);
+
+  /* Layout: centered content container with full-bleed backgrounds.
+     Sections keep their background edge-to-edge and center content at
+     --container, never letting side gutters drop below --gutter. */
+  --container: 1440px;
+  --gutter: 64px;
 }
 
 @theme inline {
@@ -72,4 +78,29 @@ body {
   text-transform: uppercase;
   color: var(--ink-soft);
   font-weight: 500;
+}
+
+/* Responsive: shrink the side gutter as the viewport narrows so content
+   keeps breathing room without the fixed 64px desktop gutter on phones.
+   Breakpoints follow Tailwind's defaults (lg 1024, md 768, sm 640). */
+@media (max-width: 1024px) {
+  :root {
+    --gutter: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --gutter: 18px;
+  }
 }

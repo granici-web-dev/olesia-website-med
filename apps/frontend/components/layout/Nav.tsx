@@ -1,16 +1,19 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Link, usePathname } from '@/i18n/navigation';
-import { routing } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import styles from './Nav.module.css';
 
 const NAV_LINKS = [
-  { href: '/about', labelKey: 'Despre' },
-  { href: '/services', labelKey: 'Servicii' },
-  { href: '/pediatrics', labelKey: 'Pediatrie' },
-  { href: '/nutrition', labelKey: 'Nutriție' },
-  { href: '/articles', labelKey: 'Articole' },
-  { href: '/pricing', labelKey: 'Tarife' },
-  { href: '/contact', labelKey: 'Contact' },
+  { href: '/about', key: 'about' },
+  { href: '/services', key: 'services' },
+  { href: '/pediatrics', key: 'pediatrics' },
+  { href: '/nutrition', key: 'nutrition' },
+  { href: '/articles', key: 'articles' },
+  { href: '/pricing', key: 'pricing' },
+  { href: '/contact', key: 'contact' },
 ] as const;
 
 interface NavProps {
@@ -18,11 +21,42 @@ interface NavProps {
 }
 
 export function Nav({ locale }: NavProps) {
-  const otherLocale = routing.locales.find((l) => l !== locale) ?? 'en';
+  const t = useTranslations('nav');
+  const [open, setOpen] = useState(false);
+
+  const close = () => setOpen(false);
+
+  // While the mobile menu is open: lock body scroll and close on Escape.
+  useEffect(() => {
+    if (!open) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
+  const langSwitch = (
+    <span className={styles.lang}>
+      <Link href="/" locale="ro" onClick={close}>
+        <span className={locale === 'ro' ? styles.langActive : undefined}>RO</span>
+      </Link>
+      <span>/</span>
+      <Link href="/" locale="en" onClick={close}>
+        <span className={locale === 'en' ? styles.langActive : undefined}>EN</span>
+      </Link>
+    </span>
+  );
 
   return (
     <header className={styles.nav}>
-      <Link href="/">
+      <Link href="/" className={styles.logoLink} onClick={close}>
         <Image
           src="/assets/logo-long.png"
           alt="Dr. Olesea Jalba — pediatru & nutriționist"
@@ -33,25 +67,60 @@ export function Nav({ locale }: NavProps) {
         />
       </Link>
 
+      {/* Desktop inline navigation (hidden ≤1023px). */}
       <nav className={styles.navLinks}>
-        {NAV_LINKS.map(({ href, labelKey }) => (
+        {NAV_LINKS.map(({ href, key }) => (
           <Link key={href} href={href}>
-            {labelKey}
+            {t(key)}
           </Link>
         ))}
       </nav>
 
+      {/* Right cluster. The booking CTA stays in the bar at every width; the
+          language switch is desktop-only (it moves into the panel on mobile)
+          and the burger appears where the inline links are hidden (≤1023px). */}
       <div className={styles.right}>
-        <span className={styles.lang}>
-          <span className={locale === 'ro' ? styles.langActive : undefined}>RO</span>
-          <span>/</span>
-          <Link href="/" locale={otherLocale}>
-            <span className={locale === 'en' ? styles.langActive : undefined}>EN</span>
-          </Link>
-        </span>
-        <Link href="/contact" className={styles.cta}>
-          Programează online →
+        {langSwitch}
+        <Link href="/contact" className={styles.cta} onClick={close}>
+          {t('bookOnline')}
         </Link>
+        <button
+          type="button"
+          className={`${styles.burger} ${open ? styles.burgerOpen : ''}`}
+          aria-label={
+            open
+              ? locale === 'en'
+                ? 'Close menu'
+                : 'Închide meniul'
+              : locale === 'en'
+                ? 'Open menu'
+                : 'Deschide meniul'
+          }
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </div>
+
+      {/* Mobile menu overlay panel. */}
+      <div
+        id="mobile-menu"
+        className={`${styles.panel} ${open ? styles.panelOpen : ''}`}
+        aria-hidden={!open}
+      >
+        <nav className={styles.panelLinks}>
+          {NAV_LINKS.map(({ href, key }) => (
+            <Link key={href} href={href} onClick={close}>
+              {t(key)}
+            </Link>
+          ))}
+        </nav>
+
+        <div className={styles.panelFooter}>{langSwitch}</div>
       </div>
     </header>
   );

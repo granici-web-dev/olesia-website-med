@@ -2,7 +2,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 64px;
+  padding-block: 20px;
+  padding-inline: max(var(--gutter), (100% - var(--container)) / 2);
   border-bottom: 1px solid var(--rule);
   background: var(--cream);
   position: sticky;
@@ -72,4 +73,193 @@
 
 .cta:hover {
   background: var(--sage);
+}
+
+/* Burger + mobile overlay panel. Hidden by default — only used on ≤1023px,
+   where the inline links and right cluster are removed from the bar. The logo
+   and burger sit above the overlay (z-index) so they stay visible/tappable. */
+.logoLink {
+  position: relative;
+  z-index: 2;
+}
+
+.burger {
+  display: none;
+}
+
+.panel {
+  display: none;
+}
+
+/* Responsive */
+
+/* Small laptops: tighten the inline menu so all 7 links still fit. */
+@media (max-width: 1100px) {
+  .navLinks {
+    gap: 22px;
+    font-size: 12px;
+  }
+
+  .right {
+    gap: 16px;
+  }
+}
+
+/* Tablet and below: the 7-item inline menu and the right cluster leave the
+   bar. The bar becomes logo + burger; everything else moves into the overlay
+   panel toggled by the burger. */
+@media (max-width: 1023px) {
+  .navLinks {
+    display: none;
+  }
+
+  /* Keep the booking CTA + burger in the bar; only the language switch moves
+     into the panel. The cluster sits above the overlay (z-index) so the CTA
+     stays visible and tappable even when the menu is open. */
+  .right {
+    position: relative;
+    z-index: 2;
+    gap: 14px;
+  }
+
+  .right .lang {
+    display: none;
+  }
+
+  .logo {
+    height: 48px;
+  }
+
+  /* Burger button */
+  .burger {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+  }
+
+  .burger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--ink);
+    transition: transform 0.24s ease, opacity 0.2s ease;
+  }
+
+  .burgerOpen span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .burgerOpen span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .burgerOpen span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Overlay panel — full-bleed cream sheet sitting just under the sticky bar
+     (logo + burger float above it via z-index). */
+  .panel {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: var(--cream);
+    padding: 104px var(--gutter) 40px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition:
+      opacity 0.24s ease,
+      transform 0.24s ease,
+      visibility 0.24s ease;
+  }
+
+  .panelOpen {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .panelLinks {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panelLinks a {
+    font-family: var(--font-cormorant), Georgia, serif;
+    font-size: 30px;
+    line-height: 1.1;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+    transition: color 0.15s;
+  }
+
+  .panelLinks a:hover {
+    color: var(--sage);
+  }
+
+  .panelFooter {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .panelFooter .lang {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .logo {
+    height: 44px;
+  }
+
+  .cta {
+    padding: 10px 14px;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav {
+    padding-block: 14px;
+  }
+
+  .logo {
+    height: 38px;
+  }
+
+  .right {
+    gap: 10px;
+  }
+
+  .cta {
+    padding: 9px 12px;
+  }
+
+  .panel {
+    padding-top: 88px;
+  }
+
+  .panelLinks a {
+    font-size: 26px;
+    padding: 14px 0;
+  }
 }

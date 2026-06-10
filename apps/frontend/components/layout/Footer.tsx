@@ -1,18 +1,14 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import styles from './Footer.module.css';
 
-const SERVICES_LINKS = [
-  'Consultație pediatrică',
-  'Consultație nutrițională',
-  'Integrativă',
-  'Abonament',
-  'Întrebare rapidă',
-];
-
-const RESOURCES_LINKS = ['Articole', 'Ghiduri descărcabile', 'Meniuri săptămânale', 'FAQ'];
+const SERVICE_KEYS = ['pediatric', 'nutrition', 'integrative', 'subscription', 'quick'] as const;
+const RESOURCE_KEYS = ['articles', 'guides', 'menus', 'faq'] as const;
 
 export function Footer() {
+  const t = useTranslations('footer');
+
   return (
     <footer className={styles.footer}>
       <div className={styles.grid}>
@@ -24,39 +20,36 @@ export function Footer() {
             height={96}
             className={styles.logo}
           />
-          <p className={styles.tagline}>
-            Cabinet online de pediatrie și nutriție. Consultații prin
-            video-call, plan scris la final, urmărire pe termen lung.
-          </p>
+          <p className={styles.tagline}>{t('tagline')}</p>
           <Link href="/contact" className={styles.bookBtn}>
-            Programează →
+            {t('book')}
           </Link>
         </div>
 
         <div>
-          <div className={styles.colLabel}>Servicii</div>
+          <div className={styles.colLabel}>{t('servicesLabel')}</div>
           <div className={styles.colLinks}>
-            {SERVICES_LINKS.map((label) => (
-              <Link key={label} href="/services">
-                {label}
+            {SERVICE_KEYS.map((key) => (
+              <Link key={key} href="/services">
+                {t(`services.${key}`)}
               </Link>
             ))}
           </div>
         </div>
 
         <div>
-          <div className={styles.colLabel}>Resurse</div>
+          <div className={styles.colLabel}>{t('resourcesLabel')}</div>
           <div className={styles.colLinks}>
-            {RESOURCES_LINKS.map((label) => (
-              <Link key={label} href="/articles">
-                {label}
+            {RESOURCE_KEYS.map((key) => (
+              <Link key={key} href="/articles">
+                {t(`resources.${key}`)}
               </Link>
             ))}
           </div>
         </div>
 
         <div>
-          <div className={styles.colLabel}>Contact</div>
+          <div className={styles.colLabel}>{t('contactLabel')}</div>
           <div className={styles.colLinks}>
             <a href="mailto:contact@oleseajalba.md">contact@oleseajalba.md</a>
             <a href="tel:+37379000000">+373 79 000 000</a>
@@ -67,9 +60,9 @@ export function Footer() {
       </div>
 
       <div className={styles.bottom}>
-        <span>© Olesea Jalba · 2026</span>
+        <span>{t('rights')}</span>
         <span>RO · EN</span>
-        <span>GDPR · Termeni</span>
+        <span>{t('legal')}</span>
       </div>
     </footer>
   );

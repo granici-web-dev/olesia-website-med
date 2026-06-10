@@ -1,50 +1,44 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import styles from './Hero.module.css';
 
-const STATS = [
-  { value: '12+', label: 'Ani practică clinică' },
-  { value: '2', label: 'Specializări · Pediatrie & Nutriție' },
-  { value: '1.400+', label: 'Familii consultate' },
-] as const;
+const STAT_KEYS = ['experience', 'specializations', 'families'] as const;
 
 export function Hero() {
+  const t = useTranslations('home.hero');
+
   return (
     <section className={styles.section}>
       <div>
         <div className={styles.eyebrow}>
           <span className={styles.dot} />
-          Consultații exclusiv online · Pediatrie & Nutriție
+          {t('eyebrow')}
         </div>
 
         <h1 className={styles.headline}>
-          Consultații
-          <br />
-          <span className={styles.headlineAccent}>video</span>, plan
-          <br />
-          scris, urmărire.
+          {t.rich('headline', {
+            accent: (chunks) => <span className={styles.headlineAccent}>{chunks}</span>,
+            br: () => <br />,
+          })}
         </h1>
 
-        <p className={styles.sub}>
-          Pediatrie și nutriție de calitate, fără să ieși din casă. Toate
-          consultațiile se desfășoară online, iar planul scris ajunge la tine în
-          24 de ore.
-        </p>
+        <p className={styles.sub}>{t('sub')}</p>
 
         <div className={styles.actions}>
           <Link href="/contact" className={styles.btnDark}>
-            Programează consultație →
+            {t('ctaBook')}
           </Link>
           <a href="#how-it-works" className={styles.btnOutline}>
-            Cum funcționează
+            {t('ctaHow')}
           </a>
         </div>
 
         <div className={styles.stats}>
-          {STATS.map(({ value, label }) => (
-            <div key={label}>
-              <div className={styles.statNumber}>{value}</div>
-              <div className={styles.statLabel}>{label}</div>
+          {STAT_KEYS.map((key) => (
+            <div key={key}>
+              <div className={styles.statNumber}>{t(`stats.${key}.value`)}</div>
+              <div className={styles.statLabel}>{t(`stats.${key}.label`)}</div>
             </div>
           ))}
         </div>
@@ -62,8 +56,8 @@ export function Hero() {
           />
         </div>
         <div className={styles.photoCaption}>
-          <span>Dr. Olesea Jalba</span>
-          <span>Online · Oriunde</span>
+          <span>{t('photoName')}</span>
+          <span>{t('photoLocation')}</span>
         </div>
       </div>
     </section>

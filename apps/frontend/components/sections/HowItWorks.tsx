@@ -1,69 +1,47 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import styles from './HowItWorks.module.css';
 
 const STEPS = [
-  {
-    n: 'I',
-    title: 'Programare',
-    description:
-      'Alegi un slot din calendar și completezi un scurt formular cu motivul vizitei.',
-  },
-  {
-    n: 'II',
-    title: 'Pregătire',
-    description:
-      'Cu 24h înainte primești instrucțiuni și o listă de informații utile (analize, jurnal alimentar etc.).',
-  },
-  {
-    n: 'III',
-    title: 'Consultația',
-    description:
-      'Ne întâlnim pe video. Lungimea variază între 50–90 min, în funcție de tipul de consultație.',
-  },
-  {
-    n: 'IV',
-    title: 'Plan scris',
-    description:
-      'În 24h primești un document cu recomandări, plan alimentar (dacă e cazul) și pașii următori.',
-  },
+  { n: 'I', key: 'booking' },
+  { n: 'II', key: 'preparation' },
+  { n: 'III', key: 'consultation' },
+  { n: 'IV', key: 'plan' },
 ] as const;
 
 export function HowItWorks() {
+  const t = useTranslations('home.howItWorks');
+
   return (
     <section id="how-it-works" className={styles.section}>
       <div className={styles.header}>
         <div>
-          <div className={styles.eyebrow}>Cum funcționează</div>
+          <div className={styles.eyebrow}>{t('eyebrow')}</div>
           <h2 className={styles.title}>
-            Patru pași<span className={styles.titleAccent}>.</span>
-            <br />
-            <span className={styles.titleAccent}>Niciun drum.</span>
+            {t.rich('title', {
+              accent: (chunks) => <span className={styles.titleAccent}>{chunks}</span>,
+              br: () => <br />,
+            })}
           </h2>
         </div>
-        <p className={styles.subtitle}>
-          De la programare până la planul scris, totul se întâmplă într-un
-          singur loc — în ritmul tău.
-        </p>
+        <p className={styles.subtitle}>{t('subtitle')}</p>
       </div>
 
       <div className={styles.grid}>
         <div className={styles.connector} aria-hidden="true" />
-        {STEPS.map(({ n, title, description }) => (
-          <div key={n} className={styles.step}>
+        {STEPS.map(({ n, key }) => (
+          <div key={key} className={styles.step}>
             <div className={styles.stepNumber}>{n}</div>
-            <h3 className={styles.stepTitle}>{title}</h3>
-            <p className={styles.stepDesc}>{description}</p>
+            <h3 className={styles.stepTitle}>{t(`steps.${key}.title`)}</h3>
+            <p className={styles.stepDesc}>{t(`steps.${key}.description`)}</p>
           </div>
         ))}
       </div>
 
       <div className={styles.footer}>
-        <p className={styles.footerNote}>
-          Platforma video, formularul și planul scris — toate gestionate
-          într-un singur portal.
-        </p>
+        <p className={styles.footerNote}>{t('footerNote')}</p>
         <Link href="/contact" className={styles.btn}>
-          Vezi calendarul →
+          {t('cta')}
         </Link>
       </div>
     </section>
