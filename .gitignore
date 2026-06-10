@@ -37,3 +37,4 @@ out
 # Build output & TS incremental info
 dist/
 *.tsbuildinfo
+test-output
