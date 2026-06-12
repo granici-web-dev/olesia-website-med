@@ -25,6 +25,15 @@ const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_DIMENSION = 1600;
 const WEBP_QUALITY = 80;
 
+/** Documents (written plans): larger cap, office/PDF types, stored as-is. */
+const MAX_DOC_BYTES = 20 * 1024 * 1024;
+const DOC_EXT: Record<string, string> = {
+  'application/pdf': 'pdf',
+  'application/msword': 'doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+    'docx',
+};
+
 /**
  * Local file storage (module_calendly.md §11). Converts uploads to WebP
  * (resized + compressed) and returns a public URL. The `storage` abstraction
@@ -68,6 +77,31 @@ export class StorageService {
     const filename = `${randomUUID()}.webp`;
     await mkdir(STORAGE_DIR, { recursive: true });
     await writeFile(join(STORAGE_DIR, filename), webp);
+
+    return { url: `${PUBLIC_API_URL}${STORAGE_URL_PREFIX}/${filename}` };
+  }
+
+  /**
+   * Store a document (the written plan) as-is and return its public URL.
+   * PDF/DOC/DOCX only; capped at 20 MB. Unlike images these are not processed.
+   */
+  async saveDocument(
+    file: UploadedImage | undefined,
+  ): Promise<{ url: string }> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded.');
+    }
+    const ext = DOC_EXT[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException('Unsupported document type (use PDF/DOC/DOCX).');
+    }
+    if (file.size > MAX_DOC_BYTES) {
+      throw new BadRequestException('Document exceeds the 20 MB limit.');
+    }
+
+    const filename = `${randomUUID()}.${ext}`;
+    await mkdir(STORAGE_DIR, { recursive: true });
+    await writeFile(join(STORAGE_DIR, filename), file.buffer);
 
     return { url: `${PUBLIC_API_URL}${STORAGE_URL_PREFIX}/${filename}` };
   }

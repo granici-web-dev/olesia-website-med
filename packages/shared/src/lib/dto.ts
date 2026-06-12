@@ -84,6 +84,8 @@ export interface AppointmentDto {
   cancelUrl: string | null;
   rescheduleUrl: string | null;
   prepSentAt: string | null;
+  /** Public URL of the written plan uploaded by the specialist. */
+  planUrl: string | null;
   planUploadedAt: string | null;
   createdAt: string;
   updatedAt: string;

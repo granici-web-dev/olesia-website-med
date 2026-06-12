@@ -7,6 +7,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ServicesModule } from './services/services.module';
+import { AppointmentsModule } from './appointments/appointments.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { AboutModule } from './about/about.module';
 import { BlogModule } from './blog/blog.module';
@@ -22,6 +23,7 @@ import { StorageModule } from './storage/storage.module';
     AuthModule,
     UsersModule,
     ServicesModule,
+    AppointmentsModule,
     ContactsModule,
     AboutModule,
     BlogModule,

@@ -32,6 +32,11 @@ services:
       # Browser-facing origin used to build uploaded-image URLs. Set to the
       # public API domain in production (e.g. https://api.example.com).
       PUBLIC_API_URL: http://localhost:3333
+      # Calendly (group-A booking). Passed through from the host environment;
+      # the webhook rejects every request until the signing key is set.
+      CALENDLY_API_TOKEN: ${CALENDLY_API_TOKEN:-}
+      CALENDLY_ORG_URI: ${CALENDLY_ORG_URI:-}
+      CALENDLY_WEBHOOK_SIGNING_KEY: ${CALENDLY_WEBHOOK_SIGNING_KEY:-}
     ports:
       - '3333:3333'
     volumes:

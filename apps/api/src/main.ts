@@ -16,7 +16,11 @@ import {
 } from './app/storage/storage.constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // `rawBody: true` preserves the unparsed request body (req.rawBody) so the
+  // Calendly webhook can verify its HMAC signature against the exact bytes.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
 
   // Serve uploaded images from disk at /uploads/* (bypasses the /api prefix).
   // CORP header lets the cross-origin frontend (:3000) load them; without it
