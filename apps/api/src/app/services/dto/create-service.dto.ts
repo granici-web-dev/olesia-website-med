@@ -52,6 +52,10 @@ export class CreateServiceDto {
   @IsString()
   calendlyEventTypeUri?: string | null;
 
+  @IsOptional()
+  @IsString()
+  calendlySchedulingUrl?: string | null;
+
   @IsInt()
   @Min(0)
   sortOrder!: number;

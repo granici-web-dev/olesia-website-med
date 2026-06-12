@@ -20,6 +20,7 @@ export interface ServiceDto {
   priceLabelRo: string | null;
   priceLabelEn: string | null;
   calendlyEventTypeUri: string | null;
+  calendlySchedulingUrl: string | null;
   sortOrder: number;
   active: boolean;
 }

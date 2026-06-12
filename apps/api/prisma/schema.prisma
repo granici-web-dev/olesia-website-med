@@ -97,7 +97,8 @@ model Service {
   price                Int
   priceLabelRo         String?
   priceLabelEn         String?
-  calendlyEventTypeUri String?      @unique
+  calendlyEventTypeUri String?      @unique // API event_type URI (webhook mapping)
+  calendlySchedulingUrl String?     // public booking link for the site embed
   sortOrder            Int          @default(0)
   active               Boolean      @default(true)
   createdAt            DateTime     @default(now())

@@ -65,6 +65,7 @@ const schema = z
     priceLabelEn: z.string(),
     durationMin: z.string(),
     calendlyEventTypeUri: z.string(),
+    calendlySchedulingUrl: z.string(),
     sortOrder: intString(f.invalidNumber),
     active: z.boolean(),
   })
@@ -95,6 +96,7 @@ function emptyValues(code: ServiceCode, sortOrder: number): FormValues {
     priceLabelEn: '',
     durationMin: meta.defaultDuration ? String(meta.defaultDuration) : '',
     calendlyEventTypeUri: '',
+    calendlySchedulingUrl: '',
     sortOrder: String(sortOrder),
     active: true,
   };
@@ -112,6 +114,7 @@ function fromService(s: Service): FormValues {
     priceLabelEn: s.priceLabelEn ?? '',
     durationMin: s.durationMin != null ? String(s.durationMin) : '',
     calendlyEventTypeUri: s.calendlyEventTypeUri ?? '',
+    calendlySchedulingUrl: s.calendlySchedulingUrl ?? '',
     sortOrder: String(s.sortOrder),
     active: s.active,
   };
@@ -134,6 +137,10 @@ function toInput(values: FormValues): ServiceInput {
     calendlyEventTypeUri:
       isA && values.calendlyEventTypeUri.trim()
         ? values.calendlyEventTypeUri.trim()
+        : null,
+    calendlySchedulingUrl:
+      isA && values.calendlySchedulingUrl.trim()
+        ? values.calendlySchedulingUrl.trim()
         : null,
     sortOrder: Number(values.sortOrder),
     active: values.active,
@@ -365,6 +372,17 @@ export function ServiceFormSheet({
                 optional
                 placeholder="https://api.calendly.com/event_types/…"
                 {...form.register('calendlyEventTypeUri')}
+              />
+            )}
+
+            {isA && (
+              <TextField
+                id="calendlySchedulingUrl"
+                label={f.calendlyUrl}
+                hint={f.calendlyUrlHint}
+                optional
+                placeholder="https://calendly.com/cont/serviciu"
+                {...form.register('calendlySchedulingUrl')}
               />
             )}
 

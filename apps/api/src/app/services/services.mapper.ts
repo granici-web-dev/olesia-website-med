@@ -15,6 +15,7 @@ export function toServiceDto(s: Service): ServiceDto {
     priceLabelRo: s.priceLabelRo,
     priceLabelEn: s.priceLabelEn,
     calendlyEventTypeUri: s.calendlyEventTypeUri,
+    calendlySchedulingUrl: s.calendlySchedulingUrl,
     sortOrder: s.sortOrder,
     active: s.active,
   };

@@ -27,7 +27,8 @@ export interface Service {
   price: number; // lei
   priceLabelRo: string | null;
   priceLabelEn: string | null;
-  calendlyEventTypeUri: string | null; // group A only
+  calendlyEventTypeUri: string | null; // group A only — webhook mapping
+  calendlySchedulingUrl: string | null; // group A only — public booking link
   sortOrder: number;
   active: boolean;
 }

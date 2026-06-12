@@ -22,6 +22,7 @@ function toView(d: ServiceDto): Service {
     priceLabelRo: d.priceLabelRo,
     priceLabelEn: d.priceLabelEn,
     calendlyEventTypeUri: d.calendlyEventTypeUri,
+    calendlySchedulingUrl: d.calendlySchedulingUrl,
     sortOrder: d.sortOrder,
     active: d.active,
   };

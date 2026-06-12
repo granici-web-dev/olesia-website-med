@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { api, loc, serviceTag, type ServiceDto } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
+import { CalendlyButton } from '@/components/ui/CalendlyButton';
 
 export const revalidate = 60;
 
@@ -64,9 +65,21 @@ export default async function PricingPage({
                     {s.durationMin} {t.min}
                   </div>
                 ) : null}
-                <Link href={`/${locale}/contact`} className={styles.serviceLink}>
-                  {t.book}
-                </Link>
+                {s.group === 'A_booking' && s.calendlySchedulingUrl ? (
+                  <CalendlyButton
+                    url={s.calendlySchedulingUrl}
+                    reason={loc(locale, s.titleRo, s.titleEn)}
+                    label={t.book}
+                    className={styles.serviceLink}
+                  />
+                ) : (
+                  <Link
+                    href={`/${locale}/contact`}
+                    className={styles.serviceLink}
+                  >
+                    {t.book}
+                  </Link>
+                )}
               </div>
             </div>
           ))}

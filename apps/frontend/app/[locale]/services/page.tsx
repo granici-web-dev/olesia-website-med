@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { api, loc, serviceTag, type ServiceDto } from '../../../lib/api';
 import { PainPoints } from '@/components/sections/PainPoints';
 import { FreeConsult } from '@/components/sections/FreeConsult';
+import { CalendlyButton } from '@/components/ui/CalendlyButton';
 
 export const revalidate = 60;
 
@@ -58,12 +59,21 @@ export default async function ServicesPage({
         <p className="max-w-[62ch] text-[1.05rem] leading-relaxed text-ink-soft text-pretty">
           {loc(locale, s.descriptionRo, s.descriptionEn)}
         </p>
-        <Link
-          href={`/${locale}/contact`}
-          className="mt-6 inline-block border-b border-ink pb-0.5 text-sm transition-colors hover:border-sage hover:text-sage"
-        >
-          {cta} →
-        </Link>
+        {s.group === 'A_booking' && s.calendlySchedulingUrl ? (
+          <CalendlyButton
+            url={s.calendlySchedulingUrl}
+            reason={loc(locale, s.titleRo, s.titleEn)}
+            label={cta}
+            className="mt-6 inline-block cursor-pointer border-b border-ink pb-0.5 text-sm transition-colors hover:border-sage hover:text-sage"
+          />
+        ) : (
+          <Link
+            href={`/${locale}/contact`}
+            className="mt-6 inline-block border-b border-ink pb-0.5 text-sm transition-colors hover:border-sage hover:text-sage"
+          >
+            {cta} →
+          </Link>
+        )}
       </div>
     </article>
   );

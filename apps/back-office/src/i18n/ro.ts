@@ -302,6 +302,8 @@ export const ro = {
       duration: 'Durată (min)',
       calendly: 'Calendly event type (URI)',
       calendlyHint: 'Doar grupul cu programare — sursa de adevăr pentru mapare.',
+      calendlyUrl: 'Link Calendly de rezervare',
+      calendlyUrlHint: 'Link public deschis în embed-ul de pe site (ex. calendly.com/cont/serviciu).',
       sortOrder: 'Ordine pe site',
       activeField: 'Afișat pe site',
       activeHint: 'Serviciile inactive nu apar public.',

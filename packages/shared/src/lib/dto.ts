@@ -62,6 +62,8 @@ export interface ServiceDto {
   priceLabelEn: string | null;
   /** Group A only — the Calendly event-type URI this service maps to. */
   calendlyEventTypeUri: string | null;
+  /** Group A only — the public Calendly booking link for the site embed. */
+  calendlySchedulingUrl: string | null;
   sortOrder: number;
   active: boolean;
 }
