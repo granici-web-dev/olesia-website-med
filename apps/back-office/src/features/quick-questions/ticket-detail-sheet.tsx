@@ -7,6 +7,7 @@ import {
   Lock,
   Mail,
   Paperclip,
+  Phone,
   Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -145,6 +146,15 @@ export function TicketDetailSheet({
                   <Mail className="size-3.5" />
                   {tk.clientEmail}
                 </a>
+                {tk.phone && (
+                  <a
+                    href={`tel:${tk.phone}`}
+                    className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                  >
+                    <Phone className="size-3.5" />
+                    {tk.phone}
+                  </a>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-2">

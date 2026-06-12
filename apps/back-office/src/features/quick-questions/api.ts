@@ -18,6 +18,7 @@ function toView(d: QuickQuestionDto): Ticket {
     id: d.id,
     clientName: d.clientName,
     clientEmail: d.clientEmail,
+    phone: d.phone,
     question: d.question,
     attachments: d.attachments.map((url, i) => ({
       id: `${d.id}-${i}`,

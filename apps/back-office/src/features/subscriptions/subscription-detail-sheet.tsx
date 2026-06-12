@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Loader2,
   Mail,
+  Phone,
   PhoneOff,
   Video,
 } from 'lucide-react';
@@ -164,7 +165,28 @@ export function SubscriptionDetailSheet({
                     {s.clientEmail}
                   </a>
                 </Field>
+                {s.phone && (
+                  <Field label={t.detail.phone}>
+                    <a
+                      href={`tel:${s.phone}`}
+                      className="inline-flex items-center gap-1.5 text-foreground underline-offset-4 hover:text-primary hover:underline"
+                    >
+                      <Phone className="size-3.5 text-muted-foreground" />
+                      {s.phone}
+                    </a>
+                  </Field>
+                )}
               </dl>
+
+              {s.notes && (
+                <>
+                  <Separator className="my-4" />
+                  <SectionTitle>{t.detail.message}</SectionTitle>
+                  <p className="mt-2 text-sm whitespace-pre-wrap text-foreground/90">
+                    {s.notes}
+                  </p>
+                </>
+              )}
 
               <Separator className="my-4" />
 

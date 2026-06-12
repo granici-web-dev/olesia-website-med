@@ -510,6 +510,8 @@ export const ro = {
       title: 'Detalii abonament',
       client: 'Client',
       email: 'Email',
+      phone: 'Telefon',
+      message: 'Mesaj',
       service: 'Serviciu',
       period: 'Perioadă',
       quota: 'Apeluri video',

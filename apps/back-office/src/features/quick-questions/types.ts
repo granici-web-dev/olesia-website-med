@@ -24,6 +24,8 @@ export interface Ticket {
   id: string;
   clientName: string;
   clientEmail: string;
+  /** Lead contact phone (public intake; absent for older records). */
+  phone?: string | null;
   question: string;
   attachments: Attachment[];
   status: TicketStatus;

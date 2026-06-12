@@ -14,6 +14,9 @@ export interface Subscription {
   id: string;
   clientName: string;
   clientEmail: string;
+  /** Lead contact phone + message (public intake; absent for older records). */
+  phone?: string | null;
+  notes?: string | null;
   status: SubscriptionStatus;
   paymentStatus: PaymentStatus;
   startDate: string; // ISO

@@ -24,6 +24,8 @@ function toView(d: SubscriptionDto): Subscription {
     id: d.id,
     clientName: d.clientName,
     clientEmail: d.clientEmail,
+    phone: d.phone,
+    notes: d.notes,
     // The UI has no "paused" state; treat it as active for display.
     status: (d.status === 'paused'
       ? 'active'
