@@ -1,6 +1,7 @@
 import {
   AppointmentStatus,
   ContactType,
+  PatientEntryType,
   PaymentStatus,
   PostStatus,
   QuickQuestionStatus,
@@ -272,4 +273,47 @@ export interface DashboardStatsDto {
   };
   /** Next scheduled consultations, soonest first. */
   upcoming: DashboardUpcomingItem[];
+}
+
+// --- Patients / medical records (module_patients.md) ---
+
+/** One medical-record timeline entry. */
+export interface PatientEntryDto {
+  id: string;
+  patientId: string;
+  type: PatientEntryType;
+  title: string | null;
+  body: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  occurredAt: string;
+  authorId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A patient profile. `entryCount`/`lastInteractionAt` populated in lists. */
+export interface PatientDto {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  birthDate: string | null;
+  gender: string | null;
+  notes: string | null;
+  consentAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  entryCount?: number;
+  lastInteractionAt?: string | null;
+}
+
+/** A linked lead interaction shown on the patient timeline. */
+export interface PatientInteractionDto {
+  source: 'appointment' | 'subscription' | 'quick_question';
+  sourceId: string;
+  label: string;
+  occurredAt: string;
+  status: string;
+  paymentStatus: PaymentStatus;
 }

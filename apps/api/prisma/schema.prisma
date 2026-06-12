@@ -128,12 +128,15 @@ model Appointment {
   prepSentAt       DateTime?
   planUrl          String? // written plan uploaded by the specialist
   planUploadedAt   DateTime?
+  patient          Patient?          @relation(fields: [patientId], references: [id])
+  patientId        String?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
   @@index([serviceId])
   @@index([status])
   @@index([startTime])
+  @@index([patientId])
 }
 
 // --- Subscriptions (service 04) ---
@@ -150,11 +153,14 @@ model Subscription {
   videoQuotaUsed     Int                @default(0)
   startsAt           DateTime
   endsAt             DateTime
+  patient            Patient?           @relation(fields: [patientId], references: [id])
+  patientId          String?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
   @@index([serviceId])
   @@index([status])
+  @@index([patientId])
 }
 
 // --- Quick questions (service 05) ---
@@ -170,10 +176,13 @@ model QuickQuestion {
   paymentStatus PaymentStatus       @default(pending)
   dueAt         DateTime // 48h SLA deadline
   answeredAt    DateTime?
+  patient       Patient?            @relation(fields: [patientId], references: [id])
+  patientId     String?
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
   @@index([status])
+  @@index([patientId])
 }
 
 // --- Blog ---
@@ -238,4 +247,48 @@ model AboutPage {
   testimonials Json? // [{ quoteRo, quoteEn, author, roleRo, roleEn }]
   faq          Json? // [{ qRo, qEn, aRo, aEn }]
   updatedAt DateTime @updatedAt
+}
+
+// --- Patients / medical records (module_patients.md) ---
+
+enum PatientEntryType {
+  anamnesis
+  note
+  prescription
+  document
+}
+
+model Patient {
+  id        String    @id @default(uuid())
+  fullName  String
+  email     String    @unique // dedup / link key
+  phone     String?
+  birthDate DateTime?
+  gender    String? // 'male' | 'female' | 'other' | null
+  notes     String? // non-medical admin notes
+  consentAt DateTime? // GDPR consent timestamp
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  entries        PatientEntry[]
+  appointments   Appointment[]
+  subscriptions  Subscription[]
+  quickQuestions QuickQuestion[]
+}
+
+model PatientEntry {
+  id         String           @id @default(uuid())
+  patient    Patient          @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId  String
+  type       PatientEntryType
+  title      String?
+  body       String? // markdown (anamnesis/note/prescription text)
+  fileUrl    String? // document/prescription PDF — authenticated url
+  fileName   String?
+  occurredAt DateTime         @default(now()) // clinical date (editable)
+  authorId   String? // User who wrote it
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@index([patientId, occurredAt])
 }

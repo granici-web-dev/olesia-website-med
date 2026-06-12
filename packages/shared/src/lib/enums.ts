@@ -76,3 +76,11 @@ export enum QuickQuestionStatus {
   Answered = 'answered',
   Closed = 'closed',
 }
+
+/** Kind of a patient medical-record timeline entry (module_patients.md). */
+export enum PatientEntryType {
+  Anamnesis = 'anamnesis',
+  Note = 'note',
+  Prescription = 'prescription',
+  Document = 'document',
+}
