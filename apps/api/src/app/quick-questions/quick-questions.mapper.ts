@@ -6,6 +6,7 @@ export function toQuickQuestionDto(q: QuickQuestion): QuickQuestionDto {
     id: q.id,
     clientName: q.clientName,
     clientEmail: q.clientEmail,
+    phone: q.phone,
     question: q.question,
     attachments: q.attachments,
     answer: q.answer,

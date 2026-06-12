@@ -147,6 +147,8 @@ model Subscription {
   serviceId          String
   clientName         String
   clientEmail        String
+  phone              String? // lead contact phone (public intake)
+  notes              String? // free-text message from the public lead form
   status             SubscriptionStatus @default(active)
   paymentStatus      PaymentStatus      @default(pending)
   videoQuotaPerMonth Int                @default(2)
@@ -169,6 +171,7 @@ model QuickQuestion {
   id            String              @id @default(uuid())
   clientName    String
   clientEmail   String
+  phone         String? // lead contact phone (public intake)
   question      String
   attachments   String[]
   answer        String?

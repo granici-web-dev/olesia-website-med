@@ -101,6 +101,8 @@ export interface SubscriptionDto {
   serviceId: string;
   clientName: string;
   clientEmail: string;
+  phone: string | null;
+  notes: string | null;
   status: SubscriptionStatus;
   paymentStatus: PaymentStatus;
   videoQuotaPerMonth: number;
@@ -117,6 +119,7 @@ export interface QuickQuestionDto {
   id: string;
   clientName: string;
   clientEmail: string;
+  phone: string | null;
   question: string;
   attachments: string[];
   answer: string | null;

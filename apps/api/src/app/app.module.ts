@@ -17,6 +17,8 @@ import { QuickQuestionsModule } from './quick-questions/quick-questions.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PatientsModule } from './patients/patients.module';
 import { StorageModule } from './storage/storage.module';
+import { MailModule } from './mail/mail.module';
+import { LeadsModule } from './leads/leads.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { StorageModule } from './storage/storage.module';
     DashboardModule,
     PatientsModule,
     StorageModule,
+    MailModule,
+    LeadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

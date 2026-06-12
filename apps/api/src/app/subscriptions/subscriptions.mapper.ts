@@ -7,6 +7,8 @@ export function toSubscriptionDto(s: Subscription): SubscriptionDto {
     serviceId: s.serviceId,
     clientName: s.clientName,
     clientEmail: s.clientEmail,
+    phone: s.phone,
+    notes: s.notes,
     status: s.status as SubscriptionDto['status'],
     paymentStatus: s.paymentStatus as SubscriptionDto['paymentStatus'],
     videoQuotaPerMonth: s.videoQuotaPerMonth,
