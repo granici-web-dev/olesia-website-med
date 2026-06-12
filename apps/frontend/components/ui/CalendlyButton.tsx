@@ -47,6 +47,7 @@ export function CalendlyButton({
   reason,
   label,
   className,
+  withArrow = true,
 }: {
   /** Public Calendly scheduling URL (Service.calendlySchedulingUrl). */
   url: string;
@@ -54,6 +55,8 @@ export function CalendlyButton({
   reason: string;
   label: string;
   className?: string;
+  /** Append a trailing " →" to the label (default true). */
+  withArrow?: boolean;
 }) {
   useEffect(() => {
     ensureWidgetAssets();
@@ -69,7 +72,8 @@ export function CalendlyButton({
 
   return (
     <button type="button" onClick={open} className={className}>
-      {label} →
+      {label}
+      {withArrow ? ' →' : ''}
     </button>
   );
 }

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
+import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import styles from './Nav.module.css';
 
 const NAV_LINKS = [
@@ -83,9 +85,13 @@ export function Nav({ locale }: NavProps) {
           and the burger appears where the inline links are hidden (≤1023px). */}
       <div className={styles.right}>
         {langSwitch}
-        <Link href="/contact" className={styles.cta} onClick={close}>
-          {t('bookOnline')}
-        </Link>
+        <CalendlyButton
+          url={FREE_CONSULT_CALENDLY_URL}
+          reason="Consultație gratuită"
+          label={t('bookOnline')}
+          className={styles.cta}
+          withArrow={false}
+        />
         <button
           type="button"
           className={`${styles.burger} ${open ? styles.burgerOpen : ''}`}

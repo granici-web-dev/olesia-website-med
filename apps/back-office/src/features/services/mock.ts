@@ -70,7 +70,8 @@ let store: Service[] = [
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/NUTRITION',
-    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/30min',
+    calendlySchedulingUrl:
+      'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
     sortOrder: 2,
     active: true,
   },
@@ -89,7 +90,8 @@ let store: Service[] = [
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/INTEGRATIVE',
-    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/30min',
+    calendlySchedulingUrl:
+      'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
     sortOrder: 3,
     active: true,
   },
