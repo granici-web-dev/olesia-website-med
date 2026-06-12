@@ -14,6 +14,24 @@ import { toAppointmentDto } from './appointments.mapper';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { ListAppointmentsDto } from './dto/list-appointments.dto';
 
+/**
+ * A Calendly booking reduced to the fields we persist, independent of whether
+ * it arrived via webhook or the backup-sync API poll. The service is resolved
+ * from `eventTypeUri`; `eventUri` is the idempotency key.
+ */
+export interface NormalizedBooking {
+  eventUri: string;
+  eventTypeUri: string;
+  clientName: string;
+  clientEmail: string;
+  reason: string | null;
+  startTime: Date;
+  endTime: Date;
+  videoUrl: string | null;
+  cancelUrl: string | null;
+  rescheduleUrl: string | null;
+}
+
 @Injectable()
 export class AppointmentsService {
   private readonly logger = new Logger(AppointmentsService.name);
@@ -82,9 +100,8 @@ export class AppointmentsService {
   }
 
   /**
-   * Idempotently apply a verified Calendly `invitee.*` event. The service is
-   * resolved strictly by `event_type` URI (never the editable `a1` answer);
-   * `scheduled_event.uri` is the idempotency key.
+   * Idempotently apply a verified Calendly `invitee.*` event (webhook path).
+   * Normalizes the payload and delegates to applyBooking/applyCancellation.
    */
   async ingestCalendlyEvent(body: CalendlyWebhookBody): Promise<void> {
     const payload = body.payload;
@@ -96,63 +113,100 @@ export class AppointmentsService {
     }
 
     if (body.event === 'invitee.canceled') {
-      const existing = await this.prisma.appointment.findUnique({
-        where: { calendlyEventUri: uri },
-      });
-      if (existing) {
-        await this.prisma.appointment.update({
-          where: { calendlyEventUri: uri },
-          data: { status: AppointmentStatus.canceled },
-        });
-      } else {
-        this.logger.warn(`Cancel for unknown appointment ${uri} — ignored.`);
-      }
+      await this.applyCancellation(uri);
       return;
     }
-
     if (body.event !== 'invitee.created') {
       this.logger.log(`Unhandled Calendly event "${body.event}" — ignored.`);
       return;
     }
-
-    const eventType = event?.event_type;
-    if (!eventType) {
+    if (!event?.event_type) {
       this.logger.warn('invitee.created without event_type — ignored.');
       return;
     }
+
+    await this.applyBooking({
+      eventUri: uri,
+      eventTypeUri: event.event_type,
+      clientName: payload?.name ?? 'Necunoscut',
+      clientEmail: payload?.email ?? '',
+      reason: this.calendly.extractReason(payload?.questions_and_answers),
+      startTime: event.start_time ? new Date(event.start_time) : new Date(),
+      endTime: event.end_time ? new Date(event.end_time) : new Date(),
+      videoUrl: this.calendly.extractVideoUrl(event.location),
+      cancelUrl: payload?.cancel_url ?? null,
+      rescheduleUrl: payload?.reschedule_url ?? null,
+    });
+  }
+
+  /**
+   * Idempotently create/refresh an appointment from a normalized Calendly
+   * booking. Shared by the webhook and the backup-sync cron. The service is
+   * resolved strictly by `event_type` URI; `eventUri` is the idempotency key.
+   * Re-application refreshes Calendly-owned logistics but never overwrites the
+   * manual fields (status, paymentStatus, plan).
+   */
+  async applyBooking(
+    b: NormalizedBooking,
+  ): Promise<'created' | 'updated' | 'skipped'> {
     const service = await this.prisma.service.findUnique({
-      where: { calendlyEventTypeUri: eventType },
+      where: { calendlyEventTypeUri: b.eventTypeUri },
     });
     if (!service) {
-      this.logger.warn(`No service mapped to event_type ${eventType} — ignored.`);
-      return;
+      this.logger.warn(
+        `No service mapped to event_type ${b.eventTypeUri} — ignored.`,
+      );
+      return 'skipped';
     }
 
     const fields = {
       serviceId: service.id,
-      clientName: payload?.name ?? 'Necunoscut',
-      clientEmail: payload?.email ?? '',
-      reason: this.calendly.extractReason(payload?.questions_and_answers),
-      startTime: event?.start_time ? new Date(event.start_time) : new Date(),
-      endTime: event?.end_time ? new Date(event.end_time) : new Date(),
-      videoUrl: this.calendly.extractVideoUrl(event?.location),
-      cancelUrl: payload?.cancel_url ?? null,
-      rescheduleUrl: payload?.reschedule_url ?? null,
+      clientName: b.clientName,
+      clientEmail: b.clientEmail,
+      reason: b.reason,
+      startTime: b.startTime,
+      endTime: b.endTime,
+      videoUrl: b.videoUrl,
+      cancelUrl: b.cancelUrl,
+      rescheduleUrl: b.rescheduleUrl,
     };
 
-    // Re-delivery refreshes Calendly-owned logistics but preserves the manual
-    // fields (status, paymentStatus, plan) set in the back office.
+    const existing = await this.prisma.appointment.findUnique({
+      where: { calendlyEventUri: b.eventUri },
+      select: { id: true },
+    });
     await this.prisma.appointment.upsert({
-      where: { calendlyEventUri: uri },
+      where: { calendlyEventUri: b.eventUri },
       create: {
-        calendlyEventUri: uri,
+        calendlyEventUri: b.eventUri,
         status: AppointmentStatus.scheduled,
         paymentStatus: PaymentStatus.pending,
         ...fields,
       },
       update: fields,
     });
-    this.logger.log(`Appointment upserted for ${service.code} (${uri}).`);
+    const outcome = existing ? 'updated' : 'created';
+    this.logger.log(
+      `Appointment ${outcome} for ${service.code} (${b.eventUri}).`,
+    );
+    return outcome;
+  }
+
+  /** Mark an appointment canceled by its Calendly event URI (idempotent). */
+  async applyCancellation(eventUri: string): Promise<void> {
+    const existing = await this.prisma.appointment.findUnique({
+      where: { calendlyEventUri: eventUri },
+    });
+    if (!existing) {
+      this.logger.warn(`Cancel for unknown appointment ${eventUri} — ignored.`);
+      return;
+    }
+    if (existing.status === AppointmentStatus.canceled) return;
+    await this.prisma.appointment.update({
+      where: { calendlyEventUri: eventUri },
+      data: { status: AppointmentStatus.canceled },
+    });
+    this.logger.log(`Appointment canceled (${eventUri}).`);
   }
 
   private async getOrThrow(id: string) {

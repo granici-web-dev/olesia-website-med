@@ -16,6 +16,8 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
 import { type UploadedImage } from '../storage/storage.service';
 import { AppointmentsService } from './appointments.service';
+import { CalendlySyncService } from './calendly-sync.service';
+import { PrepService } from './prep.service';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { ListAppointmentsDto } from './dto/list-appointments.dto';
 
@@ -29,11 +31,27 @@ import { ListAppointmentsDto } from './dto/list-appointments.dto';
 @Roles(Role.admin, Role.editor)
 @Controller('appointments')
 export class AppointmentsController {
-  constructor(private readonly appointments: AppointmentsService) {}
+  constructor(
+    private readonly appointments: AppointmentsService,
+    private readonly sync: CalendlySyncService,
+    private readonly prep: PrepService,
+  ) {}
 
   @Get()
   findAll(@Query() query: ListAppointmentsDto) {
     return this.appointments.findAll(query);
+  }
+
+  /** Force a Calendly backup-sync now (otherwise runs every 30 min). */
+  @Post('sync')
+  runSync() {
+    return this.sync.runBackupSync();
+  }
+
+  /** Force the 24h prep dispatch now (otherwise runs hourly). */
+  @Post('prep/run')
+  runPrep() {
+    return this.prep.runPrepDispatch();
   }
 
   @Patch(':id')

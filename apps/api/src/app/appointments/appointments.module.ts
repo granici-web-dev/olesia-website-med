@@ -5,10 +5,19 @@ import { AppointmentsService } from './appointments.service';
 import { AppointmentsController } from './appointments.controller';
 import { CalendlyWebhookController } from './calendly-webhook.controller';
 import { CalendlyService } from './calendly.service';
+import { CalendlySyncService } from './calendly-sync.service';
+import { PrepService } from './prep.service';
+import { NotificationsService } from './notifications.service';
 
 @Module({
   imports: [StorageModule],
   controllers: [AppointmentsController, CalendlyWebhookController],
-  providers: [AppointmentsService, CalendlyService],
+  providers: [
+    AppointmentsService,
+    CalendlyService,
+    CalendlySyncService,
+    PrepService,
+    NotificationsService,
+  ],
 })
 export class AppointmentsModule {}

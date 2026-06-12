@@ -27,16 +27,45 @@ export interface CalendlyWebhookBody {
   };
 }
 
+/** A scheduled event as returned by the Calendly REST API (backup-sync). */
+export interface CalendlyScheduledEvent {
+  uri: string;
+  status: string; // 'active' | 'canceled'
+  start_time: string;
+  end_time: string;
+  event_type: string;
+  location?: { type?: string; join_url?: string; location?: string };
+}
+
+/** An invitee as returned by the Calendly REST API. */
+export interface CalendlyInvitee {
+  name?: string;
+  email?: string;
+  status?: string;
+  cancel_url?: string;
+  reschedule_url?: string;
+  questions_and_answers?: CalendlyQuestionAnswer[];
+}
+
 /**
  * Calendly integration helpers (module_calendly.md §8): webhook signature
- * verification and payload extraction. The service-code mapping itself lives
- * in the DB (`Service.calendlyEventTypeUri`) and is resolved by the caller —
- * never trust the editable `a1` answer.
+ * verification, payload extraction, and the REST API client used by the
+ * backup-sync cron. The service-code mapping itself lives in the DB
+ * (`Service.calendlyEventTypeUri`) and is resolved by the caller — never
+ * trust the editable `a1` answer.
  */
 @Injectable()
 export class CalendlyService {
   private readonly logger = new Logger(CalendlyService.name);
   private readonly signingKey = process.env.CALENDLY_WEBHOOK_SIGNING_KEY ?? '';
+  private readonly apiToken = process.env.CALENDLY_API_TOKEN ?? '';
+  private readonly orgUri = process.env.CALENDLY_ORG_URI ?? '';
+  private readonly apiBase = 'https://api.calendly.com';
+
+  /** True when the REST API credentials needed for backup-sync are present. */
+  isApiConfigured(): boolean {
+    return Boolean(this.apiToken && this.orgUri);
+  }
 
   /**
    * Verify the `Calendly-Webhook-Signature: t=<ts>,v1=<hmac>` header against
@@ -92,5 +121,60 @@ export class CalendlyService {
   ): string | null {
     if (!location) return null;
     return location.join_url ?? location.location ?? null;
+  }
+
+  /** Authenticated GET against the Calendly API; returns parsed JSON or null. */
+  private async apiGet<T>(url: string): Promise<T | null> {
+    try {
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${this.apiToken}` },
+      });
+      if (!res.ok) {
+        this.logger.warn(`Calendly API ${res.status} for ${url}`);
+        return null;
+      }
+      return (await res.json()) as T;
+    } catch (err) {
+      this.logger.warn(`Calendly API request failed: ${String(err)}`);
+      return null;
+    }
+  }
+
+  /**
+   * List organization scheduled events overlapping [minStart, maxStart],
+   * following pagination. Empty when the API is not configured.
+   */
+  async listScheduledEvents(
+    minStart: Date,
+    maxStart: Date,
+  ): Promise<CalendlyScheduledEvent[]> {
+    if (!this.isApiConfigured()) return [];
+    const params = new URLSearchParams({
+      organization: this.orgUri,
+      min_start_time: minStart.toISOString(),
+      max_start_time: maxStart.toISOString(),
+      count: '100',
+    });
+    const out: CalendlyScheduledEvent[] = [];
+    let url: string | null = `${this.apiBase}/scheduled_events?${params}`;
+    while (url) {
+      const page = await this.apiGet<{
+        collection: CalendlyScheduledEvent[];
+        pagination?: { next_page: string | null };
+      }>(url);
+      if (!page) break;
+      out.push(...page.collection);
+      url = page.pagination?.next_page ?? null;
+    }
+    return out;
+  }
+
+  /** Invitees of a scheduled event (1:1 for these consultations). */
+  async listEventInvitees(eventUri: string): Promise<CalendlyInvitee[]> {
+    if (!this.isApiConfigured()) return [];
+    const page = await this.apiGet<{ collection: CalendlyInvitee[] }>(
+      `${eventUri}/invitees?count=100`,
+    );
+    return page?.collection ?? [];
   }
 }
