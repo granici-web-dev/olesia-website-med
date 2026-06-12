@@ -11,7 +11,9 @@ import type {
 } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService, type UploadedImage } from '../storage/storage.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
+import { PatientEntryType } from '../../generated/prisma/enums';
 import { Prisma } from '../../generated/prisma/client';
 import { toPatientDto, toPatientEntryDto } from './patients.mapper';
 import {
@@ -24,7 +26,48 @@ import { FromLeadDto } from './dto/from-lead.dto';
 
 @Injectable()
 export class PatientsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
+
+  /** Upload a private medical document → a `document` timeline entry. */
+  async addDocument(
+    id: string,
+    file: UploadedImage | undefined,
+    title?: string,
+    authorId?: string,
+  ): Promise<PatientEntryDto> {
+    await this.getOrThrow(id);
+    const { key } = await this.storage.savePrivateDocument(file);
+    return toPatientEntryDto(
+      await this.prisma.patientEntry.create({
+        data: {
+          patientId: id,
+          type: PatientEntryType.document,
+          title: title ?? file!.originalname,
+          fileUrl: key,
+          fileName: file!.originalname,
+          authorId: authorId ?? null,
+        },
+      }),
+    );
+  }
+
+  /** Resolve a private document for streaming (auth-checked by the route). */
+  async getDocument(
+    id: string,
+    entryId: string,
+  ): Promise<{ path: string; fileName: string }> {
+    const e = await this.getEntryOrThrow(id, entryId);
+    if (e.type !== PatientEntryType.document || !e.fileUrl) {
+      throw new NotFoundException('document_not_found');
+    }
+    return {
+      path: this.storage.privateDocPath(e.fileUrl),
+      fileName: e.fileName ?? 'document',
+    };
+  }
 
   async findAll(query: ListPatientsDto): Promise<Paginated<PatientDto>> {
     const where: Prisma.PatientWhereInput = query.search

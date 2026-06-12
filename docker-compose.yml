@@ -29,6 +29,8 @@ services:
       PORT: '3333'
       CORS_ORIGINS: http://localhost:3000,http://localhost:4200
       UPLOADS_DIR: /app/uploads
+      # Private patient documents — separate dir, never served statically.
+      PRIVATE_UPLOADS_DIR: /app/private-uploads
       # Browser-facing origin used to build uploaded-image URLs. Set to the
       # public API domain in production (e.g. https://api.example.com).
       PUBLIC_API_URL: http://localhost:3333
@@ -41,6 +43,7 @@ services:
       - '3333:3333'
     volumes:
       - uploads:/app/uploads
+      - private_uploads:/app/private-uploads
     healthcheck:
       test:
         [
@@ -56,3 +59,4 @@ services:
 volumes:
   pgdata:
   uploads:
+  private_uploads:

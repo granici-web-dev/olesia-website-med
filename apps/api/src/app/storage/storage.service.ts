@@ -1,10 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import sharp from 'sharp';
 
 import {
+  PRIVATE_STORAGE_DIR,
   PUBLIC_API_URL,
   STORAGE_DIR,
   STORAGE_URL_PREFIX,
@@ -104,5 +105,32 @@ export class StorageService {
     await writeFile(join(STORAGE_DIR, filename), file.buffer);
 
     return { url: `${PUBLIC_API_URL}${STORAGE_URL_PREFIX}/${filename}` };
+  }
+
+  /**
+   * Store a PRIVATE document (patient medical record) outside the public
+   * static path. Returns an opaque storage key — the file is reachable only
+   * via the authenticated download endpoint, never a public URL.
+   */
+  async savePrivateDocument(
+    file: UploadedImage | undefined,
+  ): Promise<{ key: string }> {
+    if (!file) throw new BadRequestException('No file uploaded.');
+    const ext = DOC_EXT[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException('Unsupported document type (use PDF/DOC/DOCX).');
+    }
+    if (file.size > MAX_DOC_BYTES) {
+      throw new BadRequestException('Document exceeds the 20 MB limit.');
+    }
+    const key = `${randomUUID()}.${ext}`;
+    await mkdir(PRIVATE_STORAGE_DIR, { recursive: true });
+    await writeFile(join(PRIVATE_STORAGE_DIR, key), file.buffer);
+    return { key };
+  }
+
+  /** Absolute path of a private document by its key (traversal-safe). */
+  privateDocPath(key: string): string {
+    return join(PRIVATE_STORAGE_DIR, basename(key));
   }
 }

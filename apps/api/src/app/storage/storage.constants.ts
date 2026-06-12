@@ -11,6 +11,18 @@ export const STORAGE_DIR = (() => {
 export const STORAGE_URL_PREFIX = '/uploads';
 
 /**
+ * Where PRIVATE files (patient medical documents) live — deliberately NOT
+ * under STORAGE_DIR, so they are never exposed by the public /uploads static
+ * route. Served only via the authenticated download endpoint. Mount a volume
+ * here in production; override with PRIVATE_UPLOADS_DIR.
+ */
+export const PRIVATE_STORAGE_DIR = (() => {
+  const dir = process.env.PRIVATE_UPLOADS_DIR;
+  if (!dir) return join(process.cwd(), 'private-uploads');
+  return isAbsolute(dir) ? dir : resolve(process.cwd(), dir);
+})();
+
+/**
  * Absolute origin used to build returned URLs, e.g. http://localhost:3333.
  * Defaults to the local API origin; set PUBLIC_API_URL in production.
  */

@@ -8,11 +8,17 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
+import { type UploadedImage } from '../storage/storage.service';
 import { PatientsService } from './patients.service';
 import {
   CreatePatientDto,
@@ -85,5 +91,28 @@ export class PatientsController {
   @HttpCode(204)
   removeEntry(@Param('id') id: string, @Param('entryId') entryId: string) {
     return this.patients.removeEntry(id, entryId);
+  }
+
+  /** Upload a private medical document (PDF/DOC/DOCX). */
+  @Post(':id/documents')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  addDocument(
+    @Param('id') id: string,
+    @UploadedFile() file: UploadedImage | undefined,
+    @Body('title') title?: string,
+  ) {
+    return this.patients.addDocument(id, file, title);
+  }
+
+  /** Authenticated streamed download — never a public URL. */
+  @Get(':id/documents/:entryId')
+  async download(
+    @Param('id') id: string,
+    @Param('entryId') entryId: string,
+    @Res() res: Response,
+  ) {
+    const { path, fileName } = await this.patients.getDocument(id, entryId);
+    res.download(path, fileName);
   }
 }
