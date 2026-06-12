@@ -44,6 +44,7 @@ import {
   durationMinutes,
 } from '@/features/appointments/data';
 import type { Appointment } from '@/features/appointments/types';
+import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 import { ro } from '@/i18n/ro';
 import { appointmentsQueryKey } from '@/features/appointments/query-key';
 import { cn } from '@/lib/utils';
@@ -252,6 +253,10 @@ export function AppointmentDetailSheet({
 
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
+              {a.paymentStatus === 'confirmed' && (
+                <AddAsPatientButton source="appointment" sourceId={a.id} />
+              )}
+
               {a.paymentStatus === 'pending' && a.status !== 'canceled' && (
                 <ConfirmAction
                   trigger={

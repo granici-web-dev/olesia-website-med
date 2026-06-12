@@ -18,6 +18,7 @@ export const ro = {
     appointments: 'Programări',
     subscriptions: 'Abonamente',
     quickQuestions: 'Întrebări rapide',
+    patients: 'Pacienți',
     blog: 'Blog',
     services: 'Servicii',
     contacts: 'Contacte',
@@ -126,6 +127,10 @@ export const ro = {
     quickQuestions: {
       title: 'Întrebări rapide',
       subtitle: 'Tichete cu răspuns în maximum 48 de ore.',
+    },
+    patients: {
+      title: 'Pacienți',
+      subtitle: 'Dosare medicale și istoricul consultațiilor.',
     },
     blog: {
       title: 'Blog',
@@ -534,6 +539,209 @@ export const ro = {
       callLogged: 'Apel video înregistrat.',
       canceled: 'Abonamentul a fost anulat.',
       noQuota: 'Nu mai sunt apeluri disponibile.',
+      error: 'Acțiunea a eșuat. Încearcă din nou.',
+    },
+  },
+
+  patients: {
+    title: 'Pacienți',
+    subtitle: 'Dosare medicale și istoricul consultațiilor.',
+    refresh: 'Reîmprospătează',
+    addPatient: 'Adaugă pacient',
+    backToList: 'Înapoi la pacienți',
+
+    consent: {
+      given: 'Consimțământ GDPR',
+      missing: 'Fără consimțământ',
+      record: 'Înregistrează consimțământul',
+      recordedOn: 'Consimțământ înregistrat pe',
+    },
+
+    payment: {
+      pending: 'În așteptare',
+      confirmed: 'Confirmată',
+    },
+
+    gender: {
+      male: 'Masculin',
+      female: 'Feminin',
+      other: 'Altul',
+      unset: 'Nespecificat',
+    },
+
+    entryType: {
+      anamnesis: 'Anamneză',
+      note: 'Notă',
+      prescription: 'Rețetă',
+      document: 'Document',
+    },
+
+    filters: {
+      searchPlaceholder: 'Caută după nume sau email…',
+      reset: 'Resetează',
+    },
+
+    columns: {
+      patient: 'Pacient',
+      contact: 'Contact',
+      lastInteraction: 'Ultima interacțiune',
+      entries: 'Înregistrări',
+    },
+
+    list: {
+      entriesCount: 'înregistrări',
+      noInteraction: 'Fără interacțiuni',
+    },
+
+    empty: {
+      title: 'Niciun pacient',
+      body: 'Pacienții apar aici după ce un lead plătit este adăugat sau după ce creezi manual un dosar.',
+      filteredTitle: 'Niciun rezultat',
+      filteredBody: 'Niciun pacient nu corespunde căutării.',
+    },
+
+    detail: {
+      contact: 'Date de contact',
+      email: 'Email',
+      phone: 'Telefon',
+      birthDate: 'Data nașterii',
+      age: 'ani',
+      gender: 'Gen',
+      notes: 'Note administrative',
+      noNotes: 'Nicio notă administrativă.',
+      createdAt: 'Creat',
+      edit: 'Editează profilul',
+      delete: 'Șterge pacientul',
+      notFoundTitle: 'Pacientul nu a fost găsit',
+      notFoundBody: 'Dosarul accesat nu există sau a fost șters.',
+    },
+
+    tabs: {
+      profile: 'Profil',
+      history: 'Istoric',
+      anamnesis: 'Anamneză',
+      prescriptions: 'Rețete',
+      documents: 'Documente',
+      interactions: 'Interacțiuni',
+    },
+
+    timeline: {
+      title: 'Istoric medical',
+      empty: 'Niciun istoric încă',
+      emptyBody: 'Anamnezele, notele, rețetele și documentele apar aici, în ordine cronologică.',
+      addEntry: 'Adaugă înregistrare',
+      interactionLabel: 'Interacțiune',
+    },
+
+    anamnesis: {
+      empty: 'Nicio anamneză',
+      emptyBody: 'Adaugă prima anamneză pentru acest pacient.',
+      add: 'Adaugă anamneză',
+    },
+
+    prescriptions: {
+      empty: 'Nicio rețetă',
+      emptyBody: 'Rețetele și planurile prescrise apar aici.',
+      add: 'Adaugă rețetă',
+    },
+
+    documents: {
+      empty: 'Niciun document',
+      emptyBody: 'Încarcă analize, scrisori medicale sau alte documente (PDF, DOC).',
+      upload: 'Încarcă document',
+      uploading: 'Se încarcă…',
+      download: 'Descarcă',
+      private: 'Documentele medicale sunt private și accesibile doar autentificat.',
+    },
+
+    interactions: {
+      empty: 'Nicio interacțiune',
+      emptyBody: 'Programările, abonamentele și întrebările legate de acest pacient apar aici.',
+      source: {
+        appointment: 'Programare',
+        subscription: 'Abonament',
+        quick_question: 'Întrebare rapidă',
+      },
+    },
+
+    form: {
+      createTitle: 'Pacient nou',
+      createSubtitle: 'Creează manual un dosar de pacient.',
+      editTitle: 'Editează pacientul',
+      editSubtitle: 'Actualizează datele de profil.',
+      fullName: 'Nume complet',
+      email: 'Email',
+      phone: 'Telefon',
+      birthDate: 'Data nașterii',
+      gender: 'Gen',
+      notes: 'Note administrative',
+      notesHint: 'Note interne, non-medicale (nu apar în istoricul medical).',
+      required: 'Câmp obligatoriu',
+      invalidEmail: 'Adresă de email invalidă',
+      save: 'Salvează',
+      saving: 'Se salvează…',
+    },
+
+    entryForm: {
+      addTitle: 'Adaugă înregistrare',
+      editTitle: 'Editează înregistrarea',
+      subtitle: 'Anamneză, notă sau rețetă în istoricul medical.',
+      type: 'Tip',
+      titleLabel: 'Titlu',
+      titlePlaceholder: 'Opțional',
+      body: 'Conținut',
+      bodyPlaceholder: 'Scrie detaliile (markdown acceptat)…',
+      occurredAt: 'Data clinică',
+      occurredAtHint: 'Lasă gol pentru data de azi.',
+      save: 'Salvează',
+      saving: 'Se salvează…',
+    },
+
+    docForm: {
+      title: 'Încarcă document',
+      subtitle: 'Document medical privat (PDF, DOC, DOCX).',
+      titleLabel: 'Titlu',
+      titlePlaceholder: 'Opțional — implicit numele fișierului',
+      file: 'Fișier',
+      choose: 'Alege fișier',
+      save: 'Încarcă',
+      saving: 'Se încarcă…',
+      noFile: 'Alege un fișier pentru încărcare.',
+    },
+
+    fromLead: {
+      action: 'Adaugă ca pacient',
+      adding: 'Se adaugă…',
+    },
+
+    confirm: {
+      deleteTitle: 'Ștergi pacientul?',
+      deleteBody:
+        'Dosarul, toate înregistrările medicale și documentele vor fi șterse definitiv, iar programările și abonamentele asociate vor fi anonimizate (dreptul de a fi uitat). Acțiunea nu poate fi anulată.',
+      deleteCta: 'Șterge definitiv',
+      deleteEntryTitle: 'Ștergi înregistrarea?',
+      deleteEntryBody: 'Înregistrarea va fi eliminată din istoricul medical.',
+      deleteEntryCta: 'Șterge',
+      consentTitle: 'Înregistrezi consimțământul GDPR?',
+      consentBody:
+        'Confirmi că pacientul (sau reprezentantul legal) și-a dat consimțământul pentru prelucrarea datelor. Se înregistrează data și ora curentă.',
+      consentCta: 'Înregistrează',
+    },
+
+    toast: {
+      created: 'Pacientul a fost creat.',
+      updated: 'Profilul a fost actualizat.',
+      deleted: 'Pacientul a fost șters.',
+      emailTaken: 'Există deja un pacient cu acest email.',
+      consentRecorded: 'Consimțământul a fost înregistrat.',
+      entryAdded: 'Înregistrarea a fost adăugată.',
+      entryUpdated: 'Înregistrarea a fost actualizată.',
+      entryDeleted: 'Înregistrarea a fost ștearsă.',
+      documentUploaded: 'Documentul a fost încărcat.',
+      downloadStarted: 'Descărcarea a început.',
+      downloadFailed: 'Descărcarea a eșuat.',
+      mockNoFile: 'Fișier indisponibil în modul demo.',
+      leadAdded: 'Lead-ul a fost adăugat ca pacient.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
   },

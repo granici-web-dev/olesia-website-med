@@ -47,6 +47,7 @@ import {
 } from '@/features/subscriptions/data';
 import { subscriptionsQueryKey } from '@/features/subscriptions/query-key';
 import type { Subscription } from '@/features/subscriptions/types';
+import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 
 const t = ro.subscriptions;
 
@@ -202,6 +203,10 @@ export function SubscriptionDetailSheet({
 
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
+              {s.paymentStatus === 'confirmed' && (
+                <AddAsPatientButton source="subscription" sourceId={s.id} />
+              )}
+
               {s.paymentStatus === 'pending' && s.status !== 'canceled' && (
                 <ConfirmAction
                   trigger={

@@ -8,6 +8,7 @@ import {
   Contact,
   BookOpenText,
   Users,
+  Stethoscope,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -52,6 +53,7 @@ export const navGroups: NavGroup[] = [
   {
     label: ro.nav.sectionAdmin,
     items: [
+      { to: paths.patients, label: ro.nav.patients, icon: Stethoscope },
       { to: paths.users, label: ro.nav.users, icon: Users, roles: ['admin'] },
     ],
   },

@@ -46,6 +46,7 @@ import {
 } from '@/features/quick-questions/data';
 import { ticketsQueryKey } from '@/features/quick-questions/query-key';
 import type { Ticket } from '@/features/quick-questions/types';
+import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 
 const t = ro.quickQuestions;
 
@@ -227,6 +228,9 @@ export function TicketDetailSheet({
 
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
+              {tk.paymentStatus === 'confirmed' && (
+                <AddAsPatientButton source="quick_question" sourceId={tk.id} />
+              )}
               {tk.paymentStatus === 'pending' && (
                 <ConfirmPayment
                   pending={payMutation.isPending}

@@ -10,6 +10,8 @@ import { DashboardPage } from '@/pages/dashboard';
 import { AppointmentsPage } from '@/pages/appointments';
 import { SubscriptionsPage } from '@/pages/subscriptions';
 import { QuickQuestionsPage } from '@/pages/quick-questions';
+import { PatientsPage } from '@/pages/patients';
+import { PatientDetailPage } from '@/pages/patient-detail';
 import { BlogPage } from '@/pages/blog';
 import { BlogEditorPage } from '@/pages/blog-editor';
 import { ServicesPage } from '@/pages/services';
@@ -33,6 +35,8 @@ export function App() {
             path={paths.quickQuestions}
             element={<QuickQuestionsPage />}
           />
+          <Route path={paths.patients} element={<PatientsPage />} />
+          <Route path="/pacienti/:id" element={<PatientDetailPage />} />
           <Route path={paths.blog} element={<BlogPage />} />
           <Route path={paths.blogNew} element={<BlogEditorPage />} />
           <Route path="/blog/:id" element={<BlogEditorPage />} />
