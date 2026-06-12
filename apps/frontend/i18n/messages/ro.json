@@ -112,5 +112,37 @@
     "contactLabel": "Contact",
     "rights": "© Olesea Jalba · 2026",
     "legal": "GDPR · Termeni"
+  },
+  "leadForm": {
+    "monitoring": {
+      "tag": "Monitorizare",
+      "title": "Monitorizare 3 luni",
+      "subtitle": "Lasă-ne datele tale și te contactăm pentru a stabili împreună pașii următori."
+    },
+    "quick": {
+      "tag": "Întrebare rapidă",
+      "title": "Întrebare rapidă",
+      "subtitle": "Scrie întrebarea ta — îți răspundem în maximum 48 de ore."
+    },
+    "name": "Nume complet",
+    "email": "Email",
+    "phone": "Telefon",
+    "message": "Mesaj (opțional)",
+    "question": "Întrebarea ta",
+    "namePlaceholder": "Numele tău",
+    "emailPlaceholder": "email@exemplu.md",
+    "phonePlaceholder": "+373 …",
+    "messagePlaceholder": "Spune-ne pe scurt ce te interesează…",
+    "questionPlaceholder": "Scrie aici întrebarea ta…",
+    "consent": "Sunt de acord cu prelucrarea datelor mele pentru a fi contactat(ă).",
+    "submit": "Trimite cererea",
+    "submitting": "Se trimite…",
+    "successTitle": "Mulțumim!",
+    "successBody": "Am primit cererea ta. Te contactăm în curând.",
+    "error": "Ceva n-a mers. Te rugăm să încerci din nou.",
+    "close": "Închide",
+    "required": "Câmp obligatoriu",
+    "invalidEmail": "Adresă de email invalidă",
+    "consentRequired": "Te rugăm să accepți prelucrarea datelor."
   }
 }

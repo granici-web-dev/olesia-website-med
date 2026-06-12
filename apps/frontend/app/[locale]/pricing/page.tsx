@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { api, loc, serviceTag, type ServiceDto } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
+import type { LeadService } from '@/lib/leads';
 
 export const revalidate = 60;
 
@@ -69,6 +71,12 @@ export default async function PricingPage({
                   <CalendlyButton
                     url={s.calendlySchedulingUrl}
                     reason={loc(locale, s.titleRo, s.titleEn)}
+                    label={t.book}
+                    className={styles.serviceLink}
+                  />
+                ) : s.group === 'B_portal' ? (
+                  <BookGroupBButton
+                    service={s.code as LeadService}
                     label={t.book}
                     className={styles.serviceLink}
                   />

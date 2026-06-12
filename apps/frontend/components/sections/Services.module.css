@@ -113,6 +113,8 @@
   border-bottom: 1px solid var(--ink);
   padding-bottom: 3px;
   text-decoration: none;
+  cursor: pointer;
+  background: none;
   transition: color 0.15s, border-color 0.15s;
 }
 

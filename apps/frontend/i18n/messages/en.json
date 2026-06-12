@@ -112,5 +112,37 @@
     "contactLabel": "Contact",
     "rights": "© Olesea Jalba · 2026",
     "legal": "GDPR · Terms"
+  },
+  "leadForm": {
+    "monitoring": {
+      "tag": "Monitoring",
+      "title": "3-month monitoring",
+      "subtitle": "Leave your details and we’ll get in touch to plan the next steps together."
+    },
+    "quick": {
+      "tag": "Quick question",
+      "title": "Quick question",
+      "subtitle": "Write your question — we reply within 48 hours."
+    },
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message (optional)",
+    "question": "Your question",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "email@example.com",
+    "phonePlaceholder": "+373 …",
+    "messagePlaceholder": "Tell us briefly what you’re interested in…",
+    "questionPlaceholder": "Write your question here…",
+    "consent": "I agree to the processing of my data so I can be contacted.",
+    "submit": "Send request",
+    "submitting": "Sending…",
+    "successTitle": "Thank you!",
+    "successBody": "We’ve received your request. We’ll contact you shortly.",
+    "error": "Something went wrong. Please try again.",
+    "close": "Close",
+    "required": "Required field",
+    "invalidEmail": "Invalid email address",
+    "consentRequired": "Please accept the data processing."
   }
 }
