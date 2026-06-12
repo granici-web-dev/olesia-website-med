@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import sharp from 'sharp';
@@ -132,5 +132,32 @@ export class StorageService {
   /** Absolute path of a private document by its key (traversal-safe). */
   privateDocPath(key: string): string {
     return join(PRIVATE_STORAGE_DIR, basename(key));
+  }
+
+  /**
+   * Permanently delete a private document by its key. Best-effort and
+   * idempotent (a missing file is not an error) — used by GDPR erasure so the
+   * physical medical attachment leaves disk, not just its DB row.
+   */
+  async deletePrivateDocument(key: string): Promise<void> {
+    try {
+      await rm(join(PRIVATE_STORAGE_DIR, basename(key)), { force: true });
+    } catch (err) {
+      // Never let a stray file block erasure; surface for diagnostics only.
+      this.logger.warn(`Private document delete failed: ${String(err)}`);
+    }
+  }
+
+  /**
+   * Permanently delete a public file given its stored URL (or bare filename).
+   * Best-effort/idempotent — used when erasing a person's uploaded attachments.
+   */
+  async deletePublicFile(urlOrName: string): Promise<void> {
+    if (!urlOrName) return;
+    try {
+      await rm(join(STORAGE_DIR, basename(urlOrName)), { force: true });
+    } catch (err) {
+      this.logger.warn(`Public file delete failed: ${String(err)}`);
+    }
   }
 }

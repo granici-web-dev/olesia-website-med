@@ -11,6 +11,17 @@ export interface PrepNotification {
 }
 
 /**
+ * PII-safe recipient for logs: keep the first character + domain so delivery
+ * is traceable without writing a full email address to disk. GDPR: no raw
+ * names/emails in logs.
+ */
+function maskEmail(email: string): string {
+  const at = email.indexOf('@');
+  if (at <= 0) return '***';
+  return `${email[0]}***${email.slice(at)}`;
+}
+
+/**
  * Outbound client notifications (module_calendly.md §8.6). No email transport
  * is wired yet — this logs the message and is the single seam to swap in
  * SMTP/a provider later, the same way `storage` abstracts file persistence.
@@ -21,9 +32,9 @@ export class NotificationsService {
 
   async sendPrepInstructions(n: PrepNotification): Promise<void> {
     // TODO(email): replace the log with a real transport (nodemailer/provider).
+    // PII-safe: mask the recipient and omit the client name + checklist.
     this.logger.log(
-      `PREP → ${n.to} (${n.clientName}) · "${n.serviceTitle}" @ ` +
-        `${n.startTime.toISOString()} · ${n.checklist}`,
+      `PREP → ${maskEmail(n.to)} · "${n.serviceTitle}" @ ${n.startTime.toISOString()}`,
     );
   }
 }

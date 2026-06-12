@@ -12,7 +12,7 @@ import type {
 
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService, type UploadedImage } from '../storage/storage.service';
-import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
+import { paginate } from '../common/dto/pagination.dto';
 import { PatientEntryType } from '../../generated/prisma/enums';
 import { Prisma } from '../../generated/prisma/client';
 import { toPatientDto, toPatientEntryDto } from './patients.mapper';
@@ -23,6 +23,11 @@ import {
 } from './dto/patient.dto';
 import { CreateEntryDto, UpdateEntryDto } from './dto/entry.dto';
 import { FromLeadDto } from './dto/from-lead.dto';
+
+/** Placeholders written over a linked lead's PII during GDPR erasure. */
+const ANON_NAME = 'Pacient șters';
+const ANON_EMAIL = 'sters@gdpr.local';
+const ANON_TEXT = '[conținut șters la cererea de ștergere]';
 
 @Injectable()
 export class PatientsService {
@@ -109,7 +114,13 @@ export class PatientsService {
     if (await this.prisma.patient.findUnique({ where: { email: dto.email } })) {
       throw new ConflictException('email_taken');
     }
-    return toPatientDto(await this.prisma.patient.create({ data: this.toData(dto) }));
+    // `toData` widens shared fields to optional (it also serves updates); on
+    // create, re-assert the required identity fields from the DTO.
+    return toPatientDto(
+      await this.prisma.patient.create({
+        data: { ...this.toData(dto), fullName: dto.fullName, email: dto.email },
+      }),
+    );
   }
 
   async update(id: string, dto: UpdatePatientDto): Promise<PatientDto> {
@@ -125,10 +136,73 @@ export class PatientsService {
     );
   }
 
-  /** GDPR erasure: cascades entries; lead links are set null automatically. */
+  /**
+   * GDPR erasure (right to be forgotten). Removes every trace of the person:
+   * - deletes the patient (cascades `PatientEntry` rows) and the physical
+   *   private document files those entries point to;
+   * - anonymizes the PII on linked leads (name/email + free-text medical
+   *   fields) and detaches them, keeping only non-identifying business data;
+   * - deletes the public files attached to linked quick questions.
+   * The DB mutations run in one transaction; disk cleanup is best-effort.
+   */
   async remove(id: string): Promise<void> {
     await this.getOrThrow(id);
-    await this.prisma.patient.delete({ where: { id } });
+
+    // Capture file references BEFORE the cascade/anonymization removes them.
+    const [docs, qqs] = await Promise.all([
+      this.prisma.patientEntry.findMany({
+        where: {
+          patientId: id,
+          type: PatientEntryType.document,
+          fileUrl: { not: null },
+        },
+        select: { fileUrl: true },
+      }),
+      this.prisma.quickQuestion.findMany({
+        where: { patientId: id },
+        select: { attachments: true },
+      }),
+    ]);
+
+    await this.prisma.$transaction([
+      this.prisma.appointment.updateMany({
+        where: { patientId: id },
+        data: {
+          clientName: ANON_NAME,
+          clientEmail: ANON_EMAIL,
+          reason: null,
+          patientId: null,
+        },
+      }),
+      this.prisma.subscription.updateMany({
+        where: { patientId: id },
+        data: {
+          clientName: ANON_NAME,
+          clientEmail: ANON_EMAIL,
+          patientId: null,
+        },
+      }),
+      this.prisma.quickQuestion.updateMany({
+        where: { patientId: id },
+        data: {
+          clientName: ANON_NAME,
+          clientEmail: ANON_EMAIL,
+          question: ANON_TEXT,
+          answer: null,
+          attachments: [],
+          patientId: null,
+        },
+      }),
+      this.prisma.patient.delete({ where: { id } }),
+    ]);
+
+    // Best-effort physical cleanup — outside the transaction (disk ops).
+    await Promise.all([
+      ...docs.map((d) => this.storage.deletePrivateDocument(d.fileUrl!)),
+      ...qqs
+        .flatMap((q) => q.attachments)
+        .map((url) => this.storage.deletePublicFile(url)),
+    ]);
   }
 
   /** Merged medical-record timeline: entries + linked lead interactions. */
@@ -217,8 +291,12 @@ export class PatientsService {
   }
 
   async removeEntry(id: string, entryId: string): Promise<void> {
-    await this.getEntryOrThrow(id, entryId);
+    const e = await this.getEntryOrThrow(id, entryId);
     await this.prisma.patientEntry.delete({ where: { id: entryId } });
+    // Right-to-erasure also applies per entry: drop the physical file.
+    if (e.type === PatientEntryType.document && e.fileUrl) {
+      await this.storage.deletePrivateDocument(e.fileUrl);
+    }
   }
 
   /**
