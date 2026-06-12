@@ -15,6 +15,7 @@ import { BlogModule } from './blog/blog.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { QuickQuestionsModule } from './quick-questions/quick-questions.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { PatientsModule } from './patients/patients.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
@@ -33,6 +34,7 @@ import { StorageModule } from './storage/storage.module';
     SubscriptionsModule,
     QuickQuestionsModule,
     DashboardModule,
+    PatientsModule,
     StorageModule,
   ],
   controllers: [AppController],
