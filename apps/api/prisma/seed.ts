@@ -23,7 +23,8 @@ const SERVICES = [
     price: 600,
     priceLabelRo: null,
     priceLabelEn: null,
-    calendlyEventTypeUri: 'https://api.calendly.com/event_types/PEDIATRIC',
+    calendlyEventTypeUri:
+      'https://api.calendly.com/event_types/2c590066-eeb1-4f68-a306-c53a0cb71073',
     calendlySchedulingUrl: 'https://calendly.com/designer-nefele/30min',
     sortOrder: 1,
     active: true,
@@ -39,7 +40,8 @@ const SERVICES = [
     price: 700,
     priceLabelRo: null,
     priceLabelEn: null,
-    calendlyEventTypeUri: 'https://api.calendly.com/event_types/NUTRITION',
+    calendlyEventTypeUri:
+      'https://api.calendly.com/event_types/615c76de-63dd-4870-b3c5-141aef15a844',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
     sortOrder: 2,
@@ -56,7 +58,8 @@ const SERVICES = [
     price: 1100,
     priceLabelRo: null,
     priceLabelEn: null,
-    calendlyEventTypeUri: 'https://api.calendly.com/event_types/INTEGRATIVE',
+    calendlyEventTypeUri:
+      'https://api.calendly.com/event_types/25950172-362c-43cf-aeea-323ac47d961c',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
     sortOrder: 3,
