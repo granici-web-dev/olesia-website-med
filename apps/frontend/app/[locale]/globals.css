@@ -80,6 +80,12 @@ body {
   font-weight: 500;
 }
 
+/* Page shell: matches Nav/Footer — full-bleed background, content centered
+   at --container with side gutters never below --gutter. */
+.shell {
+  padding-inline: max(var(--gutter), calc((100% - var(--container)) / 2));
+}
+
 /* Responsive: shrink the side gutter as the viewport narrows so content
    keeps breathing room without the fixed 64px desktop gutter on phones.
    Breakpoints follow Tailwind's defaults (lg 1024, md 768, sm 640). */

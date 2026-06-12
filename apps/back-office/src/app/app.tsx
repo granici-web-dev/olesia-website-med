@@ -1,50 +1,57 @@
-import './app.css';
-import NxWelcome from './nx-welcome';
+import { Routes, Route } from 'react-router-dom';
 
-import { Route, Routes, Link } from 'react-router-dom';
+import { ProtectedRoute } from '@/auth/protected-route';
+import { RequireRole } from '@/auth/require-role';
+import { AppShell } from '@/components/layout/app-shell';
+import { paths } from '@/config/routes';
+
+import { LoginPage } from '@/pages/login';
+import { DashboardPage } from '@/pages/dashboard';
+import { AppointmentsPage } from '@/pages/appointments';
+import { SubscriptionsPage } from '@/pages/subscriptions';
+import { QuickQuestionsPage } from '@/pages/quick-questions';
+import { BlogPage } from '@/pages/blog';
+import { BlogEditorPage } from '@/pages/blog-editor';
+import { ServicesPage } from '@/pages/services';
+import { ContactsPage } from '@/pages/contacts';
+import { AboutPage } from '@/pages/about';
+import { UsersPage } from '@/pages/users';
+import { NotFoundPage } from '@/pages/not-found';
 
 export function App() {
   return (
-    <div>
-      <NxWelcome title="back-office" />
+    <Routes>
+      <Route path={paths.login} element={<LoginPage />} />
 
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-      </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
-      {/* END: routes */}
-    </div>
+      {/* Everything below requires a session. */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppShell />}>
+          <Route index element={<DashboardPage />} />
+          <Route path={paths.appointments} element={<AppointmentsPage />} />
+          <Route path={paths.subscriptions} element={<SubscriptionsPage />} />
+          <Route
+            path={paths.quickQuestions}
+            element={<QuickQuestionsPage />}
+          />
+          <Route path={paths.blog} element={<BlogPage />} />
+          <Route path={paths.blogNew} element={<BlogEditorPage />} />
+          <Route path="/blog/:id" element={<BlogEditorPage />} />
+          <Route path={paths.services} element={<ServicesPage />} />
+          <Route path={paths.contacts} element={<ContactsPage />} />
+          <Route path={paths.about} element={<AboutPage />} />
+          <Route
+            path={paths.users}
+            element={
+              <RequireRole roles={['admin']}>
+                <UsersPage />
+              </RequireRole>
+            }
+          />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Route>
+    </Routes>
   );
 }
+
 export default App;

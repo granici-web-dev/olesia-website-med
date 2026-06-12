@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nx next:dev",
+    "dev": "PORT=3000 nx next:dev",
     "build": "nx next:build",
     "start": "nx next:start"
   },

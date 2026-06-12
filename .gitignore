@@ -40,3 +40,5 @@ dist/
 test-output
 
 vite.config.*.timestamp*
+# Uploaded media (storage module — kept on disk / volume, not in git)
+apps/api/uploads/

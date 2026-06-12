@@ -230,5 +230,10 @@ model AboutPage {
   contentRo String
   contentEn String
   images    Json?
+  // Structured, client-editable page blocks (JSON arrays of localized items):
+  stats        Json? // [{ value, labelRo, labelEn }]
+  credentials  Json? // [{ ro, en }]
+  testimonials Json? // [{ quoteRo, quoteEn, author, roleRo, roleEn }]
+  faq          Json? // [{ qRo, qEn, aRo, aEn }]
   updatedAt DateTime @updatedAt
 }

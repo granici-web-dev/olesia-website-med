@@ -10,11 +10,24 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, 'src'),
+      '@olesia/shared': resolve(
+        import.meta.dirname,
+        '../../packages/shared/src/index.ts',
+      ),
     },
   },
   server: {
     port: 4200,
     host: 'localhost',
+    // Proxy API calls to the NestJS backend so the browser sees a same-origin
+    // `/api` (cookies + auth work without cross-site CORS). The API's global
+    // prefix is also `/api`, so no path rewrite is needed.
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:3333',
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     port: 4200,

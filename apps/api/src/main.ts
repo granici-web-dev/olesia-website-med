@@ -6,11 +6,30 @@ loadEnv({ path: join(__dirname, '..', '.env') });
 
 import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser = require('cookie-parser');
 import { AppModule } from './app/app.module';
+import {
+  STORAGE_DIR,
+  STORAGE_URL_PREFIX,
+} from './app/storage/storage.constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Serve uploaded images from disk at /uploads/* (bypasses the /api prefix).
+  // CORP header lets the cross-origin frontend (:3000) load them; without it
+  // the browser blocks the response (ERR_BLOCKED_BY_ORB).
+  app.useStaticAssets(STORAGE_DIR, {
+    prefix: `${STORAGE_URL_PREFIX}/`,
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  });
+
+  // Refresh token travels in an httpOnly cookie.
+  app.use(cookieParser());
 
   // Everything lives under /api except the health probe (kept at /health).
   app.setGlobalPrefix('api', {

@@ -165,6 +165,36 @@ export interface ContactDto {
 
 // --- About (singleton) ---
 
+/** A headline figure (e.g. "12+" → "ani de practică"). */
+export interface AboutStat {
+  value: string;
+  labelRo: string;
+  labelEn: string;
+}
+
+/** A single qualification / credential line. */
+export interface AboutCredential {
+  ro: string;
+  en: string;
+}
+
+/** A parent testimonial. */
+export interface AboutTestimonial {
+  quoteRo: string;
+  quoteEn: string;
+  author: string;
+  roleRo: string;
+  roleEn: string;
+}
+
+/** One FAQ entry. */
+export interface AboutFaqItem {
+  qRo: string;
+  qEn: string;
+  aRo: string;
+  aEn: string;
+}
+
 export interface AboutPageDto {
   id: string;
   titleRo: string;
@@ -172,5 +202,9 @@ export interface AboutPageDto {
   contentRo: string;
   contentEn: string;
   images: string[] | null;
+  stats: AboutStat[];
+  credentials: AboutCredential[];
+  testimonials: AboutTestimonial[];
+  faq: AboutFaqItem[];
   updatedAt: string;
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import styles from './Nav.module.css';
 
 const NAV_LINKS = [
@@ -22,6 +22,7 @@ interface NavProps {
 
 export function Nav({ locale }: NavProps) {
   const t = useTranslations('nav');
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   const close = () => setOpen(false);
@@ -42,13 +43,14 @@ export function Nav({ locale }: NavProps) {
     };
   }, [open]);
 
+  // Switch locale in place: link to the current path, not the homepage.
   const langSwitch = (
     <span className={styles.lang}>
-      <Link href="/" locale="ro" onClick={close}>
+      <Link href={pathname} locale="ro" onClick={close}>
         <span className={locale === 'ro' ? styles.langActive : undefined}>RO</span>
       </Link>
       <span>/</span>
-      <Link href="/" locale="en" onClick={close}>
+      <Link href={pathname} locale="en" onClick={close}>
         <span className={locale === 'en' ? styles.langActive : undefined}>EN</span>
       </Link>
     </span>
