@@ -210,3 +210,64 @@ export interface AboutPageDto {
   faq: AboutFaqItem[];
   updatedAt: string;
 }
+
+// --- Dashboard (module_calendly.md §11) ---
+
+/** Appointment count for one service over the period. */
+export interface DashboardServiceCount {
+  serviceId: string;
+  code: ServiceCode;
+  titleRo: string;
+  count: number;
+}
+
+/** A single upcoming appointment shown on the dashboard. */
+export interface DashboardUpcomingItem {
+  id: string;
+  clientName: string;
+  serviceCode: ServiceCode;
+  startTime: string;
+  status: AppointmentStatus;
+  paymentStatus: PaymentStatus;
+}
+
+/**
+ * Aggregated back-office statistics. New metrics can be added without
+ * reworking the layout (see the dashboard page). Shares the period bounds so
+ * the UI can label and compare.
+ */
+export interface DashboardStatsDto {
+  /** Echoed period bounds (ISO 8601). */
+  from: string;
+  to: string;
+  appointments: {
+    /** Total with startTime in [from, to]. */
+    total: number;
+    /** Same metric for the immediately preceding equal-length window. */
+    previousTotal: number;
+    byService: DashboardServiceCount[];
+    scheduled: number;
+    completed: number;
+    noShow: number;
+    canceled: number;
+    /** completed / total, 0..1 (0 when there are none). */
+    completionRate: number;
+  };
+  /** Appointments awaiting manual payment confirmation (point-in-time). */
+  pendingPayments: number;
+  subscriptions: {
+    active: number;
+    quotaUsed: number;
+    quotaTotal: number;
+  };
+  quickQuestions: {
+    /** Currently open tickets (point-in-time). */
+    open: number;
+    /** Tickets created within the period. */
+    total: number;
+    /** Share of period tickets answered within the 48h SLA, 0..1. */
+    slaRate: number;
+  };
+  /** Next scheduled consultations, soonest first. */
+  upcoming: DashboardUpcomingItem[];
+}

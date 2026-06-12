@@ -110,6 +110,8 @@ export const ro = {
     activityTitle: 'Activitate recentă',
     activityEmpty: 'Nicio activitate recentă.',
     trendTitle: 'Evoluția programărilor',
+    loadError: 'Nu am putut încărca statisticile.',
+    retry: 'Reîncearcă',
   },
 
   sections: {

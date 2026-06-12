@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   CalendarCheck,
   CreditCard,
@@ -6,8 +6,11 @@ import {
   MessagesSquare,
   CalendarClock,
   Activity,
+  AlertTriangle,
+  RefreshCw,
   type LucideIcon,
 } from 'lucide-react';
+import type { DashboardStatsDto } from '@olesia/shared';
 
 import { PageHeader } from '@/components/common/page-header';
 import { EmptyState } from '@/components/common/empty-state';
@@ -18,9 +21,13 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
+import { fetchDashboardStats } from '@/features/dashboard/data';
+import { dashboardQueryKey } from '@/features/dashboard/query-key';
+import { PaymentBadge } from '@/features/appointments/status-badges';
 
 interface Metric {
   key: string;
@@ -31,45 +38,64 @@ interface Metric {
   icon: LucideIcon;
 }
 
-/**
- * Demo metrics. Placeholder until the `dashboard` module is wired
- * (GET /dashboard/stats?from=&to=). Shape lets new metrics drop in
- * without reworking the layout. See module_calendly.md §11.
- */
-const METRICS: Metric[] = [
-  {
-    key: 'appointments',
-    label: ro.dashboard.metricAppointments,
-    hint: ro.dashboard.metricAppointmentsHint,
-    value: '24',
-    delta: { value: '+12%', trend: 'up' },
-    icon: CalendarCheck,
-  },
-  {
-    key: 'pendingPayments',
-    label: ro.dashboard.metricPendingPayments,
-    hint: ro.dashboard.metricPendingPaymentsHint,
-    value: '5',
-    delta: { value: '+2', trend: 'up' },
-    icon: CreditCard,
-  },
-  {
-    key: 'subscriptions',
-    label: ro.dashboard.metricSubscriptions,
-    hint: ro.dashboard.metricSubscriptionsHint,
-    value: '11',
-    delta: { value: '0', trend: 'flat' },
-    icon: Repeat2,
-  },
-  {
-    key: 'quickQuestions',
-    label: ro.dashboard.metricQuickQuestions,
-    hint: ro.dashboard.metricQuickQuestionsHint,
-    value: '3',
-    delta: { value: '−1', trend: 'down' },
-    icon: MessagesSquare,
-  },
-];
+const upcomingFormatter = new Intl.DateTimeFormat('ro-RO', {
+  day: '2-digit',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+/** Period-over-period delta for the appointments headline. */
+function appointmentsDelta(total: number, previous: number): Metric['delta'] {
+  if (previous === 0) {
+    return total === 0
+      ? { value: '0', trend: 'flat' }
+      : { value: `+${total}`, trend: 'up' };
+  }
+  const pct = Math.round(((total - previous) / previous) * 100);
+  return {
+    value: `${pct > 0 ? '+' : ''}${pct}%`,
+    trend: pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat',
+  };
+}
+
+/** Map the stats DTO to the four headline cards. */
+function toMetrics(stats: DashboardStatsDto): Metric[] {
+  return [
+    {
+      key: 'appointments',
+      label: ro.dashboard.metricAppointments,
+      hint: ro.dashboard.metricAppointmentsHint,
+      value: String(stats.appointments.total),
+      delta: appointmentsDelta(
+        stats.appointments.total,
+        stats.appointments.previousTotal,
+      ),
+      icon: CalendarCheck,
+    },
+    {
+      key: 'pendingPayments',
+      label: ro.dashboard.metricPendingPayments,
+      hint: ro.dashboard.metricPendingPaymentsHint,
+      value: String(stats.pendingPayments),
+      icon: CreditCard,
+    },
+    {
+      key: 'subscriptions',
+      label: ro.dashboard.metricSubscriptions,
+      hint: ro.dashboard.metricSubscriptionsHint,
+      value: String(stats.subscriptions.active),
+      icon: Repeat2,
+    },
+    {
+      key: 'quickQuestions',
+      label: ro.dashboard.metricQuickQuestions,
+      hint: ro.dashboard.metricQuickQuestionsHint,
+      value: String(stats.quickQuestions.open),
+      icon: MessagesSquare,
+    },
+  ];
+}
 
 function StatCard({ metric }: { metric: Metric }) {
   const Icon = metric.icon;
@@ -124,14 +150,40 @@ function StatCardSkeleton() {
   );
 }
 
+function UpcomingRow({
+  item,
+  first,
+}: {
+  item: DashboardStatsDto['upcoming'][number];
+  first: boolean;
+}) {
+  const serviceLabel =
+    (ro.appointments.service as Record<string, string>)[item.serviceCode] ??
+    item.serviceCode;
+  return (
+    <div className={cn('flex items-center gap-3', !first && 'border-t pt-3')}>
+      <span className="grid size-9 place-items-center rounded-full bg-accent text-accent-foreground">
+        <CalendarClock className="size-[18px]" strokeWidth={2} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{item.clientName}</p>
+        <p className="truncate text-xs text-muted-foreground">
+          {serviceLabel} · {upcomingFormatter.format(new Date(item.startTime))}
+        </p>
+      </div>
+      <PaymentBadge status={item.paymentStatus} />
+    </div>
+  );
+}
+
 export function DashboardPage() {
-  // Simulates the stats fetch so loading (skeleton) states are exercised.
-  // TODO(api): replace with a TanStack Query call to /dashboard/stats.
-  const [loading, setLoading] = React.useState(true);
-  React.useEffect(() => {
-    const id = setTimeout(() => setLoading(false), 700);
-    return () => clearTimeout(id);
-  }, []);
+  const { data, isLoading, isError, refetch, isFetching } = useQuery({
+    queryKey: dashboardQueryKey,
+    queryFn: fetchDashboardStats,
+  });
+
+  const metrics = data ? toMetrics(data) : [];
+  const upcoming = data?.upcoming ?? [];
 
   return (
     <div className="space-y-6">
@@ -145,51 +197,85 @@ export function DashboardPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {loading
-          ? METRICS.map((m) => <StatCardSkeleton key={m.key} />)
-          : METRICS.map((m) => <StatCard key={m.key} metric={m} />)}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">
-              {ro.dashboard.upcomingTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <TableRowsSkeleton rows={4} />
-            ) : (
-              <EmptyState
-                icon={CalendarClock}
-                title={ro.dashboard.upcomingEmpty}
-                className="py-10"
-              />
-            )}
-          </CardContent>
-        </Card>
-
+      {isError ? (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {ro.dashboard.activityTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <TableRowsSkeleton rows={4} />
-            ) : (
-              <EmptyState
-                icon={Activity}
-                title={ro.dashboard.activityEmpty}
-                className="py-10"
-              />
-            )}
+          <CardContent className="py-10">
+            <EmptyState
+              icon={AlertTriangle}
+              title={ro.dashboard.loadError}
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                >
+                  <RefreshCw
+                    className={cn('size-4', isFetching && 'animate-spin')}
+                  />
+                  {ro.dashboard.retry}
+                </Button>
+              }
+            />
           </CardContent>
         </Card>
-      </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {isLoading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <StatCardSkeleton key={i} />
+                ))
+              : metrics.map((m) => <StatCard key={m.key} metric={m} />)}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-base">
+                  {ro.dashboard.upcomingTitle}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <TableRowsSkeleton rows={4} />
+                ) : upcoming.length === 0 ? (
+                  <EmptyState
+                    icon={CalendarClock}
+                    title={ro.dashboard.upcomingEmpty}
+                    className="py-10"
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {upcoming.map((item, i) => (
+                      <UpcomingRow key={item.id} item={item} first={i === 0} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">
+                  {ro.dashboard.activityTitle}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <TableRowsSkeleton rows={4} />
+                ) : (
+                  <EmptyState
+                    icon={Activity}
+                    title={ro.dashboard.activityEmpty}
+                    className="py-10"
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -200,10 +286,7 @@ function TableRowsSkeleton({ rows }: { rows: number }) {
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
-          className={cn(
-            'flex items-center gap-3',
-            i > 0 && 'border-t pt-3',
-          )}
+          className={cn('flex items-center gap-3', i > 0 && 'border-t pt-3')}
         >
           <Skeleton className="size-9 rounded-full" />
           <div className="flex-1 space-y-1.5">

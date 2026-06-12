@@ -13,6 +13,7 @@ import { AboutModule } from './about/about.module';
 import { BlogModule } from './blog/blog.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { QuickQuestionsModule } from './quick-questions/quick-questions.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { StorageModule } from './storage/storage.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { StorageModule } from './storage/storage.module';
     BlogModule,
     SubscriptionsModule,
     QuickQuestionsModule,
+    DashboardModule,
     StorageModule,
   ],
   controllers: [AppController],
