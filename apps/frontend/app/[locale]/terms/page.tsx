@@ -218,7 +218,7 @@ export default async function TermsPage({
       <section className="shell grid gap-12 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-24 lg:gap-24">
         <nav
           aria-label={en ? 'Sections' : 'Secțiuni'}
-          className="min-w-0 md:sticky md:top-28 md:self-start"
+          className="min-w-0 md:sticky md:top-[133px] md:self-start"
         >
           <p className="eyebrow mb-4">{en ? 'Contents' : 'Cuprins'}</p>
           <ul className="flex flex-wrap gap-2 md:flex-col md:flex-nowrap md:gap-1">
