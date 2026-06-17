@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import styles from './Hero.module.css';
 
 const STAT_KEYS = ['experience', 'specializations', 'families'] as const;
@@ -26,9 +27,13 @@ export function Hero() {
         <p className={styles.sub}>{t('sub')}</p>
 
         <div className={styles.actions}>
-          <Link href="/contact" className={styles.btnDark}>
-            {t('ctaBook')}
-          </Link>
+          <CalendlyButton
+            url={FREE_CONSULT_CALENDLY_URL}
+            reason="Consultație gratuită"
+            label={t('ctaBook')}
+            className={styles.btnDark}
+            withArrow={false}
+          />
           <a href="#how-it-works" className={styles.btnOutline}>
             {t('ctaHow')}
           </a>
