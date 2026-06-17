@@ -48,3 +48,7 @@ private-uploads/
 # Local tooling & scratch artifacts
 .codex/
 plan-sheet-*.png
+# Playwright review captures (local visual QA, not source)
+.playwright-mcp/
+/*-mobile*.png
+/*-desktop*.png

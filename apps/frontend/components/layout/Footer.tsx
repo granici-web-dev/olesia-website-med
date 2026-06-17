@@ -79,7 +79,12 @@ export function Footer() {
       <div className={styles.bottom}>
         <span>{t('rights')}</span>
         <span>RO · EN</span>
-        <span>{t('legal')}</span>
+        <span>
+          <Link href="/gdpr" className={styles.legalLink}>
+            {t('legal').split('·')[0].trim()}
+          </Link>
+          {` · ${t('legal').split('·').slice(1).join('·').trim()}`}
+        </span>
       </div>
     </footer>
   );

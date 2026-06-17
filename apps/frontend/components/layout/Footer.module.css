@@ -88,6 +88,16 @@
   font-family: var(--font-jetbrains), ui-monospace, monospace;
 }
 
+.legalLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.legalLink:hover {
+  color: var(--sage-soft);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .grid {
