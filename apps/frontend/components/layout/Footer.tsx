@@ -83,7 +83,10 @@ export function Footer() {
           <Link href="/gdpr" className={styles.legalLink}>
             {t('legal').split('·')[0].trim()}
           </Link>
-          {` · ${t('legal').split('·').slice(1).join('·').trim()}`}
+          {' · '}
+          <Link href="/terms" className={styles.legalLink}>
+            {t('legal').split('·').slice(1).join('·').trim()}
+          </Link>
         </span>
       </div>
     </footer>
