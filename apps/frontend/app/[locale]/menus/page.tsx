@@ -6,6 +6,11 @@ import {
   type MenuItem,
   type MenuSegment,
 } from '@/components/sections/MenuLibrary';
+import {
+  PLACEHOLDER_MENUS as MENUS,
+  MENU_SEGMENTS as SEGMENTS,
+  type Bi,
+} from '@/lib/placeholder-menus';
 
 export const revalidate = 60;
 
@@ -38,88 +43,8 @@ export async function generateMetadata({
   };
 }
 
-type Bi = { ro: string; en: string };
-
-const SEGMENTS: { key: string; ro: string; en: string }[] = [
-  { key: 'copii-mici', ro: 'Copii mici', en: 'Toddlers' },
-  { key: 'copii', ro: 'Copii', en: 'Children' },
-  { key: 'familie', ro: 'Familie / adulți', en: 'Family / adults' },
-];
-
-interface MenuContent {
-  slug: string;
-  age: string;
-  title: Bi;
-  description: Bi;
-  days: number;
-  featured?: boolean;
-}
-
-/* ⚠ Generic, inspiration-only menus (meal ideas — no grams, calories or
-   portions). NOT finished content; swap in real menus via the back office. */
-const MENUS: MenuContent[] = [
-  {
-    slug: 'meniu-echilibrat-familie',
-    age: 'familie',
-    title: { ro: 'Meniu echilibrat pentru o săptămână', en: 'A balanced week of meals' },
-    description: {
-      ro: 'Idei simple pentru toată familia, pe care le mâncați împreună.',
-      en: 'Simple ideas for the whole family to share at the table.',
-    },
-    days: 7,
-    featured: true,
-  },
-  {
-    slug: 'meniu-scoala-copii',
-    age: 'copii',
-    title: { ro: 'Meniu pentru o săptămână de școală', en: 'A week of school-day meals' },
-    description: {
-      ro: 'Idei rapide pentru micul dejun, prânz și cină.',
-      en: 'Quick ideas for breakfast, lunch, and dinner.',
-    },
-    days: 7,
-  },
-  {
-    slug: 'meniu-copii-mofturosi',
-    age: 'copii',
-    title: { ro: 'Idei pentru copiii mofturoși', en: 'Ideas for picky eaters' },
-    description: {
-      ro: 'Variază mesele și adu culoare în farfurie, fără bătălii.',
-      en: 'Bring variety and color to the plate, without the battles.',
-    },
-    days: 7,
-  },
-  {
-    slug: 'meniu-gustari-sanatoase',
-    age: 'copii',
-    title: { ro: 'Idei de gustări sănătoase', en: 'Healthy snack ideas' },
-    description: {
-      ro: 'Gustări simple între mese, fără zahăr adăugat.',
-      en: 'Simple between-meal snacks, with no added sugar.',
-    },
-    days: 7,
-  },
-  {
-    slug: 'meniu-copii-mici',
-    age: 'copii-mici',
-    title: { ro: 'Meniu variat pentru copii mici', en: 'A varied week for toddlers' },
-    description: {
-      ro: 'Idei pe gustul celor mici, ușor de adaptat.',
-      en: 'Toddler-friendly ideas that are easy to adapt.',
-    },
-    days: 7,
-  },
-  {
-    slug: 'meniu-sezon-familie',
-    age: 'familie',
-    title: { ro: 'Meniu de sezon pentru familie', en: 'A seasonal family menu' },
-    description: {
-      ro: 'Idei cu legume și fructe de sezon.',
-      en: 'Ideas built around seasonal fruit and vegetables.',
-    },
-    days: 7,
-  },
-];
+/* Segments + menus now live in lib/placeholder-menus.ts — the single source
+   shared with the menu detail page, so listing links never 404. */
 
 const btnDark =
   'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';

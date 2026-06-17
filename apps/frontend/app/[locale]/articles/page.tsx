@@ -6,6 +6,11 @@ import {
   type BlogPostItem,
   type BlogCategory,
 } from '@/components/sections/BlogList';
+import {
+  PLACEHOLDER_POSTS,
+  PLACEHOLDER_CATEGORIES as CATEGORIES,
+  type Bi,
+} from '@/lib/placeholder-posts';
 
 export const revalidate = 60;
 
@@ -38,98 +43,8 @@ export async function generateMetadata({
   };
 }
 
-type Bi = { ro: string; en: string };
-
-/* Categories = SEO clusters (⚠ confirm the final list). */
-const CATEGORIES: { key: string; ro: string; en: string }[] = [
-  { key: 'nutritie', ro: 'Nutriție', en: 'Nutrition' },
-  { key: 'sanatatea-copilului', ro: 'Sănătatea copilului', en: 'Child health' },
-  { key: 'alimentatia-sugarului', ro: 'Alimentația sugarului', en: 'Infant feeding' },
-  { key: 'frecvent-bolnav', ro: 'Copilul frecvent bolnav', en: 'The frequently ill child' },
-  { key: 'dezvoltare', ro: 'Dezvoltare', en: 'Development' },
-  { key: 'alergii', ro: 'Alergii', en: 'Allergies' },
-];
-
-interface PlaceholderPost {
-  slug: string;
-  category: string;
-  title: Bi;
-  excerpt: Bi;
-  /** ISO date — fixed, since these are placeholders. */
-  date: string;
-  minutes: number;
-}
-
-/* ⚠ Placeholder posts — for design review only; real posts come from the API
-   (back office, later). Topics aligned to the doctor's expertise + SEO. */
-const PLACEHOLDER_POSTS: PlaceholderPost[] = [
-  {
-    slug: 'diversificarea-cand-si-cum',
-    category: 'alimentatia-sugarului',
-    title: { ro: 'Diversificarea: când și cum începi', en: 'Starting solids: when and how' },
-    excerpt: {
-      ro: 'Semnele că bebelușul e pregătit și primii pași, în siguranță.',
-      en: 'The signs your baby is ready, and the first steps — safely.',
-    },
-    date: '2026-06-02',
-    minutes: 7,
-  },
-  {
-    slug: 'copilul-frecvent-bolnav',
-    category: 'frecvent-bolnav',
-    title: { ro: 'Copilul frecvent bolnav: ce e normal', en: 'The frequently ill child: what’s normal' },
-    excerpt: {
-      ro: 'Câte răceli pe an sunt normale și când să te îngrijorezi.',
-      en: 'How many colds a year are normal, and when to worry.',
-    },
-    date: '2026-05-24',
-    minutes: 6,
-  },
-  {
-    slug: 'alergiile-alimentare-la-copii',
-    category: 'alergii',
-    title: { ro: 'Alergiile alimentare la copii', en: 'Food allergies in children' },
-    excerpt: {
-      ro: 'Cum recunoști o reacție și ce faci în primele momente.',
-      en: 'How to recognize a reaction and what to do first.',
-    },
-    date: '2026-05-15',
-    minutes: 8,
-  },
-  {
-    slug: 'cum-sustii-imunitatea',
-    category: 'sanatatea-copilului',
-    title: { ro: 'Cum susții imunitatea copilului', en: 'Supporting your child’s immunity' },
-    excerpt: {
-      ro: 'Ce ajută cu adevărat și ce sunt doar mituri.',
-      en: 'What actually helps — and what’s just a myth.',
-    },
-    date: '2026-05-06',
-    minutes: 5,
-  },
-  {
-    slug: 'mofturos-la-masa',
-    category: 'nutritie',
-    title: { ro: 'Mofturos la masă: strategii blânde', en: 'Picky at the table: gentle strategies' },
-    excerpt: {
-      ro: 'Cum aduci varietate fără presiune și fără bătălii.',
-      en: 'Bringing variety without pressure or battles.',
-    },
-    date: '2026-04-28',
-    minutes: 6,
-  },
-  {
-    slug: 'repere-de-dezvoltare',
-    category: 'dezvoltare',
-    title: { ro: 'Repere de dezvoltare pe etape', en: 'Developmental milestones by stage' },
-    excerpt: {
-      ro: 'La ce să te uiți, de la naștere la vârsta preșcolară.',
-      en: 'What to look for, from birth to preschool age.',
-    },
-    date: '2026-04-19',
-    minutes: 7,
-  },
-];
+/* Categories + placeholder posts now live in lib/placeholder-posts.ts — the
+   single source shared with the article page, so listing links never 404. */
 
 const btnDark =
   'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
