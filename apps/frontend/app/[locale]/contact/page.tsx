@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { ContactForm } from '@/components/ui/ContactForm';
+import { Reveal } from '@/components/ui/Reveal';
 
 export const revalidate = 60;
 
@@ -180,7 +181,7 @@ export default async function ContactPage({
         </div>
 
         <ul className="mt-10 border-t border-[var(--rule)]">
-          {TRIAGE.map((item) => {
+          {TRIAGE.map((item, i) => {
             const inner = (
               <>
                 <span className="serif text-[clamp(1.25rem,2.2vw,1.7rem)] leading-snug text-ink transition-colors group-hover:text-sage text-pretty">
@@ -200,7 +201,7 @@ export default async function ContactPage({
             const cls =
               'group flex items-center justify-between gap-6 py-5 transition-colors hover:text-sage focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-sage';
             return (
-              <li key={item.href} className="border-b border-[var(--rule)]">
+              <Reveal key={item.href} as="li" className="border-b border-[var(--rule)]" delay={i * 60}>
                 {item.anchor ? (
                   <a href={item.href} className={cls}>
                     {inner}
@@ -210,7 +211,7 @@ export default async function ContactPage({
                     {inner}
                   </Link>
                 )}
-              </li>
+              </Reveal>
             );
           })}
         </ul>

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { api, loc, serviceTag, type ServiceDto } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { Reveal } from '@/components/ui/Reveal';
 import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
@@ -102,7 +103,7 @@ export default async function PricingPage({
         {/* Editorial service rows — same design as the homepage Services section. */}
         <div className="mt-12 border-b border-[var(--rule)]">
           {services.map((s, i) => (
-            <div key={s.id} className={styles.serviceRow}>
+            <Reveal key={s.id} as="div" className={styles.serviceRow} delay={i * 70}>
               <div className={styles.serviceNum}>
                 {String(i + 1).padStart(2, '0')}
               </div>
@@ -178,7 +179,7 @@ export default async function PricingPage({
                   </Link>
                 )}
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
+import { Reveal } from '@/components/ui/Reveal';
 
 export const revalidate = 60;
 
@@ -335,8 +336,8 @@ export default async function FaqPage({
                 {lc(c.title)}
               </h2>
               <div className="mt-6">
-                {c.items.map((it) => (
-                  <details key={it.q.en} className="group border-t border-[var(--rule)] last:border-b">
+                {c.items.map((it, i) => (
+                  <Reveal key={it.q.en} as="details" className="group border-t border-[var(--rule)] last:border-b" delay={i * 50}>
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
                       <span className="serif text-[clamp(1.15rem,1.8vw,1.45rem)] leading-snug text-ink text-pretty">
                         {lc(it.q)}
@@ -351,7 +352,7 @@ export default async function FaqPage({
                     <p className="max-w-[68ch] pb-6 text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
                       {lc(it.a)}
                     </p>
-                  </details>
+                  </Reveal>
                 ))}
               </div>
             </section>

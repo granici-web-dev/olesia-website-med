@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
+import { Reveal } from '@/components/ui/Reveal';
 
 export const revalidate = 60;
 
@@ -476,10 +477,12 @@ function Section({
       id={id}
       className="scroll-mt-28 border-t border-[var(--rule)] pt-10 first:border-t-0 first:pt-0 [&:not(:first-child)]:mt-14"
     >
-      <h2 className="serif text-[clamp(1.7rem,3vw,2.4rem)] leading-tight tracking-[-0.02em] text-balance">
-        {title}
-      </h2>
-      {children}
+      <Reveal>
+        <h2 className="serif text-[clamp(1.7rem,3vw,2.4rem)] leading-tight tracking-[-0.02em] text-balance">
+          {title}
+        </h2>
+        {children}
+      </Reveal>
     </section>
   );
 }
