@@ -1,4 +1,5 @@
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { Reveal } from '@/components/ui/Reveal';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 
 /** Free 45-min orientation call — helps the visitor pick the right service. */
@@ -7,7 +8,7 @@ export function FreeConsult({ locale }: { locale: string }) {
   return (
     <section className="bg-sage-deep text-cream">
       <div className="shell flex flex-col gap-8 py-16 md:flex-row md:items-center md:justify-between md:py-20">
-        <div className="max-w-[44ch]">
+        <Reveal as="div" className="max-w-[44ch]">
           <p className="eyebrow !text-[var(--sage-soft)]">
             {t('Primul pas', 'First step')}
           </p>
@@ -20,8 +21,8 @@ export function FreeConsult({ locale }: { locale: string }) {
               'Not sure which consultation fits? Let’s have a short call — I’ll help you choose the right service, no strings attached.',
             )}
           </p>
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-4">
+        </Reveal>
+        <Reveal as="div" className="flex shrink-0 flex-wrap items-center gap-4" delay={120}>
           <CalendlyButton
             url={FREE_CONSULT_CALENDLY_URL}
             reason={t('Consultație gratuită', 'Free consultation')}
@@ -29,7 +30,7 @@ export function FreeConsult({ locale }: { locale: string }) {
             withArrow={false}
             className="inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5"
           />
-        </div>
+        </Reveal>
       </div>
     </section>
   );

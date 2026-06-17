@@ -1,4 +1,5 @@
 import type { AboutTestimonial } from '@/lib/api';
+import { Reveal } from '@/components/ui/Reveal';
 
 /** Parent reviews. Editable from the back office. */
 export function Testimonials({
@@ -18,7 +19,7 @@ export function Testimonials({
       </h2>
       <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((it, i) => (
-          <figure key={i} className="flex flex-col">
+          <Reveal key={i} as="figure" className="flex flex-col" delay={(i % 3) * 70}>
             <blockquote className="serif-it text-[1.3rem] leading-snug text-ink text-pretty">
               “{t(it.quoteRo, it.quoteEn)}”
             </blockquote>
@@ -31,7 +32,7 @@ export function Testimonials({
                 </span>
               )}
             </figcaption>
-          </figure>
+          </Reveal>
         ))}
       </div>
     </section>

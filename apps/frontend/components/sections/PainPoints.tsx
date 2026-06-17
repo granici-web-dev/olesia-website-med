@@ -1,3 +1,5 @@
+import { Reveal } from '@/components/ui/Reveal';
+
 /** "Cu ce te ajut" — recognizable parenting concerns. Olive band, mirroring
  *  the homepage "Patru pași" (HowItWorks) section. */
 export function PainPoints({ locale }: { locale: string }) {
@@ -47,7 +49,7 @@ export function PainPoints({ locale }: { locale: string }) {
             aria-hidden
           />
           {items.map((it, i) => (
-            <div key={i} className="relative">
+            <Reveal key={i} as="div" className="relative" delay={i * 80}>
               <div className="relative z-10 mb-7 grid size-[72px] place-items-center rounded-full border-[6px] border-[var(--sage-deep)] bg-sage serif text-[2rem] italic leading-none text-cream">
                 {String(i + 1).padStart(2, '0')}
               </div>
@@ -57,7 +59,7 @@ export function PainPoints({ locale }: { locale: string }) {
               <p className="mt-3 text-[0.95rem] leading-relaxed text-cream/75 text-pretty">
                 {t(it.dRo, it.dEn)}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { Reveal } from '@/components/ui/Reveal';
 import styles from './About.module.css';
 
 const DETAIL_KEYS = ['studies', 'specializations'] as const;
@@ -23,11 +24,11 @@ export function About() {
         <p className={styles.body}>{t('body')}</p>
 
         <div className={styles.details}>
-          {DETAIL_KEYS.map((key) => (
-            <div key={key}>
+          {DETAIL_KEYS.map((key, i) => (
+            <Reveal key={key} as="div" delay={i * 80}>
               <div className={styles.detailLabel}>{t(`details.${key}.label`)}</div>
               <div className={styles.detailBody}>{t(`details.${key}.body`)}</div>
-            </div>
+            </Reveal>
           ))}
         </div>
 

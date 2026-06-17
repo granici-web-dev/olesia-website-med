@@ -334,7 +334,7 @@ export default async function PediatricsPage({
 
       {/* 4 · About the doctor — content left, portrait right */}
       <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
-        <div className="md:sticky md:top-28 md:self-start">
+        <div className="md:sticky md:top-[133px] md:self-start">
           <p className="eyebrow mb-4">{en ? 'About the doctor' : 'Despre medic'}</p>
           <h2 className="serif text-[clamp(1.9rem,3.6vw,3rem)] leading-[1.06] tracking-[-0.02em] text-balance">
             {en ? (

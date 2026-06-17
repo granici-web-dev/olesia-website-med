@@ -207,7 +207,7 @@ export default async function AboutPage({
       {/* 1 · Hero — name + title + tagline + photo */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell grid items-start gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
-          <div className="md:sticky md:top-28 md:self-start">
+          <div className="md:sticky md:top-[133px] md:self-start">
             <p className="mb-7 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
               <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
               {en ? 'About' : 'Despre'}

@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { Reveal } from '@/components/ui/Reveal';
 import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import type { LeadService } from '@/lib/leads';
@@ -59,13 +60,13 @@ export async function Services() {
         <p className={styles.headerSub}>{t('headerSub')}</p>
       </div>
 
-      {SERVICES.map(({ n, key }) => {
+      {SERVICES.map(({ n, key }, i) => {
         const url = bookingUrl.get(key) ?? CALENDLY_FALLBACK_URLS[key];
         const leadService = LEAD_SERVICE[key];
         const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
         const includedItems = included ? (en ? included.en : included.ro) : null;
         return (
-          <div key={n} className={styles.serviceRow}>
+          <Reveal key={n} as="div" className={styles.serviceRow} delay={i * 70}>
             <div className={styles.serviceNum}>{n}</div>
             <div>
               <div className={styles.serviceTag}>{t(`items.${key}.tag`)}</div>
@@ -116,7 +117,7 @@ export async function Services() {
                 </Link>
               )}
             </div>
-          </div>
+          </Reveal>
         );
       })}
     </section>

@@ -800,7 +800,7 @@ export default async function ServicesPage({
 
       {/* 7 · About the doctor — content left, portrait right */}
       <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
-        <div className="md:sticky md:top-28 md:self-start">
+        <div className="md:sticky md:top-[133px] md:self-start">
           <p className="eyebrow mb-4">{T.doctorEyebrow}</p>
           <SectionTitle a={en ? "Who you'll" : 'Cine te'} accent={en ? 'see' : 'consultă'} />
           <p className="mt-6 max-w-[54ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">

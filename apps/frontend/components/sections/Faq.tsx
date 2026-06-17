@@ -1,4 +1,5 @@
 import type { AboutFaqItem } from '@/lib/api';
+import { Reveal } from '@/components/ui/Reveal';
 
 /** FAQ — native <details> accordion, no client JS. Editable from the back office. */
 export function Faq({
@@ -18,9 +19,11 @@ export function Faq({
       </h2>
       <div className="mt-8 max-w-[820px]">
         {items.map((it, i) => (
-          <details
+          <Reveal
             key={i}
+            as="details"
             className="group border-t border-[var(--rule)] last:border-b"
+            delay={i * 50}
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 [&::-webkit-details-marker]:hidden">
               <span className="serif text-[1.3rem] leading-snug text-ink">
@@ -36,7 +39,7 @@ export function Faq({
             <p className="max-w-[64ch] pb-6 leading-relaxed text-ink-soft text-pretty">
               {t(it.aRo, it.aEn)}
             </p>
-          </details>
+          </Reveal>
         ))}
       </div>
     </section>

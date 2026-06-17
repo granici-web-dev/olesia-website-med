@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { Reveal } from '@/components/ui/Reveal';
 import styles from './HowItWorks.module.css';
 
 const STEPS = [
@@ -29,12 +30,12 @@ export function HowItWorks() {
 
       <div className={styles.grid}>
         <div className={styles.connector} aria-hidden="true" />
-        {STEPS.map(({ n, key }) => (
-          <div key={key} className={styles.step}>
+        {STEPS.map(({ n, key }, i) => (
+          <Reveal key={key} as="div" className={styles.step} delay={i * 80}>
             <div className={styles.stepNumber}>{n}</div>
             <h3 className={styles.stepTitle}>{t(`steps.${key}.title`)}</h3>
             <p className={styles.stepDesc}>{t(`steps.${key}.description`)}</p>
-          </div>
+          </Reveal>
         ))}
       </div>
 
