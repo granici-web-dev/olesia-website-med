@@ -243,12 +243,11 @@ export default async function GdprPage({
             <h1 className="serif max-w-[15ch] text-[clamp(2.5rem,5.6vw,5rem)] leading-[1.04] tracking-[-0.015em] text-balance">
               {en ? (
                 <>
-                  Privacy <span className="serif-it text-sage">policy</span>
+                  Your <span className="serif-it text-sage">privacy</span>
                 </>
               ) : (
                 <>
-                  Politica de{' '}
-                  <span className="serif-it text-sage">confidențialitate</span>
+                  <span className="serif-it text-sage">Confidențialitatea</span> ta
                 </>
               )}
             </h1>
