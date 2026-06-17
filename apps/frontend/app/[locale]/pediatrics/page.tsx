@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { api, loc } from '@/lib/api';
@@ -207,6 +208,14 @@ export default async function PediatricsPage({
 
   return (
     <main className="bg-cream text-ink">
+      <Breadcrumbs
+        className="shell pt-6 md:pt-8"
+        items={[
+          { label: en ? 'Home' : 'Acasă', href: '/' },
+          { label: en ? 'Services' : 'Servicii', href: '/services' },
+          { label: en ? 'Pediatric consultation' : 'Consultație pediatrică' },
+        ]}
+      />
       {/* 1 · Hero — editorial split: statement left, description right (no photo) */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">

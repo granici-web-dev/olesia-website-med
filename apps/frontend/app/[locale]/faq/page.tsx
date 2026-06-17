@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const revalidate = 60;
 
@@ -274,6 +275,13 @@ export default async function FaqPage({
 
   return (
     <main className="bg-cream text-ink">
+      <Breadcrumbs
+        className="shell pt-6 md:pt-8"
+        items={[
+          { label: en ? 'Home' : 'Acasă', href: '/' },
+          { label: en ? 'FAQ' : 'Întrebări frecvente' },
+        ]}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}

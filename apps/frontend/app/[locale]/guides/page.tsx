@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Link } from '@/i18n/navigation';
 import {
   GuideLibrary,
@@ -196,6 +197,13 @@ export default async function GuidesPage({
 
   return (
     <main className="bg-cream text-ink">
+      <Breadcrumbs
+        className="shell pt-6 md:pt-8"
+        items={[
+          { label: en ? 'Home' : 'Acasă', href: '/' },
+          { label: en ? 'Guides' : 'Ghiduri' },
+        ]}
+      />
       {/* 1 · Hero — editorial split: statement left, featured guide right */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">

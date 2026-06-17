@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const revalidate = 60;
 
@@ -233,6 +234,13 @@ export default async function GdprPage({
 
   return (
     <main className="bg-cream text-ink">
+      <Breadcrumbs
+        className="shell pt-6 md:pt-8"
+        items={[
+          { label: en ? 'Home' : 'Acasă', href: '/' },
+          { label: en ? 'Privacy' : 'Confidențialitate' },
+        ]}
+      />
       {/* 1 · Hero — title + operator meta */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">

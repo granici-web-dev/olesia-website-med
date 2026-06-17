@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Link } from '@/i18n/navigation';
 import {
   MenuLibrary,
@@ -162,6 +163,13 @@ export default async function MenusPage({
 
   return (
     <main className="bg-cream text-ink">
+      <Breadcrumbs
+        className="shell pt-6 md:pt-8"
+        items={[
+          { label: en ? 'Home' : 'Acasă', href: '/' },
+          { label: en ? 'Weekly menus' : 'Meniuri săptămânale' },
+        ]}
+      />
       {/* 1 · Hero — editorial split: statement left, featured menu right */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">

@@ -1,7 +1,11 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api, loc } from '../../../../lib/api';
 import { renderMarkdown } from '../../../../lib/markdown';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import {
+  findPlaceholderPost,
+  placeholderCategoryLabel,
+} from '@/lib/placeholder-posts';
 
 export const revalidate = 60;
 
@@ -11,11 +15,33 @@ export default async function ArticlePage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const post = await api.post(slug);
-  if (!post) notFound();
+  const en = locale === 'en';
 
+  // Prefer the live API post; fall back to a placeholder article so a link from
+  // the (placeholder-driven) listing always opens a real page instead of 404ing.
+  const apiPost = await api.post(slug);
+  const ph = apiPost ? null : findPlaceholderPost(slug);
+  if (!apiPost && !ph) notFound();
+
+  const post = apiPost ?? {
+    titleRo: ph!.title.ro,
+    titleEn: ph!.title.en,
+    contentRo: ph!.body.ro,
+    contentEn: ph!.body.en,
+    publishedAt: ph!.date,
+    coverImageUrl: null as string | null,
+    categories: [
+      {
+        id: ph!.category,
+        nameRo: placeholderCategoryLabel(ph!.category, false),
+        nameEn: placeholderCategoryLabel(ph!.category, true),
+      },
+    ],
+  };
+
+  const title = loc(locale, post.titleRo, post.titleEn);
   const date = post.publishedAt
-    ? new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ro-RO', {
+    ? new Intl.DateTimeFormat(en ? 'en-US' : 'ro-RO', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -24,15 +50,17 @@ export default async function ArticlePage({
 
   return (
     <main className="bg-cream text-ink">
-      <article className="mx-auto max-w-[760px] px-[var(--gutter)] py-20 md:py-28">
-        <Link
-          href={`/${locale}/articles`}
-          className="mono text-xs text-ink-soft underline-offset-4 hover:text-sage-deep hover:underline"
-        >
-          ← {loc(locale, 'Toate articolele', 'All articles')}
-        </Link>
+      <article className="mx-auto max-w-[760px] px-[var(--gutter)] py-14 md:py-20">
+        <Breadcrumbs
+          className="mb-10 md:mb-12"
+          items={[
+            { label: en ? 'Home' : 'Acasă', href: '/' },
+            { label: en ? 'Articles' : 'Articole', href: '/articles' },
+            { label: title },
+          ]}
+        />
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {post.categories.map((c) => (
             <span key={c.id} className="eyebrow !text-sage-deep">
               {loc(locale, c.nameRo, c.nameEn)}
@@ -42,7 +70,7 @@ export default async function ArticlePage({
         </div>
 
         <h1 className="serif mt-3 text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.08] tracking-[-0.02em] text-balance">
-          {loc(locale, post.titleRo, post.titleEn)}
+          {title}
         </h1>
 
         {post.coverImageUrl ? (
