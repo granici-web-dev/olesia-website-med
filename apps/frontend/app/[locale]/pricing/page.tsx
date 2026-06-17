@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { api, loc, serviceTag, type ServiceDto } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
 import type { LeadService } from '@/lib/leads';
@@ -23,7 +24,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     titleRo: 'Consultație pediatrică', titleEn: 'Pediatric consultation',
     descriptionRo: '', descriptionEn: '', durationMin: 50, price: 600,
     priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
-    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/30min',
+    calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.pediatric,
     sortOrder: 1, active: true,
   },
   {
@@ -31,7 +32,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     titleRo: 'Consultație nutrițională', titleEn: 'Nutrition consultation',
     descriptionRo: '', descriptionEn: '', durationMin: 60, price: 700,
     priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
-    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
+    calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.nutrition,
     sortOrder: 2, active: true,
   },
   {
@@ -40,7 +41,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     titleEn: 'Integrative consultation & monitoring',
     descriptionRo: '', descriptionEn: '', durationMin: 90, price: 1100,
     priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
-    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
+    calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.integrative,
     sortOrder: 3, active: true,
   },
   {

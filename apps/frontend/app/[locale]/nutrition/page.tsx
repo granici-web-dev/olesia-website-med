@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { api, loc } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { calendlyUrlFor } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 
@@ -143,8 +144,10 @@ export default async function NutritionPage({
   const lc = (b: Bi) => (en ? b.en : b.ro);
 
   // Calendly URL for the nutrition service (group A). API supplies only this.
-  const nutritionUrl =
-    (await api.services()).find((s) => s.code === 'nutrition')?.calendlySchedulingUrl ?? null;
+  const nutritionUrl = calendlyUrlFor(
+    'nutrition',
+    (await api.services()).find((s) => s.code === 'nutrition')?.calendlySchedulingUrl,
+  );
 
   const bookLabel = en ? 'Book a consultation' : 'Programează o consultație';
   const bookReason = en ? 'Nutrition consultation' : 'Consultație de nutriție';

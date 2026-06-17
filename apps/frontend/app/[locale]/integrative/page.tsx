@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { api, loc } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { calendlyUrlFor } from '@/lib/calendly';
 import { Reveal } from '@/components/ui/Reveal';
 
 export const revalidate = 60;
@@ -160,8 +161,10 @@ export default async function IntegrativePage({
   const en = locale === 'en';
   const lc = (b: Bi) => (en ? b.en : b.ro);
 
-  const integrativeUrl =
-    (await api.services()).find((s) => s.code === 'integrative')?.calendlySchedulingUrl ?? null;
+  const integrativeUrl = calendlyUrlFor(
+    'integrative',
+    (await api.services()).find((s) => s.code === 'integrative')?.calendlySchedulingUrl,
+  );
 
   const bookReason = en ? 'Integrative consultation' : 'Consultație integrativă';
 
