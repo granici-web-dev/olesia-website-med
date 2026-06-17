@@ -18,7 +18,9 @@ export function toAppointmentDto(a: Appointment): AppointmentDto {
     cancelUrl: a.cancelUrl,
     rescheduleUrl: a.rescheduleUrl,
     prepSentAt: a.prepSentAt ? a.prepSentAt.toISOString() : null,
-    planUrl: a.planUrl,
+    planText: a.planText,
+    // Expose only the filename — never the private storage key.
+    planFileName: a.planFileName,
     planUploadedAt: a.planUploadedAt ? a.planUploadedAt.toISOString() : null,
     createdAt: a.createdAt.toISOString(),
     updatedAt: a.updatedAt.toISOString(),

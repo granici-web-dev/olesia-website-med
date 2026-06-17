@@ -99,6 +99,22 @@ const SERVICES = [
   },
 ] as const;
 
+/**
+ * Default contact channels for the public Contact page. Seeded only when no
+ * Contact rows exist yet, so it never overwrites values edited in the back
+ * office. Add phone / social channels there as needed.
+ */
+const CONTACTS = [
+  {
+    type: 'email',
+    labelRo: 'Email',
+    labelEn: 'Email',
+    value: 'contact@olesiajalba.md',
+    sortOrder: 1,
+    active: true,
+  },
+] as const;
+
 const ABOUT = {
   titleRo: 'Despre Olesia',
   titleEn: 'About Olesia',
@@ -258,6 +274,13 @@ async function main() {
     });
   }
   console.log(`✓ seeded ${SERVICES.length} services`);
+
+  if ((await prisma.contact.count()) === 0) {
+    await prisma.contact.createMany({ data: [...CONTACTS] });
+    console.log(`✓ seeded ${CONTACTS.length} contact channel(s)`);
+  } else {
+    console.log('• contacts already present — skipped (edit in back office)');
+  }
 
   await seedAbout();
 }

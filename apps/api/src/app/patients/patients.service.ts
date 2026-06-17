@@ -149,7 +149,7 @@ export class PatientsService {
     await this.getOrThrow(id);
 
     // Capture file references BEFORE the cascade/anonymization removes them.
-    const [docs, qqs] = await Promise.all([
+    const [docs, qqs, plans] = await Promise.all([
       this.prisma.patientEntry.findMany({
         where: {
           patientId: id,
@@ -162,6 +162,10 @@ export class PatientsService {
         where: { patientId: id },
         select: { attachments: true },
       }),
+      this.prisma.appointment.findMany({
+        where: { patientId: id, planFileKey: { not: null } },
+        select: { planFileKey: true },
+      }),
     ]);
 
     await this.prisma.$transaction([
@@ -171,6 +175,11 @@ export class PatientsService {
           clientName: ANON_NAME,
           clientEmail: ANON_EMAIL,
           reason: null,
+          // Treatment plan is medical data — erase text + detach the file.
+          planText: null,
+          planFileKey: null,
+          planFileName: null,
+          planUploadedAt: null,
           patientId: null,
         },
       }),
@@ -199,6 +208,7 @@ export class PatientsService {
     // Best-effort physical cleanup — outside the transaction (disk ops).
     await Promise.all([
       ...docs.map((d) => this.storage.deletePrivateDocument(d.fileUrl!)),
+      ...plans.map((p) => this.storage.deletePrivateDocument(p.planFileKey!)),
       ...qqs
         .flatMap((q) => q.attachments)
         .map((url) => this.storage.deletePublicFile(url)),

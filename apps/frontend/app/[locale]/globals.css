@@ -11,11 +11,16 @@
   --sage-2: #94a266;
   --sage-soft: #c8d09e;
   --sage-deep: #2a3315;
+  /* AA-safe sage for small text (<18px) on cream/paper: 5.06:1 / 5.32:1.
+     Use for micro-labels; keep --sage for large display text and fills. */
+  --sage-text: #5f6c38;
   --walnut: #6b513a;
   --gold: #c89a5e;
   --ink: #2c2117;
   --ink-soft: #5a4a3a;
   --rule: rgba(44, 33, 23, 0.16);
+  /* Form validation — muted brick that reads on cream/paper at AA (5.9:1). */
+  --danger: #9a3b2e;
 
   /* Layout: centered content container with full-bleed backgrounds.
      Sections keep their background edge-to-edge and center content at
@@ -32,9 +37,11 @@
   --color-sage: var(--sage);
   --color-sage-soft: var(--sage-soft);
   --color-sage-deep: var(--sage-deep);
+  --color-sage-text: var(--sage-text);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-rule: var(--rule);
+  --color-danger: var(--danger);
   --font-serif: var(--font-cormorant);
   --font-sans: var(--font-manrope);
   --font-mono: var(--font-jetbrains);
@@ -108,5 +115,24 @@ body {
 @media (max-width: 480px) {
   :root {
     --gutter: 18px;
+  }
+}
+
+/* Scroll-reveal, driven by the <Reveal> component (IntersectionObserver) so it
+   works in every modern browser. Content is visible by default; when armed it
+   hides instantly (no transition on `out`, so there's no fade-out flash), then
+   fades + rises in on `in`. Fully disabled under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal='out'] {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  [data-reveal='in'] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.6s ease,
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }

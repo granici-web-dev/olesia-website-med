@@ -42,3 +42,9 @@ test-output
 vite.config.*.timestamp*
 # Uploaded media (storage module — kept on disk / volume, not in git)
 apps/api/uploads/
+# Patient document uploads (GDPR — runtime data, never in git)
+private-uploads/
+.vercel
+# Local tooling & scratch artifacts
+.codex/
+plan-sheet-*.png

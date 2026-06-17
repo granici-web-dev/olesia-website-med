@@ -29,14 +29,6 @@ export function FreeConsult({ locale }: { locale: string }) {
             withArrow={false}
             className="inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5"
           />
-          <a
-            href="https://wa.me/37360123456"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-[var(--sage-soft)] px-6 py-3 text-sm font-medium text-cream transition-colors hover:bg-[rgba(255,255,255,0.08)]"
-          >
-            WhatsApp
-          </a>
         </div>
       </div>
     </section>

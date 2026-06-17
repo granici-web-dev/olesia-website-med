@@ -1,0 +1,441 @@
+import type { Metadata } from 'next';
+import { Link } from '@/i18n/navigation';
+
+export const revalidate = 60;
+
+/* ──────────────────────────────────────────────────────────────────────────
+   FAQ — the site's consolidation point. Removes friction before conversion,
+   offloads support, and routes correctly (emergencies → 112, medical → Quick
+   question). Content is local bilingual data for now (→ CMS as the single
+   source of truth later, with service_tags pulling items onto landing pages).
+   Accessible native <details> accordions, deep-link category anchors, and
+   FAQPage JSON-LD for rich snippets. Bilingual (RO default · EN).
+   ⚠ Several answers are drafts pending the client's decisions (cancellation,
+   payment timing, refunds, prescriptions, ages, data policy) — see flagged.
+   ────────────────────────────────────────────────────────────────────────── */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const en = locale === 'en';
+  return {
+    title: en
+      ? 'FAQ | Dr. Olesea Jalba'
+      : 'Întrebări frecvente | Dr. Olesea Jalba',
+    description: en
+      ? 'Answers about online consultations, booking, payment by transfer, and services — pediatrics and nutrition.'
+      : 'Răspunsuri despre consultațiile online, programare, plată prin transfer și servicii — pediatrie și nutriție.',
+  };
+}
+
+type Bi = { ro: string; en: string };
+
+interface FaqItem {
+  q: Bi;
+  a: Bi;
+}
+interface FaqCategory {
+  key: string;
+  title: Bi;
+  items: FaqItem[];
+}
+
+const CATEGORIES: FaqCategory[] = [
+  {
+    key: 'consultatii',
+    title: { ro: 'Consultații online', en: 'Online consultations' },
+    items: [
+      {
+        q: { ro: 'Cum decurge o consultație online?', en: 'How does an online consultation work?' },
+        a: {
+          ro: 'Consultația are loc prin apel video, la ora programată. Primești un link în browser, fără să instalezi nimic, cu instrucțiunile cu 24 de ore înainte.',
+          en: 'The consultation takes place by video call at the scheduled time. You get a browser link — nothing to install — with instructions 24 hours ahead.',
+        },
+      },
+      {
+        q: { ro: 'De ce am nevoie pentru consultație?', en: 'What do I need for the consultation?' },
+        a: {
+          ro: 'Un dispozitiv cu cameră, conexiune la internet și un loc liniștit. Pregătește analizele și documentele relevante.',
+          en: 'A device with a camera, an internet connection, and a quiet spot. Have any relevant test results and documents ready.',
+        },
+      },
+      {
+        q: { ro: 'În ce limbi pot avea consultația?', en: 'Which languages can I have the consultation in?' },
+        a: { ro: 'În română, rusă și engleză.', en: 'Romanian, Russian, and English.' },
+      },
+      {
+        q: { ro: 'Trebuie să fie copilul prezent la consultație?', en: 'Does my child need to be present?' },
+        a: {
+          ro: 'Da, recomandăm ca cel mic să fie prezent — ajută la o evaluare cât mai bună.',
+          en: 'Yes — we recommend the child is present, as it helps with the most accurate assessment.',
+        },
+      },
+      {
+        q: { ro: 'Ce nu poate înlocui o consultație online?', en: 'What can’t an online consultation replace?' },
+        a: {
+          ro: 'Consultația online nu este pentru urgențe. Unele situații pot necesita o examinare fizică — îți vom spune clar când e cazul.',
+          en: 'Online consultations aren’t for emergencies. Some situations need a physical exam — we’ll tell you clearly when that’s the case.',
+        },
+      },
+    ],
+  },
+  {
+    key: 'programare',
+    title: { ro: 'Programare și anulare', en: 'Booking & cancellation' },
+    items: [
+      {
+        q: { ro: 'Cum programez o consultație?', en: 'How do I book a consultation?' },
+        a: {
+          ro: 'Alegi serviciul din „Servicii" și selectezi o oră liberă din calendar.',
+          en: 'Choose the service under “Services” and pick an available time from the calendar.',
+        },
+      },
+      {
+        q: { ro: 'Pot anula sau reprograma?', en: 'Can I cancel or reschedule?' },
+        a: {
+          ro: 'Da. Poți anula sau reprograma cu cel puțin 24 de ore înainte, din linkul de confirmare.',
+          en: 'Yes. You can cancel or reschedule at least 24 hours ahead, from your confirmation link.',
+        },
+      },
+      {
+        q: { ro: 'Ce se întâmplă dacă întârzii la consultație?', en: 'What if I’m late?' },
+        a: {
+          ro: 'Te rugăm să ne anunți. Putem reprograma dacă întârzierea este prea mare pentru a desfășura consultația.',
+          en: 'Please let us know. We can reschedule if the delay is too long to hold the consultation.',
+        },
+      },
+    ],
+  },
+  {
+    key: 'plata',
+    title: { ro: 'Plată', en: 'Payment' },
+    items: [
+      {
+        q: { ro: 'Cum se face plata?', en: 'How do I pay?' },
+        a: {
+          ro: 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după confirmarea programării.',
+          en: 'By bank transfer (no online payment for now). You’ll get the details once your booking is confirmed.',
+        },
+      },
+      {
+        q: { ro: 'Când achit consultația?', en: 'When do I pay?' },
+        a: {
+          ro: 'Înainte de consultație, după confirmarea programării.',
+          en: 'Before the consultation, once your booking is confirmed.',
+        },
+      },
+      {
+        q: { ro: 'Primesc o factură sau o confirmare?', en: 'Do I get an invoice or confirmation?' },
+        a: {
+          ro: 'Da, primești o confirmare pe email.',
+          en: 'Yes, you receive a confirmation by email.',
+        },
+      },
+      {
+        q: { ro: 'Există posibilitatea de rambursare?', en: 'Are refunds possible?' },
+        a: {
+          ro: 'Da, dacă anulezi în timp util, conform politicii de anulare.',
+          en: 'Yes, if you cancel in good time, per the cancellation policy.',
+        },
+      },
+    ],
+  },
+  {
+    key: 'servicii',
+    title: { ro: 'Servicii', en: 'Services' },
+    items: [
+      {
+        q: { ro: 'Care este diferența dintre consultații?', en: 'What’s the difference between the consultations?' },
+        a: {
+          ro: 'Pediatrică (sănătate, 50 min) · Nutriție (alimentație, 60 min) · Integrativă (situații complexe + monitorizare, 90 min).',
+          en: 'Pediatric (health, 50 min) · Nutrition (feeding, 60 min) · Integrative (complex cases + monitoring, 90 min).',
+        },
+      },
+      {
+        q: { ro: 'Cum aleg serviciul potrivit?', en: 'How do I choose the right service?' },
+        a: {
+          ro: 'Vezi ghidul scurt din pagina „Servicii", care te ajută să alegi în funcție de situație.',
+          en: 'See the short helper on the “Services” page that guides you by situation.',
+        },
+      },
+      {
+        q: { ro: 'Primesc o rețetă în urma consultației?', en: 'Will I get a prescription?' },
+        a: {
+          ro: 'În funcție de situație. Unele recomandări pot necesita o evaluare suplimentară — îți spunem clar la consultație.',
+          en: 'It depends on the situation. Some recommendations may need further assessment — we’ll tell you clearly during the consultation.',
+        },
+      },
+      {
+        q: { ro: 'Pentru ce vârste sunt consultațiile?', en: 'What ages are the consultations for?' },
+        a: {
+          ro: 'De la naștere până la adolescență.',
+          en: 'From birth through adolescence.',
+        },
+      },
+      {
+        q: { ro: 'Consultațiile sunt și pentru adulți?', en: 'Are consultations also for adults?' },
+        a: {
+          ro: 'Consultația de nutriție este disponibilă și pentru adulți.',
+          en: 'The nutrition consultation is also available for adults.',
+        },
+      },
+    ],
+  },
+  {
+    key: 'portal',
+    title: { ro: 'Servicii prin portal', en: 'Portal services' },
+    items: [
+      {
+        q: { ro: 'Cum funcționează „Întreabă medicul"?', en: 'How does “Ask the doctor” work?' },
+        a: {
+          ro: 'Scrii întrebarea, achiți prin transfer și primești un răspuns scris în 48 de ore.',
+          en: 'You write your question, pay by transfer, and get a written answer within 48 hours.',
+        },
+      },
+      {
+        q: { ro: '„48 de ore" înseamnă zile lucrătoare?', en: 'Does “48 hours” mean business days?' },
+        a: { ro: 'Da, 48 de ore lucrătoare.', en: 'Yes — 48 business hours.' },
+      },
+      {
+        q: { ro: 'Ce include „Monitorizare 3 luni"?', en: 'What does “3-month monitoring” include?' },
+        a: {
+          ro: 'Acompaniere timp de 3 luni: verificări periodice, ajustarea planului pe parcurs și mesagerie prioritară cu medicul.',
+          en: 'Three months of support: periodic check-ins, plan adjustments along the way, and priority messaging with the doctor.',
+        },
+      },
+      {
+        q: { ro: 'Trebuie o consultație înainte de a intra în program?', en: 'Do I need a consultation before joining the program?' },
+        a: {
+          ro: 'Recomandăm o consultație inițială, ca planul să fie adaptat copilului.',
+          en: 'We recommend an initial consultation so the plan is tailored to your child.',
+        },
+      },
+    ],
+  },
+  {
+    key: 'confidentialitate',
+    title: { ro: 'Confidențialitate și urgențe', en: 'Privacy & emergencies' },
+    items: [
+      {
+        q: { ro: 'Datele mele sunt în siguranță?', en: 'Is my data safe?' },
+        a: {
+          ro: 'Da. Datele tale sunt folosite doar pentru consultație și sunt păstrate în siguranță, conform legii.',
+          en: 'Yes. Your data is used only for the consultation and is kept securely, in line with the law.',
+        },
+      },
+      {
+        q: { ro: 'Este o urgență medicală — ce fac?', en: 'It’s a medical emergency — what do I do?' },
+        a: {
+          ro: 'Sună la 112 sau mergi la cel mai apropiat serviciu de urgență. Nu folosi platforma pentru urgențe.',
+          en: 'Call 112 or go to the nearest emergency service. Don’t use the platform for emergencies.',
+        },
+      },
+      {
+        q: { ro: 'Pot atașa poze sau analize la „Întreabă medicul"?', en: 'Can I attach photos or test results to “Ask the doctor”?' },
+        a: {
+          ro: 'Da, poți atașa poze și documente. Sunt stocate în siguranță și folosite doar pentru a-ți răspunde.',
+          en: 'Yes — you can attach photos and documents. They’re stored securely and used only to answer you.',
+        },
+      },
+    ],
+  },
+];
+
+const creamPill =
+  'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
+const creamUnderline =
+  'inline-block cursor-pointer border-b border-[var(--sage-soft)] pb-0.5 text-sm text-cream transition-colors hover:border-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sage-soft)]';
+
+export default async function FaqPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const en = locale === 'en';
+  const lc = (b: Bi) => (en ? b.en : b.ro);
+
+  // FAQPage JSON-LD (rich snippets) — built from the current-locale answers.
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: CATEGORIES.flatMap((c) =>
+      c.items.map((it) => ({
+        '@type': 'Question',
+        name: lc(it.q),
+        acceptedAnswer: { '@type': 'Answer', text: lc(it.a) },
+      })),
+    ),
+  };
+
+  return (
+    <main className="bg-cream text-ink">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+
+      {/* 1 · Hero — editorial split */}
+      <section className="border-b border-[var(--rule)]">
+        <div className="shell py-20 md:py-28">
+          <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
+            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+            {en ? 'FAQ' : 'Întrebări frecvente'}
+          </p>
+          <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 lg:gap-20">
+            <div>
+              <h1 className="serif max-w-[16ch] text-[clamp(2.6rem,6vw,5.4rem)] leading-[1.03] tracking-[-0.015em] text-balance">
+                {en ? (
+                  <>
+                    Frequently <span className="serif-it text-sage">asked</span>
+                  </>
+                ) : (
+                  <>
+                    Întrebări <span className="serif-it text-sage">frecvente</span>
+                  </>
+                )}
+              </h1>
+            </div>
+            <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
+              <p className="max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
+                {en
+                  ? 'Answers to the most common questions about consultations, booking, payment, and services.'
+                  : 'Răspunsuri la cele mai des întâlnite întrebări despre consultații, programare, plată și servicii.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2 · Category nav (sticky) + 3 · accordions */}
+      <section className="shell grid gap-12 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-24 lg:gap-24">
+        <nav aria-label={en ? 'FAQ categories' : 'Categorii de întrebări'} className="md:sticky md:top-28 md:self-start">
+          <p className="eyebrow mb-4">{en ? 'Categories' : 'Categorii'}</p>
+          <ul className="-mx-1 flex gap-2 overflow-x-auto pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:pb-0">
+            {CATEGORIES.map((c) => (
+              <li key={c.key} className="shrink-0 md:shrink">
+                <a
+                  href={`#${c.key}`}
+                  className="mono inline-block whitespace-nowrap rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage md:rounded-none md:border-0 md:border-l md:px-3 md:py-1.5 md:text-[12px] md:normal-case md:tracking-normal"
+                >
+                  {lc(c.title)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="min-w-0">
+          {CATEGORIES.map((c) => (
+            <section key={c.key} id={c.key} className="scroll-mt-28 border-t border-[var(--rule)] pt-10 first:border-t-0 first:pt-0 [&:not(:first-child)]:mt-14">
+              <h2 className="serif text-[clamp(1.7rem,3vw,2.4rem)] leading-tight tracking-[-0.02em] text-balance">
+                {lc(c.title)}
+              </h2>
+              <div className="mt-6">
+                {c.items.map((it) => (
+                  <details key={it.q.en} className="group border-t border-[var(--rule)] last:border-b">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
+                      <span className="serif text-[clamp(1.15rem,1.8vw,1.45rem)] leading-snug text-ink text-pretty">
+                        {lc(it.q)}
+                      </span>
+                      <span
+                        className="mono shrink-0 text-2xl text-sage transition-transform duration-300 group-open:rotate-45"
+                        aria-hidden="true"
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <p className="max-w-[68ch] pb-6 text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+                      {lc(it.a)}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </section>
+
+      {/* 4 · Still have a question? */}
+      <section className="bg-paper">
+        <div className="shell grid gap-10 py-16 md:grid-cols-[1fr_1fr] md:gap-16 md:py-20">
+          <div>
+            <p className="eyebrow mb-3">{en ? 'Still stuck?' : 'Nu ai găsit răspunsul?'}</p>
+            <h2 className="serif text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-0.02em] text-balance">
+              {en ? (
+                <>
+                  Ask us <span className="serif-it text-sage">directly</span>
+                </>
+              ) : (
+                <>
+                  Întreabă-ne <span className="serif-it text-sage">direct</span>
+                </>
+              )}
+            </h2>
+          </div>
+          <ul className="grid gap-4 self-center">
+            <li className="border-t border-[var(--rule)] pt-4">
+              <Link href="/contact" className="group flex items-baseline justify-between gap-4">
+                <span className="text-[1.05rem] leading-snug text-ink text-pretty">
+                  {en ? 'A general question' : 'O întrebare generală'}
+                </span>
+                <span className="shrink-0 text-[13px] font-medium uppercase tracking-[0.06em] text-sage-text">
+                  {en ? 'Contact' : 'Contact'}{' '}
+                  <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
+                </span>
+              </Link>
+            </li>
+            <li className="border-t border-[var(--rule)] pt-4">
+              <Link href="/quick-question" className="group flex items-baseline justify-between gap-4">
+                <span className="text-[1.05rem] leading-snug text-ink text-pretty">
+                  {en ? 'A medical question' : 'O întrebare medicală'}
+                </span>
+                <span className="shrink-0 text-[13px] font-medium uppercase tracking-[0.06em] text-sage-text">
+                  {en ? 'Ask the doctor · 48h' : 'Întreabă medicul · 48h'}{' '}
+                  <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
+                </span>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* 5 · CTA — see services (olive band) */}
+      <section className="bg-sage-deep text-cream">
+        <div className="shell py-20 md:py-24">
+          <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-[38rem]">
+              <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
+                {en ? (
+                  <>
+                    Ready to <span className="serif-it text-[var(--sage-soft)]">start?</span>
+                  </>
+                ) : (
+                  <>
+                    Gata să <span className="serif-it text-[var(--sage-soft)]">începi?</span>
+                  </>
+                )}
+              </h2>
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+                <Link href="/services" className={creamPill}>
+                  {en ? 'See the services' : 'Vezi serviciile'}
+                </Link>
+                <Link href="/quick-question" className={creamUnderline}>
+                  {en ? 'Or ask a quick question · 48h →' : 'Sau o întrebare punctuală · 48h →'}
+                </Link>
+              </div>
+            </div>
+            <p className="max-w-[28ch] text-sm leading-[1.7] text-[var(--sage-soft)] text-pretty md:text-right">
+              {en
+                ? 'Five services in two formats — pick the one that fits.'
+                : 'Cinci servicii în două formate — alege-l pe cel potrivit.'}
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}

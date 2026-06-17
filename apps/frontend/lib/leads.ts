@@ -24,6 +24,17 @@ export interface QuickQuestionLeadInput {
   question: string;
 }
 
+export type ContactSubject = 'appointment' | 'payment' | 'how_it_works' | 'other';
+
+export interface ContactMessageInput {
+  name: string;
+  email: string;
+  subject: ContactSubject;
+  message: string;
+  /** Honeypot — leave empty; only bots fill it. */
+  company?: string;
+}
+
 async function postLead(path: string, body: unknown): Promise<void> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
@@ -41,4 +52,8 @@ export function submitQuickQuestionLead(
   input: QuickQuestionLeadInput,
 ): Promise<void> {
   return postLead('/leads/quick-question', input);
+}
+
+export function submitContactMessage(input: ContactMessageInput): Promise<void> {
+  return postLead('/leads/contact', input);
 }

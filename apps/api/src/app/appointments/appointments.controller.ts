@@ -6,11 +6,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
@@ -20,6 +22,7 @@ import { CalendlySyncService } from './calendly-sync.service';
 import { PrepService } from './prep.service';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { ListAppointmentsDto } from './dto/list-appointments.dto';
+import { SavePlanDto } from './dto/save-plan.dto';
 
 /**
  * Appointments — video consultations (module_calendly.md §8). Rows are created
@@ -59,13 +62,22 @@ export class AppointmentsController {
     return this.appointments.update(id, dto);
   }
 
+  /** Save the written plan (text required) + an optional private attachment. */
   @Post(':id/plan')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   uploadPlan(
     @Param('id') id: string,
+    @Body() dto: SavePlanDto,
     @UploadedFile() file: UploadedImage | undefined,
   ) {
-    return this.appointments.uploadPlan(id, file);
+    return this.appointments.uploadPlan(id, dto.planText, file);
+  }
+
+  /** Authenticated streamed download of the plan attachment — never public. */
+  @Get(':id/plan/file')
+  async downloadPlanFile(@Param('id') id: string, @Res() res: Response) {
+    const { path, fileName } = await this.appointments.getPlanFile(id);
+    res.download(path, fileName);
   }
 }

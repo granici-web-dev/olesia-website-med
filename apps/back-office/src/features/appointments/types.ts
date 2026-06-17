@@ -32,6 +32,10 @@ export interface Appointment {
   cancelUrl: string;
   rescheduleUrl: string;
   prepSentAt: string | null;
+  /** Written treatment plan typed by the specialist. */
+  planText: string | null;
+  /** Filename of the optional plan attachment, or null. Downloaded via auth. */
+  planFileName: string | null;
   planUploadedAt: string | null;
 }
 

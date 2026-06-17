@@ -7,6 +7,13 @@
     "articles": "Articles",
     "pricing": "Pricing",
     "contact": "Contact",
+    "servicesMenu": {
+      "pediatric": "Pediatric consultation",
+      "nutrition": "Nutrition consultation",
+      "integrative": "Integrative consultation",
+      "monitoring": "3-month monitoring",
+      "quick": "Quick question"
+    },
     "bookOnline": "Book online →"
   },
   "home": {

@@ -11,10 +11,22 @@ import {
   ServiceCode,
   SubscriptionStatus,
 } from '../../generated/prisma/enums';
-import { MonitoringLeadDto, QuickQuestionLeadDto } from './dto/create-lead.dto';
+import {
+  ContactMessageDto,
+  MonitoringLeadDto,
+  QuickQuestionLeadDto,
+} from './dto/create-lead.dto';
 
 const QUICK_SLA_MS = 48 * 60 * 60 * 1000;
 const MONITORING_MONTHS = 3;
+
+/** Human-readable subject labels for the practice inbox (RO). */
+const CONTACT_SUBJECT_LABELS: Record<string, string> = {
+  appointment: 'Programare',
+  payment: 'Plată',
+  how_it_works: 'Cum funcționează',
+  other: 'Altă întrebare',
+};
 
 /**
  * Public lead intake for the group-B services (portal-only, no calendar).
@@ -99,5 +111,34 @@ export class LeadsService {
 
     this.logger.log('Quick-question lead created (pending).');
     return toQuickQuestionDto(qq);
+  }
+
+  /**
+   * Contact-page message → notification email to the practice inbox. Non-medical
+   * only (medical questions go through "Întrebare rapidă"), so nothing is
+   * persisted as a clinical record. The `company` honeypot, when filled, marks a
+   * bot: we drop it silently and report success so the bot learns nothing.
+   */
+  async createContact(dto: ContactMessageDto): Promise<{ ok: true }> {
+    if (dto.company) {
+      this.logger.warn('Contact message dropped (honeypot tripped).');
+      return { ok: true };
+    }
+
+    const subjectLabel = CONTACT_SUBJECT_LABELS[dto.subject] ?? dto.subject;
+    await this.mail.sendLeadNotification({
+      subject: `Mesaj de contact — ${subjectLabel}`,
+      lines: [
+        'Mesaj nou din formularul de contact (întrebare non-medicală).',
+        `Nume: ${dto.name}`,
+        `Email: ${dto.email}`,
+        `Subiect: ${subjectLabel}`,
+        '',
+        `Mesaj: ${dto.message}`,
+      ],
+    });
+
+    this.logger.log('Contact message received.');
+    return { ok: true };
   }
 }

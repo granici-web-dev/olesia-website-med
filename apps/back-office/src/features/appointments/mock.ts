@@ -51,6 +51,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/AAA111',
     rescheduleUrl: 'https://calendly.com/reschedulings/AAA111',
     prepSentAt: '2026-06-11T09:00:00+03:00',
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
   {
@@ -68,6 +70,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/BBB222',
     rescheduleUrl: 'https://calendly.com/reschedulings/BBB222',
     prepSentAt: '2026-06-11T09:05:00+03:00',
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
   {
@@ -85,6 +89,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/CCC333',
     rescheduleUrl: 'https://calendly.com/reschedulings/CCC333',
     prepSentAt: null,
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
   {
@@ -102,6 +108,9 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/DDD444',
     rescheduleUrl: 'https://calendly.com/reschedulings/DDD444',
     prepSentAt: '2026-06-08T09:00:00+03:00',
+    planText:
+      'Continuați diversificarea treptată. Reevaluare neuromotorie peste 4 săptămâni. Vitamina D 400 UI/zi.',
+    planFileName: 'plan-cristina-moraru.pdf',
     planUploadedAt: '2026-06-09T13:20:00+03:00',
   },
   {
@@ -119,6 +128,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/EEE555',
     rescheduleUrl: 'https://calendly.com/reschedulings/EEE555',
     prepSentAt: '2026-06-04T09:00:00+03:00',
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
   {
@@ -136,6 +147,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/FFF666',
     rescheduleUrl: 'https://calendly.com/reschedulings/FFF666',
     prepSentAt: '2026-06-07T09:00:00+03:00',
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
   {
@@ -153,6 +166,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/GGG777',
     rescheduleUrl: 'https://calendly.com/reschedulings/GGG777',
     prepSentAt: null,
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
   {
@@ -170,6 +185,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/HHH888',
     rescheduleUrl: 'https://calendly.com/reschedulings/HHH888',
     prepSentAt: '2026-06-12T09:00:00+03:00',
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
   {
@@ -187,6 +204,9 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/III999',
     rescheduleUrl: 'https://calendly.com/reschedulings/III999',
     prepSentAt: '2026-06-05T09:00:00+03:00',
+    planText:
+      'Apetit în limite normale pentru vârstă. Menținere ritm mese. Control creștere peste 3 luni.',
+    planFileName: null,
     planUploadedAt: '2026-06-06T17:10:00+03:00',
   },
   {
@@ -204,6 +224,8 @@ let store: Appointment[] = [
     cancelUrl: 'https://calendly.com/cancellations/JJJ000',
     rescheduleUrl: 'https://calendly.com/reschedulings/JJJ000',
     prepSentAt: null,
+    planText: null,
+    planFileName: null,
     planUploadedAt: null,
   },
 ];
@@ -238,13 +260,29 @@ export async function markNoShow(id: string): Promise<Appointment> {
   return mutate(id, { status: 'no_show' });
 }
 
-export async function uploadPlan(id: string): Promise<Appointment> {
+export async function uploadPlan(args: {
+  id: string;
+  planText: string;
+  file: File | null;
+}): Promise<Appointment> {
   await delay(700);
-  // Uploading the written plan also closes the appointment (§8).
-  return mutate(id, {
+  // Saving the written plan also closes the appointment (§8). A new file
+  // replaces the previous one; with no file, the existing name is kept.
+  const patch: Partial<Appointment> = {
+    planText: args.planText,
     planUploadedAt: new Date().toISOString(),
     status: 'completed',
-  });
+  };
+  if (args.file) patch.planFileName = args.file.name;
+  return mutate(args.id, patch);
+}
+
+export async function downloadPlanFile(
+  _id: string,
+  _fileName: string,
+): Promise<void> {
+  // No real file in mock mode — succeed silently.
+  await delay(300);
 }
 
 /* ----------------------------- formatters ----------------------------- */

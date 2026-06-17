@@ -4,7 +4,8 @@ import type {
   ServiceDto,
 } from '@olesia/shared';
 
-import { http } from '@/api/http';
+import { API_BASE_URL } from '@/api/config';
+import { http, tokenStore } from '@/api/http';
 import type {
   Appointment,
   AppointmentServiceCode,
@@ -54,6 +55,8 @@ function toView(
     cancelUrl: d.cancelUrl ?? '',
     rescheduleUrl: d.rescheduleUrl ?? '',
     prepSentAt: d.prepSentAt,
+    planText: d.planText,
+    planFileName: d.planFileName,
     planUploadedAt: d.planUploadedAt,
   };
 }
@@ -92,11 +95,49 @@ export async function markNoShow(id: string): Promise<Appointment> {
   return toView(d, codes);
 }
 
-export async function uploadPlan(id: string): Promise<Appointment> {
-  // TODO(api): send the actual file (multipart) once the UI passes it through.
+/**
+ * Save the written treatment plan (text required) plus an optional attachment.
+ * Sent as multipart so the file (if any) rides along; the http client sets the
+ * right Content-Type for FormData automatically.
+ */
+export async function uploadPlan(args: {
+  id: string;
+  planText: string;
+  file: File | null;
+}): Promise<Appointment> {
+  const form = new FormData();
+  form.append('planText', args.planText);
+  if (args.file) form.append('file', args.file);
+
   const [d, codes] = await Promise.all([
-    http.post<AppointmentDto>(`/appointments/${id}/plan`),
+    http.post<AppointmentDto>(`/appointments/${args.id}/plan`, form),
     serviceCodeMap(),
   ]);
   return toView(d, codes);
+}
+
+/**
+ * Authenticated, streamed download of the plan attachment. Fetched with the
+ * access token so the private file never touches a public path; the blob is
+ * handed to the browser as a save dialog (mirrors patient-document download).
+ */
+export async function downloadPlanFile(
+  id: string,
+  fileName: string,
+): Promise<void> {
+  const token = tokenStore.get();
+  const res = await fetch(`${API_BASE_URL}/appointments/${id}/plan/file`, {
+    credentials: 'include',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error(`download_failed:${res.status}`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName || 'plan';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }

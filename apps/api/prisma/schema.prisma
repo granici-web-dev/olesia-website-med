@@ -126,7 +126,9 @@ model Appointment {
   cancelUrl        String?
   rescheduleUrl    String?
   prepSentAt       DateTime?
-  planUrl          String? // written plan uploaded by the specialist
+  planText         String? // written treatment plan typed by the specialist
+  planFileKey      String? // PRIVATE storage key of an optional attachment (rx/doc)
+  planFileName     String? // original filename of the attachment, for download
   planUploadedAt   DateTime?
   patient          Patient?          @relation(fields: [patientId], references: [id])
   patientId        String?

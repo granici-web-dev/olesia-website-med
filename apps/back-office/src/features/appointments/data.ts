@@ -13,3 +13,6 @@ export const confirmPayment = USE_MOCKS
   : remote.confirmPayment;
 export const markNoShow = USE_MOCKS ? mock.markNoShow : remote.markNoShow;
 export const uploadPlan = USE_MOCKS ? mock.uploadPlan : remote.uploadPlan;
+export const downloadPlanFile = USE_MOCKS
+  ? mock.downloadPlanFile
+  : remote.downloadPlanFile;

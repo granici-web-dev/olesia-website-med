@@ -7,6 +7,13 @@
     "articles": "Articole",
     "pricing": "Tarife",
     "contact": "Contact",
+    "servicesMenu": {
+      "pediatric": "Consultație pediatrică",
+      "nutrition": "Consultație nutrițională",
+      "integrative": "Consultație integrativă",
+      "monitoring": "Monitorizare 3 luni",
+      "quick": "Întrebare rapidă"
+    },
     "bookOnline": "Programează online →"
   },
   "home": {

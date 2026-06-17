@@ -1,9 +1,10 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import type { LeadService } from '@/lib/leads';
+import { SERVICE_INCLUDED } from '@/lib/service-content';
 import styles from './Services.module.css';
 
 const SERVICES = [
@@ -20,8 +21,16 @@ const LEAD_SERVICE: Partial<Record<string, LeadService>> = {
   quick: 'quick_question',
 };
 
+/** Homepage item keys → service `code` used by the shared content maps. */
+const CONTENT_CODE: Record<string, string> = {
+  subscription: 'monitoring',
+  quick: 'quick_question',
+};
+
 export async function Services() {
   const t = await getTranslations('home.services');
+  const en = (await getLocale()) === 'en';
+  const includedLabel = en ? "What's included" : 'Ce include';
 
   // Group-A services (pediatric/nutrition/integrative) are calendar-backed —
   // book them through the Calendly popup using their per-service scheduling
@@ -52,6 +61,8 @@ export async function Services() {
       {SERVICES.map(({ n, key }) => {
         const url = bookingUrl.get(key);
         const leadService = LEAD_SERVICE[key];
+        const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
+        const includedItems = included ? (en ? included.en : included.ro) : null;
         return (
           <div key={n} className={styles.serviceRow}>
             <div className={styles.serviceNum}>{n}</div>
@@ -59,7 +70,28 @@ export async function Services() {
               <div className={styles.serviceTag}>{t(`items.${key}.tag`)}</div>
               <h3 className={styles.serviceTitle}>{t(`items.${key}.title`)}</h3>
             </div>
-            <p className={styles.serviceDesc}>{t(`items.${key}.description`)}</p>
+            <div>
+              {includedItems && (
+                <>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
+                    {includedLabel}
+                  </p>
+                  <ul className="mt-3 grid gap-2">
+                    {includedItems.map((item) => (
+                      <li
+                        key={item}
+                        className="grid grid-cols-[1.1em_1fr] gap-x-2 text-[0.9rem] leading-relaxed text-ink-soft"
+                      >
+                        <span aria-hidden="true" className="text-sage">
+                          —
+                        </span>
+                        <span className="text-pretty">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
             <div className={styles.serviceMeta}>
               <div className={styles.servicePrice}>{t(`items.${key}.price`)}</div>
               <div className={styles.serviceDuration}>{t(`items.${key}.duration`)}</div>

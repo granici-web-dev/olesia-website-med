@@ -221,7 +221,6 @@ export const ro = {
       joinCall: 'Deschide apelul',
       noVideo: 'Indisponibil',
       prepSent: 'Pregătire trimisă',
-      planUploaded: 'Plan scris încărcat',
       notYet: 'Încă nu',
       calendlyRef: 'Referință Calendly',
       cancelLink: 'Anulează în Calendly',
@@ -232,9 +231,28 @@ export const ro = {
       confirmPayment: 'Confirmă plata',
       markNoShow: 'Marchează neprezentare',
       markCompleted: 'Marchează finalizată',
-      uploadPlan: 'Încarcă planul scris',
-      replacePlan: 'Înlocuiește planul',
       processing: 'Se procesează…',
+    },
+
+    plan: {
+      title: 'Plan de tratament',
+      empty: 'Niciun plan adăugat încă.',
+      savedAt: 'Salvat la',
+      add: 'Adaugă plan',
+      edit: 'Editează planul',
+      textLabel: 'Plan de tratament',
+      textPlaceholder:
+        'Scrie planul de tratament și recomandările pentru client…',
+      attachmentLabel: 'Atașament (opțional)',
+      attachmentHint: 'PDF, DOC sau DOCX, până la 20 MB — ex. o rețetă.',
+      attach: 'Atașează un fișier',
+      changeFile: 'Schimbă fișierul',
+      removeFile: 'Elimină',
+      attachment: 'Atașament',
+      download: 'Descarcă',
+      save: 'Salvează planul',
+      cancel: 'Anulează',
+      downloadError: 'Descărcarea a eșuat. Încearcă din nou.',
     },
 
     confirm: {
@@ -251,7 +269,7 @@ export const ro = {
     toast: {
       paymentConfirmed: 'Plata a fost confirmată.',
       noShowMarked: 'Programarea a fost marcată ca neprezentare.',
-      planUploaded: 'Planul scris a fost încărcat.',
+      planUploaded: 'Planul de tratament a fost salvat.',
       completed: 'Programarea a fost finalizată.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },

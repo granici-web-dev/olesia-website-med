@@ -87,8 +87,14 @@ export interface AppointmentDto {
   cancelUrl: string | null;
   rescheduleUrl: string | null;
   prepSentAt: string | null;
-  /** Public URL of the written plan uploaded by the specialist. */
-  planUrl: string | null;
+  /** Written treatment plan typed by the specialist (Markdown/plain text). */
+  planText: string | null;
+  /**
+   * Original filename of an optional plan attachment (prescription/doc), or
+   * null when none. The file itself is private — fetched via the authenticated
+   * `GET /appointments/:id/plan/file`, never a public URL.
+   */
+  planFileName: string | null;
   planUploadedAt: string | null;
   createdAt: string;
   updatedAt: string;

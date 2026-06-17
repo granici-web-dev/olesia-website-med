@@ -78,25 +78,55 @@ export class AppointmentsService {
   }
 
   /**
-   * Attach the written plan: stores the file (if provided), stamps
-   * `planUploadedAt`, and moves the appointment to `completed`.
+   * Save the written treatment plan: stores the text (required) plus an
+   * optional private attachment (prescription/doc), stamps `planUploadedAt`,
+   * and moves the appointment to `completed`. A new attachment replaces the
+   * previous one (the old private file is deleted to avoid orphans).
    */
   async uploadPlan(
     id: string,
+    planText: string,
     file: UploadedImage | undefined,
   ): Promise<AppointmentDto> {
-    await this.getOrThrow(id);
-    const planUrl = file ? (await this.storage.saveDocument(file)).url : undefined;
-    return toAppointmentDto(
-      await this.prisma.appointment.update({
-        where: { id },
-        data: {
-          ...(planUrl ? { planUrl } : {}),
-          planUploadedAt: new Date(),
-          status: AppointmentStatus.completed,
-        },
-      }),
-    );
+    const existing = await this.getOrThrow(id);
+
+    let fileFields: { planFileKey: string; planFileName: string } | undefined;
+    if (file) {
+      const { key } = await this.storage.savePrivateDocument(file);
+      fileFields = { planFileKey: key, planFileName: file.originalname };
+    }
+
+    const updated = await this.prisma.appointment.update({
+      where: { id },
+      data: {
+        planText,
+        ...(fileFields ?? {}),
+        planUploadedAt: new Date(),
+        status: AppointmentStatus.completed,
+      },
+    });
+
+    // Drop the superseded attachment only after the row is persisted.
+    if (fileFields && existing.planFileKey) {
+      await this.storage.deletePrivateDocument(existing.planFileKey);
+    }
+
+    return toAppointmentDto(updated);
+  }
+
+  /**
+   * Resolve an appointment's plan attachment for the authenticated download
+   * endpoint. Returns the on-disk path (private dir) and the original filename.
+   */
+  async getPlanFile(id: string): Promise<{ path: string; fileName: string }> {
+    const appt = await this.getOrThrow(id);
+    if (!appt.planFileKey) {
+      throw new NotFoundException('plan_file_not_found');
+    }
+    return {
+      path: this.storage.privateDocPath(appt.planFileKey),
+      fileName: appt.planFileName ?? 'plan',
+    };
   }
 
   /**

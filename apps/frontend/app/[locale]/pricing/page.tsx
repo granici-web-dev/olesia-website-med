@@ -3,9 +3,61 @@ import { api, loc, serviceTag, type ServiceDto } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
+import { FreeConsult } from '@/components/sections/FreeConsult';
 import type { LeadService } from '@/lib/leads';
+import {
+  SERVICE_DESCRIPTIONS,
+  SERVICE_INCLUDED,
+  SERVICE_PRICE_META,
+} from '@/lib/service-content';
 
 export const revalidate = 60;
+
+/* Local fallback so /pricing always renders the five tariffs even when the API
+   is unreachable (e.g. the static client preview). Mirrors the seed; the live
+   API takes over whenever it responds. Group-A Calendly URLs are the current
+   test links (⚠ swap for the client's before launch). */
+const FALLBACK_SERVICES: ServiceDto[] = [
+  {
+    id: 'pediatric', code: 'pediatric', group: 'A_booking',
+    titleRo: 'Consultație pediatrică', titleEn: 'Pediatric consultation',
+    descriptionRo: '', descriptionEn: '', durationMin: 50, price: 600,
+    priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
+    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/30min',
+    sortOrder: 1, active: true,
+  },
+  {
+    id: 'nutrition', code: 'nutrition', group: 'A_booking',
+    titleRo: 'Consultație nutrițională', titleEn: 'Nutrition consultation',
+    descriptionRo: '', descriptionEn: '', durationMin: 60, price: 700,
+    priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
+    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
+    sortOrder: 2, active: true,
+  },
+  {
+    id: 'integrative', code: 'integrative', group: 'A_booking',
+    titleRo: 'Consultație integrativă & monitorizare',
+    titleEn: 'Integrative consultation & monitoring',
+    descriptionRo: '', descriptionEn: '', durationMin: 90, price: 1100,
+    priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
+    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
+    sortOrder: 3, active: true,
+  },
+  {
+    id: 'monitoring', code: 'monitoring', group: 'B_portal',
+    titleRo: 'Monitorizare 3 luni', titleEn: '3-month monitoring',
+    descriptionRo: '', descriptionEn: '', durationMin: null, price: 2400,
+    priceLabelRo: 'de la 2.400 lei / 3 luni', priceLabelEn: 'from 2,400 lei / 3 months',
+    calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 4, active: true,
+  },
+  {
+    id: 'quick_question', code: 'quick_question', group: 'B_portal',
+    titleRo: 'Întrebare rapidă', titleEn: 'Quick question',
+    descriptionRo: '', descriptionEn: '', durationMin: null, price: 180,
+    priceLabelRo: '48 h · răspuns scris', priceLabelEn: '48 h · written reply',
+    calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 5, active: true,
+  },
+];
 
 function price(locale: string, s: ServiceDto): string {
   const label = loc(locale, s.priceLabelRo, s.priceLabelEn);
@@ -19,7 +71,8 @@ export default async function PricingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const services = (await api.services()).filter((s) => s.active);
+  const live = (await api.services()).filter((s) => s.active);
+  const services = live.length > 0 ? live : FALLBACK_SERVICES;
 
   const t = {
     eyebrow: loc(locale, 'Tarife', 'Pricing'),
@@ -31,6 +84,7 @@ export default async function PricingPage({
     ),
     book: loc(locale, 'Rezervă', 'Book'),
     min: loc(locale, 'min', 'min'),
+    included: loc(locale, 'Ce include', "What's included"),
   };
 
   return (
@@ -57,12 +111,46 @@ export default async function PricingPage({
                   {loc(locale, s.titleRo, s.titleEn)}
                 </h2>
               </div>
-              <p className={styles.serviceDesc}>
-                {loc(locale, s.descriptionRo, s.descriptionEn)}
-              </p>
+              <div>
+                <p className={styles.serviceDesc}>
+                  {SERVICE_DESCRIPTIONS[s.code]
+                    ? loc(locale, SERVICE_DESCRIPTIONS[s.code].ro, SERVICE_DESCRIPTIONS[s.code].en)
+                    : loc(locale, s.descriptionRo, s.descriptionEn)}
+                </p>
+                {SERVICE_INCLUDED[s.code] && (
+                  <div className="mt-5">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
+                      {t.included}
+                    </p>
+                    <ul className="mt-3 grid gap-2">
+                      {(locale === 'en' ? SERVICE_INCLUDED[s.code].en : SERVICE_INCLUDED[s.code].ro).map(
+                        (item) => (
+                          <li
+                            key={item}
+                            className="grid grid-cols-[1.1em_1fr] gap-x-2 text-[0.9rem] leading-relaxed text-ink-soft"
+                          >
+                            <span aria-hidden="true" className="text-sage">
+                              —
+                            </span>
+                            <span className="text-pretty">{item}</span>
+                          </li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
               <div className={styles.serviceMeta}>
-                <div className={styles.servicePrice}>{price(locale, s)}</div>
-                {s.durationMin ? (
+                <div className={styles.servicePrice}>
+                  {SERVICE_PRICE_META[s.code]
+                    ? loc(locale, SERVICE_PRICE_META[s.code].price.ro, SERVICE_PRICE_META[s.code].price.en)
+                    : price(locale, s)}
+                </div>
+                {SERVICE_PRICE_META[s.code] ? (
+                  <div className={styles.serviceDuration}>
+                    {loc(locale, SERVICE_PRICE_META[s.code].duration.ro, SERVICE_PRICE_META[s.code].duration.en)}
+                  </div>
+                ) : s.durationMin ? (
                   <div className={styles.serviceDuration}>
                     {s.durationMin} {t.min}
                   </div>
@@ -93,6 +181,8 @@ export default async function PricingPage({
           ))}
         </div>
       </section>
+
+      <FreeConsult locale={locale} />
     </main>
   );
 }

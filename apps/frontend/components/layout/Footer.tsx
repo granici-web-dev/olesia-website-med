@@ -1,10 +1,23 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import styles from './Footer.module.css';
 
-const SERVICE_KEYS = ['pediatric', 'nutrition', 'integrative', 'subscription', 'quick'] as const;
-const RESOURCE_KEYS = ['articles', 'guides', 'menus', 'faq'] as const;
+const SERVICE_LINKS = [
+  { key: 'pediatric', href: '/pediatrics' },
+  { key: 'nutrition', href: '/nutrition' },
+  { key: 'integrative', href: '/integrative' },
+  { key: 'subscription', href: '/monitoring' },
+  { key: 'quick', href: '/quick-question' },
+] as const;
+const RESOURCE_LINKS = [
+  { key: 'articles', href: '/articles' },
+  { key: 'guides', href: '/guides' },
+  { key: 'menus', href: '/menus' },
+  { key: 'faq', href: '/faq' },
+] as const;
 
 export function Footer() {
   const t = useTranslations('footer');
@@ -21,16 +34,20 @@ export function Footer() {
             className={styles.logo}
           />
           <p className={styles.tagline}>{t('tagline')}</p>
-          <Link href="/contact" className={styles.bookBtn}>
-            {t('book')}
-          </Link>
+          <CalendlyButton
+            url={FREE_CONSULT_CALENDLY_URL}
+            reason="Consultație gratuită"
+            label={t('book')}
+            className={styles.bookBtn}
+            withArrow={false}
+          />
         </div>
 
         <div>
           <div className={styles.colLabel}>{t('servicesLabel')}</div>
           <div className={styles.colLinks}>
-            {SERVICE_KEYS.map((key) => (
-              <Link key={key} href="/services">
+            {SERVICE_LINKS.map(({ key, href }) => (
+              <Link key={key} href={href}>
                 {t(`services.${key}`)}
               </Link>
             ))}
@@ -40,8 +57,8 @@ export function Footer() {
         <div>
           <div className={styles.colLabel}>{t('resourcesLabel')}</div>
           <div className={styles.colLinks}>
-            {RESOURCE_KEYS.map((key) => (
-              <Link key={key} href="/articles">
+            {RESOURCE_LINKS.map(({ key, href }) => (
+              <Link key={key} href={href}>
                 {t(`resources.${key}`)}
               </Link>
             ))}

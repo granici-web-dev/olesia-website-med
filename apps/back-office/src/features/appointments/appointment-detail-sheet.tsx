@@ -3,12 +3,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarClock,
   CheckCircle2,
+  Download,
   ExternalLink,
   FileText,
   Loader2,
   Mail,
+  Paperclip,
+  Pencil,
   UserX,
   Video,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -19,7 +23,9 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +43,7 @@ import {
 } from '@/features/appointments/status-badges';
 import {
   confirmPayment,
+  downloadPlanFile,
   markNoShow,
   uploadPlan,
   serviceLabel,
@@ -84,7 +91,19 @@ export function AppointmentDetailSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const queryClient = useQueryClient();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Plan editor: local draft + optional attachment, reset per appointment.
+  const [editingPlan, setEditingPlan] = React.useState(false);
+  const [planDraft, setPlanDraft] = React.useState('');
+  const [attachFile, setAttachFile] = React.useState<File | null>(null);
+  const [downloading, setDownloading] = React.useState(false);
+  const planFileRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    setEditingPlan(false);
+    setPlanDraft(appointment?.planText ?? '');
+    setAttachFile(null);
+  }, [appointment?.id]);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: appointmentsQueryKey });
@@ -111,6 +130,8 @@ export function AppointmentDetailSheet({
     mutationFn: uploadPlan,
     onSuccess: () => {
       toast.success(t.toast.planUploaded);
+      setEditingPlan(false);
+      setAttachFile(null);
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -122,12 +143,42 @@ export function AppointmentDetailSheet({
     planMutation.isPending;
 
   const a = appointment;
+  const canEditPlan =
+    !!a && a.status !== 'canceled' && a.status !== 'no_show';
 
-  const handlePlanFile: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    // Mock: the picked file isn't persisted; we just close out the appointment.
-    if (e.target.files?.length && a) {
-      planMutation.mutate(a.id);
+  const startEditPlan = () => {
+    setPlanDraft(a?.planText ?? '');
+    setAttachFile(null);
+    setEditingPlan(true);
+  };
+
+  const cancelEditPlan = () => {
+    setEditingPlan(false);
+    setPlanDraft(a?.planText ?? '');
+    setAttachFile(null);
+  };
+
+  const savePlan = () => {
+    const text = planDraft.trim();
+    if (!a || !text) return;
+    planMutation.mutate({ id: a.id, planText: text, file: attachFile });
+  };
+
+  const handleDownload = async () => {
+    if (!a?.planFileName) return;
+    setDownloading(true);
+    try {
+      await downloadPlanFile(a.id, a.planFileName);
+    } catch {
+      toast.error(t.plan.downloadError);
+    } finally {
+      setDownloading(false);
     }
+  };
+
+  const handlePickFile: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const f = e.target.files?.[0];
+    if (f) setAttachFile(f);
     e.target.value = '';
   };
 
@@ -213,19 +264,158 @@ export function AppointmentDetailSheet({
                     </span>
                   )}
                 </Field>
-                <Field label={t.detail.planUploaded}>
-                  {a.planUploadedAt ? (
-                    <span className="inline-flex items-center gap-1.5">
-                      <CheckCircle2 className="size-3.5 text-success" />
-                      {formatDateTime(a.planUploadedAt)}
-                    </span>
-                  ) : (
-                    <span className="font-normal text-muted-foreground">
-                      {t.detail.notYet}
-                    </span>
-                  )}
-                </Field>
               </dl>
+
+              <Separator className="my-4" />
+
+              {/* Treatment plan: written text + optional private attachment. */}
+              <div className="flex items-center justify-between gap-2">
+                <SectionTitle>{t.plan.title}</SectionTitle>
+                {canEditPlan && !editingPlan && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="-mr-2 h-7 px-2 text-xs"
+                    disabled={busy}
+                    onClick={startEditPlan}
+                  >
+                    <Pencil className="size-3.5" />
+                    {a.planText ? t.plan.edit : t.plan.add}
+                  </Button>
+                )}
+              </div>
+
+              {!editingPlan ? (
+                <div className="mt-2">
+                  {a.planText ? (
+                    <>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+                        {a.planText}
+                      </p>
+                      {a.planFileName && (
+                        <button
+                          type="button"
+                          onClick={handleDownload}
+                          disabled={downloading}
+                          className="mt-3 inline-flex w-full max-w-full items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm transition-colors hover:border-ring hover:bg-accent disabled:opacity-60"
+                        >
+                          {downloading ? (
+                            <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
+                          ) : (
+                            <Paperclip className="size-4 shrink-0 text-muted-foreground" />
+                          )}
+                          <span className="min-w-0 flex-1 truncate text-left">
+                            {a.planFileName}
+                          </span>
+                          <Download className="size-3.5 shrink-0 text-muted-foreground" />
+                        </button>
+                      )}
+                      {a.planUploadedAt && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {t.plan.savedAt} {formatDateTime(a.planUploadedAt)}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {t.plan.empty}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="plan-text">{t.plan.textLabel}</Label>
+                    <Textarea
+                      id="plan-text"
+                      value={planDraft}
+                      onChange={(e) => setPlanDraft(e.target.value)}
+                      placeholder={t.plan.textPlaceholder}
+                      className="min-h-32"
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label>{t.plan.attachmentLabel}</Label>
+                    {attachFile ? (
+                      <div className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm">
+                        <Paperclip className="size-4 shrink-0 text-muted-foreground" />
+                        <span className="min-w-0 flex-1 truncate">
+                          {attachFile.name}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setAttachFile(null)}
+                          className="text-muted-foreground transition-colors hover:text-foreground"
+                          aria-label={t.plan.removeFile}
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
+                    ) : a.planFileName ? (
+                      <button
+                        type="button"
+                        onClick={() => planFileRef.current?.click()}
+                        className="flex w-full items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm transition-colors hover:border-ring hover:bg-accent"
+                      >
+                        <Paperclip className="size-4 shrink-0 text-muted-foreground" />
+                        <span className="min-w-0 flex-1 truncate text-left">
+                          {a.planFileName}
+                        </span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {t.plan.changeFile}
+                        </span>
+                      </button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => planFileRef.current?.click()}
+                      >
+                        <Paperclip className="size-3.5" />
+                        {t.plan.attach}
+                      </Button>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {t.plan.attachmentHint}
+                    </p>
+                    <input
+                      ref={planFileRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                      onChange={handlePickFile}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={cancelEditPlan}
+                      disabled={planMutation.isPending}
+                    >
+                      {t.plan.cancel}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={savePlan}
+                      disabled={!planDraft.trim() || planMutation.isPending}
+                    >
+                      {planMutation.isPending ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        <FileText />
+                      )}
+                      {t.plan.save}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <Separator className="my-4" />
 
@@ -276,24 +466,6 @@ export function AppointmentDetailSheet({
                 />
               )}
 
-              {a.status !== 'canceled' && a.status !== 'no_show' && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  disabled={busy}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {planMutation.isPending ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    <FileText />
-                  )}
-                  {a.planUploadedAt
-                    ? t.actions.replacePlan
-                    : t.actions.uploadPlan}
-                </Button>
-              )}
-
               {a.status === 'scheduled' && (
                 <ConfirmAction
                   trigger={
@@ -317,14 +489,6 @@ export function AppointmentDetailSheet({
                   onConfirm={() => noShowMutation.mutate(a.id)}
                 />
               )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx"
-                className="hidden"
-                onChange={handlePlanFile}
-              />
             </div>
           </>
         )}
