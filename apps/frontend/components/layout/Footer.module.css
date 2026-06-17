@@ -98,6 +98,10 @@
   color: var(--sage-soft);
 }
 
+.langActive {
+  color: var(--cream);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .grid {

@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { FooterLangSwitch } from './FooterLangSwitch';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import styles from './Footer.module.css';
 
@@ -78,7 +79,7 @@ export function Footer() {
 
       <div className={styles.bottom}>
         <span>{t('rights')}</span>
-        <span>RO · EN</span>
+        <FooterLangSwitch />
         <span>
           <Link href="/gdpr" className={styles.legalLink}>
             {t('legal').split('·')[0].trim()}
