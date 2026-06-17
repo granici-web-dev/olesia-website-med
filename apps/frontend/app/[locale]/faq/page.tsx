@@ -312,7 +312,7 @@ export default async function FaqPage({
 
       {/* 2 · Category nav (sticky) + 3 · accordions */}
       <section className="shell grid gap-12 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-24 lg:gap-24">
-        <nav aria-label={en ? 'FAQ categories' : 'Categorii de întrebări'} className="md:sticky md:top-28 md:self-start">
+        <nav aria-label={en ? 'FAQ categories' : 'Categorii de întrebări'} className="min-w-0 md:sticky md:top-28 md:self-start">
           <p className="eyebrow mb-4">{en ? 'Categories' : 'Categorii'}</p>
           <ul className="-mx-1 flex gap-2 overflow-x-auto pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:pb-0">
             {CATEGORIES.map((c) => (
