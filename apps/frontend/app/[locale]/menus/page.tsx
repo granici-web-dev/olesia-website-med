@@ -102,7 +102,7 @@ export default async function MenusPage({
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
             {en ? 'Menus' : 'Meniuri'}
           </p>
-          <div className="grid items-end gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-14 lg:gap-20">
+          <div className="grid items-start gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[15ch] text-[clamp(2.6rem,6vw,5.4rem)] leading-[1.03] tracking-[-0.015em] text-balance">
                 {en ? (
