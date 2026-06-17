@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "PORT=3000 nx next:dev",
     "build": "nx next:build",
-    "start": "nx next:start"
+    "start": "nx next:start",
+    "gen:images": "tsx scripts/generate-images.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.0",
@@ -17,6 +18,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@google/genai": "^2.8.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
