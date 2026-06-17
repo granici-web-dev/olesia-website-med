@@ -1,15 +1,18 @@
 /**
- * Generate site imagery with Google's Gemini 2.5 Flash Image ("Nano Banana").
- * One-time generation → PNGs saved under public/assets/{blog,menus}/<slug>.png,
- * then referenced from the placeholder content. No runtime cost.
+ * Generate site imagery via Vercel AI Gateway (image model — "Nano Banana" /
+ * Gemini Flash Image by default). One-time generation → PNGs under
+ * public/assets/{blog,menus}/<slug>.png, then referenced from the content.
+ * Billing/credits go through Vercel AI Gateway — no direct Google billing.
  *
- *   GEMINI_API_KEY=... pnpm --filter @olesia/frontend gen:images          # missing only
- *   GEMINI_API_KEY=... pnpm --filter @olesia/frontend gen:images -- --force  # regenerate all
+ *   pnpm --filter @olesia/frontend gen:images            # missing only
+ *   pnpm --filter @olesia/frontend gen:images -- --force # regenerate all
  *
- * The key is read from apps/frontend/.env.local (GEMINI_API_KEY) or the env.
- * Model override: GEMINI_IMAGE_MODEL (default gemini-2.5-flash-image).
+ * Auth (either works, read from apps/frontend/.env.local or the env):
+ *   AI_GATEWAY_API_KEY=...           # static key from the Vercel dashboard
+ *   VERCEL_OIDC_TOKEN=...            # provisioned by `vercel env pull .env.local`
+ * Model override: GATEWAY_IMAGE_MODEL (default google/gemini-3.1-flash-image-preview).
  */
-import { GoogleGenAI } from '@google/genai';
+import { generateText } from 'ai';
 import { config as loadEnv } from 'dotenv';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -21,19 +24,18 @@ const here = dirname(fileURLToPath(import.meta.url));
 loadEnv({ path: join(here, '../.env.local') });
 loadEnv({ path: join(here, '../.env') });
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-if (!apiKey) {
-  console.error('✖ Set GEMINI_API_KEY (in apps/frontend/.env.local or the env).');
+if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
+  console.error(
+    '✖ No AI Gateway auth. Set AI_GATEWAY_API_KEY in apps/frontend/.env.local,\n' +
+      '  or run `vercel env pull apps/frontend/.env.local` to get a VERCEL_OIDC_TOKEN.',
+  );
   process.exit(1);
 }
 
-const MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+const MODEL = process.env.GATEWAY_IMAGE_MODEL || 'google/gemini-3.1-flash-image-preview';
 const FORCE = process.argv.includes('--force');
-const ai = new GoogleGenAI({ apiKey });
 const publicDir = join(here, '../public/assets');
 
-/* Shared art direction — matches the brand: warm, calm, editorial; never
-   clinical or stocky; no text in the image. */
 const STYLE =
   'Soft, warm editorial photograph. Cream, beige and muted sage-green palette, gentle natural daylight, calm and reassuring mood, shallow depth of field, generous negative space. Absolutely no text, words, letters, numbers, logos or watermarks. Not clinical, not corporate stock.';
 
@@ -74,28 +76,23 @@ async function generate(prompt: string, ratio: string, outPath: string) {
   }
   const fullPrompt = `${prompt}\n\n${STYLE}\nComposition: ${ratio} aspect ratio.`;
   try {
-    const res = await ai.models.generateContent({
-      model: MODEL,
-      contents: fullPrompt,
-      config: { responseModalities: ['IMAGE'] },
-    });
-    const parts = res.candidates?.[0]?.content?.parts ?? [];
-    const img = parts.find((p) => p.inlineData?.data);
-    if (!img?.inlineData?.data) {
-      console.error('✖ no image returned for', outPath, '—', JSON.stringify(parts).slice(0, 160));
+    const result = await generateText({ model: MODEL, prompt: fullPrompt });
+    const file = (result.files ?? []).find((f) => f.mediaType?.startsWith('image/'));
+    if (!file) {
+      console.error('✖ no image returned for', outPath.replace(publicDir, 'assets'));
       return;
     }
+    const bytes = file.uint8Array ?? Buffer.from(file.base64, 'base64');
     mkdirSync(dirname(outPath), { recursive: true });
-    writeFileSync(outPath, Buffer.from(img.inlineData.data, 'base64'));
+    writeFileSync(outPath, bytes);
     console.log('✓ saved:', outPath.replace(publicDir, 'assets'));
   } catch (err) {
-    console.error('✖ failed for', outPath, '—', (err as Error).message);
+    console.error('✖ failed for', outPath.replace(publicDir, 'assets'), '—', (err as Error).message);
   }
 }
 
 async function main() {
-  console.log(`Generating with ${MODEL}${FORCE ? ' (force)' : ''}…\n`);
-
+  console.log(`Generating via AI Gateway with ${MODEL}${FORCE ? ' (force)' : ''}…\n`);
   for (const p of PLACEHOLDER_POSTS) {
     const prompt = BLOG_PROMPTS[p.slug] ?? `Editorial image about: ${p.title.en}.`;
     await generate(prompt, '16:9', join(publicDir, 'blog', `${p.slug}.png`));
@@ -104,7 +101,6 @@ async function main() {
     const prompt = MENU_PROMPTS[m.slug] ?? `Appetizing food photo: ${m.title.en}.`;
     await generate(prompt, '4:3', join(publicDir, 'menus', `${m.slug}.png`));
   }
-
   console.log('\nDone. Review public/assets/{blog,menus}/ then commit the PNGs.');
 }
 
