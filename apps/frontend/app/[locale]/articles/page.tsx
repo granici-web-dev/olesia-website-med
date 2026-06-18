@@ -33,11 +33,16 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
+    title: ru
+      ? 'Блог — здоровье и питание ребёнка | Dr. Olesea Jalba'
+      : en
       ? 'Blog — child health & nutrition | Dr. Olesea Jalba'
       : 'Blog — sănătatea și nutriția copilului | Dr. Olesea Jalba',
-    description: en
+    description: ru
+      ? 'Статьи о здоровье и питании ребёнка, написанные врачом-педиатром. Информация, которой можно доверять.'
+      : en
       ? 'Articles on your child’s health and nutrition, written by a pediatrician. Information you can trust.'
       : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru. Informații în care poți avea încredere.',
   };
@@ -62,11 +67,12 @@ export default async function ArticlesPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   const fmtDate = (iso: string | null) =>
     iso
-      ? new Intl.DateTimeFormat(en ? 'en-US' : 'ro-RO', {
+      ? new Intl.DateTimeFormat(ru ? 'ru-RU' : en ? 'en-US' : 'ro-RO', {
           day: '2-digit',
           month: 'long',
           year: 'numeric',
@@ -74,7 +80,7 @@ export default async function ArticlesPage({
       : '';
   const readMin = (content: string) =>
     Math.max(1, Math.round(content.trim().split(/\s+/).filter(Boolean).length / 200));
-  const minLabel = (n: number) => `${n} ${en ? 'min read' : 'min de citit'}`;
+  const minLabel = (n: number) => `${n} ${ru ? 'мин чтения' : en ? 'min read' : 'min de citit'}`;
   const metaLine = (dateIso: string | null, minutes: number) =>
     [fmtDate(dateIso), minLabel(minutes)].filter(Boolean).join(' · ');
   const href = (slug: string) => `/${locale}/articles/${slug}`;
@@ -96,9 +102,9 @@ export default async function ArticlesPage({
     ? live.map((p) => ({
         slug: p.slug,
         categoryKey: p.categories[0]?.slug ?? 'all',
-        categoryLabel: p.categories[0] ? lc({ ro: p.categories[0].nameRo, en: p.categories[0].nameEn }) : '',
-        title: lc({ ro: p.titleRo, en: p.titleEn }),
-        excerpt: lc({ ro: p.excerptRo ?? '', en: p.excerptEn ?? '' }),
+        categoryLabel: p.categories[0] ? lc({ ro: p.categories[0].nameRo, en: p.categories[0].nameEn, ru: p.categories[0].nameRo }) : '',
+        title: lc({ ro: p.titleRo, en: p.titleEn, ru: p.titleRo }),
+        excerpt: lc({ ro: p.excerptRo ?? '', en: p.excerptEn ?? '', ru: p.excerptRo ?? '' }),
         meta: metaLine(p.publishedAt, readMin(en ? p.contentEn : p.contentRo)),
         coverUrl: p.coverImageUrl,
         href: href(p.slug),
@@ -106,7 +112,7 @@ export default async function ArticlesPage({
     : PLACEHOLDER_POSTS.map((p) => ({
         slug: p.slug,
         categoryKey: p.category,
-        categoryLabel: lc(CATEGORIES.find((c) => c.key === p.category) ?? { ro: '', en: '' }),
+        categoryLabel: lc(CATEGORIES.find((c) => c.key === p.category) ?? { ro: '', en: '', ru: '' }),
         title: lc(p.title),
         excerpt: lc(p.excerpt),
         meta: metaLine(p.date, p.minutes),
@@ -121,7 +127,7 @@ export default async function ArticlesPage({
         new Map(
           live
             .flatMap((p) => p.categories)
-            .map((c) => [c.slug, { key: c.slug, label: lc({ ro: c.nameRo, en: c.nameEn }) }]),
+            .map((c) => [c.slug, { key: c.slug, label: lc({ ro: c.nameRo, en: c.nameEn, ru: c.nameRo }) }]),
         ).values(),
       )
     : CATEGORIES.filter((c) => presentKeys.has(c.key)).map((c) => ({ key: c.key, label: lc(c) }));
@@ -144,19 +150,25 @@ export default async function ArticlesPage({
                 Blog<span className="serif-it text-sage">.</span>
               </h1>
               <p className="mt-7 max-w-[42ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-                {en
+                {ru
+                  ? 'Статьи о здоровье и питании ребёнка, написанные врачом-педиатром.'
+                  : en
                   ? 'Articles on your child’s health and nutrition, written by a pediatrician.'
                   : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru.'}
               </p>
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="max-w-[42ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
-                {en
+                {ru
+                  ? 'Информация, которой можно доверять, — основанная на современных рекомендациях по педиатрии и нутрициологии, а не на слухах с форумов.'
+                  : en
                   ? 'Information you can trust — reviewed against current pediatric and nutrition guidance, not forum hearsay.'
                   : 'Informații în care poți avea încredere — bazate pe recomandări actuale de pediatrie și nutriție, nu pe zvonuri de pe forumuri.'}
               </p>
               <p className="mono mt-8 border-t border-[var(--rule)] pt-6 text-[11px] uppercase tracking-[0.1em] leading-relaxed text-ink-soft">
-                {en
+                {ru
+                  ? 'Автор: Dr. Olesea Jalba · Врач-педиатр · MSc Нутрициология'
+                  : en
                   ? 'By Dr. Olesea Jalba · Pediatrician · MSc Human Nutrition'
                   : 'De Dr. Olesea Jalba · Medic pediatru · MSc Nutriția Omului'}
               </p>
@@ -171,12 +183,14 @@ export default async function ArticlesPage({
             posts={[]}
             categories={[]}
             labels={{
-              all: en ? 'All' : 'Toate',
-              emptyTitle: en ? 'First articles are coming soon' : 'Primele articole vin în curând',
-              emptyBody: en
+              all: ru ? 'Все' : en ? 'All' : 'Toate',
+              emptyTitle: ru ? 'Первые статьи скоро появятся' : en ? 'First articles are coming soon' : 'Primele articole vin în curând',
+              emptyBody: ru
+                ? 'Мы готовим первые статьи. А пока можно задать вопрос врачу напрямую.'
+                : en
                 ? 'We’re working on the first articles. In the meantime, you can ask the doctor your question directly.'
                 : 'Lucrăm la primele articole. Între timp, dacă ai o întrebare, o poți adresa direct medicului.',
-              emptyCta: en ? 'Ask the doctor' : 'Întreabă medicul',
+              emptyCta: ru ? 'Спросить врача' : en ? 'Ask the doctor' : 'Întreabă medicul',
               emptyCtaHref: `/${locale}/quick-question`,
             }}
           />
@@ -186,7 +200,7 @@ export default async function ArticlesPage({
           {/* 2 · Featured / latest post */}
           {featured && (
             <section className="shell py-16 md:py-20">
-              <p className="eyebrow mb-6">{en ? 'Latest' : 'Cel mai recent'}</p>
+              <p className="eyebrow mb-6">{ru ? 'Самое новое' : en ? 'Latest' : 'Cel mai recent'}</p>
               <a
                 href={featured.href}
                 className="group grid items-stretch gap-8 md:grid-cols-2 md:gap-12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
@@ -222,7 +236,7 @@ export default async function ArticlesPage({
                     </p>
                   ) : null}
                   <span className="mt-7 inline-flex items-center gap-2 text-[13px] font-medium uppercase tracking-[0.04em] text-ink">
-                    {en ? 'Read article' : 'Citește articolul'}
+                    {ru ? 'Читать статью' : en ? 'Read article' : 'Citește articolul'}
                     <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
                       →
                     </span>
@@ -238,7 +252,11 @@ export default async function ArticlesPage({
             <div className="shell py-20 md:py-28">
               <header className="mb-10 flex flex-col gap-4 md:flex-row md:items-baseline md:justify-between">
                 <h2 className="serif text-[clamp(2.2rem,4.5vw,4rem)] leading-[1.0] tracking-[-0.02em] text-balance">
-                  {en ? (
+                  {ru ? (
+                    <>
+                      Все <span className="serif-it text-sage">статьи</span>
+                    </>
+                  ) : en ? (
                     <>
                       All <span className="serif-it text-sage">articles</span>
                     </>
@@ -249,7 +267,7 @@ export default async function ArticlesPage({
                   )}
                 </h2>
                 <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">
-                  {en ? 'Filter by category.' : 'Filtrează după categorie.'}
+                  {ru ? 'Фильтр по категории.' : en ? 'Filter by category.' : 'Filtrează după categorie.'}
                 </p>
               </header>
 
@@ -257,7 +275,7 @@ export default async function ArticlesPage({
                 posts={rest}
                 categories={categories}
                 labels={{
-                  all: en ? 'All' : 'Toate',
+                  all: ru ? 'Все' : en ? 'All' : 'Toate',
                   emptyTitle: '',
                   emptyBody: '',
                   emptyCta: '',
@@ -276,7 +294,11 @@ export default async function ArticlesPage({
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-[38rem]">
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Нужен личный <span className="serif-it text-[var(--sage-soft)]">совет?</span>
+                  </>
+                ) : en ? (
                   <>
                     Need personal <span className="serif-it text-[var(--sage-soft)]">advice?</span>
                   </>
@@ -288,15 +310,17 @@ export default async function ArticlesPage({
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/quick-question" className={creamPill}>
-                  {en ? 'Ask the doctor · 48h' : 'Întreabă medicul · 48h'}
+                  {ru ? 'Спросить врача · 48ч' : en ? 'Ask the doctor · 48h' : 'Întreabă medicul · 48h'}
                 </Link>
                 <Link href="/services" className={creamUnderline}>
-                  {en ? 'See the consultations →' : 'Vezi consultațiile →'}
+                  {ru ? 'Смотреть консультации →' : en ? 'See the consultations →' : 'Vezi consultațiile →'}
                 </Link>
               </div>
             </div>
             <p className="max-w-[30ch] text-sm leading-[1.7] text-[var(--sage-soft)] text-pretty md:text-right">
-              {en
+              {ru
+                ? 'Статья — это отправная точка. Для вашего ребёнка консультация даёт больше.'
+                : en
                 ? 'An article is a starting point. For your child, a consultation goes further.'
                 : 'Un articol e un punct de plecare. Pentru copilul tău, o consultație merge mai departe.'}
             </p>

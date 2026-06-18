@@ -90,6 +90,10 @@ export function Nav({ locale }: NavProps) {
       <Link href={pathname} locale="en" onClick={close}>
         <span className={locale === 'en' ? styles.langActive : undefined}>EN</span>
       </Link>
+      <span>/</span>
+      <Link href={pathname} locale="ru" onClick={close}>
+        <span className={locale === 'ru' ? styles.langActive : undefined}>RU</span>
+      </Link>
     </span>
   );
 

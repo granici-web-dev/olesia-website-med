@@ -64,7 +64,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
 function price(locale: string, s: ServiceDto): string {
   const label = loc(locale, s.priceLabelRo, s.priceLabelEn);
   if (label) return label;
-  return `${new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'ro-RO').format(s.price)} lei`;
+  return `${new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : locale === 'en' ? 'en-US' : 'ro-RO').format(s.price)} lei`;
 }
 
 export default async function PricingPage({
@@ -73,20 +73,22 @@ export default async function PricingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const en = locale === 'en';
+  const ru = locale === 'ru';
   const live = (await api.services()).filter((s) => s.active);
   const services = live.length > 0 ? live : FALLBACK_SERVICES;
 
   const t = {
-    eyebrow: loc(locale, 'Tarife', 'Pricing'),
-    title: loc(locale, 'Tarife transparente', 'Transparent pricing'),
-    intro: loc(
-      locale,
-      'Fără costuri ascunse. Plata se confirmă manual după programare.',
-      'No hidden costs. Payment is confirmed manually after booking.',
-    ),
-    book: loc(locale, 'Rezervă', 'Book'),
-    min: loc(locale, 'min', 'min'),
-    included: loc(locale, 'Ce include', "What's included"),
+    eyebrow: ru ? 'Цены' : en ? 'Pricing' : 'Tarife',
+    title: ru ? 'Прозрачные цены' : en ? 'Transparent pricing' : 'Tarife transparente',
+    intro: ru
+      ? 'Без скрытых платежей. Оплату подтверждаем вручную после записи.'
+      : en
+        ? 'No hidden costs. Payment is confirmed manually after booking.'
+        : 'Fără costuri ascunse. Plata se confirmă manual după programare.',
+    book: ru ? 'Записаться' : en ? 'Book' : 'Rezervă',
+    min: ru ? 'мин' : en ? 'min' : 'min',
+    included: ru ? 'Что входит' : en ? "What's included" : 'Ce include',
   };
 
   return (
@@ -116,7 +118,9 @@ export default async function PricingPage({
               <div>
                 <p className={styles.serviceDesc}>
                   {SERVICE_DESCRIPTIONS[s.code]
-                    ? loc(locale, SERVICE_DESCRIPTIONS[s.code].ro, SERVICE_DESCRIPTIONS[s.code].en)
+                    ? locale === 'ru'
+                      ? SERVICE_DESCRIPTIONS[s.code].ru
+                      : loc(locale, SERVICE_DESCRIPTIONS[s.code].ro, SERVICE_DESCRIPTIONS[s.code].en)
                     : loc(locale, s.descriptionRo, s.descriptionEn)}
                 </p>
                 {SERVICE_INCLUDED[s.code] && (
@@ -125,7 +129,7 @@ export default async function PricingPage({
                       {t.included}
                     </p>
                     <ul className="mt-3 grid gap-2">
-                      {(locale === 'en' ? SERVICE_INCLUDED[s.code].en : SERVICE_INCLUDED[s.code].ro).map(
+                      {(locale === 'ru' ? SERVICE_INCLUDED[s.code].ru : locale === 'en' ? SERVICE_INCLUDED[s.code].en : SERVICE_INCLUDED[s.code].ro).map(
                         (item) => (
                           <li
                             key={item}
@@ -145,12 +149,16 @@ export default async function PricingPage({
               <div className={styles.serviceMeta}>
                 <div className={styles.servicePrice}>
                   {SERVICE_PRICE_META[s.code]
-                    ? loc(locale, SERVICE_PRICE_META[s.code].price.ro, SERVICE_PRICE_META[s.code].price.en)
+                    ? locale === 'ru'
+                      ? SERVICE_PRICE_META[s.code].price.ru
+                      : loc(locale, SERVICE_PRICE_META[s.code].price.ro, SERVICE_PRICE_META[s.code].price.en)
                     : price(locale, s)}
                 </div>
                 {SERVICE_PRICE_META[s.code] ? (
                   <div className={styles.serviceDuration}>
-                    {loc(locale, SERVICE_PRICE_META[s.code].duration.ro, SERVICE_PRICE_META[s.code].duration.en)}
+                    {locale === 'ru'
+                      ? SERVICE_PRICE_META[s.code].duration.ru
+                      : loc(locale, SERVICE_PRICE_META[s.code].duration.ro, SERVICE_PRICE_META[s.code].duration.en)}
                   </div>
                 ) : s.durationMin ? (
                   <div className={styles.serviceDuration}>

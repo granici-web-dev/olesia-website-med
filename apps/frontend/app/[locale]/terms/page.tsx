@@ -39,13 +39,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
-      ? 'Terms & Conditions | Dr. Olesea Jalba'
-      : 'Termeni și condiții | Dr. Olesea Jalba',
-    description: en
-      ? 'Terms of use for online consultation services — booking, payment, cancellation, and the limits of the medical services.'
-      : 'Condițiile de utilizare a serviciilor de consultații online — programare, plată, anulare și limitele serviciilor medicale.',
+    title: ru
+      ? 'Условия использования | Dr. Olesea Jalba'
+      : en
+        ? 'Terms & Conditions | Dr. Olesea Jalba'
+        : 'Termeni și condiții | Dr. Olesea Jalba',
+    description: ru
+      ? 'Условия пользования услугами онлайн-консультаций — запись, оплата, отмена и ограничения медицинских услуг.'
+      : en
+        ? 'Terms of use for online consultation services — booking, payment, cancellation, and the limits of the medical services.'
+        : 'Condițiile de utilizare a serviciilor de consultații online — programare, plată, anulare și limitele serviciilor medicale.',
   };
 }
 
@@ -53,47 +58,53 @@ interface TocItem {
   id: string;
   ro: string;
   en: string;
+  ru: string;
 }
 
 const TOC: TocItem[] = [
-  { id: 'pe-scurt', ro: 'Pe scurt', en: 'In short' },
-  { id: 'servicii', ro: 'Serviciile oferite', en: 'The services' },
-  { id: 'utilizatori', ro: 'Cine poate folosi', en: 'Who can use them' },
-  { id: 'programare', ro: 'Programare', en: 'Booking' },
-  { id: 'plata', ro: 'Plată', en: 'Payment' },
-  { id: 'anulare', ro: 'Anulare și rambursare', en: 'Cancellation & refunds' },
-  { id: 'natura', ro: 'Natura serviciilor', en: 'Nature of the services' },
-  { id: 'obligatii', ro: 'Obligațiile tale', en: 'Your obligations' },
-  { id: 'raspundere', ro: 'Răspundere', en: 'Liability' },
-  { id: 'proprietate', ro: 'Proprietate intelectuală', en: 'Intellectual property' },
-  { id: 'confidentialitate', ro: 'Confidențialitate', en: 'Privacy' },
-  { id: 'modificari', ro: 'Modificări', en: 'Changes' },
-  { id: 'lege', ro: 'Legea aplicabilă', en: 'Governing law' },
-  { id: 'contact', ro: 'Contact', en: 'Contact' },
+  { id: 'pe-scurt', ro: 'Pe scurt', en: 'In short', ru: 'Коротко' },
+  { id: 'servicii', ro: 'Serviciile oferite', en: 'The services', ru: 'Услуги' },
+  { id: 'utilizatori', ro: 'Cine poate folosi', en: 'Who can use them', ru: 'Кто может пользоваться' },
+  { id: 'programare', ro: 'Programare', en: 'Booking', ru: 'Запись' },
+  { id: 'plata', ro: 'Plată', en: 'Payment', ru: 'Оплата' },
+  { id: 'anulare', ro: 'Anulare și rambursare', en: 'Cancellation & refunds', ru: 'Отмена и возврат' },
+  { id: 'natura', ro: 'Natura serviciilor', en: 'Nature of the services', ru: 'Характер услуг' },
+  { id: 'obligatii', ro: 'Obligațiile tale', en: 'Your obligations', ru: 'Ваши обязанности' },
+  { id: 'raspundere', ro: 'Răspundere', en: 'Liability', ru: 'Ответственность' },
+  { id: 'proprietate', ro: 'Proprietate intelectuală', en: 'Intellectual property', ru: 'Интеллектуальная собственность' },
+  { id: 'confidentialitate', ro: 'Confidențialitate', en: 'Privacy', ru: 'Конфиденциальность' },
+  { id: 'modificari', ro: 'Modificări', en: 'Changes', ru: 'Изменения' },
+  { id: 'lege', ro: 'Legea aplicabilă', en: 'Governing law', ru: 'Применимое право' },
+  { id: 'contact', ro: 'Contact', en: 'Contact', ru: 'Контакты' },
 ];
 
-type Bi = { ro: string; en: string };
+type Bi = { ro: string; en: string; ru: string };
 
 const SUMMARY: Bi[] = [
   {
     ro: 'Acești termeni reglementează folosirea serviciilor noastre.',
     en: 'These terms govern how you use our services.',
+    ru: 'Настоящие Условия регулируют пользование нашими услугами.',
   },
   {
     ro: 'Consultațiile online au limite și nu sunt pentru urgențe — în caz de urgență, sună la 112.',
     en: 'Online consultations have limits and aren’t for emergencies — in an emergency, call 112.',
+    ru: 'Онлайн-консультации ограничены и не предназначены для экстренных случаев — в неотложной ситуации звоните 112.',
   },
   {
     ro: 'Plata se face prin transfer bancar, înainte de consultație.',
     en: 'Payment is by bank transfer, before the consultation.',
+    ru: 'Оплата — банковским переводом, до консультации.',
   },
   {
     ro: 'Poți anula sau reprograma cu cel puțin 24 de ore înainte.',
     en: 'You can cancel or reschedule at least 24 hours in advance.',
+    ru: 'Вы можете отменить или перенести запись не позднее чем за 24 часа.',
   },
   {
     ro: 'Pentru copii, serviciile sunt solicitate de un părinte sau reprezentant legal.',
     en: 'For children, services are requested by a parent or legal guardian.',
+    ru: 'Услуги для детей заказывает родитель или законный представитель.',
   },
 ];
 
@@ -101,23 +112,28 @@ const NATURE: Bi[] = [
   {
     ro: 'Consultațiile online au limite și nu înlocuiesc o examinare fizică atunci când aceasta este necesară.',
     en: 'Online consultations have limits and don’t replace a physical examination when one is needed.',
+    ru: 'Онлайн-консультации ограничены и не заменяют очный осмотр, когда он необходим.',
   },
   {
     ro: 'Medicul poate stabili că situația necesită o consultație în persoană sau investigații suplimentare și te poate îndruma în acest sens.',
     en: 'The doctor may determine that the situation needs an in-person consultation or further tests, and will guide you accordingly.',
+    ru: 'Врач может решить, что ситуация требует очной консультации или дополнительных обследований, и подскажет, что делать дальше.',
   },
   {
     ro: 'Nu garantăm un anumit rezultat medical.',
     en: 'We don’t guarantee any particular medical outcome.',
+    ru: 'Мы не гарантируем определённый медицинский результат.',
   },
   {
     ro: 'Materialele informative — ghiduri, meniuri, articole — au caracter general și nu reprezintă sfaturi medicale personalizate.',
     en: 'Informational materials — guides, menus, articles — are general in nature and aren’t personalised medical advice.',
+    ru: 'Информационные материалы — руководства, меню, статьи — носят общий характер и не заменяют индивидуальную медицинскую консультацию.',
   },
   {
     // ⚠ prescriptions: confirm MD telemedicine regulations with lawyer
     ro: 'Eliberarea rețetelor depinde de situație și de reglementările aplicabile.',
     en: 'Whether a prescription is issued depends on the situation and the applicable regulations.',
+    ru: 'Выписка рецептов зависит от ситуации и применимых нормативных требований.',
   },
 ];
 
@@ -144,15 +160,16 @@ export default async function TermsPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   return (
     <main className="bg-cream text-ink">
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
-          { label: en ? 'Home' : 'Acasă', href: '/' },
-          { label: en ? 'Terms' : 'Termeni' },
+          { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
+          { label: ru ? 'Условия' : en ? 'Terms' : 'Termeni' },
         ]}
       />
       {/* 1 · Hero — title + provider meta */}
@@ -160,11 +177,15 @@ export default async function TermsPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {en ? 'Terms' : 'Termeni'}
+            {ru ? 'Условия' : en ? 'Terms' : 'Termeni'}
           </p>
           <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 lg:gap-20">
             <h1 className="serif max-w-[15ch] text-[clamp(2.5rem,5.6vw,5rem)] leading-[1.04] tracking-[-0.015em] text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Условия <span className="serif-it text-sage">использования</span>
+                </>
+              ) : en ? (
                 <>
                   Terms &amp; <span className="serif-it text-sage">conditions</span>
                 </>
@@ -176,21 +197,23 @@ export default async function TermsPage({
             </h1>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="max-w-[46ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
-                {en
-                  ? 'The terms for using our online consultation services — booking, payment, cancellation, and the limits of the medical services.'
-                  : 'Condițiile de utilizare a serviciilor noastre de consultații online — programare, plată, anulare și limitele serviciilor medicale.'}
+                {ru
+                  ? 'Условия пользования нашими услугами онлайн-консультаций — запись, оплата, отмена и ограничения медицинских услуг.'
+                  : en
+                    ? 'The terms for using our online consultation services — booking, payment, cancellation, and the limits of the medical services.'
+                    : 'Condițiile de utilizare a serviciilor noastre de consultații online — programare, plată, anulare și limitele serviciilor medicale.'}
               </p>
               <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-[0.9375rem]">
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
-                  {en ? 'Provider' : 'Furnizor'}
+                  {ru ? 'Поставщик услуг' : en ? 'Provider' : 'Furnizor'}
                 </dt>
                 <dd className="text-ink">{META.provider}</dd>
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
-                  {en ? 'Updated' : 'Actualizat'}
+                  {ru ? 'Обновлено' : en ? 'Updated' : 'Actualizat'}
                 </dt>
                 <dd className="text-ink">{en ? META.updatedEn : META.updatedRo}</dd>
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
-                  {en ? 'Contact' : 'Contact'}
+                  {ru ? 'Контакты' : en ? 'Contact' : 'Contact'}
                 </dt>
                 <dd>
                   <a href={`mailto:${META.email}`} className={inlineLink}>
@@ -207,7 +230,7 @@ export default async function TermsPage({
       <section id="pe-scurt" className="scroll-mt-24 border-b border-[var(--rule)] bg-paper">
         <div className="shell grid gap-8 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-20">
           <h2 className="serif text-[clamp(1.9rem,3.4vw,2.7rem)] leading-tight tracking-[-0.02em] text-balance">
-            {en ? 'In short' : 'Pe scurt'}
+            {ru ? 'Коротко' : en ? 'In short' : 'Pe scurt'}
           </h2>
           <ul className="grid max-w-[62ch] gap-4">
             {SUMMARY.map((s) => (
@@ -225,10 +248,10 @@ export default async function TermsPage({
       {/* 3 · Table of contents (sticky) + sections */}
       <section className="shell grid gap-12 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-24 lg:gap-24">
         <nav
-          aria-label={en ? 'Sections' : 'Secțiuni'}
+          aria-label={ru ? 'Разделы' : en ? 'Sections' : 'Secțiuni'}
           className="min-w-0 md:sticky md:top-[133px] md:self-start"
         >
-          <p className="eyebrow mb-4">{en ? 'Contents' : 'Cuprins'}</p>
+          <p className="eyebrow mb-4">{ru ? 'Содержание' : en ? 'Contents' : 'Cuprins'}</p>
           <ul className="flex flex-wrap gap-2 md:flex-col md:flex-nowrap md:gap-1">
             {TOC.map((item) => (
               <li key={item.id}>
@@ -236,7 +259,7 @@ export default async function TermsPage({
                   href={`#${item.id}`}
                   className="mono inline-block whitespace-nowrap rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage md:rounded-none md:border-0 md:border-l md:px-3 md:py-1.5 md:text-[12px] md:normal-case md:tracking-normal"
                 >
-                  {en ? item.en : item.ro}
+                  {ru ? item.ru : en ? item.en : item.ro}
                 </a>
               </li>
             ))}
@@ -245,9 +268,20 @@ export default async function TermsPage({
 
         <div className="min-w-0">
           {/* Serviciile oferite */}
-          <Section id="servicii" title={en ? 'The services we offer' : 'Serviciile oferite'}>
+          <Section id="servicii" title={ru ? 'Предлагаемые услуги' : en ? 'The services we offer' : 'Serviciile oferite'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en ? (
+              {ru ? (
+                <>
+                  Мы предлагаем видеоконсультации — педиатрические, по питанию и
+                  интегративные — а также услуги через портал: «Спросите врача» и
+                  3-месячное наблюдение. Детали и продолжительность каждой услуги описаны
+                  на странице{' '}
+                  <Link href="/services" className={inlineLink}>
+                    Услуги
+                  </Link>
+                  .
+                </>
+              ) : en ? (
                 <>
                   We offer video consultations — pediatric, nutrition, and integrative —
                   and portal-based services: “Ask the doctor” and 3-month monitoring. The
@@ -272,27 +306,41 @@ export default async function TermsPage({
           </Section>
 
           {/* Cine poate folosi serviciile */}
-          <Section id="utilizatori" title={en ? 'Who can use the services' : 'Cine poate folosi serviciile'}>
+          <Section id="utilizatori" title={ru ? 'Кто может пользоваться услугами' : en ? 'Who can use the services' : 'Cine poate folosi serviciile'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'For services intended for children, booking and acceptance of these terms are done by a parent or legal guardian, who confirms they have the right to act on the child’s behalf.'
-                : 'Pentru serviciile destinate copiilor, programarea și acceptarea acestor termeni se fac de către un părinte sau reprezentantul legal, care confirmă că are dreptul să acționeze în numele copilului.'}
+              {ru
+                ? 'Если услуга предназначена для ребёнка, запись оформляет и настоящие Условия принимает родитель или законный представитель, который подтверждает своё право действовать от имени ребёнка.'
+                : en
+                  ? 'For services intended for children, booking and acceptance of these terms are done by a parent or legal guardian, who confirms they have the right to act on the child’s behalf.'
+                  : 'Pentru serviciile destinate copiilor, programarea și acceptarea acestor termeni se fac de către un părinte sau reprezentantul legal, care confirmă că are dreptul să acționeze în numele copilului.'}
             </p>
           </Section>
 
           {/* Programare și confirmare */}
-          <Section id="programare" title={en ? 'Booking & confirmation' : 'Programare și confirmare'}>
+          <Section id="programare" title={ru ? 'Запись и подтверждение' : en ? 'Booking & confirmation' : 'Programare și confirmare'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'You book video consultations through Calendly and receive a confirmation of the time you chose. For portal-based services, you send a request or a question.'
-                : 'Programarea consultațiilor video se face prin Calendly; vei primi o confirmare a orei alese. Pentru serviciile prin portal, trimiți o solicitare sau o întrebare.'}
+              {ru
+                ? 'На видеоконсультации вы записываетесь через Calendly и получаете подтверждение выбранного времени. Для услуг через портал — отправляете заявку или вопрос.'
+                : en
+                  ? 'You book video consultations through Calendly and receive a confirmation of the time you chose. For portal-based services, you send a request or a question.'
+                  : 'Programarea consultațiilor video se face prin Calendly; vei primi o confirmare a orei alese. Pentru serviciile prin portal, trimiți o solicitare sau o întrebare.'}
             </p>
           </Section>
 
           {/* Plată */}
-          <Section id="plata" title={en ? 'Payment' : 'Plată'}>
+          <Section id="plata" title={ru ? 'Оплата' : en ? 'Payment' : 'Plată'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en ? (
+              {ru ? (
+                <>
+                  Оплатить можно только банковским переводом — онлайн-оплаты нет —
+                  и сделать это нужно до консультации, после того как запись подтверждена.
+                  Цены указаны для каждой услуги и на странице{' '}
+                  <Link href="/pricing" className={inlineLink}>
+                    Тарифы
+                  </Link>
+                  . Подтверждение оплаты придёт по электронной почте.
+                </>
+              ) : en ? (
                 <>
                   Payment is made exclusively by bank transfer — there is no online payment —
                   and is due before the consultation, once the booking is confirmed. Prices
@@ -319,27 +367,31 @@ export default async function TermsPage({
           {/* Anulare, reprogramare și rambursare */}
           <Section
             id="anulare"
-            title={en ? 'Cancellation, rescheduling & refunds' : 'Anulare, reprogramare și rambursare'}
+            title={ru ? 'Отмена, перенос и возврат средств' : en ? 'Cancellation, rescheduling & refunds' : 'Anulare, reprogramare și rambursare'}
           >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'You can cancel or reschedule a consultation at least 24 hours before the scheduled time, from your confirmation link. Refunds are made if you cancel within this window, per the cancellation policy. If you’re too late for the consultation to take place, we can reschedule it.'
-                : 'Poți anula sau reprograma o consultație cu cel puțin 24 de ore înainte de ora programată, din linkul de confirmare. Rambursările se fac dacă anulezi în acest interval, conform politicii de anulare. Dacă întârzii prea mult pentru a desfășura consultația, o putem reprograma.'}
+              {ru
+                ? 'Вы можете отменить или перенести консультацию не позднее чем за 24 часа до назначенного времени — по ссылке из подтверждения. Если вы отменяете запись в этот срок, мы возвращаем оплату согласно политике отмены. Если вы опаздываете настолько, что провести консультацию уже нельзя, мы можем её перенести.'
+                : en
+                  ? 'You can cancel or reschedule a consultation at least 24 hours before the scheduled time, from your confirmation link. Refunds are made if you cancel within this window, per the cancellation policy. If you’re too late for the consultation to take place, we can reschedule it.'
+                  : 'Poți anula sau reprograma o consultație cu cel puțin 24 de ore înainte de ora programată, din linkul de confirmare. Rambursările se fac dacă anulezi în acest interval, conform politicii de anulare. Dacă întârzii prea mult pentru a desfășura consultația, o putem reprograma.'}
             </p>
           </Section>
 
           {/* Natura serviciilor medicale și limitele lor — CORE */}
           <Section
             id="natura"
-            title={en ? 'The nature of the medical services & their limits' : 'Natura serviciilor medicale și limitele lor'}
+            title={ru ? 'Характер медицинских услуг и их ограничения' : en ? 'The nature of the medical services & their limits' : 'Natura serviciilor medicale și limitele lor'}
           >
             <Callout
               tone="danger"
-              label={en ? 'Not for emergencies' : 'Nu pentru urgențe'}
+              label={ru ? 'Не для экстренных случаев' : en ? 'Not for emergencies' : 'Nu pentru urgențe'}
             >
-              {en
-                ? 'The services aren’t intended for medical emergencies. In an emergency, call 112 or go to the nearest emergency service.'
-                : 'Serviciile nu sunt destinate urgențelor medicale. În caz de urgență, sună la 112 sau mergi la cel mai apropiat serviciu de urgență.'}
+              {ru
+                ? 'Услуги не предназначены для экстренной медицинской помощи. В неотложной ситуации звоните 112 или обратитесь в ближайшую службу экстренной помощи.'
+                : en
+                  ? 'The services aren’t intended for medical emergencies. In an emergency, call 112 or go to the nearest emergency service.'
+                  : 'Serviciile nu sunt destinate urgențelor medicale. În caz de urgență, sună la 112 sau mergi la cel mai apropiat serviciu de urgență.'}
             </Callout>
             <ul className="mt-8 grid gap-4">
               {NATURE.map((n) => (
@@ -354,36 +406,50 @@ export default async function TermsPage({
           </Section>
 
           {/* Obligațiile tale */}
-          <Section id="obligatii" title={en ? 'Your obligations' : 'Obligațiile tale'}>
+          <Section id="obligatii" title={ru ? 'Ваши обязанности' : en ? 'Your obligations' : 'Obligațiile tale'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'You agree to give accurate, complete information about your health and to use the services appropriately and in line with these terms.'
-                : 'Te angajezi să oferi informații corecte și complete despre starea de sănătate și să folosești serviciile în mod adecvat și conform acestor termeni.'}
+              {ru
+                ? 'Вы обязуетесь предоставлять точную и полную информацию о состоянии здоровья и пользоваться услугами добросовестно, в соответствии с настоящими Условиями.'
+                : en
+                  ? 'You agree to give accurate, complete information about your health and to use the services appropriately and in line with these terms.'
+                  : 'Te angajezi să oferi informații corecte și complete despre starea de sănătate și să folosești serviciile în mod adecvat și conform acestor termeni.'}
             </p>
           </Section>
 
           {/* Limitarea răspunderii */}
-          <Section id="raspundere" title={en ? 'Limitation of liability' : 'Limitarea răspunderii'}>
+          <Section id="raspundere" title={ru ? 'Ограничение ответственности' : en ? 'Limitation of liability' : 'Limitarea răspunderii'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'Within the limits allowed by law, our liability relates to the provision of the services described here. These terms don’t limit the rights you have as a consumer.'
-                : 'În limitele permise de lege, răspunderea noastră se referă la prestarea serviciilor descrise aici. Acești termeni nu limitează drepturile pe care le ai în calitate de consumator.'}
+              {ru
+                ? 'В пределах, допускаемых законом, наша ответственность ограничивается оказанием описанных здесь услуг. Настоящие Условия не ограничивают ваши права как потребителя.'
+                : en
+                  ? 'Within the limits allowed by law, our liability relates to the provision of the services described here. These terms don’t limit the rights you have as a consumer.'
+                  : 'În limitele permise de lege, răspunderea noastră se referă la prestarea serviciilor descrise aici. Acești termeni nu limitează drepturile pe care le ai în calitate de consumator.'}
             </p>
           </Section>
 
           {/* Proprietate intelectuală */}
-          <Section id="proprietate" title={en ? 'Intellectual property' : 'Proprietate intelectuală'}>
+          <Section id="proprietate" title={ru ? 'Интеллектуальная собственность' : en ? 'Intellectual property' : 'Proprietate intelectuală'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'The site’s content — text, guides, menus, and articles — belongs to us and may not be reproduced or distributed without our consent.'
-                : 'Conținutul site-ului — texte, ghiduri, meniuri și articole — ne aparține și nu poate fi reprodus sau distribuit fără acordul nostru.'}
+              {ru
+                ? 'Содержимое сайта — тексты, руководства, меню и статьи — принадлежит нам и не может быть воспроизведено или распространено без нашего согласия.'
+                : en
+                  ? 'The site’s content — text, guides, menus, and articles — belongs to us and may not be reproduced or distributed without our consent.'
+                  : 'Conținutul site-ului — texte, ghiduri, meniuri și articole — ne aparține și nu poate fi reprodus sau distribuit fără acordul nostru.'}
             </p>
           </Section>
 
           {/* Confidențialitate */}
-          <Section id="confidentialitate" title={en ? 'Privacy' : 'Confidențialitate'}>
+          <Section id="confidentialitate" title={ru ? 'Конфиденциальность' : en ? 'Privacy' : 'Confidențialitate'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en ? (
+              {ru ? (
+                <>
+                  Порядок обработки ваших данных описан в{' '}
+                  <Link href="/gdpr" className={inlineLink}>
+                    Политике конфиденциальности
+                  </Link>
+                  .
+                </>
+              ) : en ? (
                 <>
                   How we process your data is described in our{' '}
                   <Link href="/gdpr" className={inlineLink}>
@@ -404,27 +470,31 @@ export default async function TermsPage({
           </Section>
 
           {/* Modificarea termenilor */}
-          <Section id="modificari" title={en ? 'Changes to these terms' : 'Modificarea termenilor'}>
+          <Section id="modificari" title={ru ? 'Изменение условий' : en ? 'Changes to these terms' : 'Modificarea termenilor'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'We may update these terms. The date of the latest update is shown at the top of the page.'
-                : 'Putem actualiza acești termeni. Data ultimei actualizări este afișată în partea de sus a paginii.'}
+              {ru
+                ? 'Мы можем обновлять настоящие Условия. Дата последнего обновления указана в верхней части страницы.'
+                : en
+                  ? 'We may update these terms. The date of the latest update is shown at the top of the page.'
+                  : 'Putem actualiza acești termeni. Data ultimei actualizări este afișată în partea de sus a paginii.'}
             </p>
           </Section>
 
           {/* Legea aplicabilă */}
-          <Section id="lege" title={en ? 'Governing law' : 'Legea aplicabilă'}>
+          <Section id="lege" title={ru ? 'Применимое право' : en ? 'Governing law' : 'Legea aplicabilă'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'These terms are governed by the law of the Republic of Moldova. Any disputes are resolved in accordance with the law, without affecting your rights as a consumer.'
-                : 'Acești termeni sunt guvernați de legislația Republicii Moldova. Eventualele litigii se soluționează conform legii, fără a afecta drepturile tale de consumator.'}
+              {ru
+                ? 'Настоящие Условия регулируются законодательством Республики Молдова. Возможные споры разрешаются согласно закону, без ущемления ваших прав как потребителя.'
+                : en
+                  ? 'These terms are governed by the law of the Republic of Moldova. Any disputes are resolved in accordance with the law, without affecting your rights as a consumer.'
+                  : 'Acești termeni sunt guvernați de legislația Republicii Moldova. Eventualele litigii se soluționează conform legii, fără a afecta drepturile tale de consumator.'}
             </p>
           </Section>
 
           {/* Contact */}
-          <Section id="contact" title={en ? 'Contact' : 'Contact'}>
+          <Section id="contact" title={ru ? 'Контакты' : en ? 'Contact' : 'Contact'}>
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink text-pretty">
-              {en ? 'For questions about these terms, write to us at ' : 'Pentru întrebări despre acești termeni, scrie-ne la '}
+              {ru ? 'По вопросам, связанным с настоящими Условиями, напишите нам на ' : en ? 'For questions about these terms, write to us at ' : 'Pentru întrebări despre acești termeni, scrie-ne la '}
               <a href={`mailto:${META.email}`} className={inlineLink}>
                 {META.email}
               </a>
@@ -440,7 +510,11 @@ export default async function TermsPage({
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-[34rem]">
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.04] tracking-[-0.02em] text-cream text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Вопрос об <span className="serif-it text-[var(--sage-soft)]">условиях?</span>
+                  </>
+                ) : en ? (
                   <>
                     A question about <span className="serif-it text-[var(--sage-soft)]">the terms?</span>
                   </>
@@ -452,17 +526,19 @@ export default async function TermsPage({
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/contact" className={creamPill}>
-                  {en ? 'Contact us' : 'Scrie-ne'}
+                  {ru ? 'Напишите нам' : en ? 'Contact us' : 'Scrie-ne'}
                 </Link>
                 <Link href="/gdpr" className={creamUnderline}>
-                  {en ? 'Read the privacy policy →' : 'Vezi politica de confidențialitate →'}
+                  {ru ? 'Читать политику конфиденциальности →' : en ? 'Read the privacy policy →' : 'Vezi politica de confidențialitate →'}
                 </Link>
               </div>
             </div>
             <p className="max-w-[28ch] text-sm leading-[1.7] text-[var(--sage-soft)] text-pretty md:text-right">
-              {en
-                ? 'These terms apply when you book or use our services.'
-                : 'Acești termeni se aplică atunci când programezi sau folosești serviciile noastre.'}
+              {ru
+                ? 'Настоящие Условия применяются, когда вы записываетесь на наши услуги или пользуетесь ими.'
+                : en
+                  ? 'These terms apply when you book or use our services.'
+                  : 'Acești termeni se aplică atunci când programezi sau folosești serviciile noastre.'}
             </p>
           </div>
         </div>

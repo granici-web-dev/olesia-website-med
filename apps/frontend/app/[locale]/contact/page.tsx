@@ -24,39 +24,50 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
+    title: ru
+      ? 'Контакты | Dr. Olesea Jalba'
+      : en
       ? 'Contact | Dr. Olesea Jalba'
       : 'Contact | Dr. Olesea Jalba',
-    description: en
+    description: ru
+      ? 'Свяжитесь с нами по вопросам онлайн-консультаций, записи на приём и оплаты. По медицинским вопросам используйте «Спросить врача».'
+      : en
       ? 'Get in touch about online consultations, appointments, and payment. For a medical question, use “Ask the doctor”.'
       : 'Contactează-ne pentru întrebări despre consultații online, programări și plată. Pentru întrebări medicale, folosește „Întreabă medicul".',
   };
 }
 
-type Bi = { ro: string; en: string };
+type Bi = { ro: string; en: string; ru: string };
 
 /* Triage routes — intent → destination. */
 const TRIAGE: { situation: Bi; route: Bi; href: string; anchor?: boolean }[] = [
   {
-    situation: { ro: 'Vreau să programez o consultație', en: 'I want to book a consultation' },
-    route: { ro: 'Vezi serviciile', en: 'See the services' },
+    situation: {
+      ro: 'Vreau să programez o consultație',
+      en: 'I want to book a consultation',
+      ru: 'Хочу записаться на консультацию',
+    },
+    route: { ro: 'Vezi serviciile', en: 'See the services', ru: 'Посмотреть услуги' },
     href: '/services',
   },
   {
     situation: {
       ro: 'Am o întrebare medicală pentru medic',
       en: 'I have a medical question for the doctor',
+      ru: 'У меня медицинский вопрос к врачу',
     },
-    route: { ro: 'Întreabă medicul · 48h', en: 'Ask the doctor · 48h' },
+    route: { ro: 'Întreabă medicul · 48h', en: 'Ask the doctor · 48h', ru: 'Спросить врача · 48ч' },
     href: '/quick-question',
   },
   {
     situation: {
       ro: 'Am o întrebare despre servicii, plată sau cum funcționează',
       en: 'I have a question about services, payment, or how it works',
+      ru: 'У меня вопрос об услугах, оплате или о том, как всё устроено',
     },
-    route: { ro: 'Scrie-ne mai jos', en: 'Write to us below' },
+    route: { ro: 'Scrie-ne mai jos', en: 'Write to us below', ru: 'Напишите нам ниже' },
     href: '#contact-form',
     anchor: true,
   },
@@ -107,7 +118,8 @@ export default async function ContactPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   return (
     <main className="bg-cream text-ink">
@@ -116,12 +128,16 @@ export default async function ContactPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {en ? 'Contact' : 'Contact'}
+            {ru ? 'Контакты' : en ? 'Contact' : 'Contact'}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[14ch] text-[clamp(2.8rem,6.5vw,5.8rem)] leading-[1.02] tracking-[-0.015em] text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Давайте <span className="serif-it text-sage">поговорим</span>
+                  </>
+                ) : en ? (
                   <>
                     Let’s <span className="serif-it text-sage">talk</span>
                   </>
@@ -132,19 +148,23 @@ export default async function ContactPage({
                 )}
               </h1>
               <p className="mt-7 max-w-[36ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-                {en
+                {ru
+                  ? 'Вопрос об услугах, запись на приём или оплата? Напишите нам.'
+                  : en
                   ? 'A question about services, an appointment, or payment? Write to us.'
                   : 'Ai o întrebare despre servicii, o programare sau o plată? Scrie-ne.'}
               </p>
               <div className="mt-9">
                 <a href="#contact-form" className={underlineLg}>
-                  {en ? 'Go to the form' : 'Mergi la formular'} →
+                  {ru ? 'Перейти к форме' : en ? 'Go to the form' : 'Mergi la formular'} →
                 </a>
               </div>
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
-                {en
+                {ru
+                  ? 'Медицинский вопрос о ребёнке или о себе? Воспользуйтесь сервисом «Спросить врача» — обоснованный ответ придёт в течение 48 часов, с уважением к согласию и границам.'
+                  : en
                   ? 'For a medical question about your child or yourself, use the “Ask the doctor” service — you’ll get a documented answer within 48 hours, with proper consent and boundaries.'
                   : 'Pentru o întrebare medicală despre copilul tău sau despre tine, folosește serviciul „Întreabă medicul" — primești un răspuns documentat în 48 de ore, cu acordul și limitele corecte.'}
               </p>
@@ -152,7 +172,7 @@ export default async function ContactPage({
                 href="/quick-question"
                 className="mono mt-6 inline-flex items-center gap-2 border-b border-sage pb-1 text-[11px] uppercase tracking-[0.12em] text-sage-text transition-colors hover:border-ink hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
               >
-                {en ? 'Ask the doctor' : 'Întreabă medicul'} →
+                {ru ? 'Спросить врача' : en ? 'Ask the doctor' : 'Întreabă medicul'} →
               </Link>
             </div>
           </div>
@@ -163,7 +183,11 @@ export default async function ContactPage({
       <section className="shell py-16 md:py-24">
         <div className="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
           <h2 className="serif text-[clamp(2.2rem,4.5vw,4rem)] leading-[1.0] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Чем мы можем <span className="serif-it text-sage">помочь?</span>
+              </>
+            ) : en ? (
               <>
                 How can we <span className="serif-it text-sage">help?</span>
               </>
@@ -174,7 +198,9 @@ export default async function ContactPage({
             )}
           </h2>
           <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">
-            {en
+            {ru
+              ? 'Выберите то, что похоже на вашу ситуацию — мы подскажем верный путь.'
+              : en
               ? 'Pick what sounds like your situation — we’ll point you the right way.'
               : 'Alege ce seamănă cu situația ta — te îndrumăm pe drumul potrivit.'}
           </p>
@@ -222,9 +248,13 @@ export default async function ContactPage({
         <div className="shell grid gap-12 py-20 md:grid-cols-[1.1fr_0.9fr] md:gap-16 md:py-28 lg:gap-24">
           {/* Form */}
           <div>
-            <p className="eyebrow mb-3">{en ? 'Write to us' : 'Scrie-ne'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Напишите нам' : en ? 'Write to us' : 'Scrie-ne'}</p>
             <h2 className="serif text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.05] tracking-[-0.02em] text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Отправьте нам <span className="serif-it text-sage">сообщение</span>
+                </>
+              ) : en ? (
                 <>
                   Send us a <span className="serif-it text-sage">message</span>
                 </>
@@ -235,7 +265,9 @@ export default async function ContactPage({
               )}
             </h2>
             <p className="mt-4 max-w-[52ch] leading-relaxed text-ink-soft text-pretty">
-              {en
+              {ru
+                ? 'По вопросам об услугах, записи на приём или оплате. Пожалуйста, не указывайте здесь подробную медицинскую информацию.'
+                : en
                 ? 'For questions about services, appointments, or payment. Please don’t include detailed medical information here.'
                 : 'Pentru întrebări despre servicii, programări sau plată. Te rugăm să nu incluzi informații medicale detaliate aici.'}
             </p>
@@ -249,12 +281,12 @@ export default async function ContactPage({
           <aside className="flex flex-col gap-8 md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
             <div>
               <p className="eyebrow mb-5">
-                {en ? 'Other ways to reach us' : 'Alte modalități de contact'}
+                {ru ? 'Другие способы связи' : en ? 'Other ways to reach us' : 'Alte modalități de contact'}
               </p>
               <dl className="grid gap-5">
                 <div className="border-t border-[var(--rule)] pt-4">
                   <dt className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
-                    {en ? 'Email' : 'Email'}
+                    {ru ? 'Email' : en ? 'Email' : 'Email'}
                   </dt>
                   <dd className="serif mt-1.5 text-[1.4rem] leading-snug">
                     <a
@@ -267,7 +299,7 @@ export default async function ContactPage({
                 </div>
                 <div className="border-t border-[var(--rule)] pt-4">
                   <dt className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
-                    {en ? 'Phone' : 'Telefon'}
+                    {ru ? 'Телефон' : en ? 'Phone' : 'Telefon'}
                   </dt>
                   <dd className="serif mt-1.5 text-[1.4rem] leading-snug lining-nums">
                     <a
@@ -282,7 +314,7 @@ export default async function ContactPage({
             </div>
 
             <div className="border-t border-[var(--rule)] pt-7">
-              <p className="eyebrow mb-4">{en ? 'Social' : 'Rețele sociale'}</p>
+              <p className="eyebrow mb-4">{ru ? 'Соцсети' : en ? 'Social' : 'Rețele sociale'}</p>
               <ul className="flex gap-3">
                 {SOCIALS.map((s) => (
                   <li key={s.name}>

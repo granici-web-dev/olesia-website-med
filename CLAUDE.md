@@ -8,7 +8,7 @@ Entry point for Claude Code agents. **Procedural rules and read order live in `A
 - **Frontend:** Next.js 15 App Router, TypeScript strict, Tailwind CSS v4 + CSS Modules, Zustand (UI state), TanStack Query (server state), next-intl (EN/RO).
 - **Content:** **No third-party CMS — fully custom (decided 2026-06-10).** All content (services, blog, contacts, about) is served by the **NestJS content API** (`apps/api`) and edited in the custom back office (`apps/back-office`). **Sanity is dropped** — legacy `apps/frontend/lib/sanity/` is to be removed. Rationale: the back office must also own appointments/payments/GDPR data and `admin`/`editor` roles, which a CMS can't host. See `module_calendly.md`.
 - **Booking:** **Calendly** (paid plan, ≥ Standard) — webhook-driven into the `appointments` backend module. **Replaces the earlier Cal.com plan** (legacy `apps/frontend/lib/cal/` to be removed).
-- **i18n:** Two locales — `ro` (default) and `en`. Messages in `apps/frontend/i18n/messages/{ro,en}.json`.
+- **i18n:** Three locales — `ro` (default), `en`, and `ru`. Messages in `apps/frontend/i18n/messages/{ro,en,ru}.json`. Note: most page copy is authored inline via `const en/ru = locale === '…'` + `ru ? RU : en ? EN : RO` ternaries (not in the JSON), so all three branches must stay in sync. Dynamic content from the NestJS content API is still RO/EN only (`*_ro`/`*_en`) and falls back to RO for `ru`.
 - **Deploy:** Docker Compose for local/staging. Production TBD.
 
 ## Workspace layout

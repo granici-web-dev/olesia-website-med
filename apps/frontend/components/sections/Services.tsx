@@ -31,8 +31,10 @@ const CONTENT_CODE: Record<string, string> = {
 
 export async function Services() {
   const t = await getTranslations('home.services');
-  const en = (await getLocale()) === 'en';
-  const includedLabel = en ? "What's included" : 'Ce include';
+  const lc = await getLocale();
+  const en = lc === 'en';
+  const ru = lc === 'ru';
+  const includedLabel = ru ? 'Что входит' : en ? "What's included" : 'Ce include';
 
   // Group-A services (pediatric/nutrition/integrative) are calendar-backed —
   // book them through the Calendly popup using their per-service scheduling
@@ -64,7 +66,7 @@ export async function Services() {
         const url = bookingUrl.get(key) ?? CALENDLY_FALLBACK_URLS[key];
         const leadService = LEAD_SERVICE[key];
         const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
-        const includedItems = included ? (en ? included.en : included.ro) : null;
+        const includedItems = included ? (ru ? included.ru : en ? included.en : included.ro) : null;
         return (
           <Reveal key={n} as="div" className={styles.serviceRow} delay={i * 70}>
             <div className={styles.serviceNum}>{n}</div>

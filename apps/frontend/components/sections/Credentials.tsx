@@ -10,7 +10,8 @@ export function Credentials({
   locale: string;
   stats: AboutStat[];
 }) {
-  const t = (ro: string, en: string) => (locale === 'en' ? en : ro);
+  const t = (ro: string, en: string, ru: string) =>
+    locale === 'ru' ? ru : locale === 'en' ? en : ro;
   if (stats.length === 0) return null;
 
   return (
@@ -23,7 +24,7 @@ export function Credentials({
                 {s.value}
               </div>
               <div className="mt-2 text-[0.9rem] text-cream/70">
-                {t(s.labelRo, s.labelEn)}
+                {t(s.labelRo, s.labelEn, s.labelRo)}
               </div>
             </Reveal>
           ))}

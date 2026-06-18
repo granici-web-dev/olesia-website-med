@@ -16,6 +16,7 @@ export default async function ArticlePage({
 }) {
   const { locale, slug } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
 
   // Prefer the live API post; fall back to a placeholder article so a link from
   // the (placeholder-driven) listing always opens a real page instead of 404ing.
@@ -26,22 +27,29 @@ export default async function ArticlePage({
   const post = apiPost ?? {
     titleRo: ph!.title.ro,
     titleEn: ph!.title.en,
+    titleRu: ph!.title.ru,
     contentRo: ph!.body.ro,
     contentEn: ph!.body.en,
+    contentRu: ph!.body.ru,
     publishedAt: ph!.date,
     coverImageUrl: null as string | null,
     categories: [
       {
         id: ph!.category,
-        nameRo: placeholderCategoryLabel(ph!.category, false),
-        nameEn: placeholderCategoryLabel(ph!.category, true),
+        nameRo: placeholderCategoryLabel(ph!.category, 'ro'),
+        nameEn: placeholderCategoryLabel(ph!.category, 'en'),
+        nameRu: placeholderCategoryLabel(ph!.category, 'ru'),
       },
     ],
   };
 
-  const title = loc(locale, post.titleRo, post.titleEn);
+  // Russian content only exists on placeholder posts; live API posts fall back to RO.
+  const pick = (ro: string, enTxt: string, ruTxt?: string) =>
+    ru ? ruTxt ?? ro : loc(locale, ro, enTxt);
+
+  const title = pick(post.titleRo, post.titleEn, 'titleRu' in post ? post.titleRu : undefined);
   const date = post.publishedAt
-    ? new Intl.DateTimeFormat(en ? 'en-US' : 'ro-RO', {
+    ? new Intl.DateTimeFormat(ru ? 'ru-RU' : en ? 'en-US' : 'ro-RO', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -54,8 +62,8 @@ export default async function ArticlePage({
         <Breadcrumbs
           className="mb-10 md:mb-12"
           items={[
-            { label: en ? 'Home' : 'Acasă', href: '/' },
-            { label: en ? 'Articles' : 'Articole', href: '/articles' },
+            { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
+            { label: ru ? 'Статьи' : en ? 'Articles' : 'Articole', href: '/articles' },
             { label: title },
           ]}
         />
@@ -63,7 +71,7 @@ export default async function ArticlePage({
         <div className="flex flex-wrap items-center gap-3">
           {post.categories.map((c) => (
             <span key={c.id} className="eyebrow !text-sage-deep">
-              {loc(locale, c.nameRo, c.nameEn)}
+              {pick(c.nameRo, c.nameEn, 'nameRu' in c ? c.nameRu : undefined)}
             </span>
           ))}
           {date ? <span className="mono text-xs text-ink-soft">{date}</span> : null}
@@ -83,7 +91,7 @@ export default async function ArticlePage({
         ) : null}
 
         <div className="mt-10 text-[1.08rem]">
-          {renderMarkdown(loc(locale, post.contentRo, post.contentEn))}
+          {renderMarkdown(pick(post.contentRo, post.contentEn, 'contentRu' in post ? post.contentRu : undefined))}
         </div>
       </article>
     </main>

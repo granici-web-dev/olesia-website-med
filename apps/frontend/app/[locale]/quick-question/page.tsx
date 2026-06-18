@@ -21,80 +21,91 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
+    title: ru
+      ? 'Быстрый вопрос — ответ за 48 ч | Dr. Olesea Jalba'
+      : en
       ? 'Quick question — answer in 48h | Dr. Olesea Jalba'
       : 'Întrebare rapidă — răspuns în 48h | Dr. Olesea Jalba',
-    description: en
+    description: ru
+      ? 'Есть конкретный, неэкстренный вопрос? Получите письменный, обоснованный ответ от педиатра за 48 часов. Можно приложить фото и документы.'
+      : en
       ? 'Have one specific, non-urgent question? Get a written, documented answer from a pediatrician within 48 hours. Photos and documents welcome.'
       : 'Ai o întrebare punctuală, non-urgentă? Primești un răspuns scris și documentat de la un medic pediatru în 48 de ore. Poți atașa poze și documente.',
   };
 }
 
-type Bi = { ro: string; en: string };
+type Bi = { ro: string; en: string; ru: string };
 
 const STEPS: { title: Bi; text: Bi }[] = [
   {
-    title: { ro: 'Trimiți întrebarea', en: 'Send your question' },
+    title: { ro: 'Trimiți întrebarea', en: 'Send your question', ru: 'Отправьте вопрос' },
     text: {
       ro: 'Completezi un formular scurt — adaugă poze sau documente, dacă e cazul.',
       en: 'Fill in a short form — add photos or documents if needed.',
+      ru: 'Заполните короткую форму — при необходимости добавьте фото или документы.',
     },
   },
   {
-    title: { ro: 'Medicul analizează', en: 'The doctor reviews' },
+    title: { ro: 'Medicul analizează', en: 'The doctor reviews', ru: 'Врач изучает' },
     text: {
       ro: 'Medicul citește întrebarea și contextul și pregătește un răspuns documentat.',
       en: 'The doctor reads your question and context and prepares a documented answer.',
+      ru: 'Врач читает ваш вопрос и контекст и готовит обоснованный ответ.',
     },
   },
   {
-    title: { ro: 'Răspuns în 48h', en: 'Answer in 48h' },
+    title: { ro: 'Răspuns în 48h', en: 'Answer in 48h', ru: 'Ответ за 48ч' },
     text: {
       ro: 'Primești răspunsul scris în 48 de ore, cu o rundă de clarificări.',
       en: 'You get the written answer within 48 hours, with one round of clarification.',
+      ru: 'Письменный ответ придёт за 48 часов. Можно один раз задать уточняющие вопросы.',
     },
   },
 ];
 
 const GET: Bi[] = [
-  { ro: 'Trimiți întrebarea (cu poze sau documente, dacă e cazul)', en: 'Submit your question (with photos or documents if needed)' },
-  { ro: 'Un răspuns scris și documentat în 48 de ore', en: 'A written, documented answer within 48 hours' },
-  { ro: 'O rundă de clarificări', en: 'One round of clarification' },
+  { ro: 'Trimiți întrebarea (cu poze sau documente, dacă e cazul)', en: 'Submit your question (with photos or documents if needed)', ru: 'Отправляете вопрос (с фото или документами, если нужно)' },
+  { ro: 'Un răspuns scris și documentat în 48 de ore', en: 'A written, documented answer within 48 hours', ru: 'Письменный, обоснованный ответ за 48 часов' },
+  { ro: 'O rundă de clarificări', en: 'One round of clarification', ru: 'Возможность один раз задать уточняющие вопросы' },
 ];
 
 const FAQ: { q: Bi; a: Bi }[] = [
   {
-    q: { ro: 'Cât de repede primesc răspunsul?', en: 'How fast do I get the answer?' },
-    a: { ro: 'În maximum 48 de ore de la trimiterea întrebării.', en: 'Within 48 hours of sending your question.' },
+    q: { ro: 'Cât de repede primesc răspunsul?', en: 'How fast do I get the answer?', ru: 'Как быстро я получу ответ?' },
+    a: { ro: 'În maximum 48 de ore de la trimiterea întrebării.', en: 'Within 48 hours of sending your question.', ru: 'Не позднее 48 часов с момента отправки вопроса.' },
   },
   {
-    q: { ro: 'Pot atașa poze sau documente?', en: 'Can I attach photos or documents?' },
+    q: { ro: 'Pot atașa poze sau documente?', en: 'Can I attach photos or documents?', ru: 'Можно ли приложить фото или документы?' },
     a: {
       ro: 'Da, le poți adăuga la întrebare — ajută medicul să înțeleagă mai bine contextul.',
       en: 'Yes — add them to your question; they help the doctor understand the context.',
+      ru: 'Да, добавьте их к вопросу — это поможет врачу лучше понять контекст.',
     },
   },
   {
-    q: { ro: 'Pot pune întrebări suplimentare?', en: 'Can I ask follow-up questions?' },
-    a: { ro: 'Da, este inclusă o rundă de clarificări.', en: 'Yes — one round of clarification is included.' },
+    q: { ro: 'Pot pune întrebări suplimentare?', en: 'Can I ask follow-up questions?', ru: 'Можно ли задать дополнительные вопросы?' },
+    a: { ro: 'Da, este inclusă o rundă de clarificări.', en: 'Yes — one round of clarification is included.', ru: 'Да, один раз уточнить можно.' },
   },
   {
-    q: { ro: 'Este pentru urgențe?', en: 'Is it for emergencies?' },
+    q: { ro: 'Este pentru urgențe?', en: 'Is it for emergencies?', ru: 'Это для экстренных случаев?' },
     a: {
       ro: 'Nu. Întrebarea rapidă este pentru situații non-urgente. Dacă situația e urgentă, sună la 112.',
       en: 'No. Quick question is for non-urgent situations. If it’s urgent, call 112.',
+      ru: 'Нет. Быстрый вопрос — для неэкстренных ситуаций. Если случай экстренный, звоните 112.',
     },
   },
   {
-    q: { ro: 'În ce limbi pot scrie?', en: 'Which languages can I write in?' },
-    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.' },
+    q: { ro: 'În ce limbi pot scrie?', en: 'Which languages can I write in?', ru: 'На каких языках можно писать?' },
+    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.', ru: 'На румынском, русском и английском.' },
   },
   {
-    q: { ro: 'Cum se face plata?', en: 'How do I pay?' },
+    q: { ro: 'Cum se face plata?', en: 'How do I pay?', ru: 'Как происходит оплата?' },
     a: {
       ro: 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după trimiterea întrebării.',
       en: 'By bank transfer (no online payment for now). You’ll get the details after sending your question.',
+      ru: 'Банковским переводом (пока без онлайн-оплаты). Реквизиты придут после отправки вопроса.',
     },
   },
 ];
@@ -116,16 +127,17 @@ export default async function QuickQuestionPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   return (
     <main className="bg-cream text-ink">
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
-          { label: en ? 'Home' : 'Acasă', href: '/' },
-          { label: en ? 'Services' : 'Servicii', href: '/services' },
-          { label: en ? 'Quick question' : 'Întrebare rapidă' },
+          { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
+          { label: ru ? 'Услуги' : en ? 'Services' : 'Servicii', href: '/services' },
+          { label: ru ? 'Быстрый вопрос' : en ? 'Quick question' : 'Întrebare rapidă' },
         ]}
       />
       {/* 1 · Hero — editorial split: statement left, description right (no photo) */}
@@ -133,12 +145,16 @@ export default async function QuickQuestionPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {en ? 'Quick question · Online portal' : 'Întrebare rapidă · Portal online'}
+            {ru ? 'Быстрый вопрос · Онлайн-портал' : en ? 'Quick question · Online portal' : 'Întrebare rapidă · Portal online'}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[16ch] text-[clamp(2.4rem,5.4vw,4.8rem)] leading-[1.05] tracking-[-0.015em] text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Один вопрос, <span className="serif-it text-sage">ответ</span> за 48 часов
+                  </>
+                ) : en ? (
                   <>
                     One question, an <span className="serif-it text-sage">answer</span> in 48 hours
                   </>
@@ -149,32 +165,38 @@ export default async function QuickQuestionPage({
                 )}
               </h1>
               <p className="mt-7 max-w-[36ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-                {en
+                {ru
+                  ? 'Для конкретного вопроса, без полной консультации.'
+                  : en
                   ? 'For a specific question, without a full consultation.'
                   : 'Pentru o întrebare punctuală, fără o consultație completă.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <BookGroupBButton
                   service="quick_question"
-                  label={en ? 'Ask your question' : 'Trimite întrebarea'}
+                  label={ru ? 'Задать вопрос' : en ? 'Ask your question' : 'Trimite întrebarea'}
                   className={btnDark}
                 />
                 <Link href="/pricing" className={underlineLg}>
-                  {en ? 'See pricing' : 'Vezi tarifele'} →
+                  {ru ? 'Смотреть тарифы' : en ? 'See pricing' : 'Vezi tarifele'} →
                 </Link>
               </div>
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {en ? 'Online portal · 48h reply' : 'Portal online · răspuns în 48h'}
+                {ru ? 'Онлайн-портал · ответ за 48 ч' : en ? 'Online portal · 48h reply' : 'Portal online · răspuns în 48h'}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
-                {en
+                {ru
+                  ? 'Отправьте вопрос (с фото или документами, если нужно) и получите письменный, обоснованный ответ от врача.'
+                  : en
                   ? 'Send your question (with photos or documents if needed) and get a written, documented answer from the doctor.'
                   : 'Trimite întrebarea ta (cu poze sau documente, dacă e cazul) și primești un răspuns scris și documentat de la medic.'}
               </p>
               <p className="mono mt-8 border-t border-[var(--rule)] pt-6 text-[11px] uppercase tracking-[0.1em] leading-relaxed text-ink-soft">
-                {en
+                {ru
+                  ? 'Письменный ответ от педиатра с магистратурой по нутрициологии'
+                  : en
                   ? 'A written answer from a pediatrician with a Master’s in Human Nutrition'
                   : 'Răspuns scris de un medic pediatru cu master în nutriție umană'}
               </p>
@@ -187,10 +209,14 @@ export default async function QuickQuestionPage({
       <section className="bg-sage-deep text-cream">
         <div className="shell py-20 md:py-28">
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)]">
-            {en ? 'Step by step' : 'Pas cu pas'}
+            {ru ? 'Шаг за шагом' : en ? 'Step by step' : 'Pas cu pas'}
           </p>
           <h2 className="serif text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.0] tracking-[-0.02em] text-cream text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Как это <span className="serif-it text-[var(--sage-soft)]">работает</span>
+              </>
+            ) : en ? (
               <>
                 How it <span className="serif-it text-[var(--sage-soft)]">works</span>
               </>
@@ -229,9 +255,13 @@ export default async function QuickQuestionPage({
       {/* 3 · What you get + who it's for */}
       <section className="shell grid gap-12 py-20 md:grid-cols-[1.1fr_0.9fr] md:gap-20 md:py-28">
         <div>
-          <p className="eyebrow mb-3">{en ? 'What you get' : 'Ce primești'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Что вы получаете' : en ? 'What you get' : 'Ce primești'}</p>
           <h2 className="serif text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.05] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Ясный, письменный <span className="serif-it text-sage">ответ</span>
+              </>
+            ) : en ? (
               <>
                 A clear, written <span className="serif-it text-sage">answer</span>
               </>
@@ -256,9 +286,11 @@ export default async function QuickQuestionPage({
           </ul>
         </div>
         <div className="md:pt-12">
-          <p className="eyebrow mb-3">{en ? 'Best for' : 'Pentru ce e potrivită'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Когда подходит' : en ? 'Best for' : 'Pentru ce e potrivită'}</p>
           <p className="max-w-[42ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">
-            {en
+            {ru
+              ? 'Конкретный, неэкстренный вопрос, для которого не нужна полная видеоконсультация, — когда вам нужен письменный, обоснованный ответ.'
+              : en
               ? 'A specific, non-urgent question that doesn’t need a full video consultation — when you want a documented answer in writing.'
               : 'O întrebare punctuală, non-urgentă, care nu necesită o consultație video completă — când vrei un răspuns documentat, în scris.'}
           </p>
@@ -269,17 +301,25 @@ export default async function QuickQuestionPage({
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-2 md:gap-20 md:py-20">
           <div>
-            <p className="eyebrow mb-3">{en ? 'Payment' : 'Plată'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Оплата' : en ? 'Payment' : 'Plată'}</p>
             <p className="max-w-[48ch] leading-relaxed text-ink-soft text-pretty">
-              {en
+              {ru
+                ? 'Банковским переводом (пока без онлайн-оплаты). Реквизиты придут после отправки вопроса.'
+                : en
                 ? 'By bank transfer (no online payment for now). You’ll get the details after sending your question.'
                 : 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după trimiterea întrebării.'}
             </p>
           </div>
           <div>
-            <p className="eyebrow mb-3">{en ? 'Important' : 'Important'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Важно' : en ? 'Important' : 'Important'}</p>
             <p className="max-w-[56ch] leading-relaxed text-ink-soft text-pretty">
-              {en ? (
+              {ru ? (
+                <>
+                  Быстрый вопрос — не для экстренных случаев. Если ситуация экстренная или быстро
+                  ухудшается, звоните <span className="font-medium text-ink">112</span> или
+                  обращайтесь в ближайшую службу неотложной помощи.
+                </>
+              ) : en ? (
                 <>
                   Quick question isn’t for emergencies. If the situation is urgent or worsening
                   fast, call <span className="font-medium text-ink">112</span> or go to the nearest
@@ -300,9 +340,13 @@ export default async function QuickQuestionPage({
       {/* 5 · FAQ — centered */}
       <section className="shell py-20 md:py-28">
         <div className="mx-auto max-w-[820px] text-center">
-          <p className="eyebrow mb-3">{en ? 'Good to know' : 'Bine de știut'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Полезно знать' : en ? 'Good to know' : 'Bine de știut'}</p>
           <h2 className="serif text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.0] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Частые <span className="serif-it text-sage">вопросы</span>
+              </>
+            ) : en ? (
               <>
                 Frequently <span className="serif-it text-sage">asked</span>
               </>
@@ -341,7 +385,11 @@ export default async function QuickQuestionPage({
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-[38rem]">
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Задайте свой <span className="serif-it text-[var(--sage-soft)]">вопрос</span>
+                  </>
+                ) : en ? (
                   <>
                     Ask your <span className="serif-it text-[var(--sage-soft)]">question</span>
                   </>
@@ -354,13 +402,13 @@ export default async function QuickQuestionPage({
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <BookGroupBButton
                   service="quick_question"
-                  label={en ? 'Ask your question' : 'Trimite întrebarea'}
+                  label={ru ? 'Задать вопрос' : en ? 'Ask your question' : 'Trimite întrebarea'}
                   className={creamPill}
                 />
                 <span className="text-sm text-[var(--sage-soft)]">
-                  {en ? 'Need more than a question? ' : 'Ai nevoie de mai mult? '}
+                  {ru ? 'Нужно больше, чем вопрос? ' : en ? 'Need more than a question? ' : 'Ai nevoie de mai mult? '}
                   <Link href="/services" className={creamUnderline}>
-                    {en ? 'See the consultations →' : 'Vezi consultațiile →'}
+                    {ru ? 'Смотреть консультации →' : en ? 'See the consultations →' : 'Vezi consultațiile →'}
                   </Link>
                 </span>
               </div>
@@ -368,22 +416,22 @@ export default async function QuickQuestionPage({
 
             <div className="shrink-0 border-t border-[rgba(245,241,234,0.18)] pt-6 md:border-l md:border-t-0 md:pl-10 md:pt-0">
               <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)]">
-                {en ? 'Other services' : 'Alte servicii'}
+                {ru ? 'Другие услуги' : en ? 'Other services' : 'Alte servicii'}
               </p>
               <ul className="grid gap-3 text-[1.05rem]">
                 <li>
                   <Link href="/pediatrics" className={creamUnderline}>
-                    {en ? 'Child’s health concern? → Pediatric consultation' : 'Probleme de sănătate ale copilului? → Consultație pediatrică'}
+                    {ru ? 'Беспокоит здоровье ребёнка? → Педиатрическая консультация' : en ? 'Child’s health concern? → Pediatric consultation' : 'Probleme de sănătate ale copilului? → Consultație pediatrică'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/nutrition" className={creamUnderline}>
-                    {en ? 'Feeding or diet? → Nutrition consultation' : 'Alimentație sau dietă? → Consultație de nutriție'}
+                    {ru ? 'Питание или диета? → Консультация по нутрициологии' : en ? 'Feeding or diet? → Nutrition consultation' : 'Alimentație sau dietă? → Consultație de nutriție'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/integrative" className={creamUnderline}>
-                    {en ? 'A complex case? → Integrative consultation' : 'Un caz complex? → Consultație integrativă'}
+                    {ru ? 'Сложный случай? → Интегративная консультация' : en ? 'A complex case? → Integrative consultation' : 'Un caz complex? → Consultație integrativă'}
                   </Link>
                 </li>
               </ul>

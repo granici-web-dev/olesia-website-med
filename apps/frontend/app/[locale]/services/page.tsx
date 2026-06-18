@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
-import { loc } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
 import { Reveal } from '@/components/ui/Reveal';
@@ -26,7 +25,7 @@ export const revalidate = 60;
    mono micro-labels, hairline rules, square dark/outline buttons, olive band.
    ────────────────────────────────────────────────────────────────────────── */
 
-type Bi = { ro: string; en: string };
+type Bi = { ro: string; en: string; ru: string };
 
 interface ServiceContent {
   /** Service `code` — matches the API and the group-B LeadService values. */
@@ -38,7 +37,7 @@ interface ServiceContent {
   duration: Bi;
   value: Bi;
   bestFor: Bi;
-  included: { ro: string[]; en: string[] };
+  included: { ro: string[]; en: string[]; ru: string[] };
   cta: Bi;
   /** Optional callout: a strength to highlight, or an emergency disclaimer. */
   note?: { kind: 'highlight' | 'warning' } & Bi;
@@ -49,16 +48,22 @@ const SERVICES_A: ServiceContent[] = [
     code: 'pediatric',
     group: 'A_booking',
     num: '01',
-    tag: { ro: 'Pediatrie', en: 'Pediatrics' },
-    title: { ro: 'Consultație pediatrică', en: 'Pediatric consultation' },
-    duration: { ro: '50 min · video', en: '50 min · video' },
+    tag: { ro: 'Pediatrie', en: 'Pediatrics', ru: 'Педиатрия' },
+    title: {
+      ro: 'Consultație pediatrică',
+      en: 'Pediatric consultation',
+      ru: 'Педиатрическая консультация',
+    },
+    duration: { ro: '50 min · video', en: '50 min · video', ru: '50 мин · видео' },
     value: {
       ro: 'O consultație video dedicată sănătății copilului — simptome, creștere, dezvoltare sau o a doua opinie.',
       en: "A focused video visit for your child's health — symptoms, growth, development, or a second opinion.",
+      ru: 'Видеоконсультация о здоровье ребёнка — симптомы, рост, развитие или второе мнение.',
     },
     bestFor: {
       ro: 'Pentru părinții care vor un sfat pediatric de specialitate, fără drum la clinică.',
       en: 'For parents who want expert pediatric guidance without a clinic visit.',
+      ru: 'Для родителей, которым нужен совет педиатра без поездки в клинику.',
     },
     included: {
       ro: [
@@ -73,23 +78,35 @@ const SERVICES_A: ServiceContent[] = [
         'A clear assessment and next steps',
         'Written summary with recommendations within 24 hours',
       ],
+      ru: [
+        'Видеозвонок 50 минут',
+        'Разбор симптомов, истории болезни и присланных документов',
+        'Понятная оценка и следующие шаги',
+        'Письменный план с рекомендациями в течение 24 часов',
+      ],
     },
-    cta: { ro: 'Programează', en: 'Book a time' },
+    cta: { ro: 'Programează', en: 'Book a time', ru: 'Записаться' },
   },
   {
     code: 'nutrition',
     group: 'A_booking',
     num: '02',
-    tag: { ro: 'Nutriție', en: 'Nutrition' },
-    title: { ro: 'Consultație nutrițională', en: 'Nutrition consultation' },
-    duration: { ro: '60 min · video', en: '60 min · video' },
+    tag: { ro: 'Nutriție', en: 'Nutrition', ru: 'Питание' },
+    title: {
+      ro: 'Consultație nutrițională',
+      en: 'Nutrition consultation',
+      ru: 'Консультация по питанию',
+    },
+    duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
     value: {
       ro: 'O analiză personalizată a alimentației, pe bază de dovezi — pentru copii sau adulți.',
       en: 'A personalized, evidence-based look at feeding and nutrition — for children or adults.',
+      ru: 'Персональный анализ питания на основе доказательной медицины — для детей и взрослых.',
     },
     bestFor: {
       ro: 'Pentru dificultăți de alimentație, diversificare, greutate sau obiceiuri sănătoase.',
       en: 'For feeding difficulties, weaning, weight, or healthy-eating goals.',
+      ru: 'При трудностях с кормлением, введении прикорма, вопросах веса или здоровых привычках.',
     },
     included: {
       ro: [
@@ -104,31 +121,41 @@ const SERVICES_A: ServiceContent[] = [
         'A personalized nutrition plan',
         'Written recommendations after the call',
       ],
+      ru: [
+        'Видеозвонок 60 минут',
+        'Анализ текущих пищевых привычек',
+        'Персональный план питания',
+        'Письменные рекомендации после консультации',
+      ],
     },
     note: {
       kind: 'highlight',
       ro: 'Cu experiență dedicată în dificultățile de alimentație și refuzul biberonului.',
       en: 'With dedicated experience in feeding difficulties and bottle aversion.',
+      ru: 'Отдельно работаю с трудностями кормления и отказом от бутылочки.',
     },
-    cta: { ro: 'Programează', en: 'Book a time' },
+    cta: { ro: 'Programează', en: 'Book a time', ru: 'Записаться' },
   },
   {
     code: 'integrative',
     group: 'A_booking',
     num: '03',
-    tag: { ro: 'Integrativ', en: 'Integrative' },
+    tag: { ro: 'Integrativ', en: 'Integrative', ru: 'Интегративный' },
     title: {
       ro: 'Consultație integrativă și monitorizare',
       en: 'Integrative consultation & monitoring',
+      ru: 'Интегративная консультация и наблюдение',
     },
-    duration: { ro: '90 min · video', en: '90 min · video' },
+    duration: { ro: '90 min · video', en: '90 min · video', ru: '90 мин · видео' },
     value: {
       ro: 'O consultație amănunțită care îmbină pediatria și nutriția, cu un plan de urmat în timp.',
       en: 'An in-depth visit that combines pediatric and nutrition expertise, with a plan to follow over time.',
+      ru: 'Подробная консультация, объединяющая педиатрию и нутрициологию, с планом действий на будущее.',
     },
     bestFor: {
       ro: 'Pentru situații complexe sau de durată, care cer o evaluare completă.',
       en: 'For complex or ongoing situations that need a thorough assessment.',
+      ru: 'Для сложных или длительных ситуаций, требующих всесторонней оценки.',
     },
     included: {
       ro: [
@@ -143,8 +170,14 @@ const SERVICES_A: ServiceContent[] = [
         'A tailored action plan',
         'Initial follow-up / monitoring included',
       ],
+      ru: [
+        'Подробный видеозвонок 90 минут',
+        'Совместная педиатрическая и нутрициологическая оценка',
+        'Персональный план действий',
+        'Первый контрольный визит / наблюдение включены',
+      ],
     },
-    cta: { ro: 'Programează', en: 'Book a time' },
+    cta: { ro: 'Programează', en: 'Book a time', ru: 'Записаться' },
   },
 ];
 
@@ -153,16 +186,22 @@ const SERVICES_B: ServiceContent[] = [
     code: 'monitoring',
     group: 'B_portal',
     num: '04',
-    tag: { ro: 'Acompaniere', en: 'Support' },
-    title: { ro: 'Monitorizare 3 luni', en: '3-month monitoring' },
-    duration: { ro: '3 luni · portal', en: '3 months · portal' },
+    tag: { ro: 'Acompaniere', en: 'Support', ru: 'Сопровождение' },
+    title: {
+      ro: 'Monitorizare 3 luni',
+      en: '3-month monitoring',
+      ru: 'Наблюдение 3 месяца (Абонемент)',
+    },
+    duration: { ro: '3 luni · portal', en: '3 months · portal', ru: '3 месяца · портал' },
     value: {
       ro: 'Acompaniere continuă timp de trei luni — urmăresc progresul între consultații.',
       en: 'Continuous guidance over three months — I follow your progress between consultations.',
+      ru: 'Непрерывное сопровождение в течение трёх месяцев — слежу за динамикой между консультациями.',
     },
     bestFor: {
       ro: 'Pentru familiile care vor sprijin constant, nu o vizită singulară.',
       en: 'For families who want steady support, not a one-off visit.',
+      ru: 'Для семей, которым нужна постоянная поддержка, а не разовый визит.',
     },
     included: {
       ro: [
@@ -177,23 +216,31 @@ const SERVICES_B: ServiceContent[] = [
         'Plan adjustments as things change',
         'Priority messaging with the doctor',
       ],
+      ru: [
+        'Наблюдение в течение 3 месяцев',
+        'Регулярные проверки самочувствия',
+        'Корректировка плана по мере изменений',
+        'Приоритетная переписка с врачом',
+      ],
     },
-    cta: { ro: 'Solicită un loc', en: 'Request a place' },
+    cta: { ro: 'Solicită un loc', en: 'Request a place', ru: 'Оставить заявку' },
   },
   {
     code: 'quick_question',
     group: 'B_portal',
     num: '05',
-    tag: { ro: 'Rapid', en: 'Quick' },
-    title: { ro: 'Întrebare rapidă', en: 'Quick question' },
-    duration: { ro: 'răspuns în 48h · scris', en: '48h reply · written' },
+    tag: { ro: 'Rapid', en: 'Quick', ru: 'Быстро' },
+    title: { ro: 'Întrebare rapidă', en: 'Quick question', ru: 'Быстрый вопрос' },
+    duration: { ro: 'răspuns în 48h · scris', en: '48h reply · written', ru: 'ответ за 48 ч · письменно' },
     value: {
       ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în 48 de ore.',
       en: 'Have one question? Get a written answer from the doctor within 48 hours.',
+      ru: 'Есть один вопрос? Получите письменный ответ от врача в течение 48 часов.',
     },
     bestFor: {
       ro: 'Pentru o întrebare punctuală, non-urgentă, care nu cere o consultație completă.',
       en: "For a specific, non-urgent question that doesn't need a full consultation.",
+      ru: 'Для конкретного несрочного вопроса, который не требует полной консультации.',
     },
     included: {
       ro: [
@@ -206,13 +253,19 @@ const SERVICES_B: ServiceContent[] = [
         'A written reply within 48 hours',
         'One round of clarification',
       ],
+      ru: [
+        'Отправляете вопрос (с фото или документами, если нужно)',
+        'Письменный ответ в течение 48 часов',
+        'Одно уточнение по ответу',
+      ],
     },
     note: {
       kind: 'warning',
       ro: 'Nu este pentru urgențe. Dacă situația e urgentă, sună la 112.',
       en: 'Not for emergencies. If it’s urgent, call 112.',
+      ru: 'Не для неотложных случаев. Если ситуация срочная, звоните 112.',
     },
-    cta: { ro: 'Trimite întrebarea', en: 'Ask your question' },
+    cta: { ro: 'Trimite întrebarea', en: 'Ask your question', ru: 'Отправить вопрос' },
   },
 ];
 
@@ -220,26 +273,27 @@ const SERVICES_B: ServiceContent[] = [
 const CHOICE: { to: string; situation: Bi; service: Bi }[] = [
   {
     to: 'quick_question',
-    situation: { ro: 'O singură întrebare punctuală', en: 'One specific question' },
-    service: { ro: 'Întrebare rapidă', en: 'Quick question' },
+    situation: { ro: 'O singură întrebare punctuală', en: 'One specific question', ru: 'Один конкретный вопрос' },
+    service: { ro: 'Întrebare rapidă', en: 'Quick question', ru: 'Быстрый вопрос' },
   },
   {
     to: 'pediatric',
-    situation: { ro: 'Sănătatea copilului tău', en: "Your child's health" },
-    service: { ro: 'Consultație pediatrică', en: 'Pediatric consultation' },
+    situation: { ro: 'Sănătatea copilului tău', en: "Your child's health", ru: 'Здоровье вашего ребёнка' },
+    service: { ro: 'Consultație pediatrică', en: 'Pediatric consultation', ru: 'Педиатрическая консультация' },
   },
   {
     to: 'nutrition',
-    situation: { ro: 'Alimentație sau diversificare', en: 'Feeding or diet' },
-    service: { ro: 'Consultație nutrițională', en: 'Nutrition consultation' },
+    situation: { ro: 'Alimentație sau diversificare', en: 'Feeding or diet', ru: 'Питание или прикорм' },
+    service: { ro: 'Consultație nutrițională', en: 'Nutrition consultation', ru: 'Консультация по питанию' },
   },
   {
     to: 'integrative',
     situation: {
       ro: 'Un caz complex sau urmărire în timp',
       en: 'A complex case or ongoing care',
+      ru: 'Сложный случай или наблюдение в динамике',
     },
-    service: { ro: 'Consultație integrativă', en: 'Integrative consultation' },
+    service: { ro: 'Consultație integrativă', en: 'Integrative consultation', ru: 'Интегративная консультация' },
   },
 ];
 
@@ -254,112 +308,118 @@ const COMPARE_CODES = [
 ] as const;
 
 const COMPARE_COLS: Bi[] = [
-  { ro: 'Pediatrică', en: 'Pediatric' },
-  { ro: 'Nutrițională', en: 'Nutrition' },
-  { ro: 'Integrativă', en: 'Integrative' },
-  { ro: 'Monitorizare 3 luni', en: '3-month monitoring' },
-  { ro: 'Întrebare rapidă', en: 'Quick question' },
+  { ro: 'Pediatrică', en: 'Pediatric', ru: 'Педиатрическая' },
+  { ro: 'Nutrițională', en: 'Nutrition', ru: 'По питанию' },
+  { ro: 'Integrativă', en: 'Integrative', ru: 'Интегративная' },
+  { ro: 'Monitorizare 3 luni', en: '3-month monitoring', ru: 'Наблюдение 3 месяца' },
+  { ro: 'Întrebare rapidă', en: 'Quick question', ru: 'Быстрый вопрос' },
 ];
 
 const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
   {
-    label: { ro: 'Format', en: 'Format' },
+    label: { ro: 'Format', en: 'Format', ru: 'Формат' },
     cells: [
-      { ro: 'Video', en: 'Video' },
-      { ro: 'Video', en: 'Video' },
-      { ro: 'Video', en: 'Video' },
-      { ro: 'Portal', en: 'Portal' },
-      { ro: 'Portal', en: 'Portal' },
+      { ro: 'Video', en: 'Video', ru: 'Видео' },
+      { ro: 'Video', en: 'Video', ru: 'Видео' },
+      { ro: 'Video', en: 'Video', ru: 'Видео' },
+      { ro: 'Portal', en: 'Portal', ru: 'Портал' },
+      { ro: 'Portal', en: 'Portal', ru: 'Портал' },
     ],
   },
   {
-    label: { ro: 'Durată', en: 'Duration' },
+    label: { ro: 'Durată', en: 'Duration', ru: 'Длительность' },
     cells: [
-      { ro: '50 min', en: '50 min' },
-      { ro: '60 min', en: '60 min' },
-      { ro: '90 min', en: '90 min' },
-      { ro: '3 luni', en: '3 months' },
-      { ro: '48h', en: '48h' },
+      { ro: '50 min', en: '50 min', ru: '50 мин' },
+      { ro: '60 min', en: '60 min', ru: '60 мин' },
+      { ro: '90 min', en: '90 min', ru: '90 мин' },
+      { ro: '3 luni', en: '3 months', ru: '3 месяца' },
+      { ro: '48h', en: '48h', ru: '48 ч' },
     ],
   },
   {
-    label: { ro: 'Pentru', en: 'For' },
+    label: { ro: 'Pentru', en: 'For', ru: 'Для чего' },
     cells: [
-      { ro: 'Sănătatea copilului', en: 'Child health' },
-      { ro: 'Alimentație / dietă', en: 'Feeding / diet' },
-      { ro: 'Caz complex / de durată', en: 'Complex / ongoing' },
-      { ro: 'Sprijin continuu', en: 'Continuous support' },
-      { ro: 'O întrebare', en: 'One question' },
+      { ro: 'Sănătatea copilului', en: 'Child health', ru: 'Здоровье ребёнка' },
+      { ro: 'Alimentație / dietă', en: 'Feeding / diet', ru: 'Питание / диета' },
+      { ro: 'Caz complex / de durată', en: 'Complex / ongoing', ru: 'Сложный / длительный случай' },
+      { ro: 'Sprijin continuu', en: 'Continuous support', ru: 'Постоянная поддержка' },
+      { ro: 'O întrebare', en: 'One question', ru: 'Один вопрос' },
     ],
   },
   {
-    label: { ro: 'Rezultat', en: 'Output' },
+    label: { ro: 'Rezultat', en: 'Output', ru: 'Результат' },
     cells: [
-      { ro: 'Plan scris', en: 'Written summary' },
-      { ro: 'Plan alimentar', en: 'Nutrition plan' },
-      { ro: 'Plan de acțiune', en: 'Action plan' },
-      { ro: 'Plan continuu', en: 'Ongoing plan' },
-      { ro: 'Răspuns scris', en: 'Written answer' },
+      { ro: 'Plan scris', en: 'Written summary', ru: 'Письменный план' },
+      { ro: 'Plan alimentar', en: 'Nutrition plan', ru: 'План питания' },
+      { ro: 'Plan de acțiune', en: 'Action plan', ru: 'План действий' },
+      { ro: 'Plan continuu', en: 'Ongoing plan', ru: 'План на весь срок' },
+      { ro: 'Răspuns scris', en: 'Written answer', ru: 'Письменный ответ' },
     ],
   },
 ];
 
 /* How it works — two tracks. */
 const TRACK_VIDEO: Bi[] = [
-  { ro: 'Alegi serviciul și ora', en: 'Choose a service and time' },
-  { ro: 'Plătești prin transfer și confirmi', en: 'Pay by transfer and confirm' },
-  { ro: 'Ne vedem pe video', en: 'Join the video call' },
-  { ro: 'Primești planul scris', en: 'Get your written summary' },
+  { ro: 'Alegi serviciul și ora', en: 'Choose a service and time', ru: 'Выбираете услугу и время' },
+  { ro: 'Plătești prin transfer și confirmi', en: 'Pay by transfer and confirm', ru: 'Оплачиваете переводом и подтверждаете' },
+  { ro: 'Ne vedem pe video', en: 'Join the video call', ru: 'Встречаемся по видеосвязи' },
+  { ro: 'Primești planul scris', en: 'Get your written summary', ru: 'Получаете письменный план' },
 ];
 const TRACK_PORTAL: Bi[] = [
-  { ro: 'Alegi serviciul', en: 'Choose the service' },
-  { ro: 'Plătești și trimiți datele', en: 'Pay and submit your details' },
-  { ro: 'Medicul analizează', en: 'The doctor reviews' },
-  { ro: 'Primești răspunsul sau planul', en: 'Get your answer or plan' },
+  { ro: 'Alegi serviciul', en: 'Choose the service', ru: 'Выбираете услугу' },
+  { ro: 'Plătești și trimiți datele', en: 'Pay and submit your details', ru: 'Оплачиваете и отправляете данные' },
+  { ro: 'Medicul analizează', en: 'The doctor reviews', ru: 'Врач изучает' },
+  { ro: 'Primești răspunsul sau planul', en: 'Get your answer or plan', ru: 'Получаете ответ или план' },
 ];
 
 /* FAQ. */
 const FAQ: { q: Bi; a: Bi }[] = [
   {
-    q: { ro: 'Cum decurg consultațiile video?', en: 'How do video consultations work?' },
+    q: { ro: 'Cum decurg consultațiile video?', en: 'How do video consultations work?', ru: 'Как проходят видеоконсультации?' },
     a: {
       ro: 'Printr-un link în browser, fără să instalezi nimic. Primești instrucțiunile cu 24 de ore înainte.',
       en: 'Through a link in your browser — nothing to install. You get instructions 24 hours before.',
+      ru: 'По ссылке в браузере, ничего устанавливать не нужно. Инструкции получаете за 24 часа.',
     },
   },
   {
-    q: { ro: 'În ce limbi?', en: 'Which languages?' },
-    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.' },
+    q: { ro: 'În ce limbi?', en: 'Which languages?', ru: 'На каких языках?' },
+    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.', ru: 'Румынский, русский и английский.' },
   },
   {
-    q: { ro: 'Cum plătesc?', en: 'How do I pay?' },
+    q: { ro: 'Cum plătesc?', en: 'How do I pay?', ru: 'Как оплатить?' },
     a: {
       ro: 'Prin transfer bancar. Primești detaliile de plată după confirmarea programării.',
       en: "By bank transfer. You'll get the payment details once your booking is confirmed.",
+      ru: 'Банковским переводом. Реквизиты для оплаты получаете после подтверждения записи.',
     },
   },
   {
-    q: { ro: 'Pot reprograma sau anula?', en: 'Can I reschedule or cancel?' },
+    q: { ro: 'Pot reprograma sau anula?', en: 'Can I reschedule or cancel?', ru: 'Можно перенести или отменить?' },
     a: {
       ro: 'Da. Reprogramezi sau anulezi din linkul de confirmare, cu cel puțin 24 de ore înainte.',
       en: 'Yes. Reschedule or cancel from your confirmation link at least 24 hours ahead.',
+      ru: 'Да. Перенести или отменить можно по ссылке из подтверждения, не позднее чем за 24 часа.',
     },
   },
   {
-    q: { ro: 'Este pentru urgențe?', en: 'Is this for emergencies?' },
+    q: { ro: 'Este pentru urgențe?', en: 'Is this for emergencies?', ru: 'Это для неотложных случаев?' },
     a: {
       ro: 'Nu. Consultațiile online nu sunt pentru urgențe. Dacă situația e urgentă, sună la 112.',
       en: "No. Online consultations aren't for emergencies. If it's urgent, call 112.",
+      ru: 'Нет. Онлайн-консультации не для неотложных случаев. Если ситуация срочная, звоните 112.',
     },
   },
   {
     q: {
       ro: 'Care e diferența dintre pediatrică și integrativă?',
       en: 'Pediatric vs integrative — what’s the difference?',
+      ru: 'В чём разница между педиатрической и интегративной?',
     },
     a: {
       ro: 'Consultația pediatrică se concentrează pe o întrebare de sănătate. Cea integrativă îmbină pediatria și nutriția pentru cazuri complexe și include începutul unei urmăriri.',
       en: 'A pediatric consultation focuses on one health question. The integrative one combines pediatrics and nutrition for complex cases and includes the start of ongoing monitoring.',
+      ru: 'Педиатрическая консультация сосредоточена на одном вопросе здоровья. Интегративная объединяет педиатрию и нутрициологию для сложных случаев и включает начало наблюдения.',
     },
   },
 ];
@@ -375,9 +435,13 @@ const underlineLg =
 
 /** A described service — homepage-style numbered editorial row. */
 function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {
-  const title = loc(locale, s.title.ro, s.title.en);
   const detailHref = DETAIL_ROUTE[s.code] ?? '/services';
-  const included = locale === 'en' ? s.included.en : s.included.ro;
+  const included =
+    locale === 'ru' ? s.included.ru : locale === 'en' ? s.included.en : s.included.ro;
+  const ru = locale === 'ru';
+  const en = locale === 'en';
+  const pick = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const title = pick(s.title);
 
   return (
     <Reveal
@@ -397,28 +461,28 @@ function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {
         {/* Identity */}
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
-            {loc(locale, s.tag.ro, s.tag.en)}
+            {pick(s.tag)}
           </p>
           <h3 className="serif mt-3 text-[clamp(1.9rem,3vw,2.75rem)] leading-[1.05] tracking-[-0.01em]">
             {title}
           </h3>
           <p className="mono mt-3 text-[11px] uppercase tracking-[0.06em] text-ink-soft">
-            {loc(locale, s.duration.ro, s.duration.en)}
+            {pick(s.duration)}
           </p>
           <p className="mt-5 max-w-[40ch] text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
-            <span className="text-ink">{loc(locale, 'Recomandat — ', 'Best for — ')}</span>
-            {loc(locale, s.bestFor.ro, s.bestFor.en)}
+            <span className="text-ink">{ru ? 'Рекомендуется — ' : en ? 'Best for — ' : 'Recomandat — '}</span>
+            {pick(s.bestFor)}
           </p>
         </div>
 
         {/* Detail */}
         <div>
           <p className="max-w-[58ch] text-[1.15rem] leading-relaxed text-ink text-pretty">
-            {loc(locale, s.value.ro, s.value.en)}
+            {pick(s.value)}
           </p>
 
           <p className="mt-7 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            {loc(locale, 'Ce include', "What's included")}
+            {ru ? 'Что входит' : en ? "What's included" : 'Ce include'}
           </p>
           <ul className="mt-3 grid gap-2.5">
             {included.map((item) => (
@@ -444,16 +508,16 @@ function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {
             >
               {s.note.kind === 'warning' && (
                 <span className="mono mr-2 text-[11px] uppercase tracking-[0.12em] text-sage not-italic">
-                  {loc(locale, 'Important', 'Important')}
+                  {ru ? 'Важно' : en ? 'Important' : 'Important'}
                 </span>
               )}
-              {loc(locale, s.note.ro, s.note.en)}
+              {pick(s.note)}
             </p>
           )}
 
           <div className="mt-8">
             <Link href={detailHref} className={underline}>
-              {loc(locale, 'Detalii', 'Details')} →
+              {ru ? 'Подробнее' : en ? 'Details' : 'Detalii'} →
             </Link>
           </div>
         </div>
@@ -470,54 +534,79 @@ export default async function ServicesPage({
   const { locale } = await params;
 
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   const T = {
-    eyebrow: en ? 'Services · Pediatrics & Nutrition' : 'Servicii · Pediatrie & Nutriție',
-    heroTagline: en
-      ? 'Video consultations and ongoing support — at your pace.'
-      : 'Consultații video și acompaniere — în ritmul tău.',
-    heroDesc: en
-      ? 'Five services in two formats — from a single video consultation to three-month monitoring. Pick the one that fits and book in minutes.'
-      : 'Cinci servicii în două formate: de la o consultație video la urmărire de trei luni. Alege-l pe cel potrivit și programează în câteva minute.',
-    ctaBook: en ? 'Book a free intro call' : 'Programează o discuție gratuită',
-    seePricing: en ? 'See pricing' : 'Vezi tarifele',
-    trust: en
-      ? 'Pediatrician · MSc in Human Nutrition (USMF) · member of the Society of Pediatrics'
-      : 'Medic pediatru · MSc Nutriția Omului (USMF) · membră a Societății de Pediatrie',
-    choiceTitle: en ? 'Not sure where to start?' : 'Nu ești sigură de unde să începi?',
-    choiceSub: en
-      ? 'Pick the situation that sounds like yours.'
-      : 'Alege situația care seamănă cu a ta.',
-    videoEyebrow: en ? 'Group A · Live' : 'Grupa A · Live',
-    portalEyebrow: en ? 'Group B · Portal' : 'Grupa B · Portal',
-    videoSub: en
-      ? 'Live visits, booked from a calendar. Pay by transfer; get your written plan afterwards.'
-      : 'Întâlniri live, rezervate dintr-un calendar. Plătești prin transfer, primești planul scris după.',
-    portalSub: en
-      ? 'No calendar. Submit your details through the portal and the doctor replies.'
-      : 'Fără calendar. Trimiți datele prin portal și medicul îți răspunde.',
-    compareEyebrow: en ? 'Side by side' : 'Toate, alături',
-    service: en ? 'Serviciu' : 'Serviciu',
-    pricingCell: en ? 'Pricing' : 'Tarife',
-    howEyebrow: en ? 'How it works' : 'Cum funcționează',
-    howSub: en
-      ? 'Two simple paths. Choose the format — the rest is clear.'
-      : 'Două drumuri simple. Alegi formatul — restul e clar.',
-    doctorEyebrow: en ? 'About the doctor' : 'Despre medic',
-    doctorBody: en
-      ? 'Olesea Jalba, a pediatrician with an MSc in Human Nutrition (USMF “Nicolae Testemițanu”). She works exclusively online, so distance is never the obstacle — for families across the country and the diaspora.'
-      : 'Olesea Jalba, medic pediatru cu masterat în Nutriția Omului (USMF „Nicolae Testemițanu”). Lucrează exclusiv online, ca distanța să nu mai fie o problemă — pentru familii din toată țara și din diasporă.',
-    doctorLink: en ? 'See full profile' : 'Vezi profilul complet',
-    docFocusLabel: en ? 'Focus areas' : 'Specializări',
-    docFocus: en
-      ? 'Child nutrition\nFeeding difficulties\nPediatric gastroenterology'
-      : 'Nutriția copilului\nDificultăți de alimentație\nGastroenterologie pediatrică',
-    docRecLabel: en ? 'Credentials' : 'Recunoaștere',
-    docRec: en
-      ? 'Member, Society of Pediatrics\nMSc Human Nutrition (USMF)'
-      : 'Membră a Societății de Pediatrie\nMSc Nutriția Omului (USMF)',
-    faqEyebrow: en ? 'Good to know' : 'Bine de știut',
+    eyebrow: ru
+      ? 'Услуги · Педиатрия & Питание'
+      : en
+        ? 'Services · Pediatrics & Nutrition'
+        : 'Servicii · Pediatrie & Nutriție',
+    heroTagline: ru
+      ? 'Видеоконсультации и сопровождение — в вашем ритме.'
+      : en
+        ? 'Video consultations and ongoing support — at your pace.'
+        : 'Consultații video și acompaniere — în ritmul tău.',
+    heroDesc: ru
+      ? 'Пять услуг в двух форматах — от одной видеоконсультации до наблюдения в течение трёх месяцев. Выберите подходящую и запишитесь за несколько минут.'
+      : en
+        ? 'Five services in two formats — from a single video consultation to three-month monitoring. Pick the one that fits and book in minutes.'
+        : 'Cinci servicii în două formate: de la o consultație video la urmărire de trei luni. Alege-l pe cel potrivit și programează în câteva minute.',
+    ctaBook: ru ? 'Записаться на бесплатную беседу' : en ? 'Book a free intro call' : 'Programează o discuție gratuită',
+    seePricing: ru ? 'Смотреть цены' : en ? 'See pricing' : 'Vezi tarifele',
+    trust: ru
+      ? 'Врач-педиатр · магистр нутрициологии (USMF) · член Общества педиатрии'
+      : en
+        ? 'Pediatrician · MSc in Human Nutrition (USMF) · member of the Society of Pediatrics'
+        : 'Medic pediatru · MSc Nutriția Omului (USMF) · membră a Societății de Pediatrie',
+    choiceTitle: ru ? 'Не знаете, с чего начать?' : en ? 'Not sure where to start?' : 'Nu ești sigură de unde să începi?',
+    choiceSub: ru
+      ? 'Выберите ситуацию, похожую на вашу.'
+      : en
+        ? 'Pick the situation that sounds like yours.'
+        : 'Alege situația care seamănă cu a ta.',
+    videoEyebrow: ru ? 'Группа A · Live' : en ? 'Group A · Live' : 'Grupa A · Live',
+    portalEyebrow: ru ? 'Группа B · Портал' : en ? 'Group B · Portal' : 'Grupa B · Portal',
+    videoSub: ru
+      ? 'Живые встречи, запись через календарь. Оплата переводом, письменный план — после.'
+      : en
+        ? 'Live visits, booked from a calendar. Pay by transfer; get your written plan afterwards.'
+        : 'Întâlniri live, rezervate dintr-un calendar. Plătești prin transfer, primești planul scris după.',
+    portalSub: ru
+      ? 'Без календаря. Отправляете данные через портал, и врач отвечает.'
+      : en
+        ? 'No calendar. Submit your details through the portal and the doctor replies.'
+        : 'Fără calendar. Trimiți datele prin portal și medicul îți răspunde.',
+    compareEyebrow: ru ? 'Все рядом' : en ? 'Side by side' : 'Toate, alături',
+    service: ru ? 'Услуга' : en ? 'Serviciu' : 'Serviciu',
+    pricingCell: ru ? 'Цены' : en ? 'Pricing' : 'Tarife',
+    howEyebrow: ru ? 'Как это работает' : en ? 'How it works' : 'Cum funcționează',
+    howSub: ru
+      ? 'Два простых пути. Выбираете формат — остальное понятно.'
+      : en
+        ? 'Two simple paths. Choose the format — the rest is clear.'
+        : 'Două drumuri simple. Alegi formatul — restul e clar.',
+    doctorEyebrow: ru ? 'О враче' : en ? 'About the doctor' : 'Despre medic',
+    doctorBody: ru
+      ? 'Олеся Жалба, врач-педиатр с магистратурой по нутрициологии (USMF «Николае Тестемицану»). Работает исключительно онлайн, чтобы расстояние больше не было препятствием — для семей по всей стране и в диаспоре.'
+      : en
+        ? 'Olesea Jalba, a pediatrician with an MSc in Human Nutrition (USMF “Nicolae Testemițanu”). She works exclusively online, so distance is never the obstacle — for families across the country and the diaspora.'
+        : 'Olesea Jalba, medic pediatru cu masterat în Nutriția Omului (USMF „Nicolae Testemițanu”). Lucrează exclusiv online, ca distanța să nu mai fie o problemă — pentru familii din toată țara și din diasporă.',
+    doctorLink: ru ? 'Смотреть полный профиль' : en ? 'See full profile' : 'Vezi profilul complet',
+    docFocusLabel: ru ? 'Специализации' : en ? 'Focus areas' : 'Specializări',
+    docFocus: ru
+      ? 'Питание ребёнка\nТрудности кормления\nДетская гастроэнтерология'
+      : en
+        ? 'Child nutrition\nFeeding difficulties\nPediatric gastroenterology'
+        : 'Nutriția copilului\nDificultăți de alimentație\nGastroenterologie pediatrică',
+    docRecLabel: ru ? 'Признание' : en ? 'Credentials' : 'Recunoaștere',
+    docRec: ru
+      ? 'Член Общества педиатрии\nМагистр нутрициологии (USMF)'
+      : en
+        ? 'Member, Society of Pediatrics\nMSc Human Nutrition (USMF)'
+        : 'Membră a Societății de Pediatrie\nMSc Nutriția Omului (USMF)',
+    faqEyebrow: ru ? 'Полезно знать' : en ? 'Good to know' : 'Bine de știut',
   };
 
   const SectionTitle = ({
@@ -556,7 +645,11 @@ export default async function ServicesPage({
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[15ch] text-[clamp(2.8rem,6.5vw,5.8rem)] leading-[1.02] tracking-[-0.015em] text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Педиатрия и <span className="serif-it text-sage">питание</span>, онлайн
+                  </>
+                ) : en ? (
                   <>
                     Pediatric & <span className="serif-it text-sage">nutrition</span> care, online
                   </>
@@ -599,8 +692,8 @@ export default async function ServicesPage({
         <div className="shell py-16 md:py-24">
           <div className="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
             <SectionTitle
-              a={en ? 'Not sure where to' : 'Nu ești sigură de unde'}
-              accent={en ? 'start?' : 'să începi?'}
+              a={ru ? 'С чего' : en ? 'Not sure where to' : 'Nu ești sigură de unde'}
+              accent={ru ? 'начать?' : en ? 'start?' : 'să începi?'}
             />
             <p className="max-w-[300px] text-sm leading-[1.7] text-ink-soft">{T.choiceSub}</p>
           </div>
@@ -635,7 +728,7 @@ export default async function ServicesPage({
         <header className="mb-4 flex flex-col gap-4 md:flex-row md:items-baseline md:justify-between">
           <div>
             <p className="eyebrow mb-3">{T.videoEyebrow}</p>
-            <SectionTitle a={en ? 'Video' : 'Consultații'} accent={en ? 'consultations' : 'video'} />
+            <SectionTitle a={ru ? 'Видео' : en ? 'Video' : 'Consultații'} accent={ru ? 'консультации' : en ? 'consultations' : 'video'} />
           </div>
           <p className="max-w-[340px] text-sm leading-[1.7] text-ink-soft md:pt-4">{T.videoSub}</p>
         </header>
@@ -653,8 +746,8 @@ export default async function ServicesPage({
             <div>
               <p className="eyebrow mb-3">{T.portalEyebrow}</p>
               <SectionTitle
-                a={en ? 'Support &' : 'Acompaniere'}
-                accent={en ? 'questions' : '& întrebări'}
+                a={ru ? 'Сопровождение' : en ? 'Support &' : 'Acompaniere'}
+                accent={ru ? 'и вопросы' : en ? 'questions' : '& întrebări'}
               />
             </div>
             <p className="max-w-[340px] text-sm leading-[1.7] text-ink-soft md:pt-4">
@@ -673,7 +766,7 @@ export default async function ServicesPage({
       <section className="shell border-t border-[var(--rule)] py-20 md:py-28">
         <div className="mb-12 md:mb-16">
           <p className="eyebrow mb-3">{T.compareEyebrow}</p>
-          <SectionTitle a={en ? 'Compare' : 'Compară'} accent={en ? 'services' : 'serviciile'} />
+          <SectionTitle a={ru ? 'Сравните' : en ? 'Compare' : 'Compară'} accent={ru ? 'услуги' : en ? 'services' : 'serviciile'} />
         </div>
 
         <div className="grid grid-cols-1 border-t border-[var(--rule)] lg:grid-cols-5 lg:divide-x lg:divide-[var(--rule)]">
@@ -701,18 +794,20 @@ export default async function ServicesPage({
                 ))}
               </dl>
               <a href={`#${COMPARE_CODES[ci]}`} className={`mt-auto self-start pt-7 ${underline}`}>
-                {en ? 'Details' : 'Detalii'} →
+                {ru ? 'Подробнее' : en ? 'Details' : 'Detalii'} →
               </a>
             </div>
           ))}
         </div>
 
         <p className="mt-8 text-sm leading-relaxed text-ink-soft">
-          {en
-            ? 'Prices for every service are on the '
-            : 'Prețurile pentru toate serviciile sunt pe pagina de '}
+          {ru
+            ? 'Цены на все услуги — на странице '
+            : en
+              ? 'Prices for every service are on the '
+              : 'Prețurile pentru toate serviciile sunt pe pagina de '}
           <Link href="/pricing" className={underlineLg}>
-            {en ? 'pricing page' : 'tarife'} →
+            {ru ? 'цен' : en ? 'pricing page' : 'tarife'} →
           </Link>
         </p>
       </section>
@@ -724,7 +819,7 @@ export default async function ServicesPage({
             {T.howEyebrow}
           </p>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <SectionTitle a={en ? 'How it' : 'Cum'} accent={en ? 'works' : 'decurge'} onDark />
+            <SectionTitle a={ru ? 'Как это' : en ? 'How it' : 'Cum'} accent={ru ? 'работает' : en ? 'works' : 'decurge'} onDark />
             <p className="max-w-[320px] text-sm leading-[1.7] text-[var(--sage-soft)] text-pretty md:text-right">
               {T.howSub}
             </p>
@@ -733,15 +828,15 @@ export default async function ServicesPage({
           <div className="mt-14 grid gap-14 md:mt-20 md:grid-cols-2 md:gap-0">
             {[
               {
-                title: en ? 'Video consultations' : 'Consultații video',
+                title: ru ? 'Видеоконсультации' : en ? 'Video consultations' : 'Consultații video',
                 chip: 'Video',
-                descr: en ? 'Live visits, on a calendar.' : 'Întâlniri live, în calendar.',
+                descr: ru ? 'Живые встречи, в календаре.' : en ? 'Live visits, on a calendar.' : 'Întâlniri live, în calendar.',
                 steps: TRACK_VIDEO,
               },
               {
-                title: en ? 'Support & questions' : 'Acompaniere și întrebări',
+                title: ru ? 'Сопровождение и вопросы' : en ? 'Support & questions' : 'Acompaniere și întrebări',
                 chip: 'Portal',
-                descr: en ? 'No calendar, through the portal.' : 'Fără calendar, prin portal.',
+                descr: ru ? 'Без календаря, через портал.' : en ? 'No calendar, through the portal.' : 'Fără calendar, prin portal.',
                 steps: TRACK_PORTAL,
               },
             ].map((track, ti) => (
@@ -802,7 +897,7 @@ export default async function ServicesPage({
       <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
         <div className="md:sticky md:top-[133px] md:self-start">
           <p className="eyebrow mb-4">{T.doctorEyebrow}</p>
-          <SectionTitle a={en ? "Who you'll" : 'Cine te'} accent={en ? 'see' : 'consultă'} />
+          <SectionTitle a={ru ? 'Кто вас' : en ? "Who you'll" : 'Cine te'} accent={ru ? 'консультирует' : en ? 'see' : 'consultă'} />
           <p className="mt-6 max-w-[54ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">
             {T.doctorBody}
           </p>
@@ -826,9 +921,11 @@ export default async function ServicesPage({
             <Image
               src="/assets/olesea-portrait.webp"
               alt={
-                en
-                  ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
-                  : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
+                ru
+                  ? 'Д-р Олеся Жалба, врач-педиатр и специалист по питанию'
+                  : en
+                    ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
+                    : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
               }
               fill
               className="object-cover object-top"
@@ -837,7 +934,7 @@ export default async function ServicesPage({
           </div>
           <div className="mono mt-4 flex justify-between text-[11px] uppercase tracking-[0.08em] text-ink-soft">
             <span>Dr. Olesea Jalba</span>
-            <span>{en ? 'Online · Anywhere' : 'Online · Oriunde'}</span>
+            <span>{ru ? 'Онлайн · Где угодно' : en ? 'Online · Anywhere' : 'Online · Oriunde'}</span>
           </div>
         </div>
       </section>
@@ -847,8 +944,8 @@ export default async function ServicesPage({
         <div className="mx-auto max-w-[820px] text-center">
           <p className="eyebrow mb-3">{T.faqEyebrow}</p>
           <SectionTitle
-            a={en ? 'Frequently' : 'Întrebări'}
-            accent={en ? 'asked' : 'frecvente'}
+            a={ru ? 'Частые' : en ? 'Frequently' : 'Întrebări'}
+            accent={ru ? 'вопросы' : en ? 'asked' : 'frecvente'}
           />
         </div>
         <div className="mx-auto mt-12 max-w-[760px]">

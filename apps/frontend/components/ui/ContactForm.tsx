@@ -24,11 +24,16 @@ interface FieldErrors {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const SUBJECTS: { value: ContactSubject; ro: string; en: string }[] = [
-  { value: 'appointment', ro: 'Programare', en: 'Appointment' },
-  { value: 'payment', ro: 'Plată', en: 'Payment' },
-  { value: 'how_it_works', ro: 'Cum funcționează', en: 'How it works' },
-  { value: 'other', ro: 'Altă întrebare', en: 'Other question' },
+const SUBJECTS: {
+  value: ContactSubject;
+  ro: string;
+  en: string;
+  ru: string;
+}[] = [
+  { value: 'appointment', ro: 'Programare', en: 'Appointment', ru: 'Запись на приём' },
+  { value: 'payment', ro: 'Plată', en: 'Payment', ru: 'Оплата' },
+  { value: 'how_it_works', ro: 'Cum funcționează', en: 'How it works', ru: 'Как это работает' },
+  { value: 'other', ro: 'Altă întrebare', en: 'Other question', ru: 'Другой вопрос' },
 ];
 
 const inputCls =
@@ -40,6 +45,7 @@ const errCls =
 
 export function ContactForm({ locale }: { locale: string }) {
   const en = locale === 'en';
+  const ru = locale === 'ru';
   const uid = useId();
   const fid = (n: string) => `${uid}-${n}`;
 
@@ -57,23 +63,30 @@ export function ContactForm({ locale }: { locale: string }) {
   const msgRef = useRef<HTMLTextAreaElement>(null);
   const consentRef = useRef<HTMLInputElement>(null);
 
-  const t = (ro: string, enStr: string) => (en ? enStr : ro);
+  const t = (ro: string, enStr: string, ruStr: string) =>
+    ru ? ruStr : en ? enStr : ro;
 
   const validate = (): FieldErrors => {
     const e: FieldErrors = {};
-    const required = t('Acest câmp este obligatoriu.', 'This field is required.');
+    const required = t(
+      'Acest câmp este obligatoriu.',
+      'This field is required.',
+      'Заполните это поле.',
+    );
     if (!name.trim()) e.name = required;
     if (!email.trim()) e.email = required;
     else if (!EMAIL_RE.test(email.trim()))
       e.email = t(
         'Introdu o adresă de email validă.',
         'Enter a valid email address.',
+        'Введите корректный адрес email.',
       );
     if (!message.trim()) e.message = required;
     if (!consent)
       e.consent = t(
         'Te rugăm să accepți prelucrarea datelor.',
         'Please accept the data processing terms.',
+        'Подтвердите согласие на обработку данных.',
       );
     return e;
   };
@@ -123,12 +136,17 @@ export function ContactForm({ locale }: { locale: string }) {
           ✓
         </span>
         <h3 className="serif mt-5 text-[clamp(1.5rem,2.4vw,2rem)] leading-snug">
-          {t('Mulțumim! Am primit mesajul tău.', 'Thank you — we got your message.')}
+          {t(
+            'Mulțumim! Am primit mesajul tău.',
+            'Thank you — we got your message.',
+            'Спасибо! Мы получили ваше сообщение.',
+          )}
         </h3>
         <p className="mt-3 max-w-[46ch] leading-relaxed text-ink-soft text-pretty">
           {t(
             'Îți răspundem în cel mult două zile lucrătoare. Pentru o întrebare medicală, folosește „Întreabă medicul".',
             'We’ll reply within two business days. For a medical question, use “Ask the doctor”.',
+            'Ответим в течение двух рабочих дней. А с медицинским вопросом — через «Спросить врача».',
           )}
         </p>
       </div>
@@ -153,7 +171,7 @@ export function ContactForm({ locale }: { locale: string }) {
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
           <label htmlFor={fid('name')} className={labelCls}>
-            {t('Nume', 'Name')}
+            {t('Nume', 'Name', 'Имя')}
           </label>
           <input
             ref={nameRef}
@@ -162,7 +180,7 @@ export function ContactForm({ locale }: { locale: string }) {
             className={inputCls}
             value={name}
             onChange={(ev) => setName(ev.target.value)}
-            placeholder={t('Numele tău', 'Your name')}
+            placeholder={t('Numele tău', 'Your name', 'Ваше имя')}
             autoComplete="name"
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? fid('name-err') : undefined}
@@ -177,7 +195,7 @@ export function ContactForm({ locale }: { locale: string }) {
 
         <div>
           <label htmlFor={fid('email')} className={labelCls}>
-            {t('Email', 'Email')}
+            {t('Email', 'Email', 'Email')}
           </label>
           <input
             ref={emailRef}
@@ -203,7 +221,7 @@ export function ContactForm({ locale }: { locale: string }) {
 
       <div>
         <label htmlFor={fid('subject')} className={labelCls}>
-          {t('Subiect', 'Subject')}
+          {t('Subiect', 'Subject', 'Тема')}
         </label>
         <div className="relative">
           <select
@@ -214,7 +232,7 @@ export function ContactForm({ locale }: { locale: string }) {
           >
             {SUBJECTS.map((s) => (
               <option key={s.value} value={s.value}>
-                {t(s.ro, s.en)}
+                {t(s.ro, s.en, s.ru)}
               </option>
             ))}
           </select>
@@ -237,7 +255,7 @@ export function ContactForm({ locale }: { locale: string }) {
 
       <div>
         <label htmlFor={fid('message')} className={labelCls}>
-          {t('Mesaj', 'Message')}
+          {t('Mesaj', 'Message', 'Сообщение')}
         </label>
         <textarea
           ref={msgRef}
@@ -246,7 +264,7 @@ export function ContactForm({ locale }: { locale: string }) {
           className={`${inputCls} resize-y`}
           value={message}
           onChange={(ev) => setMessage(ev.target.value)}
-          placeholder={t('Cum te putem ajuta?', 'How can we help?')}
+          placeholder={t('Cum te putem ajuta?', 'How can we help?', 'Чем мы можем помочь?')}
           aria-invalid={!!errors.message}
           aria-describedby={errors.message ? fid('message-err') : undefined}
         />
@@ -273,6 +291,7 @@ export function ContactForm({ locale }: { locale: string }) {
             {t(
               'Sunt de acord cu prelucrarea datelor conform Politicii de confidențialitate.',
               'I agree to the processing of my data per the Privacy Policy.',
+              'Даю согласие на обработку данных согласно Политике конфиденциальности.',
             )}
           </span>
         </label>
@@ -292,6 +311,7 @@ export function ContactForm({ locale }: { locale: string }) {
           {t(
             'Ceva nu a funcționat. Încearcă din nou sau scrie-ne direct prin canalele de mai jos.',
             'Something went wrong. Try again, or reach us through the channels below.',
+            'Что-то пошло не так. Попробуйте ещё раз или напишите нам напрямую по контактам ниже.',
           )}
         </p>
       )}
@@ -303,8 +323,8 @@ export function ContactForm({ locale }: { locale: string }) {
           className="inline-flex cursor-pointer items-center bg-ink px-[26px] py-[15px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === 'submitting'
-            ? t('Se trimite…', 'Sending…')
-            : t('Trimite mesajul', 'Send message')}
+            ? t('Se trimite…', 'Sending…', 'Отправка…')
+            : t('Trimite mesajul', 'Send message', 'Отправить сообщение')}
         </button>
       </div>
     </form>

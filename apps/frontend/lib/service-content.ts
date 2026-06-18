@@ -8,34 +8,36 @@
 export interface BiList {
   ro: string[];
   en: string[];
+  ru: string[];
 }
 export interface Bi {
   ro: string;
   en: string;
+  ru: string;
 }
 
 /** Price (large) + duration/qualifier (small) per service, mirroring the
  *  homepage Services section so /pricing renders them the same way. */
 export const SERVICE_PRICE_META: Record<string, { price: Bi; duration: Bi }> = {
   pediatric: {
-    price: { ro: '600 lei', en: '600 lei' },
-    duration: { ro: '50 min · video', en: '50 min · video' },
+    price: { ro: '600 lei', en: '600 lei', ru: '600 lei' },
+    duration: { ro: '50 min · video', en: '50 min · video', ru: '50 мин · видео' },
   },
   nutrition: {
-    price: { ro: '700 lei', en: '700 lei' },
-    duration: { ro: '60 min · video', en: '60 min · video' },
+    price: { ro: '700 lei', en: '700 lei', ru: '700 lei' },
+    duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
   },
   integrative: {
-    price: { ro: '1.100 lei', en: '1,100 lei' },
-    duration: { ro: '90 min · video', en: '90 min · video' },
+    price: { ro: '1.100 lei', en: '1,100 lei', ru: '1 100 lei' },
+    duration: { ro: '90 min · video', en: '90 min · video', ru: '90 мин · видео' },
   },
   monitoring: {
-    price: { ro: 'de la 2.400 lei', en: 'from 2,400 lei' },
-    duration: { ro: '3 luni', en: '3 months' },
+    price: { ro: 'de la 2.400 lei', en: 'from 2,400 lei', ru: 'от 2 400 lei' },
+    duration: { ro: '3 luni', en: '3 months', ru: '3 месяца' },
   },
   quick_question: {
-    price: { ro: '180 lei', en: '180 lei' },
-    duration: { ro: '48h · scris', en: '48h · written' },
+    price: { ro: '180 lei', en: '180 lei', ru: '180 lei' },
+    duration: { ro: '48h · scris', en: '48h · written', ru: '48 ч · письменно' },
   },
 };
 
@@ -43,22 +45,27 @@ export const SERVICE_DESCRIPTIONS: Record<string, Bi> = {
   pediatric: {
     ro: 'O consultație video dedicată sănătății copilului — simptome, creștere, dezvoltare sau o a doua opinie.',
     en: "A focused video visit for your child's health — symptoms, growth, development, or a second opinion.",
+    ru: 'Видеоконсультация о здоровье ребёнка — симптомы, рост, развитие или второе мнение.',
   },
   nutrition: {
     ro: 'O analiză personalizată a alimentației, pe bază de dovezi — pentru copii sau adulți.',
     en: 'A personalized, evidence-based look at feeding and nutrition — for children or adults.',
+    ru: 'Персональный анализ питания на основе доказательной медицины — для детей и взрослых.',
   },
   integrative: {
     ro: 'O consultație amănunțită care îmbină pediatria și nutriția, cu un plan de urmat în timp.',
     en: 'An in-depth visit that combines pediatric and nutrition expertise, with a plan to follow over time.',
+    ru: 'Подробная консультация, объединяющая педиатрию и нутрициологию, с планом на будущее.',
   },
   monitoring: {
     ro: 'Acompaniere continuă timp de trei luni — urmăresc progresul între consultații.',
     en: 'Continuous guidance over three months — I follow your progress between consultations.',
+    ru: 'Непрерывное сопровождение в течение трёх месяцев — слежу за прогрессом между консультациями.',
   },
   quick_question: {
     ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în 48 de ore.',
     en: 'Have one question? Get a written answer from the doctor within 48 hours.',
+    ru: 'Есть один вопрос? Получите письменный ответ от врача в течение 48 часов.',
   },
 };
 
@@ -76,6 +83,12 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'A clear assessment and next steps',
       'Written summary with recommendations within 24 hours',
     ],
+    ru: [
+      'Видеозвонок 50 минут',
+      'Разбор симптомов, истории болезни и присланных документов',
+      'Понятное заключение и дальнейшие шаги',
+      'Письменный план с рекомендациями в течение 24 часов',
+    ],
   },
   nutrition: {
     ro: [
@@ -89,6 +102,12 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'Analysis of current eating and feeding patterns',
       'A personalized nutrition plan',
       'Written recommendations after the call',
+    ],
+    ru: [
+      'Видеозвонок 60 минут',
+      'Анализ текущих привычек питания',
+      'Персональный план питания',
+      'Письменные рекомендации после консультации',
     ],
   },
   integrative: {
@@ -104,6 +123,12 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'A tailored action plan',
       'Initial follow-up / monitoring included',
     ],
+    ru: [
+      'Подробный видеозвонок 90 минут',
+      'Совместная педиатрическая и нутрициологическая оценка',
+      'Индивидуальный план действий',
+      'Первичное наблюдение / мониторинг включены',
+    ],
   },
   monitoring: {
     ro: [
@@ -118,6 +143,12 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'Plan adjustments as things change',
       'Priority messaging with the doctor',
     ],
+    ru: [
+      'Наблюдение в течение 3 месяцев',
+      'Регулярные проверки',
+      'Корректировка плана по мере изменений',
+      'Приоритетная переписка с врачом',
+    ],
   },
   quick_question: {
     ro: [
@@ -129,6 +160,11 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'Submit your question (with photos or documents if needed)',
       'A written reply within 48 hours',
       'One round of clarification',
+    ],
+    ru: [
+      'Отправляете вопрос (с фото или документами, если нужно)',
+      'Письменный ответ в течение 48 часов',
+      'Один круг уточнений',
     ],
   },
 };

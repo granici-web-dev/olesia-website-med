@@ -18,50 +18,58 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
-      ? 'About Dr. Olesea Jalba — pediatrician and nutrition specialist'
-      : 'Despre Dr. Olesea Jalba — medic pediatru și nutriționist',
-    description: en
-      ? 'Pediatrician with a master’s in human nutrition and experience in pediatric gastroenterology. Consultations in Romanian, Russian, and English.'
-      : 'Medic pediatru cu master în nutriție umană și experiență în gastroenterologie pediatrică. Consultații în română, rusă și engleză.',
+    title: ru
+      ? 'Обо мне — Dr. Olesea Jalba, врач-педиатр и нутрициолог'
+      : en
+        ? 'About Dr. Olesea Jalba — pediatrician and nutrition specialist'
+        : 'Despre Dr. Olesea Jalba — medic pediatru și nutriționist',
+    description: ru
+      ? 'Врач-педиатр с магистратурой по питанию человека и опытом в детской гастроэнтерологии. Консультирую на румынском, русском и английском.'
+      : en
+        ? 'Pediatrician with a master’s in human nutrition and experience in pediatric gastroenterology. Consultations in Romanian, Russian, and English.'
+        : 'Medic pediatru cu master în nutriție umană și experiență în gastroenterologie pediatrică. Consultații în română, rusă și engleză.',
   };
 }
 
-type Bi = { ro: string; en: string };
-type BiList = { ro: string[]; en: string[] };
+type Bi = { ro: string; en: string; ru: string };
+type BiList = { ro: string[]; en: string[]; ru: string[] };
 
 const FOCUS: Bi[] = [
-  { ro: 'Probleme digestive la copii — un domeniu cu care lucrez încă de la începutul carierei.', en: 'Digestive issues in children — an area I’ve worked in since the start of my career.' },
-  { ro: 'Nutriția și dificultățile de hrănire — inclusiv refuzul mâncării și diversificarea.', en: 'Nutrition and feeding difficulties — including food refusal and starting solids.' },
-  { ro: 'Copilul care se îmbolnăvește des.', en: 'The often-ill child.' },
-  { ro: 'Alergologie pediatrică.', en: 'Pediatric allergology.' },
-  { ro: 'Creșterea și dezvoltarea copilului.', en: 'Child growth and development.' },
+  { ro: 'Probleme digestive la copii — un domeniu cu care lucrez încă de la începutul carierei.', en: 'Digestive issues in children — an area I’ve worked in since the start of my career.', ru: 'Проблемы пищеварения у детей — направление, с которым я работаю с самого начала карьеры.' },
+  { ro: 'Nutriția și dificultățile de hrănire — inclusiv refuzul mâncării și diversificarea.', en: 'Nutrition and feeding difficulties — including food refusal and starting solids.', ru: 'Питание и трудности с кормлением — отказ от еды, введение прикорма.' },
+  { ro: 'Copilul care se îmbolnăvește des.', en: 'The often-ill child.', ru: 'Часто болеющий ребёнок.' },
+  { ro: 'Alergologie pediatrică.', en: 'Pediatric allergology.', ru: 'Детская аллергология.' },
+  { ro: 'Creșterea și dezvoltarea copilului.', en: 'Child growth and development.', ru: 'Рост и развитие ребёнка.' },
 ];
 
 const ADVANTAGES: { key: 'whole' | 'one' | 'evidence'; title: Bi; text: Bi }[] = [
   {
     key: 'whole',
-    title: { ro: 'O privire de ansamblu', en: 'A whole-picture view' },
+    title: { ro: 'O privire de ansamblu', en: 'A whole-picture view', ru: 'Взгляд на всю картину' },
     text: {
       ro: 'Sănătatea și alimentația, evaluate împreună — nu pe bucăți.',
       en: 'Health and nutrition, assessed together — not in pieces.',
+      ru: 'Оцениваю здоровье и питание вместе, а не по частям.',
     },
   },
   {
     key: 'one',
-    title: { ro: 'Un singur specialist', en: 'One specialist' },
+    title: { ro: 'Un singur specialist', en: 'One specialist', ru: 'Один специалист' },
     text: {
       ro: 'Nu mai mergi de la un medic la altul pentru sănătate și nutriție.',
       en: 'No going from one doctor to another for health and nutrition.',
+      ru: 'Не нужно ходить от врача к врачу ради здоровья и питания.',
     },
   },
   {
     key: 'evidence',
-    title: { ro: 'Plan pe bază de dovezi', en: 'An evidence-based plan' },
+    title: { ro: 'Plan pe bază de dovezi', en: 'An evidence-based plan', ru: 'Доказательный подход' },
     text: {
       ro: 'Recomandări fundamentate pe pregătire pediatrică și nutrițională.',
       en: 'Recommendations grounded in pediatric and nutrition training.',
+      ru: 'Рекомендации опираются на педиатрическую и нутрициологическую подготовку.',
     },
   },
 ];
@@ -108,20 +116,22 @@ interface CvEntry {
 
 const CV: CvEntry[] = [
   {
-    label: { ro: 'Experiență', en: 'Experience' },
+    label: { ro: 'Experiență', en: 'Experience', ru: 'Опыт' },
     body: [
       {
         ro: 'Lucrez ca medic pediatru la Spitalul Clinic Municipal de Copii „Valentin Ignatenco” și la clinica Harper Medklinic din Chișinău.',
         en: 'I work as a pediatrician at the “Valentin Ignatenco” Municipal Children’s Clinical Hospital and at the Harper Medklinic clinic in Chișinău.',
+        ru: 'Работаю врачом-педиатром в Муниципальной клинической детской больнице имени Валентина Игнатенко и в клинике Harper Medklinic в Кишинёве.',
       },
       {
         ro: 'Înainte de a deveni medic, am lucrat opt ani ca asistentă medicală în secția de gastroenterologie a Institutului Mamei și Copilului — de aici vine și interesul meu pentru sănătatea digestivă a copiilor.',
         en: 'Before becoming a doctor, I worked for eight years as a nurse in the gastroenterology department of the Mother and Child Institute — that’s where my interest in children’s digestive health comes from.',
+        ru: 'До того как стать врачом, я восемь лет работала медсестрой в отделении гастроэнтерологии Института матери и ребёнка — отсюда и мой интерес к детскому пищеварению.',
       },
     ],
   },
   {
-    label: { ro: 'Studii', en: 'Education' },
+    label: { ro: 'Studii', en: 'Education', ru: 'Образование' },
     items: {
       ro: [
         'Master în Sănătate Publică – Nutriție Umană, USMF „Nicolae Testemițanu” (2025)',
@@ -133,14 +143,20 @@ const CV: CvEntry[] = [
         'Residency in Pediatrics, USMF “Nicolae Testemițanu” (2018)',
         'Degree in General Medicine, USMF “Nicolae Testemițanu” (2014)',
       ],
+      ru: [
+        'Магистратура по общественному здоровью – питание человека, USMF «Nicolae Testemițanu» (2025)',
+        'Ординатура по педиатрии, USMF «Nicolae Testemițanu» (2018)',
+        'Диплом по общей медицине, USMF «Nicolae Testemițanu» (2014)',
+      ],
     },
   },
   {
-    label: { ro: 'Formare continuă', en: 'Continuing education' },
+    label: { ro: 'Formare continuă', en: 'Continuing education', ru: 'Непрерывное образование' },
     body: [
       {
         ro: 'Particip constant la congrese și cursuri de specialitate, în Moldova și peste hotare. Printre cele mai recente:',
         en: 'I regularly take part in congresses and specialty courses, in Moldova and abroad. Among the most recent:',
+        ru: 'Постоянно участвую в конгрессах и профильных курсах — в Молдове и за рубежом. Из недавнего:',
       },
     ],
     items: {
@@ -154,32 +170,40 @@ const CV: CvEntry[] = [
         'Congress of Pediatric Gastroenterology, Hepatology and Nutrition, Sibiu (2025)',
         'WHO pediatric emergency courses',
       ],
+      ru: [
+        'Программы по трудностям с кормлением у детей (2026)',
+        'Конгресс по детской гастроэнтерологии, гепатологии и питанию, Сибиу (2025)',
+        'Курсы ВОЗ по неотложной педиатрической помощи',
+      ],
     },
   },
   {
-    label: { ro: 'Activitate științifică', en: 'Research' },
+    label: { ro: 'Activitate științifică', en: 'Research', ru: 'Научная деятельность' },
     body: [
       {
         ro: 'Cercetarea mea s-a concentrat pe afecțiunile digestive la copii, inclusiv bolile inflamatorii intestinale. Am publicat articole despre diareea și constipația la copii și despre rinita alergică la copii.',
         en: 'My research focused on digestive conditions in children, including inflammatory bowel disease. I’ve published articles on diarrhea and constipation in children and on allergic rhinitis in children.',
+        ru: 'Я исследовала заболевания пищеварения у детей, в том числе воспалительные заболевания кишечника. Опубликовала статьи о диарее и запорах, а также об аллергическом рините у детей.',
       },
     ],
   },
   {
-    label: { ro: 'Limbi', en: 'Languages' },
+    label: { ro: 'Limbi', en: 'Languages', ru: 'Языки' },
     body: [
       {
         ro: 'Consultațiile pot avea loc în română, rusă și engleză.',
         en: 'Consultations can take place in Romanian, Russian, and English.',
+        ru: 'Консультирую на румынском, русском и английском.',
       },
     ],
   },
   {
-    label: { ro: 'Membru și acreditare', en: 'Membership & accreditation' },
+    label: { ro: 'Membru și acreditare', en: 'Membership & accreditation', ru: 'Членство и аккредитация' },
     body: [
       {
         ro: 'Membră a Societății Române de Pediatrie. Categorie de calificare confirmată de Ministerul Sănătății al Republicii Moldova.',
         en: 'Member of the Romanian Society of Pediatrics. Qualification category confirmed by the Ministry of Health of the Republic of Moldova.',
+        ru: 'Член Румынского общества педиатрии. Квалификационная категория подтверждена Министерством здравоохранения Республики Молдова.',
       },
     ],
   },
@@ -200,7 +224,8 @@ export default async function AboutPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   return (
     <main className="bg-cream text-ink">
@@ -210,22 +235,24 @@ export default async function AboutPage({
           <div className="md:sticky md:top-[133px] md:self-start">
             <p className="mb-7 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
               <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-              {en ? 'About' : 'Despre'}
+              {ru ? 'Обо мне' : en ? 'About' : 'Despre'}
             </p>
             <h1 className="serif text-[clamp(2.8rem,6vw,5.4rem)] leading-[1.02] tracking-[-0.015em] text-balance">
               Dr. Olesea <span className="serif-it text-sage">Jalba</span>
             </h1>
             <p className="mono mt-5 text-[12px] uppercase tracking-[0.12em] text-ink-soft">
-              {en ? 'Pediatrician · MSc in Human Nutrition' : 'Medic pediatru · Master în Nutriție Umană'}
+              {ru ? 'Врач-педиатр · Магистр питания человека' : en ? 'Pediatrician · MSc in Human Nutrition' : 'Medic pediatru · Master în Nutriție Umană'}
             </p>
             <p className="mt-7 max-w-[42ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-              {en
-                ? 'I look at a child’s health as a whole — the medical side and nutrition, together.'
-                : 'Privesc sănătatea copilului în ansamblu — partea medicală și alimentația, împreună.'}
+              {ru
+                ? 'Я смотрю на здоровье ребёнка в целом — медицинскую часть и питание вместе.'
+                : en
+                  ? 'I look at a child’s health as a whole — the medical side and nutrition, together.'
+                  : 'Privesc sănătatea copilului în ansamblu — partea medicală și alimentația, împreună.'}
             </p>
             <div className="mt-9">
               <Link href="/services" className={btnDark}>
-                {en ? 'See the services' : 'Vezi serviciile'}
+                {ru ? 'Посмотреть услуги' : en ? 'See the services' : 'Vezi serviciile'}
               </Link>
             </div>
           </div>
@@ -235,9 +262,11 @@ export default async function AboutPage({
               <Image
                 src="/assets/olesea-portrait.webp"
                 alt={
-                  en
-                    ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
-                    : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
+                  ru
+                    ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'
+                    : en
+                      ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
+                      : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
                 }
                 fill
                 priority
@@ -247,7 +276,7 @@ export default async function AboutPage({
             </div>
             <div className="mono mt-4 flex justify-between text-[11px] uppercase tracking-[0.08em] text-ink-soft">
               <span>Dr. Olesea Jalba</span>
-              <span>{en ? 'Online · Anywhere' : 'Online · Oriunde'}</span>
+              <span>{ru ? 'Онлайн · Где угодно' : en ? 'Online · Anywhere' : 'Online · Oriunde'}</span>
             </div>
           </div>
         </div>
@@ -257,9 +286,14 @@ export default async function AboutPage({
       <section className="shell py-20 md:py-28">
         <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16 lg:gap-24">
           <div>
-            <p className="eyebrow mb-4">{en ? 'In short' : 'Pe scurt'}</p>
+            <p className="eyebrow mb-4">{ru ? 'Кратко' : en ? 'In short' : 'Pe scurt'}</p>
             <h2 className="serif text-[clamp(1.8rem,3vw,2.6rem)] leading-[1.12] tracking-[-0.02em] text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Педиатр и <span className="serif-it text-sage">нутрициолог</span>, в одном
+                  человеке
+                </>
+              ) : en ? (
                 <>
                   Pediatrician and <span className="serif-it text-sage">nutritionist</span>, in one
                   person
@@ -274,15 +308,17 @@ export default async function AboutPage({
           </div>
           <div>
             <p className="max-w-[58ch] text-[1.15rem] leading-[1.75] text-ink-soft text-pretty">
-              {en
-                ? 'I’m a pediatrician with a master’s in human nutrition and experience that began in pediatric gastroenterology. This combination lets me see a child’s health as a whole — not just today’s symptom, but how they eat and develop over time.'
-                : 'Sunt medic pediatru, cu un master în nutriție umană și o experiență care a început în gastroenterologia pediatrică. Această combinație îmi permite să privesc sănătatea copilului în ansamblu — nu doar simptomul de azi, ci și felul în care se hrănește și se dezvoltă în timp.'}
+              {ru
+                ? 'Я врач-педиатр с магистратурой по питанию человека; мой опыт начинался в детской гастроэнтерологии. Это сочетание помогает мне видеть здоровье ребёнка целиком — не только сегодняшний симптом, но и то, как он растёт и питается изо дня в день.'
+                : en
+                  ? 'I’m a pediatrician with a master’s in human nutrition and experience that began in pediatric gastroenterology. This combination lets me see a child’s health as a whole — not just today’s symptom, but how they eat and develop over time.'
+                  : 'Sunt medic pediatru, cu un master în nutriție umană și o experiență care a început în gastroenterologia pediatrică. Această combinație îmi permite să privesc sănătatea copilului în ansamblu — nu doar simptomul de azi, ci și felul în care se hrănește și se dezvoltă în timp.'}
             </p>
             <div className="mt-8 flex flex-wrap gap-2.5">
               {[
-                { ro: 'Medic pediatru', en: 'Pediatrician' },
-                { ro: 'Master în nutriție umană', en: 'MSc Human Nutrition' },
-                { ro: 'Gastroenterologie pediatrică', en: 'Pediatric gastroenterology' },
+                { ro: 'Medic pediatru', en: 'Pediatrician', ru: 'Врач-педиатр' },
+                { ro: 'Master în nutriție umană', en: 'MSc Human Nutrition', ru: 'Магистр питания человека' },
+                { ro: 'Gastroenterologie pediatrică', en: 'Pediatric gastroenterology', ru: 'Детская гастроэнтерология' },
               ].map((f) => (
                 <span
                   key={f.en}
@@ -300,7 +336,7 @@ export default async function AboutPage({
       <section className="bg-sage-deep text-cream">
         <div className="shell py-20 md:py-28">
           <p className="mb-12 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)] md:mb-16">
-            {en ? 'What it means for you' : 'Ce înseamnă asta pentru tine'}
+            {ru ? 'Что это значит для вас' : en ? 'What it means for you' : 'Ce înseamnă asta pentru tine'}
           </p>
           <div className="grid gap-x-12 gap-y-12 md:grid-cols-3">
             {ADVANTAGES.map((a, i) => (
@@ -324,9 +360,13 @@ export default async function AboutPage({
       {/* 4 · Focus areas */}
       <section className="shell py-20 md:py-28">
         <header className="max-w-[40rem]">
-          <p className="eyebrow mb-3">{en ? 'What I work with' : 'Domenii de focus'}</p>
+          <p className="eyebrow mb-3">{ru ? 'С чем я работаю' : en ? 'What I work with' : 'Domenii de focus'}</p>
           <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Направления <span className="serif-it text-sage">работы</span>
+              </>
+            ) : en ? (
               <>
                 Areas of <span className="serif-it text-sage">focus</span>
               </>
@@ -360,9 +400,13 @@ export default async function AboutPage({
       <section className="bg-paper">
         <div className="shell py-20 md:py-28">
           <header className="mx-auto mb-12 max-w-[820px] text-center md:mb-16">
-            <p className="eyebrow mb-3">{en ? 'The record' : 'Parcurs'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Путь' : en ? 'The record' : 'Parcurs'}</p>
             <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Опыт и <span className="serif-it text-sage">аккредитация</span>
+                </>
+              ) : en ? (
                 <>
                   Background & <span className="serif-it text-sage">credentials</span>
                 </>
@@ -392,7 +436,7 @@ export default async function AboutPage({
                   ))}
                   {entry.items && (
                     <ul className={`grid gap-2.5 ${entry.body ? 'mt-4' : ''}`}>
-                      {(en ? entry.items.en : entry.items.ro).map((item) => (
+                      {(ru ? entry.items.ru : en ? entry.items.en : entry.items.ro).map((item) => (
                         <li
                           key={item}
                           className="grid grid-cols-[1.1em_1fr] gap-x-2.5 text-[1.0625rem] leading-relaxed text-ink"
@@ -417,7 +461,11 @@ export default async function AboutPage({
         <div className="shell flex flex-col gap-8 py-20 md:flex-row md:items-end md:justify-between md:py-24">
           <div className="max-w-[34ch]">
             <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Записаться на <span className="serif-it text-[var(--sage-soft)]">консультацию</span>
+                </>
+              ) : en ? (
                 <>
                   Book a <span className="serif-it text-[var(--sage-soft)]">consultation</span>
                 </>
@@ -430,7 +478,7 @@ export default async function AboutPage({
           </div>
           <div>
             <Link href="/services" className={creamPill}>
-              {en ? 'See the services' : 'Vezi serviciile'}
+              {ru ? 'Посмотреть услуги' : en ? 'See the services' : 'Vezi serviciile'}
             </Link>
           </div>
         </div>

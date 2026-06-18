@@ -26,12 +26,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   const menu = findPlaceholderMenu(slug);
-  if (!menu) return { title: en ? 'Menu | Dr. Olesea Jalba' : 'Meniu | Dr. Olesea Jalba' };
-  const title = en ? menu.title.en : menu.title.ro;
+  if (!menu) return { title: ru ? 'Меню | Dr. Olesea Jalba' : en ? 'Menu | Dr. Olesea Jalba' : 'Meniu | Dr. Olesea Jalba' };
+  const title = ru ? menu.title.ru : en ? menu.title.en : menu.title.ro;
   return {
     title: `${title} | Dr. Olesea Jalba`,
-    description: en ? menu.description.en : menu.description.ro,
+    description: ru ? menu.description.ru : en ? menu.description.en : menu.description.ro,
   };
 }
 
@@ -47,12 +48,13 @@ export default async function MenuDetailPage({
 }) {
   const { locale, slug } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   const menu = findPlaceholderMenu(slug);
   if (!menu) notFound();
 
-  const ageLabel = menuSegmentLabel(menu.age, en);
+  const ageLabel = menuSegmentLabel(menu.age, en, ru);
   const title = lc(menu.title);
 
   return (
@@ -60,8 +62,8 @@ export default async function MenuDetailPage({
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
-          { label: en ? 'Home' : 'Acasă', href: '/' },
-          { label: en ? 'Weekly menus' : 'Meniuri săptămânale', href: '/menus' },
+          { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
+          { label: ru ? 'Недельные меню' : en ? 'Weekly menus' : 'Meniuri săptămânale', href: '/menus' },
           { label: title },
         ]}
       />
@@ -71,7 +73,7 @@ export default async function MenuDetailPage({
         <div className="shell py-16 md:py-24">
           <p className="mb-8 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {ageLabel} · {en ? 'Weekly menu' : 'Meniu săptămânal'}
+            {ageLabel} · {ru ? 'Недельное меню' : en ? 'Weekly menu' : 'Meniu săptămânal'}
           </p>
           <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 lg:gap-20">
             <h1 className="serif max-w-[18ch] text-[clamp(2.3rem,5vw,4.4rem)] leading-[1.05] tracking-[-0.015em] text-balance">
@@ -83,10 +85,10 @@ export default async function MenuDetailPage({
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2">
                 <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.1em] text-sage-text">
-                  {menu.days} {en ? 'days' : 'zile'}
+                  {menu.days} {ru ? 'дн.' : en ? 'days' : 'zile'}
                 </span>
                 <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.1em] text-sage-text">
-                  {en ? 'Free · Inspiration, not a plan' : 'Gratuit · Inspirație, nu un plan'}
+                  {ru ? 'Бесплатно · Вдохновение, а не план' : en ? 'Free · Inspiration, not a plan' : 'Gratuit · Inspirație, nu un plan'}
                 </span>
               </div>
             </div>
@@ -133,9 +135,13 @@ export default async function MenuDetailPage({
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-2 md:gap-20 md:py-20">
           <div>
-            <p className="eyebrow mb-3">{en ? 'Good to know' : 'De reținut'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Важно знать' : en ? 'Good to know' : 'De reținut'}</p>
             <h2 className="serif text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-0.02em] text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Идеи, чтобы <span className="serif-it text-sage">адаптировать</span>
+                </>
+              ) : en ? (
                 <>
                   Ideas to <span className="serif-it text-sage">adapt</span>
                 </>
@@ -148,9 +154,11 @@ export default async function MenuDetailPage({
           </div>
           <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
             <p className="max-w-[52ch] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'This menu is a set of meal ideas — without exact grams, calories, or set portions. Adapt it to your child’s age, preferences, and needs. If your child has allergies, intolerances, or a condition, check with the doctor first.'
-                : 'Acest meniu este un set de idei de mese — fără gramaje exacte, calorii sau porții prescrise. Adaptează-l la vârsta, preferințele și nevoile copilului tău. Dacă cel mic are alergii, intoleranțe sau o afecțiune, consultă mai întâi medicul.'}
+              {ru
+                ? 'Это меню — набор идей блюд, без точных граммов, калорий или заданных порций. Адаптируйте его под возраст, предпочтения и потребности вашего ребёнка. Если у малыша аллергии, непереносимости или заболевание, сначала посоветуйтесь с врачом.'
+                : en
+                  ? 'This menu is a set of meal ideas — without exact grams, calories, or set portions. Adapt it to your child’s age, preferences, and needs. If your child has allergies, intolerances, or a condition, check with the doctor first.'
+                  : 'Acest meniu este un set de idei de mese — fără gramaje exacte, calorii sau porții prescrise. Adaptează-l la vârsta, preferințele și nevoile copilului tău. Dacă cel mic are alergii, intoleranțe sau o afecțiune, consultă mai întâi medicul.'}
             </p>
           </div>
         </div>
@@ -162,7 +170,11 @@ export default async function MenuDetailPage({
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-[36rem]">
               <h2 className="serif text-[clamp(2rem,4vw,3rem)] leading-[1.04] tracking-[-0.02em] text-cream text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Хотите план для вашего <span className="serif-it text-[var(--sage-soft)]">ребёнка?</span>
+                  </>
+                ) : en ? (
                   <>
                     Want a plan made for your <span className="serif-it text-[var(--sage-soft)]">child?</span>
                   </>
@@ -174,17 +186,19 @@ export default async function MenuDetailPage({
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/nutrition" className={creamPill}>
-                  {en ? 'Nutrition consultation' : 'Consultație de nutriție'}
+                  {ru ? 'Консультация нутрициолога' : en ? 'Nutrition consultation' : 'Consultație de nutriție'}
                 </Link>
                 <Link href="/menus" className={creamUnderline}>
-                  {en ? 'See all menus →' : 'Vezi toate meniurile →'}
+                  {ru ? 'Все меню →' : en ? 'See all menus →' : 'Vezi toate meniurile →'}
                 </Link>
               </div>
             </div>
             <p className="max-w-[30ch] text-sm leading-[1.7] text-[var(--sage-soft)] text-pretty md:text-right">
-              {en
-                ? 'A menu is inspiration. A plan is built around your child.'
-                : 'Un meniu e inspirație. Un plan e construit în jurul copilului tău.'}
+              {ru
+                ? 'Меню — это вдохновение. План строится вокруг вашего ребёнка.'
+                : en
+                  ? 'A menu is inspiration. A plan is built around your child.'
+                  : 'Un meniu e inspirație. Un plan e construit în jurul copilului tău.'}
             </p>
           </div>
         </div>

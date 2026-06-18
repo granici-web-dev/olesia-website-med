@@ -22,94 +22,107 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
-      ? '3-month monitoring | Dr. Olesea Jalba'
-      : 'Monitorizare 3 luni | Dr. Olesea Jalba',
-    description: en
-      ? 'Continuous support over three months: periodic check-ins, plan adjustments, and priority messaging with a pediatrician and nutrition specialist.'
-      : 'Acompaniere continuă timp de trei luni: verificări periodice, ajustări ale planului și mesagerie prioritară cu un medic pediatru și nutriționist.',
+    title: ru
+      ? 'Наблюдение 3 месяца | Dr. Olesea Jalba'
+      : en
+        ? '3-month monitoring | Dr. Olesea Jalba'
+        : 'Monitorizare 3 luni | Dr. Olesea Jalba',
+    description: ru
+      ? 'Непрерывное сопровождение в течение трёх месяцев: периодические проверки, корректировки плана и приоритетная переписка с педиатром и нутрициологом.'
+      : en
+        ? 'Continuous support over three months: periodic check-ins, plan adjustments, and priority messaging with a pediatrician and nutrition specialist.'
+        : 'Acompaniere continuă timp de trei luni: verificări periodice, ajustări ale planului și mesagerie prioritară cu un medic pediatru și nutriționist.',
   };
 }
 
-type Bi = { ro: string; en: string };
+type Bi = { ro: string; en: string; ru: string };
 
 const CHOOSE_WHEN: Bi[] = [
-  { ro: 'Vrei sprijin constant, nu o vizită singulară.', en: 'You want steady support, not a one-off visit.' },
-  { ro: 'Lucrezi la un obiectiv de durată — alimentație, creștere, un plan.', en: 'You’re working toward a longer goal — diet, growth, a plan.' },
-  { ro: 'Ai nevoie de ajustări pe parcurs, pe măsură ce lucrurile se schimbă.', en: 'You need adjustments along the way, as things change.' },
-  { ro: 'Vrei să poți întreba medicul între consultații.', en: 'You want to be able to ask the doctor between consultations.' },
+  { ro: 'Vrei sprijin constant, nu o vizită singulară.', en: 'You want steady support, not a one-off visit.', ru: 'Вам нужна постоянная поддержка, а не разовый визит.' },
+  { ro: 'Lucrezi la un obiectiv de durată — alimentație, creștere, un plan.', en: 'You’re working toward a longer goal — diet, growth, a plan.', ru: 'Вы движетесь к долгосрочной цели — питание, рост, план.' },
+  { ro: 'Ai nevoie de ajustări pe parcurs, pe măsură ce lucrurile se schimbă.', en: 'You need adjustments along the way, as things change.', ru: 'Вам нужно корректировать план по ходу, когда меняется ситуация.' },
+  { ro: 'Vrei să poți întreba medicul între consultații.', en: 'You want to be able to ask the doctor between consultations.', ru: 'Вы хотите спрашивать врача между консультациями.' },
 ];
 
 const INCLUDES: Bi[] = [
-  { ro: 'Monitorizarea cazului timp de 3 luni', en: 'Case monitoring for 3 months' },
-  { ro: 'Verificări periodice', en: 'Periodic check-ins' },
-  { ro: 'Ajustarea planului pe parcurs', en: 'Plan adjustments along the way' },
-  { ro: 'Mesagerie prioritară cu medicul', en: 'Priority messaging with the doctor' },
+  { ro: 'Monitorizarea cazului timp de 3 luni', en: 'Case monitoring for 3 months', ru: 'Наблюдение в течение 3 месяцев' },
+  { ro: 'Verificări periodice', en: 'Periodic check-ins', ru: 'Периодические проверки' },
+  { ro: 'Ajustarea planului pe parcurs', en: 'Plan adjustments along the way', ru: 'Корректировка плана по ходу' },
+  { ro: 'Mesagerie prioritară cu medicul', en: 'Priority messaging with the doctor', ru: 'Приоритетная переписка с врачом' },
 ];
 
 const STEPS: { title: Bi; text: Bi }[] = [
   {
-    title: { ro: 'Solicitare', en: 'Request' },
+    title: { ro: 'Solicitare', en: 'Request', ru: 'Заявка' },
     text: {
       ro: 'Soliciți un loc și ne spui pe scurt despre situație și obiective.',
       en: 'Request a spot and tell us briefly about the situation and goals.',
+      ru: 'Вы оставляете заявку и кратко рассказываете о ситуации и целях.',
     },
   },
   {
-    title: { ro: 'Plan de pornire', en: 'Starting plan' },
+    title: { ro: 'Plan de pornire', en: 'Starting plan', ru: 'Стартовый план' },
     text: {
       ro: 'Stabilim împreună planul de pornire și pașii pentru următoarele luni.',
       en: 'Together we set the starting plan and the steps for the coming months.',
+      ru: 'Вместе мы определяем стартовый план и шаги на ближайшие месяцы.',
     },
   },
   {
-    title: { ro: 'Urmărire 3 luni', en: '3-month follow-up' },
+    title: { ro: 'Urmărire 3 luni', en: '3-month follow-up', ru: 'Сопровождение 3 месяца' },
     text: {
       ro: 'Te urmăresc timp de trei luni — verificări periodice și mesagerie.',
       en: 'I follow you for three months — periodic check-ins and messaging.',
+      ru: 'Я сопровождаю вас в течение трёх месяцев — периодические проверки и переписка.',
     },
   },
   {
-    title: { ro: 'Ajustări', en: 'Adjustments' },
+    title: { ro: 'Ajustări', en: 'Adjustments', ru: 'Корректировки' },
     text: {
       ro: 'Ajustăm planul pe parcurs, pe măsură ce lucrurile se schimbă.',
       en: 'We adjust the plan along the way, as things change.',
+      ru: 'Мы корректируем план по ходу, когда меняется ситуация.',
     },
   },
 ];
 
 const FAQ: { q: Bi; a: Bi }[] = [
   {
-    q: { ro: 'Ce include monitorizarea de 3 luni?', en: 'What does 3-month monitoring include?' },
+    q: { ro: 'Ce include monitorizarea de 3 luni?', en: 'What does 3-month monitoring include?', ru: 'Что входит в наблюдение на 3 месяца?' },
     a: {
       ro: 'Urmărirea cazului timp de trei luni, verificări periodice, ajustarea planului pe parcurs și mesagerie prioritară pentru întrebări între consultații.',
       en: 'Case follow-up over three months, periodic check-ins, plan adjustments along the way, and priority messaging for questions between consultations.',
+      ru: 'Сопровождение в течение трёх месяцев, периодические проверки, корректировка плана по ходу и приоритетная переписка с врачом между консультациями.',
     },
   },
   {
-    q: { ro: 'Cât de des comunicăm?', en: 'How often do we talk?' },
+    q: { ro: 'Cât de des comunicăm?', en: 'How often do we talk?', ru: 'Как часто мы общаемся?' },
     a: {
       ro: 'Prin verificări periodice și mesagerie pentru întrebări între consultații — în ritmul potrivit situației tale.',
       en: 'Through periodic check-ins and messaging for questions between consultations — at the pace your situation needs.',
+      ru: 'Через периодические проверки и переписку — задавайте вопросы между консультациями в удобном для вас ритме.',
     },
   },
   {
-    q: { ro: 'Este pentru copii sau și pentru adulți?', en: 'Is it for children or adults too?' },
-    a: { ro: 'Pentru copii și adulți.', en: 'For children and adults.' },
+    q: { ro: 'Este pentru copii sau și pentru adulți?', en: 'Is it for children or adults too?', ru: 'Это для детей или также для взрослых?' },
+    a: { ro: 'Pentru copii și adulți.', en: 'For children and adults.', ru: 'Для детей и взрослых.' },
   },
   {
-    q: { ro: 'Pot continua după 3 luni?', en: 'Can I continue after 3 months?' },
+    q: { ro: 'Pot continua după 3 luni?', en: 'Can I continue after 3 months?', ru: 'Могу ли я продолжить после 3 месяцев?' },
     a: {
       ro: 'Da, poți continua programul dacă vrei sprijin în continuare.',
       en: 'Yes — you can continue the program if you want ongoing support.',
+      ru: 'Да, вы можете продолжить программу, если хотите дальнейшую поддержку.',
     },
   },
   {
-    q: { ro: 'Cum se face plata?', en: 'How do I pay?' },
+    q: { ro: 'Cum se face plata?', en: 'How do I pay?', ru: 'Как происходит оплата?' },
     a: {
       ro: 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după ce te contactăm.',
       en: 'By bank transfer (no online payment for now). You’ll get the details after we contact you.',
+      ru: 'Банковским переводом (онлайн-оплаты пока нет). Реквизиты пришлём, когда свяжемся с вами.',
     },
   },
 ];
@@ -131,16 +144,17 @@ export default async function MonitoringPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   return (
     <main className="bg-cream text-ink">
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
-          { label: en ? 'Home' : 'Acasă', href: '/' },
-          { label: en ? 'Services' : 'Servicii', href: '/services' },
-          { label: en ? '3-month monitoring' : 'Monitorizare 3 luni' },
+          { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
+          { label: ru ? 'Услуги' : en ? 'Services' : 'Servicii', href: '/services' },
+          { label: ru ? 'Наблюдение 3 месяца' : en ? '3-month monitoring' : 'Monitorizare 3 luni' },
         ]}
       />
       {/* 1 · Hero — editorial split: statement left, description right (no photo) */}
@@ -148,12 +162,16 @@ export default async function MonitoringPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {en ? 'Support · Online portal' : 'Acompaniere · Portal online'}
+            {ru ? 'Сопровождение · Онлайн-портал' : en ? 'Support · Online portal' : 'Acompaniere · Portal online'}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[15ch] text-[clamp(2.6rem,6vw,5.4rem)] leading-[1.04] tracking-[-0.015em] text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    <span className="serif-it text-sage">Наблюдение</span> 3 месяца
+                  </>
+                ) : en ? (
                   <>
                     <span className="serif-it text-sage">3-month</span> monitoring
                   </>
@@ -164,34 +182,40 @@ export default async function MonitoringPage({
                 )}
               </h1>
               <p className="mt-7 max-w-[34ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-                {en
-                  ? 'Continuous guidance, between consultations.'
-                  : 'Acompaniere continuă, între consultații.'}
+                {ru
+                  ? 'Непрерывное сопровождение между консультациями.'
+                  : en
+                    ? 'Continuous guidance, between consultations.'
+                    : 'Acompaniere continuă, între consultații.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <BookGroupBButton
                   service="monitoring"
-                  label={en ? 'Request a place' : 'Solicită un loc'}
+                  label={ru ? 'Записаться' : en ? 'Request a place' : 'Solicită un loc'}
                   className={btnDark}
                 />
                 <Link href="/pricing" className={underlineLg}>
-                  {en ? 'See pricing' : 'Vezi tarifele'} →
+                  {ru ? 'Смотреть тарифы' : en ? 'See pricing' : 'Vezi tarifele'} →
                 </Link>
               </div>
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {en ? 'Online portal · 3 months' : 'Portal online · 3 luni'}
+                {ru ? 'Онлайн-портал · 3 месяца' : en ? 'Online portal · 3 months' : 'Portal online · 3 luni'}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
-                {en
-                  ? 'I follow your progress for three months — periodic check-ins, plan adjustments, and direct messaging for questions between consultations.'
-                  : 'Îți urmăresc progresul timp de trei luni — verificări periodice, ajustări ale planului și mesagerie directă pentru întrebări între consultații.'}
+                {ru
+                  ? 'Я слежу за вашим прогрессом в течение трёх месяцев — периодические проверки, корректировки плана и прямая переписка по вопросам между консультациями.'
+                  : en
+                    ? 'I follow your progress for three months — periodic check-ins, plan adjustments, and direct messaging for questions between consultations.'
+                    : 'Îți urmăresc progresul timp de trei luni — verificări periodice, ajustări ale planului și mesagerie directă pentru întrebări între consultații.'}
               </p>
               <p className="mono mt-8 border-t border-[var(--rule)] pt-6 text-[11px] uppercase tracking-[0.1em] leading-relaxed text-ink-soft">
-                {en
-                  ? 'Pediatrician with a Master’s in Human Nutrition — steady support, not just one-off advice'
-                  : 'Medic pediatru cu master în nutriție umană — sprijin constant, nu doar un sfat unic'}
+                {ru
+                  ? 'Врач-педиатр с магистратурой по питанию человека — постоянная поддержка, а не просто разовый совет'
+                  : en
+                    ? 'Pediatrician with a Master’s in Human Nutrition — steady support, not just one-off advice'
+                    : 'Medic pediatru cu master în nutriție umană — sprijin constant, nu doar un sfat unic'}
               </p>
             </div>
           </div>
@@ -201,9 +225,13 @@ export default async function MonitoringPage({
       {/* 2 · When to choose it */}
       <section className="shell py-20 md:py-28">
         <header className="max-w-[40rem]">
-          <p className="eyebrow mb-3">{en ? 'Is it for you?' : 'Ți se potrivește?'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Вам это подходит?' : en ? 'Is it for you?' : 'Ți se potrivește?'}</p>
           <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-pretty">
-            {en ? (
+            {ru ? (
+              <>
+                Кому это <span className="serif-it text-sage">подходит</span>
+              </>
+            ) : en ? (
               <>
                 Who it’s <span className="serif-it text-sage">for</span>
               </>
@@ -234,9 +262,13 @@ export default async function MonitoringPage({
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-[1fr_1.3fr] md:gap-20 md:py-24">
           <div>
-            <p className="eyebrow mb-3">{en ? 'In the program' : 'În program'}</p>
+            <p className="eyebrow mb-3">{ru ? 'В программе' : en ? 'In the program' : 'În program'}</p>
             <h2 className="serif text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.05] tracking-[-0.02em] text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Что <span className="serif-it text-sage">входит</span>
+                </>
+              ) : en ? (
                 <>
                   What’s <span className="serif-it text-sage">included</span>
                 </>
@@ -267,10 +299,14 @@ export default async function MonitoringPage({
       <section className="bg-sage-deep text-cream">
         <div className="shell py-20 md:py-28">
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)]">
-            {en ? 'Step by step' : 'Pas cu pas'}
+            {ru ? 'Шаг за шагом' : en ? 'Step by step' : 'Pas cu pas'}
           </p>
           <h2 className="serif text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.0] tracking-[-0.02em] text-cream text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Как это <span className="serif-it text-[var(--sage-soft)]">проходит</span>
+              </>
+            ) : en ? (
               <>
                 How it <span className="serif-it text-[var(--sage-soft)]">works</span>
               </>
@@ -309,9 +345,13 @@ export default async function MonitoringPage({
       {/* 5 · About the doctor — content left, portrait right */}
       <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
         <div className="md:sticky md:top-[133px] md:self-start">
-          <p className="eyebrow mb-4">{en ? 'About the doctor' : 'Despre medic'}</p>
+          <p className="eyebrow mb-4">{ru ? 'О враче' : en ? 'About the doctor' : 'Despre medic'}</p>
           <h2 className="serif text-[clamp(1.9rem,3.6vw,3rem)] leading-[1.06] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Кто вас <span className="serif-it text-sage">сопровождает</span>
+              </>
+            ) : en ? (
               <>
                 Who you’ll <span className="serif-it text-sage">work with</span>
               </>
@@ -322,12 +362,14 @@ export default async function MonitoringPage({
             )}
           </h2>
           <p className="mt-6 max-w-[58ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">
-            {en
-              ? 'Dr. Olesea Jalba is a pediatrician with a Master’s in Public Health – Human Nutrition. Over three months she follows your case as a whole — health and nutrition together — and adjusts the plan as your situation evolves.'
-              : 'Dr. Olesea Jalba este medic pediatru cu master în Sănătate Publică – Nutriție Umană. Timp de trei luni îți urmărește cazul în ansamblu — sănătate și alimentație împreună — și ajustează planul pe măsură ce situația evoluează.'}
+            {ru
+              ? 'Dr. Olesea Jalba — врач-педиатр с магистратурой по специальности «Общественное здоровье – Питание человека». Три месяца она ведёт вас целостно — здоровье и питание вместе — и корректирует план по мере того, как меняется ваша ситуация.'
+              : en
+                ? 'Dr. Olesea Jalba is a pediatrician with a Master’s in Public Health – Human Nutrition. Over three months she follows your case as a whole — health and nutrition together — and adjusts the plan as your situation evolves.'
+                : 'Dr. Olesea Jalba este medic pediatru cu master în Sănătate Publică – Nutriție Umană. Timp de trei luni îți urmărește cazul în ansamblu — sănătate și alimentație împreună — și ajustează planul pe măsură ce situația evoluează.'}
           </p>
           <Link href="/about" className={`mt-9 ${underlineLg}`}>
-            {en ? 'See full profile' : 'Vezi profilul complet'} →
+            {ru ? 'Смотреть полный профиль' : en ? 'See full profile' : 'Vezi profilul complet'} →
           </Link>
         </div>
 
@@ -336,9 +378,11 @@ export default async function MonitoringPage({
             <Image
               src="/assets/olesea-portrait.webp"
               alt={
-                en
-                  ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
-                  : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
+                ru
+                  ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'
+                  : en
+                    ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
+                    : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
               }
               fill
               className="object-cover object-top"
@@ -352,17 +396,26 @@ export default async function MonitoringPage({
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-2 md:gap-20 md:py-20">
           <div>
-            <p className="eyebrow mb-3">{en ? 'Payment' : 'Plată'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Оплата' : en ? 'Payment' : 'Plată'}</p>
             <p className="max-w-[48ch] leading-relaxed text-ink-soft text-pretty">
-              {en
-                ? 'By bank transfer (no online payment for now). After you request a place, we contact you to agree on the next steps and send the payment details.'
-                : 'Prin transfer bancar (deocamdată fără plată online). După ce soliciți un loc, te contactăm pentru a stabili pașii următori și îți trimitem detaliile de plată.'}
+              {ru
+                ? 'Банковским переводом (онлайн-оплаты пока нет). Когда вы оставите заявку, мы свяжемся с вами, согласуем следующие шаги и пришлём реквизиты для оплаты.'
+                : en
+                  ? 'By bank transfer (no online payment for now). After you request a place, we contact you to agree on the next steps and send the payment details.'
+                  : 'Prin transfer bancar (deocamdată fără plată online). După ce soliciți un loc, te contactăm pentru a stabili pașii următori și îți trimitem detaliile de plată.'}
             </p>
           </div>
           <div>
-            <p className="eyebrow mb-3">{en ? 'Important' : 'Important'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Важно' : en ? 'Important' : 'Important'}</p>
             <p className="max-w-[56ch] leading-relaxed text-ink-soft text-pretty">
-              {en ? (
+              {ru ? (
+                <>
+                  Сопровождение не подходит для неотложных ситуаций и не заменяет
+                  лечение диагностированного заболевания. Если ситуация срочная, звоните{' '}
+                  <span className="font-medium text-ink">112</span> или обратитесь в ближайшую службу
+                  неотложной помощи.
+                </>
+              ) : en ? (
                 <>
                   Monitoring isn’t for medical emergencies and doesn’t replace treatment for a
                   diagnosed condition. If the situation is urgent, call{' '}
@@ -385,9 +438,13 @@ export default async function MonitoringPage({
       {/* 7 · FAQ — centered */}
       <section className="shell py-20 md:py-28">
         <div className="mx-auto max-w-[820px] text-center">
-          <p className="eyebrow mb-3">{en ? 'Good to know' : 'Bine de știut'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Полезно знать' : en ? 'Good to know' : 'Bine de știut'}</p>
           <h2 className="serif text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.0] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Частые <span className="serif-it text-sage">вопросы</span>
+              </>
+            ) : en ? (
               <>
                 Frequently <span className="serif-it text-sage">asked</span>
               </>
@@ -426,7 +483,11 @@ export default async function MonitoringPage({
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-[38rem]">
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Записаться на <span className="serif-it text-[var(--sage-soft)]">наблюдение</span>
+                  </>
+                ) : en ? (
                   <>
                     Request a place in <span className="serif-it text-[var(--sage-soft)]">monitoring</span>
                   </>
@@ -439,13 +500,13 @@ export default async function MonitoringPage({
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <BookGroupBButton
                   service="monitoring"
-                  label={en ? 'Request a place' : 'Solicită un loc'}
+                  label={ru ? 'Записаться' : en ? 'Request a place' : 'Solicită un loc'}
                   className={creamPill}
                 />
                 <span className="text-sm text-[var(--sage-soft)]">
-                  {en ? 'Not sure what fits? ' : 'Nu ești sigur ce ți se potrivește? '}
+                  {ru ? 'Не уверены, что подходит? ' : en ? 'Not sure what fits? ' : 'Nu ești sigur ce ți se potrivește? '}
                   <Link href="/services" className={creamUnderline}>
-                    {en ? 'See all services →' : 'Vezi toate serviciile →'}
+                    {ru ? 'Все услуги →' : en ? 'See all services →' : 'Vezi toate serviciile →'}
                   </Link>
                 </span>
               </div>
@@ -453,22 +514,22 @@ export default async function MonitoringPage({
 
             <div className="shrink-0 border-t border-[rgba(245,241,234,0.18)] pt-6 md:border-l md:border-t-0 md:pl-10 md:pt-0">
               <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)]">
-                {en ? 'Other services' : 'Alte servicii'}
+                {ru ? 'Другие услуги' : en ? 'Other services' : 'Alte servicii'}
               </p>
               <ul className="grid gap-3 text-[1.05rem]">
                 <li>
                   <Link href="/integrative" className={creamUnderline}>
-                    {en ? 'A one-off deep assessment? → Integrative consultation' : 'O evaluare aprofundată unică? → Consultație integrativă'}
+                    {ru ? 'Разовая глубокая оценка? → Интегративная консультация' : en ? 'A one-off deep assessment? → Integrative consultation' : 'O evaluare aprofundată unică? → Consultație integrativă'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/pediatrics" className={creamUnderline}>
-                    {en ? 'Just a health issue? → Pediatric consultation' : 'Doar o problemă de sănătate? → Consultație pediatrică'}
+                    {ru ? 'Только проблема со здоровьем? → Педиатрическая консультация' : en ? 'Just a health issue? → Pediatric consultation' : 'Doar o problemă de sănătate? → Consultație pediatrică'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/nutrition" className={creamUnderline}>
-                    {en ? 'Just nutrition? → Nutrition consultation' : 'Doar alimentație? → Consultație de nutriție'}
+                    {ru ? 'Только питание? → Консультация по питанию' : en ? 'Just nutrition? → Nutrition consultation' : 'Doar alimentație? → Consultație de nutriție'}
                   </Link>
                 </li>
               </ul>

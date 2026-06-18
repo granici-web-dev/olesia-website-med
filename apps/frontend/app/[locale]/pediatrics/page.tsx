@@ -25,146 +25,167 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
+    title: ru
+      ? 'Онлайн педиатрические консультации | Dr. Olesea Jalba'
+      : en
       ? 'Online pediatric consultations | Dr. Olesea Jalba'
       : 'Consultații pediatrice online | Dr. Olesea Jalba',
-    description: en
+    description: ru
+      ? 'Видеоконсультация врача-педиатра: симптомы, пищеварение, часто болеющий ребёнок, аллергия, рост. Запишитесь онлайн.'
+      : en
       ? 'Video pediatric consultation with a pediatrician: symptoms, digestion, the often-ill child, allergies, growth. Book online.'
       : 'Consultație pediatrică video cu un medic pediatru: simptome, digestie, copilul frecvent bolnav, alergii, creștere. Programează online.',
   };
 }
 
-type Bi = { ro: string; en: string };
+type Bi = { ro: string; en: string; ru: string };
 
 const HELP: { label: Bi; text: Bi }[] = [
   {
-    label: { ro: 'Simptome acute', en: 'Acute symptoms' },
+    label: { ro: 'Simptome acute', en: 'Acute symptoms', ru: 'Острые симптомы' },
     text: {
       ro: 'Febră, tuse, dureri, erupții — ce să faci și când să te îngrijorezi.',
       en: 'Fever, cough, pain, rashes — what to do and when to worry.',
+      ru: 'Температура, кашель, боли, сыпь — что делать и когда стоит беспокоиться.',
     },
   },
   {
-    label: { ro: 'Probleme digestive', en: 'Digestive issues' },
+    label: { ro: 'Probleme digestive', en: 'Digestive issues', ru: 'Проблемы с пищеварением' },
     text: {
       ro: 'Dureri abdominale, colici, constipație, diaree.',
       en: 'Abdominal pain, colic, constipation, diarrhea.',
+      ru: 'Боли в животе, колики, запоры, диарея.',
     },
   },
   {
-    label: { ro: 'Copilul care se îmbolnăvește des', en: 'The often-ill child' },
+    label: { ro: 'Copilul care se îmbolnăvește des', en: 'The often-ill child', ru: 'Часто болеющий ребёнок' },
     text: {
       ro: 'Infecții respiratorii repetate și imunitate.',
       en: 'Repeated respiratory infections and immunity.',
+      ru: 'Повторяющиеся респираторные инфекции и иммунитет.',
     },
   },
   {
-    label: { ro: 'Alergii', en: 'Allergies' },
+    label: { ro: 'Alergii', en: 'Allergies', ru: 'Аллергии' },
     text: {
       ro: 'Erupții, rinită alergică, reacții alimentare.',
       en: 'Rashes, allergic rhinitis, food reactions.',
+      ru: 'Сыпь, аллергический ринит, пищевые реакции.',
     },
   },
   {
-    label: { ro: 'Creștere și dezvoltare', en: 'Growth and development' },
+    label: { ro: 'Creștere și dezvoltare', en: 'Growth and development', ru: 'Рост и развитие' },
     text: {
       ro: 'Evaluarea progresului copilului.',
       en: "Assessing your child's progress.",
+      ru: 'Как растёт и развивается ребёнок.',
     },
   },
   {
-    label: { ro: 'Alimentație și apetit', en: 'Feeding and appetite' },
+    label: { ro: 'Alimentație și apetit', en: 'Feeding and appetite', ru: 'Питание и аппетит' },
     text: {
       ro: 'Dificultăți de hrănire, refuzul mâncării.',
       en: 'Feeding difficulties, food refusal.',
+      ru: 'Трудности с кормлением, отказ от еды.',
     },
   },
   {
-    label: { ro: 'A doua opinie', en: 'A second opinion' },
+    label: { ro: 'A doua opinie', en: 'A second opinion', ru: 'Второе мнение' },
     text: {
       ro: 'Verificarea unui diagnostic sau a unui tratament.',
       en: 'Reviewing a diagnosis or a treatment.',
+      ru: 'Проверка диагноза или назначенного лечения.',
     },
   },
 ];
 
 const STEPS: { title: Bi; text: Bi }[] = [
   {
-    title: { ro: 'Programare', en: 'Booking' },
+    title: { ro: 'Programare', en: 'Booking', ru: 'Запись' },
     text: {
       ro: 'Alegi o oră potrivită și completezi un scurt formular despre copil.',
       en: 'Pick a suitable time and fill in a short form about your child.',
+      ru: 'Выбираете удобное время и заполняете короткую форму о ребёнке.',
     },
   },
   {
-    title: { ro: 'Apel video', en: 'Video call' },
+    title: { ro: 'Apel video', en: 'Video call', ru: 'Видеозвонок' },
     text: {
       ro: 'Te conectezi la apelul video de 50 de minute.',
       en: 'Join the 50-minute video call.',
+      ru: 'Подключаетесь к 50-минутному видеозвонку.',
     },
   },
   {
-    title: { ro: 'Consultația', en: 'The consultation' },
+    title: { ro: 'Consultația', en: 'The consultation', ru: 'Консультация' },
     text: {
       ro: 'Discutăm împreună simptomele, istoricul și documentele pregătite.',
       en: 'Together we go through symptoms, history, and the documents you prepared.',
+      ru: 'Вместе разбираем симптомы, историю болезни и подготовленные документы.',
     },
   },
   {
-    title: { ro: 'Rezumat scris', en: 'Written summary' },
+    title: { ro: 'Rezumat scris', en: 'Written summary', ru: 'Письменный план' },
     text: {
       ro: 'Primești o evaluare clară și un rezumat scris cu recomandări.',
       en: 'You get a clear assessment and a written summary with recommendations.',
+      ru: 'Вы получаете понятную оценку и письменный план с рекомендациями.',
     },
   },
 ];
 
 const FOCUS: Bi[] = [
-  { ro: 'Nutriție și dificultăți de hrănire', en: 'Nutrition and feeding difficulties' },
-  { ro: 'Probleme digestive', en: 'Digestive issues' },
-  { ro: 'Copilul frecvent bolnav', en: 'The often-ill child' },
-  { ro: 'Alergologie', en: 'Allergology' },
+  { ro: 'Nutriție și dificultăți de hrănire', en: 'Nutrition and feeding difficulties', ru: 'Питание и трудности с кормлением' },
+  { ro: 'Probleme digestive', en: 'Digestive issues', ru: 'Проблемы с пищеварением' },
+  { ro: 'Copilul frecvent bolnav', en: 'The often-ill child', ru: 'Часто болеющий ребёнок' },
+  { ro: 'Alergologie', en: 'Allergology', ru: 'Аллергология' },
 ];
 
 const FAQ: { q: Bi; a: Bi }[] = [
   {
-    q: { ro: 'Pot primi o rețetă în urma consultației?', en: 'Can I get a prescription after the consultation?' },
+    q: { ro: 'Pot primi o rețetă în urma consultației?', en: 'Can I get a prescription after the consultation?', ru: 'Можно ли получить рецепт после консультации?' },
     a: {
       ro: 'În funcție de situație și de reglementările în vigoare. Dacă o rețetă nu poate fi emisă online sau e nevoie de o examinare fizică, îți explicăm clar și te îndrumăm.',
       en: 'It depends on the situation and current regulations. If a prescription can’t be issued online or a physical exam is needed, we’ll explain clearly and guide you.',
+      ru: 'Это зависит от ситуации и действующих правил. Если рецепт нельзя выписать онлайн или нужен очный осмотр, мы понятно всё объясним и подскажем, что делать.',
     },
   },
   {
-    q: { ro: 'În ce limbi pot discuta cu medicul?', en: 'Which languages can I speak with the doctor?' },
-    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.' },
+    q: { ro: 'În ce limbi pot discuta cu medicul?', en: 'Which languages can I speak with the doctor?', ru: 'На каких языках можно общаться с врачом?' },
+    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.', ru: 'На румынском, русском и английском.' },
   },
   {
-    q: { ro: 'Trebuie să fie copilul prezent la apel?', en: 'Does my child need to be on the call?' },
+    q: { ro: 'Trebuie să fie copilul prezent la apel?', en: 'Does my child need to be on the call?', ru: 'Должен ли ребёнок присутствовать на звонке?' },
     a: {
       ro: 'De obicei da — ajută medicul să observe copilul. Te anunțăm dacă într-un caz anume nu este necesar.',
       en: 'Usually yes — it helps the doctor observe your child. We’ll let you know if it isn’t needed in a particular case.',
+      ru: 'Обычно да — это помогает врачу понаблюдать за ребёнком. Мы сообщим, если в конкретном случае это не потребуется.',
     },
   },
   {
-    q: { ro: 'Cum se face plata?', en: 'How do I pay?' },
+    q: { ro: 'Cum se face plata?', en: 'How do I pay?', ru: 'Как происходит оплата?' },
     a: {
       ro: 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după confirmarea programării.',
       en: 'By bank transfer (no online payment for now). You’ll get the details once your booking is confirmed.',
+      ru: 'Банковским переводом (пока без онлайн-оплаты). Реквизиты вы получите после подтверждения записи.',
     },
   },
   {
-    q: { ro: 'Pot reprograma sau anula?', en: 'Can I reschedule or cancel?' },
+    q: { ro: 'Pot reprograma sau anula?', en: 'Can I reschedule or cancel?', ru: 'Можно ли перенести или отменить запись?' },
     a: {
       ro: 'Da, din linkul de confirmare, cu cel puțin 24 de ore înainte.',
       en: 'Yes, from your confirmation link at least 24 hours ahead.',
+      ru: 'Да, по ссылке из подтверждения, не позднее чем за 24 часа.',
     },
   },
   {
-    q: { ro: 'Ce documente să pregătesc?', en: 'What documents should I prepare?' },
+    q: { ro: 'Ce documente să pregătesc?', en: 'What documents should I prepare?', ru: 'Какие документы подготовить?' },
     a: {
       ro: 'Analize recente, rezultate anterioare și lista medicamentelor administrate.',
       en: 'Recent lab work, previous results, and a list of any medication given.',
+      ru: 'Свежие анализы, предыдущие результаты и список принимаемых лекарств.',
     },
   },
 ];
@@ -186,7 +207,8 @@ export default async function PediatricsPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   // Calendly URL for the pediatric service (group A). API supplies only this.
   const pediatricUrl = calendlyUrlFor(
@@ -194,8 +216,8 @@ export default async function PediatricsPage({
     (await api.services()).find((s) => s.code === 'pediatric')?.calendlySchedulingUrl,
   );
 
-  const bookLabel = en ? 'Book a consultation' : 'Programează o consultație';
-  const bookReason = en ? 'Pediatric consultation' : 'Consultație pediatrică';
+  const bookLabel = ru ? 'Записаться на консультацию' : en ? 'Book a consultation' : 'Programează o consultație';
+  const bookReason = ru ? 'Педиатрическая консультация' : en ? 'Pediatric consultation' : 'Consultație pediatrică';
 
   const BookPrimary = ({ className, label }: { className: string; label: string }) =>
     pediatricUrl ? (
@@ -211,9 +233,9 @@ export default async function PediatricsPage({
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
-          { label: en ? 'Home' : 'Acasă', href: '/' },
-          { label: en ? 'Services' : 'Servicii', href: '/services' },
-          { label: en ? 'Pediatric consultation' : 'Consultație pediatrică' },
+          { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
+          { label: ru ? 'Услуги' : en ? 'Services' : 'Servicii', href: '/services' },
+          { label: ru ? 'Педиатрическая консультация' : en ? 'Pediatric consultation' : 'Consultație pediatrică' },
         ]}
       />
       {/* 1 · Hero — editorial split: statement left, description right (no photo) */}
@@ -221,12 +243,16 @@ export default async function PediatricsPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {en ? 'Pediatrics · Video consultation' : 'Pediatrie · Consultație video'}
+            {ru ? 'Педиатрия · Видеоконсультация' : en ? 'Pediatrics · Video consultation' : 'Pediatrie · Consultație video'}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[15ch] text-[clamp(2.6rem,6vw,5.4rem)] leading-[1.04] tracking-[-0.015em] text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Онлайн <span className="serif-it text-sage">педиатрические</span> консультации
+                  </>
+                ) : en ? (
                   <>
                     Online <span className="serif-it text-sage">pediatric</span> consultations
                   </>
@@ -237,26 +263,30 @@ export default async function PediatricsPage({
                 )}
               </h1>
               <p className="mt-7 max-w-[32ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-                {en ? "For your child's health, from home." : 'Pentru sănătatea copilului tău, de acasă.'}
+                {ru ? 'Здоровье ребёнка — не выходя из дома.' : en ? "For your child's health, from home." : 'Pentru sănătatea copilului tău, de acasă.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <BookPrimary className={btnDark} label={bookLabel} />
                 <Link href="/pricing" className={underlineLg}>
-                  {en ? 'See pricing' : 'Vezi tarifele'} →
+                  {ru ? 'Посмотреть цены' : en ? 'See pricing' : 'Vezi tarifele'} →
                 </Link>
               </div>
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {en ? 'Video call · 50 min' : 'Apel video · 50 min'}
+                {ru ? 'Видеозвонок · 50 мин' : en ? 'Video call · 50 min' : 'Apel video · 50 min'}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
-                {en
+                {ru
+                  ? 'Поговорите с врачом-педиатром о симптомах, пищеварении, аллергиях, росте и развитии — без очередей и зала ожидания.'
+                  : en
                   ? 'Talk to a pediatrician about symptoms, digestion, allergies, growth and development — with no waiting room.'
                   : 'Discută cu un medic pediatru despre simptome, digestie, alergii, creștere și dezvoltare — fără sală de așteptare.'}
               </p>
               <p className="mono mt-8 border-t border-[var(--rule)] pt-6 text-[11px] uppercase tracking-[0.1em] leading-relaxed text-ink-soft">
-                {en
+                {ru
+                  ? 'Врач-педиатр · опыт работы в стационаре и амбулатории · член Общества педиатров'
+                  : en
                   ? 'Pediatrician · hospital and outpatient experience · member of the Society of Pediatrics'
                   : 'Medic pediatru · experiență în spital și ambulatoriu · membră a Societății de Pediatrie'}
               </p>
@@ -268,9 +298,13 @@ export default async function PediatricsPage({
       {/* 2 · What it helps with (core + SEO) */}
       <section className="shell py-20 md:py-28">
         <header className="max-w-[46rem]">
-          <p className="eyebrow mb-3">{en ? 'Reasons to book' : 'Motive să programezi'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Поводы записаться' : en ? 'Reasons to book' : 'Motive să programezi'}</p>
           <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-pretty">
-            {en ? (
+            {ru ? (
+              <>
+                С чем поможет <span className="serif-it text-sage">педиатрическая</span> консультация
+              </>
+            ) : en ? (
               <>
                 What a pediatric consultation <span className="serif-it text-sage">helps with</span>
               </>
@@ -302,10 +336,14 @@ export default async function PediatricsPage({
       <section className="bg-sage-deep text-cream">
         <div className="shell py-20 md:py-28">
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)]">
-            {en ? 'Step by step' : 'Pas cu pas'}
+            {ru ? 'Шаг за шагом' : en ? 'Step by step' : 'Pas cu pas'}
           </p>
           <h2 className="serif text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.0] tracking-[-0.02em] text-cream text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Как проходит <span className="serif-it text-[var(--sage-soft)]">консультация</span>
+              </>
+            ) : en ? (
               <>
                 How the <span className="serif-it text-[var(--sage-soft)]">consultation</span> works
               </>
@@ -344,9 +382,13 @@ export default async function PediatricsPage({
       {/* 4 · About the doctor — content left, portrait right */}
       <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
         <div className="md:sticky md:top-[133px] md:self-start">
-          <p className="eyebrow mb-4">{en ? 'About the doctor' : 'Despre medic'}</p>
+          <p className="eyebrow mb-4">{ru ? 'О враче' : en ? 'About the doctor' : 'Despre medic'}</p>
           <h2 className="serif text-[clamp(1.9rem,3.6vw,3rem)] leading-[1.06] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Кто вас <span className="serif-it text-sage">консультирует</span>
+              </>
+            ) : en ? (
               <>
                 Who you’ll <span className="serif-it text-sage">see</span>
               </>
@@ -357,11 +399,13 @@ export default async function PediatricsPage({
             )}
           </h2>
           <p className="mt-6 max-w-[56ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">
-            {en
+            {ru
+              ? 'Dr. Olesea Jalba — врач-педиатр с дополнительной подготовкой по детскому питанию и детской гастроэнтерологии. Работала в стационаре и амбулатории, регулярно участвует в профильных конференциях и курсах.'
+              : en
               ? 'Dr. Olesea Jalba is a pediatrician with additional training in child nutrition and pediatric gastroenterology. She has worked in both hospital and outpatient settings and regularly takes part in specialty conferences and courses.'
               : 'Dr. Olesea Jalba este medic pediatru, cu pregătire suplimentară în nutriția copilului și gastroenterologie pediatrică. A lucrat în spital și în ambulatoriu și participă constant la conferințe și cursuri de specialitate.'}
           </p>
-          <p className="eyebrow mt-9 mb-3">{en ? 'Focus areas' : 'Domenii de focus'}</p>
+          <p className="eyebrow mt-9 mb-3">{ru ? 'Направления работы' : en ? 'Focus areas' : 'Domenii de focus'}</p>
           <ul className="grid gap-2.5 sm:grid-cols-2">
             {FOCUS.map((f) => (
               <li
@@ -376,7 +420,7 @@ export default async function PediatricsPage({
             ))}
           </ul>
           <Link href="/about" className={`mt-9 ${underlineLg}`}>
-            {en ? 'See full profile' : 'Vezi profilul complet'} →
+            {ru ? 'Полный профиль' : en ? 'See full profile' : 'Vezi profilul complet'} →
           </Link>
         </div>
 
@@ -385,7 +429,9 @@ export default async function PediatricsPage({
             <Image
               src="/assets/olesea-portrait.webp"
               alt={
-                en
+                ru
+                  ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'
+                  : en
                   ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
                   : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
               }
@@ -401,15 +447,23 @@ export default async function PediatricsPage({
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-2 md:gap-20 md:py-20">
           <div>
-            <p className="eyebrow mb-3">{en ? 'Ages' : 'Vârste'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Возраст' : en ? 'Ages' : 'Vârste'}</p>
             <p className="serif text-[clamp(1.5rem,2.6vw,2.2rem)] leading-snug tracking-[-0.01em] text-balance">
-              {en ? 'From newborns to teenagers.' : 'De la nou-născuți până la adolescenți.'}
+              {ru ? 'От новорождённых до подростков.' : en ? 'From newborns to teenagers.' : 'De la nou-născuți până la adolescenți.'}
             </p>
           </div>
           <div>
-            <p className="eyebrow mb-3">{en ? 'Important' : 'Important'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Важно' : en ? 'Important' : 'Important'}</p>
             <p className="max-w-[56ch] leading-relaxed text-ink-soft text-pretty">
-              {en ? (
+              {ru ? (
+                <>
+                  Онлайн-консультация не предназначена для неотложных случаев. Если состояние ребёнка
+                  тяжёлое или быстро ухудшается, звоните{' '}
+                  <span className="font-medium text-ink">112</span> или обратитесь в ближайшую службу
+                  скорой помощи. Иногда нужен очный осмотр или дополнительные обследования — в этом
+                  случае мы понятно всё объясним и подскажем.
+                </>
+              ) : en ? (
                 <>
                   An online consultation isn’t meant for medical emergencies. If your child’s
                   condition is serious or worsening fast, call{' '}
@@ -434,9 +488,13 @@ export default async function PediatricsPage({
       {/* 6 · FAQ — centered */}
       <section className="shell py-20 md:py-28">
         <div className="mx-auto max-w-[820px] text-center">
-          <p className="eyebrow mb-3">{en ? 'Good to know' : 'Bine de știut'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Полезно знать' : en ? 'Good to know' : 'Bine de știut'}</p>
           <h2 className="serif text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.0] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Частые <span className="serif-it text-sage">вопросы</span>
+              </>
+            ) : en ? (
               <>
                 Frequently <span className="serif-it text-sage">asked</span>
               </>
@@ -475,7 +533,11 @@ export default async function PediatricsPage({
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-[38rem]">
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Запишитесь на педиатрическую <span className="serif-it text-[var(--sage-soft)]">консультацию</span>
+                  </>
+                ) : en ? (
                   <>
                     Book a pediatric <span className="serif-it text-[var(--sage-soft)]">consultation</span>
                   </>
@@ -488,13 +550,13 @@ export default async function PediatricsPage({
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <BookPrimary
                   className={creamPill}
-                  label={en ? 'Book a time (50 min, video)' : 'Programează o oră (50 min, video)'}
+                  label={ru ? 'Выбрать время (50 мин, видео)' : en ? 'Book a time (50 min, video)' : 'Programează o oră (50 min, video)'}
                 />
                 <span className="text-sm text-[var(--sage-soft)]">
-                  {en ? 'Have just one question? ' : 'Ai o singură întrebare? '}
+                  {ru ? 'Всего один вопрос? ' : en ? 'Have just one question? ' : 'Ai o singură întrebare? '}
                   <BookGroupBButton
                     service="quick_question"
-                    label={en ? 'Ask the doctor (48h reply) →' : 'Întreabă medicul (răspuns în 48h) →'}
+                    label={ru ? 'Спросить врача (ответ за 48 ч) →' : en ? 'Ask the doctor (48h reply) →' : 'Întreabă medicul (răspuns în 48h) →'}
                     className={creamUnderline}
                   />
                 </span>
@@ -503,17 +565,19 @@ export default async function PediatricsPage({
 
             <div className="shrink-0 border-t border-[rgba(245,241,234,0.18)] pt-6 md:border-l md:border-t-0 md:pl-10 md:pt-0">
               <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)]">
-                {en ? 'Other services' : 'Alte servicii'}
+                {ru ? 'Другие услуги' : en ? 'Other services' : 'Alte servicii'}
               </p>
               <ul className="grid gap-3 text-[1.05rem]">
                 <li>
                   <Link href="/services#nutrition" className={creamUnderline}>
-                    {en ? 'Feeding problems? → Nutrition consultation' : 'Probleme de alimentație? → Consultație de nutriție'}
+                    {ru ? 'Проблемы с питанием? → Консультация по питанию' : en ? 'Feeding problems? → Nutrition consultation' : 'Probleme de alimentație? → Consultație de nutriție'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/integrative" className={creamUnderline}>
-                    {en
+                    {ru
+                      ? 'Сложный случай или нужен мониторинг? → Интегративная консультация'
+                      : en
                       ? 'Complex case or need monitoring? → Integrative consultation'
                       : 'Caz complex sau monitorizare? → Consultație integrativă'}
                   </Link>

@@ -15,7 +15,7 @@ export function FooterLangSwitch() {
 
   return (
     <span className={styles.langSwitch}>
-      {(['ro', 'en'] as const).map((lng, i) => (
+      {(['ro', 'en', 'ru'] as const).map((lng, i) => (
         <span key={lng}>
           {i > 0 && <span aria-hidden="true"> · </span>}
           {locale === lng ? (

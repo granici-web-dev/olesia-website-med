@@ -28,23 +28,28 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const en = locale === 'en';
+  const ru = locale === 'ru';
   return {
-    title: en
+    title: ru
+      ? 'Гайды для скачивания о здоровье и питании ребёнка | Dr. Olesea Jalba'
+      : en
       ? 'Downloadable guides on child health & nutrition | Dr. Olesea Jalba'
       : 'Ghiduri descărcabile despre sănătatea și nutriția copilului | Dr. Olesea Jalba',
-    description: en
+    description: ru
+      ? 'Бесплатные гайды от педиатра: прикорм, привередливый аппетит, часто болеющий ребёнок и другие темы.'
+      : en
       ? 'Free, practical guides written by a pediatrician: feeding, picky eating, the frequently ill child, and more.'
       : 'Ghiduri practice gratuite scrise de un medic pediatru: alimentație, dificultăți de hrănire, copilul frecvent bolnav și altele.',
   };
 }
 
-type Bi = { ro: string; en: string };
+type Bi = { ro: string; en: string; ru: string };
 
-const TOPICS: { key: string; ro: string; en: string }[] = [
-  { key: 'nutritie', ro: 'Nutriție', en: 'Nutrition' },
-  { key: 'sanatate', ro: 'Sănătate', en: 'Health' },
-  { key: 'dezvoltare', ro: 'Dezvoltare', en: 'Development' },
-  { key: 'alergii', ro: 'Alergii', en: 'Allergies' },
+const TOPICS: { key: string; ro: string; en: string; ru: string }[] = [
+  { key: 'nutritie', ro: 'Nutriție', en: 'Nutrition', ru: 'Питание' },
+  { key: 'sanatate', ro: 'Sănătate', en: 'Health', ru: 'Здоровье' },
+  { key: 'dezvoltare', ro: 'Dezvoltare', en: 'Development', ru: 'Развитие' },
+  { key: 'alergii', ro: 'Alergii', en: 'Allergies', ru: 'Аллергии' },
 ];
 
 interface GuideContent {
@@ -65,10 +70,12 @@ const GUIDES: GuideContent[] = [
     title: {
       ro: 'Diversificarea alimentației — primii pași',
       en: 'Starting solids — the first steps',
+      ru: 'Введение прикорма — первые шаги',
     },
     description: {
       ro: 'Când și cum începi diversificarea, în siguranță și fără stres.',
       en: 'When and how to start solids, safely and without stress.',
+      ru: 'Когда и как начинать прикорм — безопасно и без стресса.',
     },
     pages: 16,
     featured: true,
@@ -79,10 +86,12 @@ const GUIDES: GuideContent[] = [
     title: {
       ro: 'Copilul mofturos: dificultăți de hrănire',
       en: 'The picky eater: feeding difficulties',
+      ru: 'Привередливый ребёнок: трудности с кормлением',
     },
     description: {
       ro: 'Strategii practice pentru mesele dificile și refuzul mâncării.',
       en: 'Practical strategies for hard meals and food refusal.',
+      ru: 'Практичные стратегии для сложных приёмов пищи и отказа от еды.',
     },
     pages: 12,
   },
@@ -92,10 +101,12 @@ const GUIDES: GuideContent[] = [
     title: {
       ro: 'Copilul care se îmbolnăvește des',
       en: 'The child who gets sick often',
+      ru: 'Часто болеющий ребёнок',
     },
     description: {
       ro: 'Ce e normal, când să te îngrijorezi și cum susții imunitatea.',
       en: "What's normal, when to worry, and how to support immunity.",
+      ru: 'Что нормально, когда стоит беспокоиться и как поддержать иммунитет.',
     },
     pages: 14,
   },
@@ -105,10 +116,12 @@ const GUIDES: GuideContent[] = [
     title: {
       ro: 'Constipația și diareea la copii',
       en: 'Constipation and diarrhea in children',
+      ru: 'Запор и диарея у детей',
     },
     description: {
       ro: 'Cauze frecvente, semne de alarmă și ce poți face acasă.',
       en: 'Common causes, warning signs, and what you can do at home.',
+      ru: 'Частые причины, тревожные признаки и что можно сделать дома.',
     },
     pages: 10,
   },
@@ -118,10 +131,12 @@ const GUIDES: GuideContent[] = [
     title: {
       ro: 'Alergiile la copii: ce trebuie să știi',
       en: 'Allergies in children: what to know',
+      ru: 'Аллергии у детей: что нужно знать',
     },
     description: {
       ro: 'Recunoașterea alergiilor alimentare și pașii corecți.',
       en: 'Recognizing food allergies and the right steps to take.',
+      ru: 'Как распознать пищевую аллергию и какие шаги предпринять.',
     },
     pages: 18,
   },
@@ -131,10 +146,12 @@ const GUIDES: GuideContent[] = [
     title: {
       ro: 'Dezvoltarea copilului pe etape',
       en: 'Child development, stage by stage',
+      ru: 'Развитие ребёнка по этапам',
     },
     description: {
       ro: 'Reperele de dezvoltare de la naștere la vârsta preșcolară.',
       en: 'Developmental milestones from birth to preschool age.',
+      ru: 'Этапы развития от рождения до дошкольного возраста.',
     },
     pages: 20,
   },
@@ -156,13 +173,14 @@ export default async function GuidesPage({
 }) {
   const { locale } = await params;
   const en = locale === 'en';
-  const lc = (b: Bi) => (en ? b.en : b.ro);
+  const ru = locale === 'ru';
+  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
   const topicLabel = (key: string) => {
     const t = TOPICS.find((x) => x.key === key);
     return t ? lc(t) : key;
   };
-  const meta = (pages: number) => `PDF · ${pages} ${en ? 'pages' : 'pagini'} · RO`;
+  const meta = (pages: number) => `PDF · ${pages} ${ru ? 'стр.' : en ? 'pages' : 'pagini'} · RO`;
   // ⚠ Placeholder file path — no real PDF exists yet. Swap for the real file
   // (back office, later); set to '' to show the "coming soon" state instead.
   const fileHref = (slug: string) => `/files/guides/${slug}-${locale}.pdf`;
@@ -182,16 +200,16 @@ export default async function GuidesPage({
 
   const HOW = [
     {
-      title: { ro: 'Alege un ghid', en: 'Pick a guide' },
-      text: { ro: 'Răsfoiește biblioteca și alege tema potrivită.', en: 'Browse the library and choose the topic you need.' },
+      title: { ro: 'Alege un ghid', en: 'Pick a guide', ru: 'Выберите гайд' },
+      text: { ro: 'Răsfoiește biblioteca și alege tema potrivită.', en: 'Browse the library and choose the topic you need.', ru: 'Полистайте библиотеку и выберите нужную тему.' },
     },
     {
-      title: { ro: 'Apasă „Descarcă"', en: 'Tap “Download”' },
-      text: { ro: 'Fără cont și fără cost — primești fișierul PDF.', en: 'No account, no cost — you get the PDF file.' },
+      title: { ro: 'Apasă „Descarcă"', en: 'Tap “Download”', ru: 'Нажмите «Скачать»' },
+      text: { ro: 'Fără cont și fără cost — primești fișierul PDF.', en: 'No account, no cost — you get the PDF file.', ru: 'Без аккаунта и бесплатно — сразу получаете PDF-файл.' },
     },
     {
-      title: { ro: 'Citește în ritmul tău', en: 'Read at your pace' },
-      text: { ro: 'Salvează-l și revino oricând ai nevoie.', en: 'Save it and come back whenever you need it.' },
+      title: { ro: 'Citește în ritmul tău', en: 'Read at your pace', ru: 'Читайте в своём ритме' },
+      text: { ro: 'Salvează-l și revino oricând ai nevoie.', en: 'Save it and come back whenever you need it.', ru: 'Сохраните его и возвращайтесь, когда понадобится.' },
     },
   ];
 
@@ -200,8 +218,8 @@ export default async function GuidesPage({
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
-          { label: en ? 'Home' : 'Acasă', href: '/' },
-          { label: en ? 'Guides' : 'Ghiduri' },
+          { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
+          { label: ru ? 'Гайды' : en ? 'Guides' : 'Ghiduri' },
         ]}
       />
       {/* 1 · Hero — editorial split: statement left, featured guide right */}
@@ -209,12 +227,16 @@ export default async function GuidesPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {en ? 'Guides' : 'Ghiduri'}
+            {ru ? 'Гайды' : en ? 'Guides' : 'Ghiduri'}
           </p>
           <div className="grid items-end gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[15ch] text-[clamp(2.6rem,6vw,5.4rem)] leading-[1.03] tracking-[-0.015em] text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Гайды <span className="serif-it text-sage">для скачивания</span>
+                  </>
+                ) : en ? (
                   <>
                     Downloadable <span className="serif-it text-sage">guides</span>
                   </>
@@ -225,23 +247,25 @@ export default async function GuidesPage({
                 )}
               </h1>
               <p className="mt-7 max-w-[44ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-                {en
+                {ru
+                  ? 'Практичные материалы о здоровье и питании ребёнка, написанные педиатром. Скачивайте бесплатно.'
+                  : en
                   ? 'Practical guides on your child’s health and nutrition, written by a pediatrician. Download them free.'
                   : 'Materiale practice despre sănătatea și alimentația copilului, scrise de un medic pediatru. Descarcă-le gratuit.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <a href="#library" className={btnDark}>
-                  {en ? 'Browse the guides' : 'Vezi ghidurile'}
+                  {ru ? 'Смотреть гайды' : en ? 'Browse the guides' : 'Vezi ghidurile'}
                 </a>
                 <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-sage-text">
-                  {en ? 'Free · No account' : 'Gratuit · Fără cont'}
+                  {ru ? 'Бесплатно · Без аккаунта' : en ? 'Free · No account' : 'Gratuit · Fără cont'}
                 </span>
               </div>
             </div>
 
             {/* Featured guide */}
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
-              <p className="eyebrow mb-5">{en ? 'Featured' : 'Recomandat'}</p>
+              <p className="eyebrow mb-5">{ru ? 'Рекомендуем' : en ? 'Featured' : 'Recomandat'}</p>
               <article className="flex flex-col border border-[var(--rule)] bg-paper">
                 <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden bg-cream-2 text-sage">
                   <span className="mono absolute left-4 top-4 rounded-full border border-[var(--rule)] bg-paper/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-sage-text">
@@ -268,7 +292,7 @@ export default async function GuidesPage({
                     download
                     className="mt-6 inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
                   >
-                    {en ? 'Download guide' : 'Descarcă ghidul'}
+                    {ru ? 'Скачать гайд' : en ? 'Download guide' : 'Descarcă ghidul'}
                     <span aria-hidden="true">↓</span>
                   </a>
                 </div>
@@ -282,9 +306,13 @@ export default async function GuidesPage({
       <section id="library" className="scroll-mt-24 shell py-20 md:py-28">
         <header className="mb-10 flex flex-col gap-4 md:flex-row md:items-baseline md:justify-between">
           <div>
-            <p className="eyebrow mb-3">{en ? 'Library' : 'Bibliotecă'}</p>
+            <p className="eyebrow mb-3">{ru ? 'Библиотека' : en ? 'Library' : 'Bibliotecă'}</p>
             <h2 className="serif text-[clamp(2.2rem,4.5vw,4rem)] leading-[1.0] tracking-[-0.02em] text-balance">
-              {en ? (
+              {ru ? (
+                <>
+                  Выберите <span className="serif-it text-sage">гайд</span>
+                </>
+              ) : en ? (
                 <>
                   Choose a <span className="serif-it text-sage">guide</span>
                 </>
@@ -296,7 +324,9 @@ export default async function GuidesPage({
             </h2>
           </div>
           <p className="max-w-[340px] text-sm leading-[1.7] text-ink-soft">
-            {en
+            {ru
+              ? 'Фильтруйте по теме. Все гайды бесплатны и написаны Dr. Olesea Jalba.'
+              : en
               ? 'Filter by topic. Every guide is free and written by Dr. Olesea Jalba.'
               : 'Filtrează după temă. Toate ghidurile sunt gratuite, scrise de Dr. Olesea Jalba.'}
           </p>
@@ -306,14 +336,16 @@ export default async function GuidesPage({
           guides={items}
           topics={topics}
           labels={{
-            all: en ? 'All' : 'Toate',
-            download: en ? 'Download guide' : 'Descarcă ghidul',
-            soon: en ? 'Coming soon' : 'În curând',
-            emptyTitle: en ? 'Guides are coming soon' : 'Ghidurile vin în curând',
-            emptyBody: en
+            all: ru ? 'Все' : en ? 'All' : 'Toate',
+            download: ru ? 'Скачать гайд' : en ? 'Download guide' : 'Descarcă ghidul',
+            soon: ru ? 'Скоро' : en ? 'Coming soon' : 'În curând',
+            emptyTitle: ru ? 'Гайды появятся скоро' : en ? 'Guides are coming soon' : 'Ghidurile vin în curând',
+            emptyBody: ru
+              ? 'Мы работаем над первыми гайдами. А пока задайте вопрос врачу напрямую.'
+              : en
               ? 'We’re working on the first guides. In the meantime, you can ask the doctor your question directly.'
               : 'Lucrăm la primele ghiduri. Între timp, dacă ai o întrebare, o poți adresa direct medicului.',
-            emptyCta: en ? 'Ask the doctor' : 'Întreabă medicul',
+            emptyCta: ru ? 'Спросить врача' : en ? 'Ask the doctor' : 'Întreabă medicul',
             emptyCtaHref: `/${locale}/quick-question`,
           }}
         />
@@ -323,10 +355,14 @@ export default async function GuidesPage({
       <section className="bg-sage-deep text-cream">
         <div className="shell py-20 md:py-24">
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)]">
-            {en ? 'How it works' : 'Cum funcționează'}
+            {ru ? 'Как это работает' : en ? 'How it works' : 'Cum funcționează'}
           </p>
           <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Бесплатно, в пару <span className="serif-it text-[var(--sage-soft)]">кликов</span>
+              </>
+            ) : en ? (
               <>
                 Free, in a few <span className="serif-it text-[var(--sage-soft)]">taps</span>
               </>
@@ -365,9 +401,13 @@ export default async function GuidesPage({
       {/* 4 · Author + disclaimer */}
       <section className="shell grid gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-2 md:gap-20 md:py-24">
         <div>
-          <p className="eyebrow mb-3">{en ? 'Who writes them' : 'Cine scrie ghidurile'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Кто их пишет' : en ? 'Who writes them' : 'Cine scrie ghidurile'}</p>
           <h2 className="serif text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-0.02em] text-balance">
-            {en ? (
+            {ru ? (
+              <>
+                Написаны <span className="serif-it text-sage">педиатром</span>
+              </>
+            ) : en ? (
               <>
                 Written by a <span className="serif-it text-sage">pediatrician</span>
               </>
@@ -378,19 +418,23 @@ export default async function GuidesPage({
             )}
           </h2>
           <p className="mt-5 max-w-[48ch] leading-relaxed text-ink-soft text-pretty">
-            {en
+            {ru
+              ? 'Гайды пишет Dr. Olesea Jalba — педиатр со степенью магистра нутрициологии.'
+              : en
               ? 'The guides are written by Dr. Olesea Jalba, a pediatrician with a Master’s in Human Nutrition.'
               : 'Ghidurile sunt realizate de Dr. Olesea Jalba, medic pediatru cu master în nutriție umană.'}
           </p>
           <Link href="/about" className={`mt-7 ${underlineLg}`}>
-            {en ? 'About the doctor' : 'Despre medic'} →
+            {ru ? 'О враче' : en ? 'About the doctor' : 'Despre medic'} →
           </Link>
         </div>
 
         <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
-          <p className="eyebrow mb-3">{en ? 'Good to know' : 'De reținut'}</p>
+          <p className="eyebrow mb-3">{ru ? 'Важно знать' : en ? 'Good to know' : 'De reținut'}</p>
           <p className="max-w-[52ch] leading-relaxed text-ink-soft text-pretty">
-            {en
+            {ru
+              ? 'Гайды дают общую информацию и не заменяют медицинскую консультацию. Если нужно разобраться в ситуации вашего ребёнка — запишитесь на приём.'
+              : en
               ? 'The guides are for information only and don’t replace a medical consultation. For your child’s specific situation, book a consultation.'
               : 'Ghidurile au scop informativ și nu înlocuiesc o consultație medicală. Pentru situația specifică a copilului tău, programează o consultație.'}
           </p>
@@ -403,7 +447,11 @@ export default async function GuidesPage({
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-[38rem]">
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
-                {en ? (
+                {ru ? (
+                  <>
+                    Нужен личный <span className="serif-it text-[var(--sage-soft)]">совет?</span>
+                  </>
+                ) : en ? (
                   <>
                     Need personal <span className="serif-it text-[var(--sage-soft)]">advice?</span>
                   </>
@@ -415,16 +463,18 @@ export default async function GuidesPage({
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/quick-question" className={creamPill}>
-                  {en ? 'Ask the doctor · 48h' : 'Întreabă medicul · 48h'}
+                  {ru ? 'Спросить врача · 48 ч' : en ? 'Ask the doctor · 48h' : 'Întreabă medicul · 48h'}
                 </Link>
                 <Link href="/services" className={creamUnderline}>
-                  {en ? 'See the consultations →' : 'Vezi consultațiile →'}
+                  {ru ? 'Смотреть консультации →' : en ? 'See the consultations →' : 'Vezi consultațiile →'}
                 </Link>
               </div>
             </div>
 
             <p className="max-w-[30ch] text-sm leading-[1.7] text-[var(--sage-soft)] text-pretty md:text-right">
-              {en
+              {ru
+                ? 'Гайд — это отправная точка. А с ситуацией вашего ребёнка поможет разобраться консультация.'
+                : en
                 ? 'A guide is a starting point. For your child’s situation, a consultation goes further.'
                 : 'Un ghid e un punct de plecare. Pentru situația copilului tău, o consultație merge mai departe.'}
             </p>
