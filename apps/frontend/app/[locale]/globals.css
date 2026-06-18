@@ -47,6 +47,12 @@
   --font-mono: var(--font-jetbrains);
 }
 
+/* In-page anchor links land below the sticky header (60px desktop / 48px
+   mobile) instead of hiding under it. */
+html {
+  scroll-padding-top: 5rem;
+}
+
 html,
 body {
   margin: 0;
@@ -123,6 +129,11 @@ body {
    hides instantly (no transition on `out`, so there's no fade-out flash), then
    fades + rises in on `in`. Fully disabled under reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
+  /* Smooth scrolling for in-page anchor links across the whole site. */
+  html {
+    scroll-behavior: smooth;
+  }
+
   [data-reveal='out'] {
     opacity: 0;
     transform: translateY(18px);
