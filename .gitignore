@@ -54,3 +54,5 @@ plan-sheet-*.png
 .playwright-mcp/
 /*-mobile*.png
 /*-desktop*.png
+# Extracted Russian text for Textovod proofreading (scratch, regenerated)
+/ru-proofread.txt
