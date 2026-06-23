@@ -33,10 +33,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
-import {
-  StatusBadge,
-  PaymentBadge,
-} from '@/features/appointments/status-badges';
+import { StatusBadge } from '@/features/appointments/status-badges';
+import { AppointmentPaymentCell } from '@/features/appointments/payment-cell';
 import { AppointmentDetailSheet } from '@/features/appointments/appointment-detail-sheet';
 import {
   fetchAppointments,
@@ -282,7 +280,7 @@ export function AppointmentsPage() {
                     <StatusBadge status={a.status} />
                   </TableCell>
                   <TableCell>
-                    <PaymentBadge status={a.paymentStatus} />
+                    <AppointmentPaymentCell appointment={a} />
                   </TableCell>
                   <TableCell className="text-right">
                     <Button

@@ -3,6 +3,7 @@ import {
   CalendarCheck,
   Repeat2,
   MessagesSquare,
+  Mail,
   Newspaper,
   Tags,
   Contact,
@@ -39,6 +40,7 @@ export const navGroups: NavGroup[] = [
       { to: paths.appointments, label: ro.nav.appointments, icon: CalendarCheck },
       { to: paths.subscriptions, label: ro.nav.subscriptions, icon: Repeat2 },
       { to: paths.quickQuestions, label: ro.nav.quickQuestions, icon: MessagesSquare },
+      { to: paths.messages, label: ro.nav.messages, icon: Mail },
     ],
   },
   {

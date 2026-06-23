@@ -221,7 +221,10 @@ export async function answerTicket(
   });
 }
 
-export async function confirmPayment(id: string): Promise<Ticket> {
+export async function setPaymentStatus(
+  id: string,
+  paymentStatus: PaymentStatus,
+): Promise<Ticket> {
   await delay(450);
-  return mutate(id, { paymentStatus: 'confirmed' });
+  return mutate(id, { paymentStatus });
 }

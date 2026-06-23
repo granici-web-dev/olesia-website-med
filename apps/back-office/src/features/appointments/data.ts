@@ -8,9 +8,9 @@ export * from '@/features/appointments/mock';
 export const fetchAppointments = USE_MOCKS
   ? mock.fetchAppointments
   : remote.fetchAppointments;
-export const confirmPayment = USE_MOCKS
-  ? mock.confirmPayment
-  : remote.confirmPayment;
+export const setPaymentStatus = USE_MOCKS
+  ? mock.setPaymentStatus
+  : remote.setPaymentStatus;
 export const markNoShow = USE_MOCKS ? mock.markNoShow : remote.markNoShow;
 export const uploadPlan = USE_MOCKS ? mock.uploadPlan : remote.uploadPlan;
 export const downloadPlanFile = USE_MOCKS

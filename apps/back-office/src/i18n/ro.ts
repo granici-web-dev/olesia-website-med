@@ -18,6 +18,7 @@ export const ro = {
     appointments: 'Programări',
     subscriptions: 'Abonamente',
     quickQuestions: 'Întrebări rapide',
+    messages: 'Mesaje',
     patients: 'Pacienți',
     blog: 'Blog',
     services: 'Servicii',
@@ -77,6 +78,19 @@ export const ro = {
     all: 'Toate',
     new: 'Nou',
     none: '—',
+  },
+
+  // Shared payment-status vocabulary (manual, offline payments). Used by the
+  // inline status switcher in lists; the per-module blocks keep their own copies
+  // for the detail sheets.
+  payment: {
+    pending: 'În așteptare',
+    confirmed: 'Confirmată',
+    free: 'Gratuit',
+    change: 'Schimbă statusul plății',
+    confirmedToast: 'Plata a fost confirmată.',
+    revertedToast: 'Plata a fost marcată drept neplătită.',
+    error: 'Acțiunea a eșuat. Încearcă din nou.',
   },
 
   states: {
@@ -163,6 +177,7 @@ export const ro = {
       pediatric: 'Consultație pediatrică',
       nutrition: 'Consultație nutrițională',
       integrative: 'Consultație integrativă',
+      free_consult: 'Consultație gratuită',
     },
 
     status: {
@@ -229,6 +244,7 @@ export const ro = {
 
     actions: {
       confirmPayment: 'Confirmă plata',
+      revertPayment: 'Marchează drept neplătită',
       markNoShow: 'Marchează neprezentare',
       markCompleted: 'Marchează finalizată',
       processing: 'Se procesează…',
@@ -260,6 +276,10 @@ export const ro = {
       paymentBody:
         'Marchezi manual plata ca încasată pentru această programare. Poți reveni asupra acțiunii ulterior.',
       paymentCta: 'Confirmă plata',
+      paymentRevertTitle: 'Marchezi plata drept neplătită?',
+      paymentRevertBody:
+        'Statusul plății revine la „În așteptare”. Poți confirma din nou oricând.',
+      paymentRevertCta: 'Marchează drept neplătită',
       noShowTitle: 'Marchezi neprezentarea?',
       noShowBody:
         'Clientul nu s-a prezentat la consultație. Statusul programării devine „Neprezentare”.',
@@ -268,6 +288,7 @@ export const ro = {
 
     toast: {
       paymentConfirmed: 'Plata a fost confirmată.',
+      paymentReverted: 'Plata a fost marcată drept neplătită.',
       noShowMarked: 'Programarea a fost marcată ca neprezentare.',
       planUploaded: 'Planul de tratament a fost salvat.',
       completed: 'Programarea a fost finalizată.',
@@ -539,6 +560,7 @@ export const ro = {
 
     actions: {
       confirmPayment: 'Confirmă plata',
+      revertPayment: 'Marchează drept neplătită',
       logCall: 'Înregistrează apel video',
       cancel: 'Anulează abonamentul',
     },
@@ -548,6 +570,10 @@ export const ro = {
       paymentBody:
         'Marchezi manual plata ca încasată pentru acest abonament. Poți reveni asupra acțiunii ulterior.',
       paymentCta: 'Confirmă plata',
+      paymentRevertTitle: 'Marchezi plata drept neplătită?',
+      paymentRevertBody:
+        'Statusul plății revine la „În așteptare”. Poți confirma din nou oricând.',
+      paymentRevertCta: 'Marchează drept neplătită',
       cancelTitle: 'Anulezi abonamentul?',
       cancelBody:
         'Abonamentul va fi marcat ca anulat și nu va mai consuma cotă de apeluri.',
@@ -556,6 +582,7 @@ export const ro = {
 
     toast: {
       paymentConfirmed: 'Plata a fost confirmată.',
+      paymentReverted: 'Plata a fost marcată drept neplătită.',
       callLogged: 'Apel video înregistrat.',
       canceled: 'Abonamentul a fost anulat.',
       noQuota: 'Nu mai sunt apeluri disponibile.',
@@ -833,6 +860,7 @@ export const ro = {
 
     actions: {
       confirmPayment: 'Confirmă plata',
+      revertPayment: 'Marchează drept neplătită',
       sendAnswer: 'Trimite răspunsul',
       sending: 'Se trimite…',
     },
@@ -842,14 +870,90 @@ export const ro = {
       paymentBody:
         'Marchezi manual plata ca încasată pentru acest tichet. Poți reveni asupra acțiunii ulterior.',
       paymentCta: 'Confirmă plata',
+      paymentRevertTitle: 'Marchezi plata drept neplătită?',
+      paymentRevertBody:
+        'Statusul plății revine la „În așteptare”. Poți confirma din nou oricând.',
+      paymentRevertCta: 'Marchează drept neplătită',
     },
 
     toast: {
       paymentConfirmed: 'Plata a fost confirmată.',
+      paymentReverted: 'Plata a fost marcată drept neplătită.',
       answerSent: 'Răspunsul a fost trimis clientului.',
       answerRequired: 'Scrie un răspuns înainte de a-l trimite.',
       attachmentMock:
         'Descărcarea atașamentelor va fi disponibilă după conectarea la API.',
+      error: 'Acțiunea a eșuat. Încearcă din nou.',
+    },
+  },
+
+  messages: {
+    title: 'Mesaje',
+    subtitle: 'Mesajele trimise prin formularul de contact de pe site.',
+    refresh: 'Reîmprospătează',
+
+    status: {
+      new: 'Nou',
+      read: 'Citit',
+      replied: 'Răspuns trimis',
+    },
+
+    subjects: {
+      appointment: 'Programare',
+      payment: 'Plată',
+      how_it_works: 'Cum funcționează',
+      other: 'Altă întrebare',
+    },
+
+    tabs: {
+      all: 'Toate',
+      new: 'Noi',
+      read: 'Citite',
+    },
+
+    filters: {
+      searchPlaceholder: 'Caută după nume, email sau mesaj…',
+      reset: 'Resetează',
+    },
+
+    columns: {
+      client: 'Expeditor',
+      subject: 'Subiect',
+      message: 'Mesaj',
+      received: 'Primit',
+      status: 'Status',
+    },
+
+    empty: {
+      title: 'Niciun mesaj',
+      body: 'Mesajele trimise din formularul de contact de pe site apar aici.',
+      filteredTitle: 'Niciun rezultat',
+      filteredBody: 'Niciun mesaj nu corespunde filtrelor selectate.',
+    },
+
+    detail: {
+      title: 'Detalii mesaj',
+      received: 'Primit',
+      message: 'Mesajul clientului',
+      reply: 'Răspuns',
+      replyHint:
+        'Trimiterea răspunsului direct din portal se activează după configurarea email-ului. Până atunci, poți răspunde din contul tău de email.',
+    },
+
+    actions: {
+      replyByEmail: 'Răspunde prin email',
+      delete: 'Șterge mesajul',
+    },
+
+    confirm: {
+      deleteTitle: 'Ștergi acest mesaj?',
+      deleteBody:
+        'Mesajul va fi șters definitiv. Această acțiune nu poate fi anulată.',
+      deleteCta: 'Șterge',
+    },
+
+    toast: {
+      deleted: 'Mesajul a fost șters.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
   },

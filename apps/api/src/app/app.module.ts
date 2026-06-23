@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { ServicesModule } from './services/services.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { AboutModule } from './about/about.module';
 import { BlogModule } from './blog/blog.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
@@ -31,6 +32,7 @@ import { LeadsModule } from './leads/leads.module';
     ServicesModule,
     AppointmentsModule,
     ContactsModule,
+    ContactMessagesModule,
     AboutModule,
     BlogModule,
     SubscriptionsModule,

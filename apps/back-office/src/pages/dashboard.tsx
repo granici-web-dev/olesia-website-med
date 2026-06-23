@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 import { fetchDashboardStats } from '@/features/dashboard/data';
 import { dashboardQueryKey } from '@/features/dashboard/query-key';
-import { PaymentBadge } from '@/features/appointments/status-badges';
+import { UpcomingPaymentCell } from '@/features/dashboard/upcoming-payment-cell';
 
 interface Metric {
   key: string;
@@ -171,7 +171,11 @@ function UpcomingRow({
           {serviceLabel} · {upcomingFormatter.format(new Date(item.startTime))}
         </p>
       </div>
-      <PaymentBadge status={item.paymentStatus} />
+      <UpcomingPaymentCell
+        id={item.id}
+        status={item.paymentStatus}
+        serviceCode={item.serviceCode}
+      />
     </div>
   );
 }

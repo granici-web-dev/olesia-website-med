@@ -97,6 +97,29 @@ const SERVICES = [
     sortOrder: 5,
     active: true,
   },
+  {
+    // Free 30-min orientation call. Group A (Calendly) so bookings land in the
+    // back office via the webhook, but `active: false` keeps it out of the
+    // public pricing grid — it has its own dedicated section on the site.
+    code: 'free_consult',
+    group: 'A_booking',
+    titleRo: 'Consultație gratuită',
+    titleEn: 'Free consultation',
+    descriptionRo:
+      'Discuție scurtă de orientare, fără cost — pentru a alege serviciul potrivit.',
+    descriptionEn:
+      'A short, no-cost orientation call — to help choose the right service.',
+    durationMin: 30,
+    price: 0,
+    priceLabelRo: 'Gratuit · 30 min',
+    priceLabelEn: 'Free · 30 min',
+    calendlyEventTypeUri:
+      'https://api.calendly.com/event_types/02306705-7d03-4bfa-bdbd-b6548b519771',
+    calendlySchedulingUrl:
+      'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
+    sortOrder: 0,
+    active: false,
+  },
 ] as const;
 
 /**

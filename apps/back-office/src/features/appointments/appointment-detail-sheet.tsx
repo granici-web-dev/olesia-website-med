@@ -10,6 +10,7 @@ import {
   Mail,
   Paperclip,
   Pencil,
+  RotateCcw,
   UserX,
   Video,
   X,
@@ -22,6 +23,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -42,13 +44,14 @@ import {
   PaymentBadge,
 } from '@/features/appointments/status-badges';
 import {
-  confirmPayment,
+  setPaymentStatus,
   downloadPlanFile,
   markNoShow,
   uploadPlan,
   serviceLabel,
   formatDateTime,
   durationMinutes,
+  isFreeAppointment,
 } from '@/features/appointments/data';
 import type { Appointment } from '@/features/appointments/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
@@ -109,9 +112,19 @@ export function AppointmentDetailSheet({
     queryClient.invalidateQueries({ queryKey: appointmentsQueryKey });
 
   const payMutation = useMutation({
-    mutationFn: confirmPayment,
-    onSuccess: () => {
-      toast.success(t.toast.paymentConfirmed);
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: Appointment['paymentStatus'];
+    }) => setPaymentStatus(id, status),
+    onSuccess: (_data, vars) => {
+      toast.success(
+        vars.status === 'confirmed'
+          ? t.toast.paymentConfirmed
+          : t.toast.paymentReverted,
+      );
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -198,7 +211,11 @@ export function AppointmentDetailSheet({
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={a.status} />
-                <PaymentBadge status={a.paymentStatus} />
+                {isFreeAppointment(a) ? (
+                  <Badge variant="secondary">{ro.payment.free}</Badge>
+                ) : (
+                  <PaymentBadge status={a.paymentStatus} />
+                )}
               </div>
 
               <h3 className="mt-4 text-lg font-semibold tracking-tight text-balance">
@@ -444,10 +461,38 @@ export function AppointmentDetailSheet({
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
               {a.paymentStatus === 'confirmed' && (
-                <AddAsPatientButton source="appointment" sourceId={a.id} />
+                <>
+                  <AddAsPatientButton source="appointment" sourceId={a.id} />
+                  {!isFreeAppointment(a) && (
+                    <ConfirmAction
+                      trigger={
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          disabled={busy}
+                        >
+                          {payMutation.isPending ? (
+                            <Loader2 className="animate-spin" />
+                          ) : (
+                            <RotateCcw />
+                          )}
+                          {t.actions.revertPayment}
+                        </Button>
+                      }
+                      title={t.confirm.paymentRevertTitle}
+                      body={t.confirm.paymentRevertBody}
+                      cta={t.confirm.paymentRevertCta}
+                      onConfirm={() =>
+                        payMutation.mutate({ id: a.id, status: 'pending' })
+                      }
+                    />
+                  )}
+                </>
               )}
 
-              {a.paymentStatus === 'pending' && a.status !== 'canceled' && (
+              {a.paymentStatus === 'pending' &&
+                a.status !== 'canceled' &&
+                !isFreeAppointment(a) && (
                 <ConfirmAction
                   trigger={
                     <Button className="w-full" disabled={busy}>
@@ -462,7 +507,9 @@ export function AppointmentDetailSheet({
                   title={t.confirm.paymentTitle}
                   body={t.confirm.paymentBody}
                   cta={t.confirm.paymentCta}
-                  onConfirm={() => payMutation.mutate(a.id)}
+                  onConfirm={() =>
+                    payMutation.mutate({ id: a.id, status: 'confirmed' })
+                  }
                 />
               )}
 

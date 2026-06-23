@@ -77,11 +77,13 @@ export async function fetchAppointments(): Promise<Appointment[]> {
     .sort((a, b) => b.startTime.localeCompare(a.startTime));
 }
 
-export async function confirmPayment(id: string): Promise<Appointment> {
+/** Manually set the payment status (both directions — payment is offline). */
+export async function setPaymentStatus(
+  id: string,
+  paymentStatus: Appointment['paymentStatus'],
+): Promise<Appointment> {
   const [d, codes] = await Promise.all([
-    http.patch<AppointmentDto>(`/appointments/${id}`, {
-      paymentStatus: 'confirmed',
-    }),
+    http.patch<AppointmentDto>(`/appointments/${id}`, { paymentStatus }),
     serviceCodeMap(),
   ]);
   return toView(d, codes);

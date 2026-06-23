@@ -22,6 +22,11 @@ export const paymentBadgeVariant: Record<PaymentStatus, BadgeVariant> = {
   confirmed: 'success',
 };
 
+/** The free orientation call carries no payment (price 0). */
+export function isFreeAppointment(a: Appointment): boolean {
+  return a.service === 'free_consult';
+}
+
 export function serviceLabel(service: AppointmentServiceCode): string {
   return ro.appointments.service[service];
 }
@@ -250,9 +255,12 @@ export async function fetchAppointments(): Promise<Appointment[]> {
     .sort((a, b) => b.startTime.localeCompare(a.startTime));
 }
 
-export async function confirmPayment(id: string): Promise<Appointment> {
+export async function setPaymentStatus(
+  id: string,
+  paymentStatus: PaymentStatus,
+): Promise<Appointment> {
   await delay(450);
-  return mutate(id, { paymentStatus: 'confirmed' });
+  return mutate(id, { paymentStatus });
 }
 
 export async function markNoShow(id: string): Promise<Appointment> {

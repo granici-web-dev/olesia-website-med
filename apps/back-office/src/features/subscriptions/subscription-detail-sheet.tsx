@@ -7,6 +7,7 @@ import {
   Mail,
   Phone,
   PhoneOff,
+  RotateCcw,
   Video,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -39,7 +40,7 @@ import {
 } from '@/features/subscriptions/status-badges';
 import { QuotaBar } from '@/features/subscriptions/quota-bar';
 import {
-  confirmPayment,
+  setPaymentStatus,
   cancelSubscription,
   logVideoCall,
   formatDate,
@@ -89,9 +90,19 @@ export function SubscriptionDetailSheet({
     queryClient.invalidateQueries({ queryKey: subscriptionsQueryKey });
 
   const payMutation = useMutation({
-    mutationFn: confirmPayment,
-    onSuccess: () => {
-      toast.success(t.toast.paymentConfirmed);
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: Subscription['paymentStatus'];
+    }) => setPaymentStatus(id, status),
+    onSuccess: (_data, vars) => {
+      toast.success(
+        vars.status === 'confirmed'
+          ? t.toast.paymentConfirmed
+          : t.toast.paymentReverted,
+      );
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -226,7 +237,31 @@ export function SubscriptionDetailSheet({
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
               {s.paymentStatus === 'confirmed' && (
-                <AddAsPatientButton source="subscription" sourceId={s.id} />
+                <>
+                  <AddAsPatientButton source="subscription" sourceId={s.id} />
+                  <ConfirmAction
+                    trigger={
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={busy}
+                      >
+                        {payMutation.isPending ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <RotateCcw />
+                        )}
+                        {t.actions.revertPayment}
+                      </Button>
+                    }
+                    title={t.confirm.paymentRevertTitle}
+                    body={t.confirm.paymentRevertBody}
+                    cta={t.confirm.paymentRevertCta}
+                    onConfirm={() =>
+                      payMutation.mutate({ id: s.id, status: 'pending' })
+                    }
+                  />
+                </>
               )}
 
               {s.paymentStatus === 'pending' && s.status !== 'canceled' && (
@@ -244,7 +279,9 @@ export function SubscriptionDetailSheet({
                   title={t.confirm.paymentTitle}
                   body={t.confirm.paymentBody}
                   cta={t.confirm.paymentCta}
-                  onConfirm={() => payMutation.mutate(s.id)}
+                  onConfirm={() =>
+                    payMutation.mutate({ id: s.id, status: 'confirmed' })
+                  }
                 />
               )}
 

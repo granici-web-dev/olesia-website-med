@@ -7,6 +7,6 @@ export * from '@/features/quick-questions/mock';
 
 export const fetchTickets = USE_MOCKS ? mock.fetchTickets : remote.fetchTickets;
 export const answerTicket = USE_MOCKS ? mock.answerTicket : remote.answerTicket;
-export const confirmPayment = USE_MOCKS
-  ? mock.confirmPayment
-  : remote.confirmPayment;
+export const setPaymentStatus = USE_MOCKS
+  ? mock.setPaymentStatus
+  : remote.setPaymentStatus;

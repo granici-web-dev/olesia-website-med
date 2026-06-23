@@ -3,8 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
   ChevronRight,
-  MessagesSquare,
-  Paperclip,
+  Mail,
   RefreshCw,
   Search,
   SearchX,
@@ -27,21 +26,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
-import { StatusBadge } from '@/features/quick-questions/status-badges';
-import { TicketPaymentCell } from '@/features/quick-questions/payment-cell';
-import { DeadlineIndicator } from '@/features/quick-questions/deadline-indicator';
-import { TicketDetailSheet } from '@/features/quick-questions/ticket-detail-sheet';
-import { fetchTickets, bucketOf } from '@/features/quick-questions/data';
-import { ticketsQueryKey } from '@/features/quick-questions/query-key';
-import type { StatusFilter } from '@/features/quick-questions/types';
+import { StatusBadge, SubjectBadge } from '@/features/messages/status-badges';
+import { MessageDetailSheet } from '@/features/messages/message-detail-sheet';
+import { fetchMessages, bucketOf, formatDateTime } from '@/features/messages/data';
+import { messagesQueryKey } from '@/features/messages/query-key';
+import type { StatusFilter } from '@/features/messages/types';
 
-const t = ro.quickQuestions;
-const STATUS_TABS: StatusFilter[] = ['all', 'open', 'overdue', 'answered'];
+const t = ro.messages;
+const STATUS_TABS: StatusFilter[] = ['all', 'new', 'read'];
 
-export function QuickQuestionsPage() {
+export function MessagesPage() {
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ticketsQueryKey,
-    queryFn: fetchTickets,
+    queryKey: messagesQueryKey,
+    queryFn: fetchMessages,
   });
 
   const [status, setStatus] = React.useState<StatusFilter>('all');
@@ -49,31 +46,29 @@ export function QuickQuestionsPage() {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = React.useState(false);
 
-  const tickets = React.useMemo(() => data ?? [], [data]);
+  const messages = React.useMemo(() => data ?? [], [data]);
 
-  // Precompute the derived bucket once per ticket.
   const withBucket = React.useMemo(
-    () => tickets.map((tk) => ({ tk, bucket: bucketOf(tk) })),
-    [tickets],
+    () => messages.map((m) => ({ m, bucket: bucketOf(m) })),
+    [messages],
   );
 
   const scoped = React.useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return withBucket;
     return withBucket.filter(
-      ({ tk }) =>
-        tk.clientName.toLowerCase().includes(q) ||
-        tk.clientEmail.toLowerCase().includes(q) ||
-        tk.question.toLowerCase().includes(q),
+      ({ m }) =>
+        m.name.toLowerCase().includes(q) ||
+        m.email.toLowerCase().includes(q) ||
+        m.message.toLowerCase().includes(q),
     );
   }, [withBucket, search]);
 
   const counts = React.useMemo(() => {
     const c: Record<StatusFilter, number> = {
       all: scoped.length,
-      open: 0,
-      overdue: 0,
-      answered: 0,
+      new: 0,
+      read: 0,
     };
     for (const { bucket } of scoped) c[bucket] += 1;
     return c;
@@ -88,8 +83,8 @@ export function QuickQuestionsPage() {
   );
 
   const selected = React.useMemo(
-    () => tickets.find((tk) => tk.id === selectedId) ?? null,
-    [tickets, selectedId],
+    () => messages.find((m) => m.id === selectedId) ?? null,
+    [messages, selectedId],
   );
 
   const filtersActive = status !== 'all' || search !== '';
@@ -133,8 +128,8 @@ export function QuickQuestionsPage() {
                 <span
                   className={cn(
                     'text-xs tabular-nums',
-                    key === 'overdue' && counts.overdue > 0 && status !== key
-                      ? 'font-semibold text-destructive'
+                    key === 'new' && counts.new > 0 && status !== key
+                      ? 'font-semibold text-info'
                       : 'text-muted-foreground/70',
                   )}
                 >
@@ -173,10 +168,10 @@ export function QuickQuestionsPage() {
             }
           />
         ) : isLoading ? (
-          <TicketsTableSkeleton />
+          <MessagesTableSkeleton />
         ) : visible.length === 0 ? (
           <EmptyState
-            icon={filtersActive ? SearchX : MessagesSquare}
+            icon={filtersActive ? SearchX : Mail}
             title={filtersActive ? t.empty.filteredTitle : t.empty.title}
             description={filtersActive ? t.empty.filteredBody : t.empty.body}
             className="py-16"
@@ -193,46 +188,53 @@ export function QuickQuestionsPage() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead>{t.columns.client}</TableHead>
-                <TableHead>{t.columns.question}</TableHead>
-                <TableHead>{t.columns.deadline}</TableHead>
+                <TableHead>{t.columns.subject}</TableHead>
+                <TableHead>{t.columns.message}</TableHead>
+                <TableHead>{t.columns.received}</TableHead>
                 <TableHead>{t.columns.status}</TableHead>
-                <TableHead>{t.columns.payment}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map(({ tk, bucket }) => (
+              {visible.map(({ m }) => (
                 <TableRow
-                  key={tk.id}
-                  onClick={() => openDetail(tk.id)}
-                  data-state={tk.id === selectedId ? 'selected' : undefined}
-                  className="cursor-pointer"
+                  key={m.id}
+                  onClick={() => openDetail(m.id)}
+                  data-state={m.id === selectedId ? 'selected' : undefined}
+                  className={cn(
+                    'cursor-pointer',
+                    m.status === 'new' && 'font-medium',
+                  )}
                 >
                   <TableCell className="align-top">
-                    <div className="font-medium">{tk.clientName}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {tk.clientEmail}
+                    <div className="flex items-center gap-2">
+                      {m.status === 'new' && (
+                        <span
+                          aria-hidden="true"
+                          className="size-1.5 shrink-0 rounded-full bg-info"
+                        />
+                      )}
+                      <div>
+                        <div>{m.name}</div>
+                        <div className="text-xs font-normal text-muted-foreground">
+                          {m.email}
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
+                  <TableCell className="align-top">
+                    <SubjectBadge subject={m.subject} />
+                  </TableCell>
                   <TableCell className="max-w-xs align-top">
-                    <p className="truncate text-sm text-muted-foreground">
-                      {tk.question}
+                    <p className="truncate text-sm font-normal text-muted-foreground">
+                      {m.message}
                     </p>
-                    {tk.attachments.length > 0 && (
-                      <span className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <Paperclip className="size-3" />
-                        {tk.attachments.length}
-                      </span>
-                    )}
+                  </TableCell>
+                  <TableCell className="align-top text-sm font-normal text-muted-foreground whitespace-nowrap">
+                    {formatDateTime(m.createdAt)}
                   </TableCell>
                   <TableCell className="align-top">
-                    <DeadlineIndicator ticket={tk} />
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <StatusBadge bucket={bucket} />
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <TicketPaymentCell ticket={tk} />
+                    <StatusBadge status={m.status} />
                   </TableCell>
                   <TableCell className="text-right align-top">
                     <Button
@@ -242,7 +244,7 @@ export function QuickQuestionsPage() {
                       aria-label={t.detail.title}
                       onClick={(e) => {
                         e.stopPropagation();
-                        openDetail(tk.id);
+                        openDetail(m.id);
                       }}
                     >
                       <ChevronRight className="size-4" />
@@ -255,8 +257,8 @@ export function QuickQuestionsPage() {
         )}
       </Card>
 
-      <TicketDetailSheet
-        ticket={selected}
+      <MessageDetailSheet
+        message={selected}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />
@@ -264,19 +266,19 @@ export function QuickQuestionsPage() {
   );
 }
 
-function TicketsTableSkeleton() {
+function MessagesTableSkeleton() {
   return (
     <div className="divide-y">
       {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 px-3 py-4">
-          <div className="w-40 space-y-1.5">
+          <div className="w-44 space-y-1.5">
             <Skeleton className="h-3.5 w-28" />
             <Skeleton className="h-3 w-36" />
           </div>
-          <Skeleton className="h-3.5 flex-1" />
-          <Skeleton className="h-3.5 w-24" />
-          <Skeleton className="h-5 w-16 rounded-md" />
           <Skeleton className="h-5 w-20 rounded-md" />
+          <Skeleton className="h-3.5 flex-1" />
+          <Skeleton className="h-3.5 w-20" />
+          <Skeleton className="h-5 w-16 rounded-md" />
         </div>
       ))}
     </div>

@@ -6,6 +6,7 @@ import { MailService } from '../mail/mail.service';
 import { toSubscriptionDto } from '../subscriptions/subscriptions.mapper';
 import { toQuickQuestionDto } from '../quick-questions/quick-questions.mapper';
 import {
+  ContactMessageStatus,
   PaymentStatus,
   QuickQuestionStatus,
   ServiceCode,
@@ -114,16 +115,27 @@ export class LeadsService {
   }
 
   /**
-   * Contact-page message → notification email to the practice inbox. Non-medical
-   * only (medical questions go through "Întrebare rapidă"), so nothing is
-   * persisted as a clinical record. The `company` honeypot, when filled, marks a
-   * bot: we drop it silently and report success so the bot learns nothing.
+   * Contact-page message → persisted as a `ContactMessage` (back-office "Mesaje")
+   * AND a notification email to the practice inbox. Non-medical only (medical
+   * questions go through "Întrebare rapidă"), so it carries no clinical data.
+   * The `company` honeypot, when filled, marks a bot: we drop it silently and
+   * report success so the bot learns nothing.
    */
   async createContact(dto: ContactMessageDto): Promise<{ ok: true }> {
     if (dto.company) {
       this.logger.warn('Contact message dropped (honeypot tripped).');
       return { ok: true };
     }
+
+    await this.prisma.contactMessage.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        subject: dto.subject,
+        message: dto.message,
+        status: ContactMessageStatus.new,
+      },
+    });
 
     const subjectLabel = CONTACT_SUBJECT_LABELS[dto.subject] ?? dto.subject;
     await this.mail.sendLeadNotification({

@@ -16,13 +16,15 @@ export enum Locale {
   En = 'en',
 }
 
-/** Stable code identifying each of the 5 services. */
+/** Stable code identifying each service. */
 export enum ServiceCode {
   Pediatric = 'pediatric',
   Nutrition = 'nutrition',
   Integrative = 'integrative',
   Monitoring = 'monitoring',
   QuickQuestion = 'quick_question',
+  /** Free orientation call (group A, price 0) — booked via Calendly. */
+  FreeConsult = 'free_consult',
 }
 
 /** Whether a service needs a calendar slot (A) or is portal-only (B). */
@@ -75,6 +77,16 @@ export enum QuickQuestionStatus {
   Open = 'open',
   Answered = 'answered',
   Closed = 'closed',
+}
+
+/** Lifecycle of a Contact-form message (public site → back-office "Mesaje"). */
+export enum ContactMessageStatus {
+  /** Just arrived, not yet opened. */
+  New = 'new',
+  /** Opened/read in the back office. */
+  Read = 'read',
+  /** Answered by email from the portal. */
+  Replied = 'replied',
 }
 
 /** Kind of a patient medical-record timeline entry (module_patients.md). */

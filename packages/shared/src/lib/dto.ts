@@ -1,5 +1,6 @@
 import {
   AppointmentStatus,
+  ContactMessageStatus,
   ContactType,
   PatientEntryType,
   PaymentStatus,
@@ -175,6 +176,30 @@ export interface ContactDto {
   value: string;
   sortOrder: number;
   active: boolean;
+}
+
+/** Non-medical subjects a Contact-form message can be filed under. */
+export type ContactMessageSubject =
+  | 'appointment'
+  | 'payment'
+  | 'how_it_works'
+  | 'other';
+
+/** A message submitted from the public Contact form (back-office "Mesaje"). */
+export interface ContactMessageDto {
+  id: string;
+  name: string;
+  email: string;
+  subject: ContactMessageSubject;
+  message: string;
+  status: ContactMessageStatus;
+  /** When the message was opened in the back office. */
+  readAt: string | null;
+  /** Email reply text (set once answered from the portal). */
+  reply: string | null;
+  repliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // --- About (singleton) ---

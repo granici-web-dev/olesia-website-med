@@ -51,10 +51,14 @@ export async function fetchSubscriptions(): Promise<Subscription[]> {
   return asList(r).map(toView);
 }
 
-export async function confirmPayment(id: string): Promise<Subscription> {
+/** Manually set the payment status (both directions — payment is offline). */
+export async function setPaymentStatus(
+  id: string,
+  paymentStatus: Subscription['paymentStatus'],
+): Promise<Subscription> {
   return toView(
     await http.patch<SubscriptionDto>(`/subscriptions/${id}`, {
-      paymentStatus: 'confirmed',
+      paymentStatus,
     }),
   );
 }

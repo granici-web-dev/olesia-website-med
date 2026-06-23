@@ -10,7 +10,8 @@ export type ServiceCode =
   | 'nutrition'
   | 'integrative'
   | 'monitoring'
-  | 'quick_question';
+  | 'quick_question'
+  | 'free_consult';
 
 /** A = calendar-backed video slot; B = portal-only (no Calendly). */
 export type ServiceGroup = 'A_booking' | 'B_portal';

@@ -8,6 +8,7 @@ import {
   Mail,
   Paperclip,
   Phone,
+  RotateCcw,
   Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -40,7 +41,7 @@ import {
 } from '@/features/quick-questions/status-badges';
 import { DeadlineIndicator } from '@/features/quick-questions/deadline-indicator';
 import {
-  confirmPayment,
+  setPaymentStatus,
   answerTicket,
   bucketOf,
   formatDateTime,
@@ -84,9 +85,19 @@ export function TicketDetailSheet({
     queryClient.invalidateQueries({ queryKey: ticketsQueryKey });
 
   const payMutation = useMutation({
-    mutationFn: confirmPayment,
-    onSuccess: () => {
-      toast.success(t.toast.paymentConfirmed);
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: Ticket['paymentStatus'];
+    }) => setPaymentStatus(id, status),
+    onSuccess: (_data, vars) => {
+      toast.success(
+        vars.status === 'confirmed'
+          ? t.toast.paymentConfirmed
+          : t.toast.paymentReverted,
+      );
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -239,13 +250,37 @@ export function TicketDetailSheet({
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
               {tk.paymentStatus === 'confirmed' && (
-                <AddAsPatientButton source="quick_question" sourceId={tk.id} />
+                <>
+                  <AddAsPatientButton
+                    source="quick_question"
+                    sourceId={tk.id}
+                  />
+                  <PaymentAction
+                    icon={<RotateCcw />}
+                    label={t.actions.revertPayment}
+                    title={t.confirm.paymentRevertTitle}
+                    body={t.confirm.paymentRevertBody}
+                    cta={t.confirm.paymentRevertCta}
+                    pending={payMutation.isPending}
+                    disabled={busy}
+                    onConfirm={() =>
+                      payMutation.mutate({ id: tk.id, status: 'pending' })
+                    }
+                  />
+                </>
               )}
               {tk.paymentStatus === 'pending' && (
-                <ConfirmPayment
+                <PaymentAction
+                  icon={<CheckCircle2 />}
+                  label={t.actions.confirmPayment}
+                  title={t.confirm.paymentTitle}
+                  body={t.confirm.paymentBody}
+                  cta={t.confirm.paymentCta}
                   pending={payMutation.isPending}
                   disabled={busy}
-                  onConfirm={() => payMutation.mutate(tk.id)}
+                  onConfirm={() =>
+                    payMutation.mutate({ id: tk.id, status: 'confirmed' })
+                  }
                 />
               )}
               {!isAnswered && (
@@ -272,11 +307,22 @@ export function TicketDetailSheet({
   );
 }
 
-function ConfirmPayment({
+/** Manual payment-status action with confirmation (confirm or revert). */
+function PaymentAction({
+  icon,
+  label,
+  title,
+  body,
+  cta,
   pending,
   disabled,
   onConfirm,
 }: {
+  icon: React.ReactNode;
+  label: string;
+  title: string;
+  body: string;
+  cta: string;
   pending: boolean;
   disabled: boolean;
   onConfirm: () => void;
@@ -285,20 +331,18 @@ function ConfirmPayment({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="outline" className="w-full" disabled={disabled}>
-          {pending ? <Loader2 className="animate-spin" /> : <CheckCircle2 />}
-          {t.actions.confirmPayment}
+          {pending ? <Loader2 className="animate-spin" /> : icon}
+          {label}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t.confirm.paymentTitle}</AlertDialogTitle>
-          <AlertDialogDescription>{t.confirm.paymentBody}</AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{body}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
-            {t.confirm.paymentCta}
-          </AlertDialogAction>
+          <AlertDialogAction onClick={onConfirm}>{cta}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

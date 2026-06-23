@@ -13,8 +13,12 @@ export type AppointmentStatus =
 
 export type PaymentStatus = 'pending' | 'confirmed';
 
-/** Group-A services only — the calendar-backed ones. */
-export type AppointmentServiceCode = 'pediatric' | 'nutrition' | 'integrative';
+/** Group-A services only — the calendar-backed ones (incl. the free call). */
+export type AppointmentServiceCode =
+  | 'pediatric'
+  | 'nutrition'
+  | 'integrative'
+  | 'free_consult';
 
 export interface Appointment {
   id: string;

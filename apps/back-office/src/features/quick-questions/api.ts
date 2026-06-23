@@ -56,10 +56,14 @@ export async function answerTicket(
   );
 }
 
-export async function confirmPayment(id: string): Promise<Ticket> {
+/** Manually set the payment status (both directions — payment is offline). */
+export async function setPaymentStatus(
+  id: string,
+  paymentStatus: Ticket['paymentStatus'],
+): Promise<Ticket> {
   return toView(
     await http.patch<QuickQuestionDto>(`/quick-questions/${id}`, {
-      paymentStatus: 'confirmed',
+      paymentStatus,
     }),
   );
 }

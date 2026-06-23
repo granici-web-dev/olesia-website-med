@@ -205,12 +205,17 @@ export class AppointmentsService {
       where: { calendlyEventUri: b.eventUri },
       select: { id: true },
     });
+    // Free services carry no payment, so they land already settled and never
+    // surface as a "pending payment" in the back office.
+    const initialPayment =
+      service.price === 0 ? PaymentStatus.confirmed : PaymentStatus.pending;
+
     await this.prisma.appointment.upsert({
       where: { calendlyEventUri: b.eventUri },
       create: {
         calendlyEventUri: b.eventUri,
         status: AppointmentStatus.scheduled,
-        paymentStatus: PaymentStatus.pending,
+        paymentStatus: initialPayment,
         ...fields,
       },
       update: fields,

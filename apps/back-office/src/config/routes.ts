@@ -5,6 +5,7 @@ export const paths = {
   appointments: '/programari',
   subscriptions: '/abonamente',
   quickQuestions: '/intrebari-rapide',
+  messages: '/mesaje',
   patients: '/pacienti',
   blog: '/blog',
   blogNew: '/blog/nou',

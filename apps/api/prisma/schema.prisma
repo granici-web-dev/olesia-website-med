@@ -23,6 +23,7 @@ enum ServiceCode {
   integrative
   monitoring
   quick_question
+  free_consult
 }
 
 enum ServiceGroup {
@@ -66,6 +67,12 @@ enum QuickQuestionStatus {
   open
   answered
   closed
+}
+
+enum ContactMessageStatus {
+  new
+  read
+  replied
 }
 
 // --- Back-office users ---
@@ -235,6 +242,29 @@ model Contact {
   active    Boolean     @default(true)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+}
+
+// --- Contact-form messages (public Contact page → back-office "Mesaje") ---
+//
+// Non-medical messages submitted from the site's Contact form. The doctor
+// reads them in the back office, marks them read and (once SMTP is wired)
+// replies by email — `reply`/`repliedAt` are reserved for that next step.
+
+model ContactMessage {
+  id        String               @id @default(uuid())
+  name      String
+  email     String
+  subject   String // ContactSubject value: appointment | payment | how_it_works | other
+  message   String
+  status    ContactMessageStatus @default(new)
+  readAt    DateTime?
+  reply     String? // email reply text (set when answered from the portal)
+  repliedAt DateTime?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 // --- About (singleton) ---

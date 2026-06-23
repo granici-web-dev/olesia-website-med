@@ -8,9 +8,9 @@ export * from '@/features/subscriptions/mock';
 export const fetchSubscriptions = USE_MOCKS
   ? mock.fetchSubscriptions
   : remote.fetchSubscriptions;
-export const confirmPayment = USE_MOCKS
-  ? mock.confirmPayment
-  : remote.confirmPayment;
+export const setPaymentStatus = USE_MOCKS
+  ? mock.setPaymentStatus
+  : remote.setPaymentStatus;
 export const logVideoCall = USE_MOCKS ? mock.logVideoCall : remote.logVideoCall;
 export const cancelSubscription = USE_MOCKS
   ? mock.cancelSubscription

@@ -26,10 +26,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
-import {
-  StatusBadge,
-  PaymentBadge,
-} from '@/features/subscriptions/status-badges';
+import { StatusBadge } from '@/features/subscriptions/status-badges';
+import { SubscriptionPaymentCell } from '@/features/subscriptions/payment-cell';
 import { QuotaBar } from '@/features/subscriptions/quota-bar';
 import { SubscriptionDetailSheet } from '@/features/subscriptions/subscription-detail-sheet';
 import {
@@ -244,7 +242,7 @@ export function SubscriptionsPage() {
                       <StatusBadge status={s.status} />
                     </TableCell>
                     <TableCell>
-                      <PaymentBadge status={s.paymentStatus} />
+                      <SubscriptionPaymentCell subscription={s} />
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
