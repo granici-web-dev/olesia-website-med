@@ -3,6 +3,7 @@
 import { useId, useRef, useState } from 'react';
 
 import { submitContactMessage, type ContactSubject } from '@/lib/leads';
+import { track } from '@/lib/analytics';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Contact form — non-medical questions only (appointments, payment, how it
@@ -116,6 +117,7 @@ export function ContactForm({ locale }: { locale: string }) {
         message: message.trim(),
         company: company || undefined,
       });
+      track('lead_submit', { service: 'contact', subject });
       setStatus('success');
     } catch {
       setStatus('error');

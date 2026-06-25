@@ -7,6 +7,8 @@ import { routing } from '@/i18n/routing';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { DevTools } from '@/components/DevTools';
+import { Analytics } from '@/components/analytics/Analytics';
+import { ANALYTICS } from '@/lib/analytics';
 import './globals.css';
 
 const cormorant = Cormorant_Garamond({
@@ -35,6 +37,9 @@ export const metadata: Metadata = {
   title: 'Dr. Olesea Jalba — Pediatrics & Nutrition',
   description:
     'Online pediatrics and nutrition consultations. Video call, written plan, long-term follow-up.',
+  ...(ANALYTICS.gscVerification
+    ? { verification: { google: ANALYTICS.gscVerification } }
+    : {}),
 };
 
 export default async function LocaleLayout({
@@ -64,6 +69,7 @@ export default async function LocaleLayout({
           {children}
           <Footer />
           <DevTools />
+          <Analytics locale={locale} />
         </NextIntlClientProvider>
       </body>
     </html>

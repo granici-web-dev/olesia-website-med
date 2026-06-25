@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { LeadFormModal } from './LeadFormModal';
 import type { LeadService } from '@/lib/leads';
+import { track } from '@/lib/analytics';
 
 /**
  * "Rezervă" trigger for group-B services (Monitorizare / Întrebare EXPRESS):
@@ -22,7 +23,14 @@ export function BookGroupBButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" className={className} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={className}
+        onClick={() => {
+          track('lead_open', { service });
+          setOpen(true);
+        }}
+      >
         {label}
       </button>
       <LeadFormModal

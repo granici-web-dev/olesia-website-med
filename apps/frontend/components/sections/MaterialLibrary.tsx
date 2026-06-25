@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Reveal } from '@/components/ui/Reveal';
+import { track } from '@/lib/analytics';
 import type { AgeGroup } from '@/lib/age-taxonomy';
 import type { Material, MaterialCategory, MaterialFlag } from '@/lib/placeholder-materials';
 
@@ -268,6 +269,7 @@ export function MaterialLibrary({
           lc={lc}
           onClose={() => setGate(null)}
           onSubmit={() => {
+            track('material_download', { slug: gate.slug, category: gate.categoryKey });
             unlock(gate.slug);
             setGate(null);
           }}

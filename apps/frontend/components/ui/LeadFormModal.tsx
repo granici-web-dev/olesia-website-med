@@ -9,6 +9,7 @@ import {
   submitQuickQuestionLead,
   type LeadService,
 } from '@/lib/leads';
+import { track } from '@/lib/analytics';
 import styles from './LeadFormModal.module.css';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
@@ -91,6 +92,7 @@ export function LeadFormModal({
           message: text.trim() || undefined,
         });
       }
+      track('lead_submit', { service });
       setStatus('success');
     } catch {
       setStatus('error');

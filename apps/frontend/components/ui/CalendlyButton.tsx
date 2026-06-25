@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { track } from '@/lib/analytics';
 
 /**
  * Opens the Calendly booking popup for a group-A service, with the visit
@@ -63,6 +64,7 @@ export function CalendlyButton({
   }, []);
 
   const open = () => {
+    track('booking_click', { service: reason });
     ensureWidgetAssets();
     window.Calendly?.initPopupWidget({
       url,
