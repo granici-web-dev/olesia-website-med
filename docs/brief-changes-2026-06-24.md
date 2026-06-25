@@ -177,11 +177,14 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 
   ⚠️ **Before launch (blocker #6):** confirm "~1h" SLA is realistic + get exact `program de lucru`; then update the back-office operational 48h SLA countdown (`dueAt`/deadline-indicator) to match the public promise.
 
-### Phase 2 — Biblioteca Digitală (after decision §3 above)
-- [ ] API `materials` module (categories, age taxonomy, free/paid, file, flags).
-- [ ] Back-office CRUD.
-- [ ] Storefront: categories, search, age/topic filter, email-gate, featured/popular/new.
-- [ ] Migrate `/guides` stub into the new module.
+### Phase 2 — Biblioteca Digitală (after decision §3 above) — 🟡 STOREFRONT DONE 2026-06-25
+- [x] **Storefront** (commit `2328090`) on /guides: 9 categories, search, category + child-age filters, free/paid badges, flags (recommended/popular/new), **email-gate** modal before free downloads, featured material. Rebrand /guides → "Biblioteca digitală" (+ footer nav label).
+  - Shared **age taxonomy** `apps/frontend/lib/age-taxonomy.ts` (reusable by blog — Phase 6).
+  - Catalog data `apps/frontend/lib/placeholder-materials.ts` (~12 interim materials); client shelf `components/sections/MaterialLibrary.tsx`. Removed old free-only `GuideLibrary`.
+  - Email-gate is **UI-only** (unlocks download; no persistence) — newsletter wiring blocked (#8). Paid materials → /contact (manual, no payment provider).
+- [ ] API `materials` module (categories, age taxonomy, free/paid, file, flags). DEFERRED — backend pass.
+- [ ] Back-office CRUD. DEFERRED — backend pass.
+- [ ] Wire real PDFs + paid-download flow + newsletter persistence. DEFERRED (paid model = manual; newsletter ⛔ #8).
 
 ### Phase 3 — Analytics
 - [ ] GTM container + GA4 + Meta Pixel + Search Console verification.
