@@ -161,15 +161,17 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 - [x] Replace social links; add Telegram; remove LinkedIn; normalize www usage.
 - [x] Set GDPR data operator (Dr. Olesea Jalba, oleseajalba@gmail.com) on /gdpr (legal entity PFA/SRL still ⛔ blocker #2).
 
-### Phase 1 — Service catalog + pricing (after decision §10)
-- [ ] Decide data-driven (A) vs hardcode (B).
-- [ ] Switch currency MDL → EUR across pricing UI + `SERVICE_PRICE_META`.
-- [ ] Update durations/prices: pediatric 30/28; integrative 90/58.
-- [ ] Split `nutrition` → `nutrition_copii` (60/38) + `nutrition_adulti` (60/38).
-- [ ] Rename quick_question → "Întrebare EXPRESS", SLA 48h→~1h, 180lei→8EUR, email/WhatsApp delivery, disclaimers.
-- [ ] Add group C deliverables: 3 menus (7/14/30 → 28/48/88) + 2 protocols (98/98).
-- [ ] Restructure subscriptions: 4 types × 4 durations (prices once unblocked).
-- [ ] Update `packages/shared` enums/DTOs + Prisma schema + seed to match.
+### Phase 1 — Service catalog + pricing (after decision §10) — 🟡 IN PROGRESS 2026-06-25
+- [x] Decide data-driven (A) vs hardcode (B). → **(A)**; services already are a DB model + CRUD + back-office screen, so no new infra needed — Phase 1 is data/copy.
+- [x] Switch currency MDL → EUR across pricing UI + `SERVICE_PRICE_META` + seed + back-office (commit `43e1624`).
+- [x] Update durations/prices: pediatric 30min/28€; nutrition 60/38€; integrative 90/58€; quick 8€.
+- [x] Rename quick_question → "Întrebare EXPRESS", SLA 48h→~1h (public copy), email/WhatsApp delivery, disclaimers (commit `a007e20`).
+- [ ] **Split `nutrition` → `nutrition_copii` (60/38) + `nutrition_adulti` (60/38).** DEFERRED — needs new enum codes + Prisma migration + new Calendly event types (booking won't route until client provides them).
+- [ ] **Add group C deliverables:** 3 menus (7/14/30 → 28/48/88) + 2 protocols (98/98). DEFERRED — new `ServiceGroup` + async pay→form→delivery flow.
+- [ ] **Restructure subscriptions:** 4 types × 4 durations. DEFERRED — ⛔ prices blocked (#1). Monitoring shown as "Preț la cerere" (price 0) interim.
+- [ ] Update `packages/shared` enums/DTOs + Prisma schema + seed. PARTIAL — catalog **values** updated; new enum codes (nutrition split, group C) pending the deferred items above.
+
+  ⚠️ **Before launch (blocker #6):** confirm "~1h" SLA is realistic + get exact `program de lucru`; then update the back-office operational 48h SLA countdown (`dueAt`/deadline-indicator) to match the public promise.
 
 ### Phase 2 — Biblioteca Digitală (after decision §3 above)
 - [ ] API `materials` module (categories, age taxonomy, free/paid, file, flags).
