@@ -200,8 +200,10 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 - [ ] De ce să lucrezi cu mine / Cum decurge colaborarea / Valori / Apariții media / Diplome.
 - [ ] Homepage/About italic quotes + slogan.
 
-### Phase 6 — Age filter
-- [ ] Shared age taxonomy; apply to blog + materials.
+### Phase 6 — Age filter — ✅ FRONTEND DONE 2026-06-25
+- [x] Shared age taxonomy `apps/frontend/lib/age-taxonomy.ts` (built in Phase 2).
+- [x] Applied to **materials** (Phase 2 library) and **blog** (commit `27a7620`): posts tagged with `ageKeys` (empty = all ages); `BlogList` gained an age-filter row combined with the category filter; /articles shows only age groups present in the listing. Browser-verified.
+- [ ] Backend: add age tagging to the `posts` + `materials` API models so live content carries ages (deferred — backend pass; live posts currently pass `ageKeys: []`).
 
 ### Phase 7 — Calendly Google Meet
 - [ ] Configure event types to auto-generate Google Meet links in confirmations.
