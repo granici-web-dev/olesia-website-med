@@ -209,6 +209,65 @@ const CV: CvEntry[] = [
   },
 ];
 
+/* Q17 content (brief §7) — exact client text (RO), with EN/RU translations. */
+const WHY_INTRO: Bi = {
+  ro: 'Nu doar diplome și experiență.',
+  en: 'Not just diplomas and experience.',
+  ru: 'Не только дипломы и опыт.',
+};
+const WHY: Bi[] = [
+  {
+    ro: 'Peste 18 ani dedicați domeniului medical — de la activitatea clinică și formarea continuă, până la practica de pediatru și specialist în nutriție umană.',
+    en: 'Over 18 years devoted to medicine — from clinical work and continuing education to practising as a pediatrician and human-nutrition specialist.',
+    ru: 'Более 18 лет в медицине — от клинической работы и непрерывного обучения до практики педиатра и специалиста по питанию человека.',
+  },
+  {
+    ro: 'Master în Nutriție Umană.',
+    en: 'A Master’s in Human Nutrition.',
+    ru: 'Магистратура по питанию человека.',
+  },
+  {
+    ro: 'Abordare integrată Pediatrie + Nutriție.',
+    en: 'An integrated Pediatrics + Nutrition approach.',
+    ru: 'Интегрированный подход: педиатрия + нутрициология.',
+  },
+  {
+    ro: 'Recomandări bazate pe dovezi științifice actuale.',
+    en: 'Recommendations grounded in current scientific evidence.',
+    ru: 'Рекомендации на основе актуальных научных данных.',
+  },
+  {
+    ro: 'Planuri individualizate, nu recomandări standard.',
+    en: 'Individualized plans, not standard advice.',
+    ru: 'Индивидуальные планы, а не шаблонные рекомендации.',
+  },
+  {
+    ro: 'Accent pe prevenție și educația familiei.',
+    en: 'A focus on prevention and family education.',
+    ru: 'Акцент на профилактике и обучении семьи.',
+  },
+  {
+    ro: 'Monitorizare și suport pe termen lung.',
+    en: 'Long-term monitoring and support.',
+    ru: 'Долгосрочное наблюдение и поддержка.',
+  },
+];
+const VALUES: Bi = {
+  ro: 'Valorile care îmi ghidează activitatea sunt profesionalismul, empatia, individualizarea recomandărilor, comunicarea deschisă și educația medicală bazată pe dovezi științifice.',
+  en: 'The values that guide my work are professionalism, empathy, individualized recommendations, open communication, and evidence-based medical education.',
+  ru: 'Ценности, которыми я руководствуюсь, — профессионализм, эмпатия, индивидуальный подход, открытое общение и доказательная медицина.',
+};
+const QUOTE_PHILOSOPHY: Bi = {
+  ro: 'Cred într-o abordare integrată a sănătății copilului, în care pediatria, nutriția și colaborarea cu familia se completează reciproc pentru a susține creșterea, dezvoltarea și starea de bine pe termen lung. Fiecare copil este unic, iar recomandările medicale și nutriționale trebuie adaptate nevoilor și particularităților sale individuale.',
+  en: 'I believe in an integrated approach to a child’s health, where pediatrics, nutrition, and working with the family complement one another to support growth, development, and long-term well-being. Every child is unique, and medical and nutritional advice must be adapted to their individual needs.',
+  ru: 'Я верю в интегрированный подход к здоровью ребёнка, где педиатрия, нутрициология и работа с семьёй дополняют друг друга, поддерживая рост, развитие и благополучие в долгосрочной перспективе. Каждый ребёнок уникален, и рекомендации должны учитывать его индивидуальные особенности.',
+};
+const QUOTE_MISSION: Bi = {
+  ro: 'Misiunea mea este să ofer familiilor recomandări medicale și nutriționale individualizate, bazate pe dovezi științifice actuale, într-un limbaj clar, practic și ușor de aplicat în viața de zi cu zi.',
+  en: 'My mission is to give families individualized medical and nutritional advice, grounded in current scientific evidence, in clear, practical language that’s easy to apply in everyday life.',
+  ru: 'Моя миссия — давать семьям индивидуальные медицинские и нутрициологические рекомендации на основе актуальных научных данных, понятным и практичным языком, который легко применять каждый день.',
+};
+
 /* Shared class strings (mirror the other landings). */
 const btnDark =
   'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
@@ -332,6 +391,18 @@ export default async function AboutPage({
         </div>
       </section>
 
+      {/* 2.5 · Philosophy — integrated-approach pull-quote (brief §7.7) */}
+      <section className="border-y border-[var(--rule)] bg-paper">
+        <div className="shell py-20 md:py-28">
+          <figure className="mx-auto max-w-[60ch] text-center">
+            <p className="eyebrow mb-8">{ru ? 'Подход' : en ? 'Approach' : 'Abordare'}</p>
+            <blockquote className="serif-it text-[clamp(1.5rem,3.2vw,2.4rem)] leading-[1.3] tracking-[-0.01em] text-ink text-balance">
+              „{lc(QUOTE_PHILOSOPHY)}”
+            </blockquote>
+          </figure>
+        </div>
+      </section>
+
       {/* 3 · What it means for you — advantages of the duo (olive band) */}
       <section className="bg-sage-deep text-cream">
         <div className="shell py-20 md:py-28">
@@ -355,6 +426,46 @@ export default async function AboutPage({
             ))}
           </div>
         </div>
+      </section>
+
+      {/* 3.5 · De ce să lucrezi cu mine (brief §7.1) */}
+      <section className="shell py-20 md:py-28">
+        <div className="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
+          <div>
+            <p className="eyebrow mb-3">{ru ? 'Почему я' : en ? 'Why me' : 'De ce eu'}</p>
+            <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
+              {ru ? (
+                <>
+                  Почему стоит <span className="serif-it text-sage">работать со мной</span>
+                </>
+              ) : en ? (
+                <>
+                  Why work <span className="serif-it text-sage">with me</span>
+                </>
+              ) : (
+                <>
+                  De ce să lucrezi <span className="serif-it text-sage">cu mine</span>
+                </>
+              )}
+            </h2>
+          </div>
+          <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">{lc(WHY_INTRO)}</p>
+        </div>
+        <ul className="mt-10 grid gap-x-12 border-t border-[var(--rule)] pt-8 sm:grid-cols-2">
+          {WHY.map((r, i) => (
+            <Reveal
+              as="li"
+              key={r.en}
+              delay={(i % 2) * 70}
+              className="grid grid-cols-[auto_1fr] gap-x-4 border-b border-[var(--rule)] py-5"
+            >
+              <span className="serif text-[1.1rem] italic leading-none text-sage-text lining-nums tabular-nums">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span className="text-[1.05rem] leading-relaxed text-ink text-pretty">{lc(r)}</span>
+            </Reveal>
+          ))}
+        </ul>
       </section>
 
       {/* 4 · Focus areas */}
@@ -452,6 +563,38 @@ export default async function AboutPage({
                 </div>
               </Reveal>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5.5 · Valori profesionale + mission (brief §7.3 / §7.7) */}
+      <section className="shell border-t border-[var(--rule)] py-20 md:py-28">
+        <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16 lg:gap-24">
+          <div>
+            <p className="eyebrow mb-4">{ru ? 'Ценности' : en ? 'Values' : 'Valori'}</p>
+            <h2 className="serif text-[clamp(1.8rem,3vw,2.6rem)] leading-[1.12] tracking-[-0.02em] text-balance">
+              {ru ? (
+                <>
+                  Что мной <span className="serif-it text-sage">движет</span>
+                </>
+              ) : en ? (
+                <>
+                  What <span className="serif-it text-sage">guides me</span>
+                </>
+              ) : (
+                <>
+                  Ce mă <span className="serif-it text-sage">ghidează</span>
+                </>
+              )}
+            </h2>
+          </div>
+          <div>
+            <p className="max-w-[58ch] text-[1.15rem] leading-[1.75] text-ink-soft text-pretty">
+              {lc(VALUES)}
+            </p>
+            <blockquote className="serif-it mt-10 border-t border-[var(--rule)] pt-8 text-[clamp(1.3rem,2.4vw,1.8rem)] leading-[1.4] text-ink text-pretty">
+              „{lc(QUOTE_MISSION)}”
+            </blockquote>
           </div>
         </div>
       </section>
