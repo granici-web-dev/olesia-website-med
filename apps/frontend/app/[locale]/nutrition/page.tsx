@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
-import { api, loc } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { calendlyUrlFor } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
@@ -12,9 +11,10 @@ export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
    Single-service landing for the Nutrition consultation (group A · 60 min ·
-   video). Books the same Calendly event as the `nutrition` service. Content is
-   bilingual (RO default · EN) and lives here so the page renders fully even if
-   the API is unreachable; the API supplies only the Calendly scheduling URL.
+   video). One service, two audience-specific Calendly events — children and
+   adults — surfaced as two booking buttons (see CALENDLY_FALLBACK_URLS).
+   Content is bilingual (RO default · EN) and lives here so the page renders
+   fully even if the API is unreachable.
    Two audiences: children (feeding) and adults (personal plan). Visual language
    mirrors the homepage, the Services page, and the Pediatrics landing.
    ────────────────────────────────────────────────────────────────────────── */
@@ -158,23 +158,30 @@ export default async function NutritionPage({
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
-  // Calendly URL for the nutrition service (group A). API supplies only this.
-  const nutritionUrl = calendlyUrlFor(
-    'nutrition',
-    (await api.services()).find((s) => s.code === 'nutrition')?.calendlySchedulingUrl,
+  // One nutrition service, two audience-specific Calendly events (group A):
+  // children / adults. Same price and duration; the patient picks the right one.
+  const copiiUrl = calendlyUrlFor('nutrition_copii');
+  const adultiUrl = calendlyUrlFor('nutrition_adulti');
+
+  const copiiLabel = ru ? 'Записаться · дети' : en ? 'Book · children' : 'Programează · copii';
+  const adultiLabel = ru ? 'Записаться · взрослые' : en ? 'Book · adults' : 'Programează · adulți';
+  const copiiReason = ru ? 'Консультация по питанию · дети' : en ? 'Nutrition consultation · children' : 'Consultație de nutriție · copii';
+  const adultiReason = ru ? 'Консультация по питанию · взрослые' : en ? 'Nutrition consultation · adults' : 'Consultație de nutriție · adulți';
+
+  const BookButtons = ({ className }: { className: string }) => (
+    <div className="flex flex-wrap items-center gap-3">
+      {copiiUrl ? (
+        <CalendlyButton url={copiiUrl} reason={copiiReason} label={copiiLabel} withArrow={false} className={className} />
+      ) : (
+        <Link href="/contact" className={className}>{copiiLabel}</Link>
+      )}
+      {adultiUrl ? (
+        <CalendlyButton url={adultiUrl} reason={adultiReason} label={adultiLabel} withArrow={false} className={className} />
+      ) : (
+        <Link href="/contact" className={className}>{adultiLabel}</Link>
+      )}
+    </div>
   );
-
-  const bookLabel = ru ? 'Записаться на консультацию' : en ? 'Book a consultation' : 'Programează o consultație';
-  const bookReason = ru ? 'Консультация по питанию' : en ? 'Nutrition consultation' : 'Consultație de nutriție';
-
-  const BookPrimary = ({ className, label }: { className: string; label: string }) =>
-    nutritionUrl ? (
-      <CalendlyButton url={nutritionUrl} reason={bookReason} label={label} withArrow={false} className={className} />
-    ) : (
-      <Link href="/contact" className={className}>
-        {label}
-      </Link>
-    );
 
   const HelpGroup = ({ title, items }: { title: string; items: Bi[] }) => (
     <Reveal className="border-t border-[var(--rule)] pt-7">
@@ -237,7 +244,7 @@ export default async function NutritionPage({
                     : 'Un plan alimentar personalizat — pentru copii și adulți.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-                <BookPrimary className={btnDark} label={bookLabel} />
+                <BookButtons className={btnDark} />
                 <Link href="/pricing" className={underlineLg}>
                   {ru ? 'Посмотреть цены' : en ? 'See pricing' : 'Vezi tarifele'} →
                 </Link>
@@ -496,10 +503,7 @@ export default async function NutritionPage({
                 )}
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
-                <BookPrimary
-                  className={creamPill}
-                  label={ru ? 'Выбрать время (60 мин, видео)' : en ? 'Book a time (60 min, video)' : 'Programează o oră (60 min, video)'}
-                />
+                <BookButtons className={creamPill} />
                 <span className="text-sm text-[var(--sage-soft)]">
                   {ru ? 'Всего один вопрос? ' : en ? 'Have just one question? ' : 'Ai o singură întrebare? '}
                   <BookGroupBButton

@@ -20,6 +20,12 @@ export const FREE_CONSULT_CALENDLY_URL =
 export const CALENDLY_FALLBACK_URLS: Record<string, string> = {
   pediatric: 'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
   nutrition: 'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
+  // Nutrition is one catalog service but books into two audience-specific
+  // Calendly events (children / adults). The /nutrition page offers both.
+  nutrition_copii:
+    'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-copii',
+  nutrition_adulti:
+    'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-adulti',
   integrative:
     'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
 };
