@@ -69,10 +69,11 @@ export function Footer() {
         <div>
           <div className={styles.colLabel}>{t('contactLabel')}</div>
           <div className={styles.colLinks}>
-            <a href="mailto:contact@oleseajalba.md">contact@oleseajalba.md</a>
-            <a href="tel:+37379000000">+373 79 000 000</a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+            <a href="mailto:oleseajalba@gmail.com">oleseajalba@gmail.com</a>
+            <a href="tel:+37368837774">+373 68837774</a>
+            <a href="https://www.instagram.com/dr.olesea_jalba_pediatru" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.facebook.com/olesea.jalba.2025" target="_blank" rel="noopener noreferrer">Facebook</a>
+            <a href="https://t.me/dr_olesea_jalba_official" target="_blank" rel="noopener noreferrer">Telegram</a>
           </div>
         </div>
       </div>

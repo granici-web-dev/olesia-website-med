@@ -24,8 +24,8 @@ export const revalidate = 60;
    ────────────────────────────────────────────────────────────────────────── */
 
 const META = {
-  operator: 'Dr. Olesea Jalba', // ⚠ confirm legal entity / operator name with client + lawyer
-  email: 'contact@oleseajalba.md', // matches Footer; ⚠ confirm dedicated data-protection mailbox
+  operator: 'Dr. Olesea Jalba', // ⚠ confirm legal entity (PFA/SRL) with client + lawyer
+  email: 'oleseajalba@gmail.com', // matches Footer; ⚠ confirm dedicated data-protection mailbox
   updatedRo: '17 iunie 2026', // ⚠ bump on every revision
   updatedEn: '17 June 2026',
   updatedRu: '17 июня 2026',

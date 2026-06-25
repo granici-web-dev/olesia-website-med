@@ -27,7 +27,7 @@ export const revalidate = 60;
 
 const META = {
   provider: 'Dr. Olesea Jalba', // ⚠ confirm legal entity / provider name with client + lawyer
-  email: 'contact@oleseajalba.md', // matches Footer; ⚠ confirm contact mailbox
+  email: 'oleseajalba@gmail.com', // matches Footer; ⚠ confirm contact mailbox
   updatedRo: '17 iunie 2026', // ⚠ bump on every revision
   updatedEn: '17 June 2026',
 };

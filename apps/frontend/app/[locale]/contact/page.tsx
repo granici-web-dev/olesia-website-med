@@ -73,15 +73,15 @@ const TRIAGE: { situation: Bi; route: Bi; href: string; anchor?: boolean }[] = [
   },
 ];
 
-/* Direct contact details. ⚠ Confirm the phone and social URLs before launch. */
-const EMAIL = 'contact@olesiajalba.md';
-const PHONE_DISPLAY = '+373 79 000 000';
-const PHONE_HREF = 'tel:+37379000000';
+/* Direct contact details. */
+const EMAIL = 'oleseajalba@gmail.com';
+const PHONE_DISPLAY = '+373 68837774';
+const PHONE_HREF = 'tel:+37368837774';
 
 const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
   {
     name: 'Instagram',
-    href: 'https://www.instagram.com/',
+    href: 'https://www.instagram.com/dr.olesea_jalba_pediatru',
     icon: (
       <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
         <path d="M12 2c-2.7 0-3 0-4.1.1-1 .1-1.8.2-2.4.5-.7.3-1.2.6-1.8 1.2S2.7 5 2.5 5.5c-.2.6-.4 1.4-.4 2.4C2 9 2 9.3 2 12s0 3 .1 4.1c0 1 .2 1.8.4 2.4.3.7.6 1.2 1.2 1.8s1.1.9 1.8 1.2c.6.2 1.4.4 2.4.4C9 22 9.3 22 12 22s3 0 4.1-.1c1 0 1.8-.2 2.4-.4.7-.3 1.2-.6 1.8-1.2s.9-1.1 1.2-1.8c.2-.6.4-1.4.4-2.4.1-1.1.1-1.4.1-4.1s0-3-.1-4.1c0-1-.2-1.8-.4-2.4-.3-.7-.6-1.2-1.2-1.8S19 2.7 18.5 2.5c-.6-.2-1.4-.4-2.4-.4C15 2 14.7 2 12 2zm0 1.8c2.7 0 3 0 4 .1.9 0 1.5.2 1.8.3.5.2.8.4 1.1.7.3.3.6.6.7 1.1.1.3.3.9.3 1.8.1 1 .1 1.3.1 4s0 3-.1 4c0 .9-.2 1.5-.3 1.8-.2.5-.4.8-.7 1.1-.3.3-.6.6-1.1.7-.3.1-.9.3-1.8.3-1 .1-1.3.1-4 .1s-3 0-4-.1c-.9 0-1.5-.2-1.8-.3-.5-.2-.8-.4-1.1-.7-.3-.3-.6-.6-.7-1.1-.1-.3-.3-.9-.3-1.8-.1-1-.1-1.3-.1-4s0-3 .1-4c0-.9.2-1.5.3-1.8.2-.5.4-.8.7-1.1.3-.3.6-.6 1.1-.7.3-.1.9-.3 1.8-.3 1-.1 1.3-.1 4-.1zm0 3.1a5.1 5.1 0 1 0 0 10.2 5.1 5.1 0 0 0 0-10.2zm0 1.8a3.3 3.3 0 1 1 0 6.6 3.3 3.3 0 0 1 0-6.6zm5.3-3.2a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z" />
@@ -90,7 +90,7 @@ const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
   },
   {
     name: 'Facebook',
-    href: 'https://www.facebook.com/',
+    href: 'https://www.facebook.com/olesea.jalba.2025',
     icon: (
       <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
         <path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.7-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.5 2.9h-2.3v7A10 10 0 0 0 22 12z" />
@@ -98,11 +98,11 @@ const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
     ),
   },
   {
-    name: 'LinkedIn',
-    href: 'https://www.linkedin.com/',
+    name: 'Telegram',
+    href: 'https://t.me/dr_olesea_jalba_official',
     icon: (
       <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
-        <path d="M20.4 3H3.6C3.3 3 3 3.3 3 3.6v16.8c0 .3.3.6.6.6h16.8c.3 0 .6-.3.6-.6V3.6c0-.3-.3-.6-.6-.6zM8.3 18.3H5.6V9.8h2.7v8.5zM6.9 8.6a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2zm11.4 9.7h-2.7v-4.1c0-1 0-2.3-1.4-2.3s-1.6 1.1-1.6 2.2v4.2H9.9V9.8h2.6v1.2h.1c.4-.7 1.3-1.4 2.6-1.4 2.7 0 3.2 1.8 3.2 4.1v4.6z" />
+        <path d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6.5 13.1l-4.8-1.5c-1-.3-1.1-1 .2-1.5l18.8-7.3c.9-.3 1.6.2 1.3 1.5z" />
       </svg>
     ),
   },
