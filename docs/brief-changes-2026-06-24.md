@@ -193,8 +193,9 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 - [ ] ⛔ **Client to provide:** **Cookiebot account + CBID** (paid plan — they shared pricing), GTM container + GA4 + Pixel IDs + GSC token. Then set env on Vercel.
 - [ ] Update /gdpr cookie section to name GA4/GTM/Pixel cookies (after tools confirmed; page already DRAFT pending lawyer).
 
-### Phase 4 — Newsletter (after blocker #8)
-- [ ] Pick provider; signup component; library email-gate integration.
+### Phase 4 — Newsletter — 🟡 INFRA DONE 2026-06-25 (commit `477da4a`)
+- [x] **Signup component + subscribe() infra**, env-gated like analytics (`lib/newsletter.ts`, `components/ui/NewsletterSignup.tsx`). Hidden until `NEXT_PUBLIC_NEWSLETTER_ENDPOINT` is set; POSTs `{email, locale, source, consent}`; fires `newsletter_subscribe` analytics event. In the footer (gated) + the library email-gate now doubles as opt-in. Browser-verified (hidden by default; appears + validates + POSTs when configured).
+- [ ] ⛔ **Pick provider + endpoint** (blocker #8 — no SMTP/list yet). Note: prefer a **same-origin** endpoint (our API/serverless proxy) over a direct provider URL to avoid browser CORS. Then set env on Vercel.
 
 ### Phase 5 — Content sections (after client texts) — 🟡 PARTIAL 2026-06-25 (commit `d456c4a`)
 - [x] **De ce să lucrezi cu mine** (7 reasons), **Valori profesionale**, + 2 italic philosophy quotes — added to /about with the client's exact RO text + EN/RU translations.
