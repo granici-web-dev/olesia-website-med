@@ -14,6 +14,8 @@ export interface BlogPostItem {
   slug: string;
   categoryKey: string;
   categoryLabel: string;
+  /** Child age groups this post targets (keys from AGE_GROUPS). Empty = all ages. */
+  ageKeys: string[];
   title: string;
   excerpt: string;
   /** "12 mai 2026 · 6 min de citit" */
@@ -29,6 +31,10 @@ export interface BlogCategory {
 
 export interface BlogListLabels {
   all: string;
+  /** Age filter labels — omit `ages` prop to hide the age row entirely. */
+  allAges?: string;
+  categoryLabel?: string;
+  ageLabel?: string;
   emptyTitle: string;
   emptyBody: string;
   emptyCta: string;
@@ -80,16 +86,24 @@ function PostCard({ p }: { p: BlogPostItem }) {
   );
 }
 
+const chipCls = (on: boolean) =>
+  `cursor-pointer rounded-full border px-4 py-2 text-[12px] font-medium uppercase tracking-[0.08em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage ${
+    on ? 'border-ink bg-ink text-cream' : 'border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage'
+  }`;
+
 export function BlogList({
   posts,
   categories,
+  ages = [],
   labels,
 }: {
   posts: BlogPostItem[];
   categories: BlogCategory[];
+  ages?: BlogCategory[];
   labels: BlogListLabels;
 }) {
   const [active, setActive] = useState('all');
+  const [activeAge, setActiveAge] = useState('all');
 
   if (posts.length === 0) {
     return (
@@ -110,32 +124,68 @@ export function BlogList({
     );
   }
 
-  const chips: BlogCategory[] = [{ key: 'all', label: labels.all }, ...categories];
-  const filtered = active === 'all' ? posts : posts.filter((p) => p.categoryKey === active);
+  const catChips: BlogCategory[] = [{ key: 'all', label: labels.all }, ...categories];
+  const ageChips: BlogCategory[] = [{ key: 'all', label: labels.allAges ?? labels.all }, ...ages];
+  const showAges = ages.length > 0;
+  const filtered = posts.filter(
+    (p) =>
+      (active === 'all' || p.categoryKey === active) &&
+      (activeAge === 'all' || p.ageKeys.length === 0 || p.ageKeys.includes(activeAge)),
+  );
 
   return (
     <div>
       {categories.length > 1 && (
-        <div role="tablist" aria-label={labels.all} className="flex flex-wrap gap-2.5">
-          {chips.map((c) => {
-            const on = active === c.key;
-            return (
-              <button
-                key={c.key}
-                type="button"
-                role="tab"
-                aria-selected={on}
-                onClick={() => setActive(c.key)}
-                className={`cursor-pointer rounded-full border px-4 py-2 text-[12px] font-medium uppercase tracking-[0.08em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage ${
-                  on
-                    ? 'border-ink bg-ink text-cream'
-                    : 'border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage'
-                }`}
-              >
-                {c.label}
-              </button>
-            );
-          })}
+        <div>
+          {labels.categoryLabel && (
+            <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">
+              {labels.categoryLabel}
+            </p>
+          )}
+          <div role="tablist" aria-label={labels.categoryLabel ?? labels.all} className="flex flex-wrap gap-2.5">
+            {catChips.map((c) => {
+              const on = active === c.key;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setActive(c.key)}
+                  className={chipCls(on)}
+                >
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {showAges && (
+        <div className="mt-6">
+          {labels.ageLabel && (
+            <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">
+              {labels.ageLabel}
+            </p>
+          )}
+          <div role="tablist" aria-label={labels.ageLabel ?? labels.allAges} className="flex flex-wrap gap-2.5">
+            {ageChips.map((a) => {
+              const on = activeAge === a.key;
+              return (
+                <button
+                  key={a.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setActiveAge(a.key)}
+                  className={chipCls(on)}
+                >
+                  {a.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 

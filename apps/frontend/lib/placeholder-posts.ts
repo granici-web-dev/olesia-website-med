@@ -28,6 +28,8 @@ export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
 export interface PlaceholderPost {
   slug: string;
   category: string;
+  /** Child age groups this post is relevant to (keys from AGE_GROUPS). Empty = all ages. */
+  ageKeys: string[];
   title: Bi;
   excerpt: Bi;
   /** Markdown body, rendered on the article page. */
@@ -47,6 +49,7 @@ export const PLACEHOLDER_POSTS: PlaceholderPost[] = [
   {
     slug: 'diversificarea-cand-si-cum',
     category: 'alimentatia-sugarului',
+    ageKeys: ['6-12m'],
     title: { ro: 'Diversificarea: când și cum începi', en: 'Starting solids: when and how', ru: 'Прикорм: когда и как начинать' },
     excerpt: {
       ro: 'Semnele că bebelușul e pregătit și primii pași, în siguranță.',
@@ -64,6 +67,7 @@ export const PLACEHOLDER_POSTS: PlaceholderPost[] = [
   {
     slug: 'copilul-frecvent-bolnav',
     category: 'frecvent-bolnav',
+    ageKeys: ['1-3y', '3-6y'],
     title: { ro: 'Copilul frecvent bolnav: ce e normal', en: 'The frequently ill child: what’s normal', ru: 'Часто болеющий ребёнок: что считается нормой' },
     excerpt: {
       ro: 'Câte răceli pe an sunt normale și când să te îngrijorezi.',
@@ -81,6 +85,7 @@ export const PLACEHOLDER_POSTS: PlaceholderPost[] = [
   {
     slug: 'alergiile-alimentare-la-copii',
     category: 'alergii',
+    ageKeys: ['6-12m', '1-3y', '3-6y'],
     title: { ro: 'Alergiile alimentare la copii', en: 'Food allergies in children', ru: 'Пищевая аллергия у детей' },
     excerpt: {
       ro: 'Cum recunoști o reacție și ce faci în primele momente.',
@@ -98,6 +103,7 @@ export const PLACEHOLDER_POSTS: PlaceholderPost[] = [
   {
     slug: 'cum-sustii-imunitatea',
     category: 'sanatatea-copilului',
+    ageKeys: [],
     title: { ro: 'Cum susții imunitatea copilului', en: 'Supporting your child’s immunity', ru: 'Как поддержать иммунитет ребёнка' },
     excerpt: {
       ro: 'Ce ajută cu adevărat și ce sunt doar mituri.',
@@ -115,6 +121,7 @@ export const PLACEHOLDER_POSTS: PlaceholderPost[] = [
   {
     slug: 'mofturos-la-masa',
     category: 'nutritie',
+    ageKeys: ['1-3y', '3-6y'],
     title: { ro: 'Mofturos la masă: strategii blânde', en: 'Picky at the table: gentle strategies', ru: 'Привередливость за столом: мягкие стратегии' },
     excerpt: {
       ro: 'Cum aduci varietate fără presiune și fără bătălii.',
@@ -132,6 +139,7 @@ export const PLACEHOLDER_POSTS: PlaceholderPost[] = [
   {
     slug: 'repere-de-dezvoltare',
     category: 'dezvoltare',
+    ageKeys: ['0-6m', '6-12m', '1-3y', '3-6y'],
     title: { ro: 'Repere de dezvoltare pe etape', en: 'Developmental milestones by stage', ru: 'Этапы развития ребёнка' },
     excerpt: {
       ro: 'La ce să te uiți, de la naștere la vârsta preșcolară.',

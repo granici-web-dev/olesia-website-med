@@ -11,6 +11,7 @@ import {
   PLACEHOLDER_CATEGORIES as CATEGORIES,
   type Bi,
 } from '@/lib/placeholder-posts';
+import { AGE_GROUPS } from '@/lib/age-taxonomy';
 
 export const revalidate = 60;
 
@@ -103,6 +104,7 @@ export default async function ArticlesPage({
         slug: p.slug,
         categoryKey: p.categories[0]?.slug ?? 'all',
         categoryLabel: p.categories[0] ? lc({ ro: p.categories[0].nameRo, en: p.categories[0].nameEn, ru: p.categories[0].nameRo }) : '',
+        ageKeys: [],
         title: lc({ ro: p.titleRo, en: p.titleEn, ru: p.titleRo }),
         excerpt: lc({ ro: p.excerptRo ?? '', en: p.excerptEn ?? '', ru: p.excerptRo ?? '' }),
         meta: metaLine(p.publishedAt, readMin(en ? p.contentEn : p.contentRo)),
@@ -113,6 +115,7 @@ export default async function ArticlesPage({
         slug: p.slug,
         categoryKey: p.category,
         categoryLabel: lc(CATEGORIES.find((c) => c.key === p.category) ?? { ro: '', en: '', ru: '' }),
+        ageKeys: p.ageKeys,
         title: lc(p.title),
         excerpt: lc(p.excerpt),
         meta: metaLine(p.date, p.minutes),
@@ -134,6 +137,14 @@ export default async function ArticlesPage({
 
   const featured = items[0];
   const rest = items.slice(1);
+
+  // Age filter (brief §6/§8) — shared taxonomy with the digital library. Only
+  // show ages actually present among the listed posts (untagged = all ages).
+  const presentAges = new Set(rest.flatMap((i) => i.ageKeys));
+  const ages: BlogCategory[] = AGE_GROUPS.filter((a) => presentAges.has(a.key)).map((a) => ({
+    key: a.key,
+    label: lc(a.label),
+  }));
 
   return (
     <main className="bg-cream text-ink">
@@ -267,15 +278,19 @@ export default async function ArticlesPage({
                   )}
                 </h2>
                 <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">
-                  {ru ? 'Фильтр по категории.' : en ? 'Filter by category.' : 'Filtrează după categorie.'}
+                  {ru ? 'Фильтр по категории и возрасту.' : en ? 'Filter by category and age.' : 'Filtrează după categorie și vârstă.'}
                 </p>
               </header>
 
               <BlogList
                 posts={rest}
                 categories={categories}
+                ages={ages}
                 labels={{
                   all: ru ? 'Все' : en ? 'All' : 'Toate',
+                  allAges: ru ? 'Все возрасты' : en ? 'All ages' : 'Toate vârstele',
+                  categoryLabel: ru ? 'Категория' : en ? 'Category' : 'Categorie',
+                  ageLabel: ru ? 'Возраст' : en ? 'Age' : 'Vârstă',
                   emptyTitle: '',
                   emptyBody: '',
                   emptyCta: '',
