@@ -25,7 +25,7 @@ export interface Service {
   descriptionRo: string;
   descriptionEn: string;
   durationMin: number | null; // group A only
-  price: number; // lei
+  price: number; // EUR (whole euros; 0 = on request)
   priceLabelRo: string | null;
   priceLabelEn: string | null;
   calendlyEventTypeUri: string | null; // group A only — webhook mapping

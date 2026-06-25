@@ -20,23 +20,23 @@ export interface Bi {
  *  homepage Services section so /pricing renders them the same way. */
 export const SERVICE_PRICE_META: Record<string, { price: Bi; duration: Bi }> = {
   pediatric: {
-    price: { ro: '600 lei', en: '600 lei', ru: '600 lei' },
-    duration: { ro: '50 min · video', en: '50 min · video', ru: '50 мин · видео' },
+    price: { ro: '28 €', en: '28 €', ru: '28 €' },
+    duration: { ro: '30 min · video', en: '30 min · video', ru: '30 мин · видео' },
   },
   nutrition: {
-    price: { ro: '700 lei', en: '700 lei', ru: '700 lei' },
+    price: { ro: '38 €', en: '38 €', ru: '38 €' },
     duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
   },
   integrative: {
-    price: { ro: '1.100 lei', en: '1,100 lei', ru: '1 100 lei' },
+    price: { ro: '58 €', en: '58 €', ru: '58 €' },
     duration: { ro: '90 min · video', en: '90 min · video', ru: '90 мин · видео' },
   },
   monitoring: {
-    price: { ro: 'de la 2.400 lei', en: 'from 2,400 lei', ru: 'от 2 400 lei' },
+    price: { ro: 'la cerere', en: 'on request', ru: 'по запросу' },
     duration: { ro: '3 luni', en: '3 months', ru: '3 месяца' },
   },
   quick_question: {
-    price: { ro: '180 lei', en: '180 lei', ru: '180 lei' },
+    price: { ro: '8 €', en: '8 €', ru: '8 €' },
     duration: { ro: '48h · scris', en: '48h · written', ru: '48 ч · письменно' },
   },
 };

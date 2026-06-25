@@ -24,7 +24,7 @@ export interface Subscription {
   /** Total video calls included in the cycle (e.g. 2/month × 3 months). */
   videoQuotaTotal: number;
   videoQuotaUsed: number;
-  price: number; // lei
+  price: number; // EUR
   createdAt: string;
 }
 

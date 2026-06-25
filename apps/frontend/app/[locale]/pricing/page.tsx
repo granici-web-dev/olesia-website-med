@@ -23,7 +23,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
   {
     id: 'pediatric', code: 'pediatric', group: 'A_booking',
     titleRo: 'Consultație pediatrică', titleEn: 'Pediatric consultation',
-    descriptionRo: '', descriptionEn: '', durationMin: 50, price: 600,
+    descriptionRo: '', descriptionEn: '', durationMin: 30, price: 28,
     priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
     calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.pediatric,
     sortOrder: 1, active: true,
@@ -31,7 +31,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
   {
     id: 'nutrition', code: 'nutrition', group: 'A_booking',
     titleRo: 'Consultație nutrițională', titleEn: 'Nutrition consultation',
-    descriptionRo: '', descriptionEn: '', durationMin: 60, price: 700,
+    descriptionRo: '', descriptionEn: '', durationMin: 60, price: 38,
     priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
     calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.nutrition,
     sortOrder: 2, active: true,
@@ -40,7 +40,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     id: 'integrative', code: 'integrative', group: 'A_booking',
     titleRo: 'Consultație integrativă & monitorizare',
     titleEn: 'Integrative consultation & monitoring',
-    descriptionRo: '', descriptionEn: '', durationMin: 90, price: 1100,
+    descriptionRo: '', descriptionEn: '', durationMin: 90, price: 58,
     priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
     calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.integrative,
     sortOrder: 3, active: true,
@@ -48,14 +48,14 @@ const FALLBACK_SERVICES: ServiceDto[] = [
   {
     id: 'monitoring', code: 'monitoring', group: 'B_portal',
     titleRo: 'Monitorizare 3 luni', titleEn: '3-month monitoring',
-    descriptionRo: '', descriptionEn: '', durationMin: null, price: 2400,
-    priceLabelRo: 'de la 2.400 lei / 3 luni', priceLabelEn: 'from 2,400 lei / 3 months',
+    descriptionRo: '', descriptionEn: '', durationMin: null, price: 0,
+    priceLabelRo: 'Preț la cerere', priceLabelEn: 'Price on request',
     calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 4, active: true,
   },
   {
     id: 'quick_question', code: 'quick_question', group: 'B_portal',
     titleRo: 'Întrebare rapidă', titleEn: 'Quick question',
-    descriptionRo: '', descriptionEn: '', durationMin: null, price: 180,
+    descriptionRo: '', descriptionEn: '', durationMin: null, price: 8,
     priceLabelRo: '48 h · răspuns scris', priceLabelEn: '48 h · written reply',
     calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 5, active: true,
   },
@@ -64,7 +64,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
 function price(locale: string, s: ServiceDto): string {
   const label = loc(locale, s.priceLabelRo, s.priceLabelEn);
   if (label) return label;
-  return `${new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : locale === 'en' ? 'en-US' : 'ro-RO').format(s.price)} lei`;
+  return `${new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : locale === 'en' ? 'en-US' : 'ro-RO').format(s.price)} €`;
 }
 
 export default async function PricingPage({

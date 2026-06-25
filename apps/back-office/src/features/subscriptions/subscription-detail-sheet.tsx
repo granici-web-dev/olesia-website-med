@@ -209,7 +209,7 @@ export function SubscriptionDetailSheet({
                     {formatDate(s.startDate)} – {formatDate(s.endDate)}
                   </span>
                 </Field>
-                <Field label={t.detail.price}>{s.price} lei</Field>
+                <Field label={t.detail.price}>{s.price} €</Field>
               </dl>
               <p
                 className={cn(

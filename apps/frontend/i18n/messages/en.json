@@ -53,35 +53,35 @@
           "tag": "Pediatrics",
           "title": "Pediatric consultation",
           "description": "Full clinical evaluation on video, detailed history, written recommendations delivered within 24h. For children from birth to adolescence — growth, development, prevention, day-to-day questions.",
-          "price": "600 lei",
-          "duration": "50 min · video"
+          "price": "28 €",
+          "duration": "30 min · video"
         },
         "nutrition": {
           "tag": "Nutrition",
           "title": "Nutrition consultation",
           "description": "Personalized meal plan for children or adults. History, analysis of existing habits, recent lab work, realistic goals. Includes a scheduled follow-up at 4 weeks.",
-          "price": "700 lei",
+          "price": "38 €",
           "duration": "60 min · video"
         },
         "integrative": {
           "tag": "Integrative",
           "title": "Integrative consultation & monitoring",
           "description": "Pediatrics and nutrition in a single meeting — for complex cases or the start of a long-term follow-up. Written plan, structured recommendations, first follow-up appointment included.",
-          "price": "1,100 lei",
+          "price": "58 €",
           "duration": "90 min · video"
         },
         "subscription": {
           "tag": "Subscription",
           "title": "3-month monitoring",
           "description": "Three months of active follow-up: direct messaging for questions between consultations, periodic plan adjustments, two monthly video calls. Recommended for long-term goals.",
-          "price": "from 2,400 lei",
+          "price": "on request",
           "duration": "3 months"
         },
         "quick": {
           "tag": "Quick",
           "title": "Quick question",
           "description": "For specific questions that don't require a full consultation. You send the question + context through a form and receive a written, documented answer within 48 hours.",
-          "price": "180 lei",
+          "price": "8 €",
           "duration": "48h · written"
         }
       },

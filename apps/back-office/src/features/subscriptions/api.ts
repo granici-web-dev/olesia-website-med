@@ -14,8 +14,10 @@ import type { Subscription } from '@/features/subscriptions/types';
  * and a service id; the UI uses a cycle total and a price, so we derive both.
  */
 
+// Monitoring is being restructured into 4 subscription types × 1/2/3/6 months;
+// catalog price is 0 ("on request") until the client provides the matrix.
 const MONITORING_PRICE =
-  SERVICE_CATALOG.find((s) => s.code === ServiceCode.Monitoring)?.price ?? 2400;
+  SERVICE_CATALOG.find((s) => s.code === ServiceCode.Monitoring)?.price ?? 0;
 
 const CYCLE_MONTHS = 3;
 

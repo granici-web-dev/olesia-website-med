@@ -26,8 +26,8 @@ export function groupForCode(code: ServiceCode): ServiceGroup {
 
 const priceFmt = new Intl.NumberFormat('ro-RO');
 
-export function formatPrice(lei: number): string {
-  return `${priceFmt.format(lei)} lei`;
+export function formatPrice(eur: number): string {
+  return `${priceFmt.format(eur)} €`;
 }
 
 /* ------------------------------------------------------------------ *
@@ -47,8 +47,8 @@ let store: Service[] = [
       'Evaluare completă a stării de sănătate a copilului, cu recomandări personalizate.',
     descriptionEn:
       'Comprehensive assessment of the child’s health, with personalized recommendations.',
-    durationMin: 50,
-    price: 600,
+    durationMin: 30,
+    price: 28,
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/PEDIATRIC',
@@ -67,7 +67,7 @@ let store: Service[] = [
     descriptionEn:
       'A meal plan tailored to the child’s age and needs, with clear goals.',
     durationMin: 60,
-    price: 700,
+    price: 38,
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/NUTRITION',
@@ -87,7 +87,7 @@ let store: Service[] = [
     descriptionEn:
       'An integrative approach to the child’s health, with ongoing monitoring.',
     durationMin: 90,
-    price: 1100,
+    price: 58,
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/INTEGRATIVE',
@@ -107,9 +107,9 @@ let store: Service[] = [
     descriptionEn:
       'Three months of support: messaging, adjustments and 2 video calls per month.',
     durationMin: null,
-    price: 2400,
-    priceLabelRo: 'de la 2.400 lei / 3 luni',
-    priceLabelEn: 'from 2,400 lei / 3 months',
+    price: 0,
+    priceLabelRo: 'Preț la cerere',
+    priceLabelEn: 'Price on request',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
     sortOrder: 4,
@@ -125,7 +125,7 @@ let store: Service[] = [
       'Răspuns scris la o întrebare punctuală, în maximum 48 de ore.',
     descriptionEn: 'A written answer to a specific question, within 48 hours.',
     durationMin: null,
-    price: 180,
+    price: 8,
     priceLabelRo: '48 h · răspuns scris',
     priceLabelEn: '48 h · written reply',
     calendlyEventTypeUri: null,

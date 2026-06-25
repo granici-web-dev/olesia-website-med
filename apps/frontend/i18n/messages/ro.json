@@ -53,35 +53,35 @@
           "tag": "Pediatrie",
           "title": "Consultație pediatrică",
           "description": "Evaluare clinică completă pe video, anamneză detaliată, recomandări scrise pe care le primești în 24h. Pentru copii de la naștere până la adolescență — creștere, dezvoltare, profilaxie, întrebări la zi.",
-          "price": "600 lei",
-          "duration": "50 min · video"
+          "price": "28 €",
+          "duration": "30 min · video"
         },
         "nutrition": {
           "tag": "Nutriție",
           "title": "Consultație nutrițională",
           "description": "Plan alimentar personalizat pentru copii sau adulți. Anamneză, analiza obiceiurilor existente, analize recente, obiective realiste. Include un follow-up programat la 4 săptămâni.",
-          "price": "700 lei",
+          "price": "38 €",
           "duration": "60 min · video"
         },
         "integrative": {
           "tag": "Integrativ",
           "title": "Consultație integrativă & monitorizare",
           "description": "Pediatrie și nutriție într-o singură întâlnire — pentru cazuri complexe sau pentru începutul unei urmăriri pe termen lung. Plan scris, recomandări structurate, prima programare de follow-up inclusă.",
-          "price": "1.100 lei",
+          "price": "58 €",
           "duration": "90 min · video"
         },
         "subscription": {
           "tag": "Abonament",
           "title": "Monitorizare 3 luni",
           "description": "Trei luni de urmărire activă: mesagerie directă pentru întrebări între consultații, ajustări periodice ale planului, două video-call-uri lunare. Recomandat pentru obiective de durată.",
-          "price": "de la 2.400 lei",
+          "price": "la cerere",
           "duration": "3 luni"
         },
         "quick": {
           "tag": "Rapid",
           "title": "Întrebare rapidă",
           "description": "Pentru întrebări punctuale care nu necesită o consultație completă. Trimiți întrebarea + context prin formular și primești un răspuns scris, documentat, în 48 de ore.",
-          "price": "180 lei",
+          "price": "8 €",
           "duration": "48h · scris"
         }
       },
