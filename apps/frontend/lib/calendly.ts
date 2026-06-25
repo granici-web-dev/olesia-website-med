@@ -18,8 +18,11 @@ export const FREE_CONSULT_CALENDLY_URL =
  * together with FREE_CONSULT_CALENDLY_URL.
  */
 export const CALENDLY_FALLBACK_URLS: Record<string, string> = {
-  pediatric: 'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
-  nutrition: 'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
+  // ⚠ Test clones — slugs intentionally don't match service names; keep these in
+  // sync with apps/api/prisma/seed.ts (the API source of truth). Swap for the
+  // client's real Calendly before launch.
+  pediatric: 'https://calendly.com/designer-nefele/30min',
+  nutrition: 'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
   // Nutrition is one catalog service but books into two audience-specific
   // Calendly events (children / adults). The /nutrition page offers both.
   nutrition_copii:
@@ -27,7 +30,7 @@ export const CALENDLY_FALLBACK_URLS: Record<string, string> = {
   nutrition_adulti:
     'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-adulti',
   integrative:
-    'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
+    'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
 };
 
 /** Calendly scheduling URL for a service `code`, preferring the API value. */

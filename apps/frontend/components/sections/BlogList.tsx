@@ -35,6 +35,8 @@ export interface BlogListLabels {
   allAges?: string;
   categoryLabel?: string;
   ageLabel?: string;
+  /** Shown when filters match no posts (but posts exist). Falls back to emptyBody. */
+  noResults?: string;
   emptyTitle: string;
   emptyBody: string;
   emptyCta: string;
@@ -142,15 +144,14 @@ export function BlogList({
               {labels.categoryLabel}
             </p>
           )}
-          <div role="tablist" aria-label={labels.categoryLabel ?? labels.all} className="flex flex-wrap gap-2.5">
+          <div role="group" aria-label={labels.categoryLabel ?? labels.all} className="flex flex-wrap gap-2.5">
             {catChips.map((c) => {
               const on = active === c.key;
               return (
                 <button
                   key={c.key}
                   type="button"
-                  role="tab"
-                  aria-selected={on}
+                  aria-pressed={on}
                   onClick={() => setActive(c.key)}
                   className={chipCls(on)}
                 >
@@ -169,15 +170,14 @@ export function BlogList({
               {labels.ageLabel}
             </p>
           )}
-          <div role="tablist" aria-label={labels.ageLabel ?? labels.allAges} className="flex flex-wrap gap-2.5">
+          <div role="group" aria-label={labels.ageLabel ?? labels.allAges} className="flex flex-wrap gap-2.5">
             {ageChips.map((a) => {
               const on = activeAge === a.key;
               return (
                 <button
                   key={a.key}
                   type="button"
-                  role="tab"
-                  aria-selected={on}
+                  aria-pressed={on}
                   onClick={() => setActiveAge(a.key)}
                   className={chipCls(on)}
                 >
@@ -189,13 +189,19 @@ export function BlogList({
         </div>
       )}
 
-      <div className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((p, i) => (
-          <Reveal key={p.slug} delay={(i % 3) * 70}>
-            <PostCard p={p} />
-          </Reveal>
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <p className="mt-10 border-t border-[var(--rule)] py-16 text-center leading-relaxed text-ink-soft">
+          {labels.noResults ?? labels.emptyBody}
+        </p>
+      ) : (
+        <div className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((p, i) => (
+            <Reveal key={p.slug} delay={(i % 3) * 70}>
+              <PostCard p={p} />
+            </Reveal>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

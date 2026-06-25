@@ -123,8 +123,9 @@ export default async function ArticlesPage({
         href: href(p.slug),
       }));
 
-  // Categories present in the current item set, in CATEGORIES order.
-  const presentKeys = new Set(items.map((i) => i.categoryKey));
+  // Categories present among the filterable posts (rest — the featured post is
+  // shown separately, so a category whose only post is featured gets no chip).
+  const presentKeys = new Set(items.slice(1).map((i) => i.categoryKey));
   const categories: BlogCategory[] = usingLive
     ? Array.from(
         new Map(
@@ -291,6 +292,11 @@ export default async function ArticlesPage({
                   allAges: ru ? 'Все возрасты' : en ? 'All ages' : 'Toate vârstele',
                   categoryLabel: ru ? 'Категория' : en ? 'Category' : 'Categorie',
                   ageLabel: ru ? 'Возраст' : en ? 'Age' : 'Vârstă',
+                  noResults: ru
+                    ? 'Нет статей по выбранным фильтрам.'
+                    : en
+                      ? 'No articles match these filters.'
+                      : 'Niciun articol pentru filtrele selectate.',
                   emptyTitle: '',
                   emptyBody: '',
                   emptyCta: '',

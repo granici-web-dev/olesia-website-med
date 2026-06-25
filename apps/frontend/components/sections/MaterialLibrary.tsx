@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { Reveal } from '@/components/ui/Reveal';
+import { Modal } from '@/components/ui/Modal';
 import { track } from '@/lib/analytics';
 import { subscribe } from '@/lib/newsletter';
 import type { AgeGroup } from '@/lib/age-taxonomy';
@@ -134,12 +135,12 @@ export function MaterialLibrary({
       {/* Category filter */}
       <div className="mt-8">
         <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.category)}</p>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setCat('all')} className={chip(cat === 'all')}>
+        <div role="group" aria-label={lc(T.category)} className="flex flex-wrap gap-2">
+          <button type="button" aria-pressed={cat === 'all'} onClick={() => setCat('all')} className={chip(cat === 'all')}>
             {lc(T.all)}
           </button>
           {categories.map((c) => (
-            <button key={c.key} type="button" onClick={() => setCat(c.key)} className={chip(cat === c.key)}>
+            <button key={c.key} type="button" aria-pressed={cat === c.key} onClick={() => setCat(c.key)} className={chip(cat === c.key)}>
               {lc(c.label)}
             </button>
           ))}
@@ -149,19 +150,19 @@ export function MaterialLibrary({
       {/* Age filter */}
       <div className="mt-6">
         <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.age)}</p>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setAge('all')} className={chip(age === 'all')}>
+        <div role="group" aria-label={lc(T.age)} className="flex flex-wrap gap-2">
+          <button type="button" aria-pressed={age === 'all'} onClick={() => setAge('all')} className={chip(age === 'all')}>
             {lc(T.allAges)}
           </button>
           {ages.map((a) => (
-            <button key={a.key} type="button" onClick={() => setAge(a.key)} className={chip(age === a.key)}>
+            <button key={a.key} type="button" aria-pressed={age === a.key} onClick={() => setAge(a.key)} className={chip(age === a.key)}>
               {lc(a.label)}
             </button>
           ))}
         </div>
       </div>
 
-      <p className="mono mt-8 text-[11px] uppercase tracking-[0.1em] text-ink-soft">
+      <p aria-live="polite" className="mono mt-8 text-[11px] uppercase tracking-[0.1em] text-ink-soft">
         {filtered.length} {lc(T.count)}
       </p>
 
@@ -296,22 +297,17 @@ function EmailGate({
 }) {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
+  const titleId = useId();
+  const emailId = useId();
   const valid = /\S+@\S+\.\S+/.test(email) && consent;
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-label={lc(T.gateTitle)}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-[420px] border border-[var(--rule)] bg-cream p-7 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal open onClose={onClose} labelledBy={titleId}>
+      <div className="p-7">
         <p className="mono text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.gateTitle)}</p>
-        <h3 className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty">{lc(material.title)}</h3>
+        <h3 id={titleId} className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty">
+          {lc(material.title)}
+        </h3>
         <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(T.gateBody)}</p>
 
         <form
@@ -321,8 +317,11 @@ function EmailGate({
             if (valid) onSubmit(email);
           }}
         >
-          <label className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text">{lc(T.email)}</label>
+          <label htmlFor={emailId} className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text">
+            {lc(T.email)}
+          </label>
           <input
+            id={emailId}
             type="email"
             required
             value={email}
@@ -358,6 +357,6 @@ function EmailGate({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

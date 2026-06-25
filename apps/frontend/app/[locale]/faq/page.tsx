@@ -212,7 +212,7 @@ const CATEGORIES: FaqCategory[] = [
     title: { ro: 'Servicii prin portal', en: 'Portal services', ru: 'Услуги через портал' },
     items: [
       {
-        q: { ro: 'Cum funcționează „Întreabă medicul"?', en: 'How does “Ask the doctor” work?', ru: 'Как работает «Экспресс-вопрос»?' },
+        q: { ro: 'Cum funcționează „Întreabă medicul"?', en: 'How does “Ask the doctor” work?', ru: 'Как работает «Спросить врача»?' },
         a: {
           ro: 'Scrii întrebarea, achiți prin transfer și primești un răspuns scris în ~1 oră în timpul programului de lucru.',
           en: 'You write your question, pay by transfer, and get a written answer within ~1 hour during working hours.',
@@ -262,7 +262,7 @@ const CATEGORIES: FaqCategory[] = [
         },
       },
       {
-        q: { ro: 'Pot atașa poze sau analize la „Întreabă medicul"?', en: 'Can I attach photos or test results to “Ask the doctor”?', ru: 'Можно ли прикрепить фото или анализы к «Быстрому вопросу»?' },
+        q: { ro: 'Pot atașa poze sau analize la „Întreabă medicul"?', en: 'Can I attach photos or test results to “Ask the doctor”?', ru: 'Можно ли прикрепить фото или анализы к «Спросить врача»?' },
         a: {
           ro: 'Da, poți atașa poze și documente. Sunt stocate în siguranță și folosite doar pentru a-ți răspunde.',
           en: 'Yes — you can attach photos and documents. They’re stored securely and used only to answer you.',
@@ -441,7 +441,7 @@ export default async function FaqPage({
                   {ru ? 'Медицинский вопрос' : en ? 'A medical question' : 'O întrebare medicală'}
                 </span>
                 <span className="shrink-0 text-[13px] font-medium uppercase tracking-[0.06em] text-sage-text">
-                  {ru ? 'Экспресс-вопрос · ~1ч' : en ? 'Ask the doctor · ~1h' : 'Întreabă medicul · ~1h'}{' '}
+                  {ru ? 'Спросить врача · ~1ч' : en ? 'Ask the doctor · ~1h' : 'Întreabă medicul · ~1h'}{' '}
                   <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
                 </span>
               </Link>
