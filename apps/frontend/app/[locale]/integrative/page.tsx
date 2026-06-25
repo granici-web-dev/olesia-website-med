@@ -94,7 +94,7 @@ const STEPS: { title: Bi; text: Bi }[] = [
 const COMPARE: { title: Bi; duration: Bi; text: Bi; current?: boolean }[] = [
   {
     title: { ro: 'Consultație pediatrică', en: 'Pediatric consultation', ru: 'Педиатрическая консультация' },
-    duration: { ro: '50 min', en: '50 min', ru: '50 мин' },
+    duration: { ro: '30 min', en: '30 min', ru: '30 мин' },
     text: { ro: 'O problemă de sănătate, evaluare focusată.', en: 'One health issue, a focused assessment.', ru: 'Одна проблема со здоровьем, точечная оценка.' },
   },
   {

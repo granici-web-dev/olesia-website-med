@@ -11,7 +11,7 @@ import { Reveal } from '@/components/ui/Reveal';
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Single-service landing for the Pediatric consultation (group A · 50 min ·
+   Single-service landing for the Pediatric consultation (group A · 30 min ·
    video). Books the same Calendly event as the `pediatric` service. Content is
    bilingual (RO default · EN) and lives here so the page renders fully even if
    the API is unreachable; the API supplies only the Calendly scheduling URL.
@@ -113,9 +113,9 @@ const STEPS: { title: Bi; text: Bi }[] = [
   {
     title: { ro: 'Apel video', en: 'Video call', ru: 'Видеозвонок' },
     text: {
-      ro: 'Te conectezi la apelul video de 50 de minute.',
-      en: 'Join the 50-minute video call.',
-      ru: 'Подключаетесь к 50-минутному видеозвонку.',
+      ro: 'Te conectezi la apelul video de 30 de minute.',
+      en: 'Join the 30-minute video call.',
+      ru: 'Подключаетесь к 30-минутному видеозвонку.',
     },
   },
   {
@@ -274,7 +274,7 @@ export default async function PediatricsPage({
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {ru ? 'Видеозвонок · 50 мин' : en ? 'Video call · 50 min' : 'Apel video · 50 min'}
+                {ru ? 'Видеозвонок · 30 мин' : en ? 'Video call · 30 min' : 'Apel video · 30 min'}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
@@ -550,7 +550,7 @@ export default async function PediatricsPage({
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <BookPrimary
                   className={creamPill}
-                  label={ru ? 'Выбрать время (50 мин, видео)' : en ? 'Book a time (50 min, video)' : 'Programează o oră (50 min, video)'}
+                  label={ru ? 'Выбрать время (30 мин, видео)' : en ? 'Book a time (30 min, video)' : 'Programează o oră (30 min, video)'}
                 />
                 <span className="text-sm text-[var(--sage-soft)]">
                   {ru ? 'Всего один вопрос? ' : en ? 'Have just one question? ' : 'Ai o singură întrebare? '}

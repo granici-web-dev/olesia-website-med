@@ -54,7 +54,7 @@ const SERVICES_A: ServiceContent[] = [
       en: 'Pediatric consultation',
       ru: 'Педиатрическая консультация',
     },
-    duration: { ro: '50 min · video', en: '50 min · video', ru: '50 мин · видео' },
+    duration: { ro: '30 min · video', en: '30 min · video', ru: '30 мин · видео' },
     value: {
       ro: 'O consultație video dedicată sănătății copilului — simptome, creștere, dezvoltare sau o a doua opinie.',
       en: "A focused video visit for your child's health — symptoms, growth, development, or a second opinion.",
@@ -67,19 +67,19 @@ const SERVICES_A: ServiceContent[] = [
     },
     included: {
       ro: [
-        'Apel video de 50 de minute',
+        'Apel video de 30 de minute',
         'Analiza simptomelor, a istoricului și a documentelor trimise',
         'Evaluare clară și pașii următori',
         'Plan scris cu recomandări, în 24 de ore',
       ],
       en: [
-        '50-minute video call',
+        '30-minute video call',
         'Review of symptoms, history, and any documents you share',
         'A clear assessment and next steps',
         'Written summary with recommendations within 24 hours',
       ],
       ru: [
-        'Видеозвонок 50 минут',
+        'Видеозвонок 30 минут',
         'Разбор симптомов, истории болезни и присланных документов',
         'Понятная оценка и следующие шаги',
         'Письменный план с рекомендациями в течение 24 часов',
@@ -329,7 +329,7 @@ const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
   {
     label: { ro: 'Durată', en: 'Duration', ru: 'Длительность' },
     cells: [
-      { ro: '50 min', en: '50 min', ru: '50 мин' },
+      { ro: '30 min', en: '30 min', ru: '30 мин' },
       { ro: '60 min', en: '60 min', ru: '60 мин' },
       { ro: '90 min', en: '90 min', ru: '90 мин' },
       { ro: '3 luni', en: '3 months', ru: '3 месяца' },

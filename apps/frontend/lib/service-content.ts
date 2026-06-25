@@ -72,19 +72,19 @@ export const SERVICE_DESCRIPTIONS: Record<string, Bi> = {
 export const SERVICE_INCLUDED: Record<string, BiList> = {
   pediatric: {
     ro: [
-      'Apel video de 50 de minute',
+      'Apel video de 30 de minute',
       'Analiza simptomelor, a istoricului și a documentelor trimise',
       'Evaluare clară și pașii următori',
       'Plan scris cu recomandări, în 24 de ore',
     ],
     en: [
-      '50-minute video call',
+      '30-minute video call',
       'Review of symptoms, history, and any documents you share',
       'A clear assessment and next steps',
       'Written summary with recommendations within 24 hours',
     ],
     ru: [
-      'Видеозвонок 50 минут',
+      'Видеозвонок 30 минут',
       'Разбор симптомов, истории болезни и присланных документов',
       'Понятное заключение и дальнейшие шаги',
       'Письменный план с рекомендациями в течение 24 часов',

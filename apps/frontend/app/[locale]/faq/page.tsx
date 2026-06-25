@@ -168,9 +168,9 @@ const CATEGORIES: FaqCategory[] = [
       {
         q: { ro: 'Care este diferența dintre consultații?', en: 'What’s the difference between the consultations?', ru: 'В чём разница между консультациями?' },
         a: {
-          ro: 'Pediatrică (sănătate, 50 min) · Nutriție (alimentație, 60 min) · Integrativă (situații complexe + monitorizare, 90 min).',
-          en: 'Pediatric (health, 50 min) · Nutrition (feeding, 60 min) · Integrative (complex cases + monitoring, 90 min).',
-          ru: 'Педиатрическая (здоровье, 50 мин) · Нутрициологическая (питание, 60 мин) · Интегративная (сложные случаи + наблюдение, 90 мин).',
+          ro: 'Pediatrică (sănătate, 30 min) · Nutriție (alimentație, 60 min) · Integrativă (situații complexe + monitorizare, 90 min).',
+          en: 'Pediatric (health, 30 min) · Nutrition (feeding, 60 min) · Integrative (complex cases + monitoring, 90 min).',
+          ru: 'Педиатрическая (здоровье, 30 мин) · Нутрициологическая (питание, 60 мин) · Интегративная (сложные случаи + наблюдение, 90 мин).',
         },
       },
       {
