@@ -188,9 +188,9 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 
 ### Phase 3 — Analytics — 🟡 INFRA DONE 2026-06-25 (commit `01640b4`)
 - [x] GTM + GA4 + Meta Pixel + Search Console verification — **env-gated** infra (`lib/analytics.ts`, `components/analytics/`). No-op until IDs set. Wire IDs via env: `NEXT_PUBLIC_GTM_ID` / `NEXT_PUBLIC_GA4_ID` / `NEXT_PUBLIC_META_PIXEL_ID` / `NEXT_PUBLIC_GSC_VERIFICATION`.
-- [x] Cookie/consent banner (GDPR) — trilingual, Accept/Decline persisted 180d; **no tracker loads before Accept** (browser-verified). Banner only shows when an ID is configured.
+- [x] Cookie/consent banner (GDPR) — **Cookiebot CMP** (decided 2026-06-25, https://cookiebot.com). It renders the banner + auto-blocks cookies; we load GTM/GA4 on `statistics` consent and Pixel on `marketing` (via Cookiebot window events). Enabled by `NEXT_PUBLIC_COOKIEBOT_CBID`. Verified: Cookiebot script injects, GTM does not load pre-consent.
 - [x] Events wired: `booking_click` (Calendly), `lead_open` + `lead_submit` (group-B + contact form), `material_download` (library email-gate). Push to dataLayer/gtag/fbq.
-- [ ] ⛔ **Client to provide:** GTM container + GA4 + Pixel IDs + GSC token. Then set env on Vercel.
+- [ ] ⛔ **Client to provide:** **Cookiebot account + CBID** (paid plan — they shared pricing), GTM container + GA4 + Pixel IDs + GSC token. Then set env on Vercel.
 - [ ] Update /gdpr cookie section to name GA4/GTM/Pixel cookies (after tools confirmed; page already DRAFT pending lawyer).
 
 ### Phase 4 — Newsletter (after blocker #8)
