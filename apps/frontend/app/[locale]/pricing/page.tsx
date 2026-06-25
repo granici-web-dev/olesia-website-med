@@ -67,6 +67,78 @@ function price(locale: string, s: ServiceDto): string {
   return `${new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : locale === 'en' ? 'en-US' : 'ro-RO').format(s.price)} €`;
 }
 
+/* Group C — deliverable products (brief §2): pay → short form/upload → a
+   written/PDF result. No calendar, no portal subscription. Surfaced here as a
+   catalog section with manual ordering (→ /contact) until the dedicated order
+   form + delivery flow lands in the backend pass. Prices are final; the short
+   copy is interim (client texts pending). */
+type DBi = { ro: string; en: string; ru: string };
+const DELIVERABLES: { id: string; tag: DBi; title: DBi; desc: DBi; price: string }[] = [
+  {
+    id: 'menu_7',
+    tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
+    title: { ro: 'Meniu personalizat · 7 zile', en: 'Personalized menu · 7 days', ru: 'Персональное меню · 7 дней' },
+    desc: {
+      ro: 'Plan alimentar personalizat pe 7 zile, livrat în scris după un formular scurt.',
+      en: 'A personalized 7-day meal plan, delivered in writing after a short form.',
+      ru: 'Персональный план питания на 7 дней — присылается письменно после короткой формы.',
+    },
+    price: '28 €',
+  },
+  {
+    id: 'menu_14',
+    tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
+    title: { ro: 'Meniu personalizat · 14 zile', en: 'Personalized menu · 14 days', ru: 'Персональное меню · 14 дней' },
+    desc: {
+      ro: 'Plan alimentar personalizat pe 14 zile, cu variație și liste de cumpărături.',
+      en: 'A personalized 14-day meal plan, with variety and shopping lists.',
+      ru: 'Персональный план питания на 14 дней — с разнообразием и списками покупок.',
+    },
+    price: '48 €',
+  },
+  {
+    id: 'menu_30',
+    tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
+    title: { ro: 'Meniu personalizat · 30 zile', en: 'Personalized menu · 30 days', ru: 'Персональное меню · 30 дней' },
+    desc: {
+      ro: 'Plan alimentar personalizat pe 30 de zile, pentru obiective de durată.',
+      en: 'A personalized 30-day meal plan, for longer-term goals.',
+      ru: 'Персональный план питания на 30 дней — для долгосрочных целей.',
+    },
+    price: '88 €',
+  },
+  {
+    id: 'protocol_pednutri',
+    tag: { ro: 'Protocol', en: 'Protocol', ru: 'Протокол' },
+    title: {
+      ro: 'Protocol individualizat pediatrico-nutrițional',
+      en: 'Individual pediatric-nutrition protocol',
+      ru: 'Индивидуальный педиатрическо-нутрициологический протокол',
+    },
+    desc: {
+      ro: 'Protocol individualizat pe baza informațiilor și documentelor trimise, livrat în scris.',
+      en: 'An individualized protocol built from the information and documents you send, delivered in writing.',
+      ru: 'Индивидуальный протокол на основе присланных данных и документов — присылается письменно.',
+    },
+    price: '98 €',
+  },
+  {
+    id: 'protocol_complementary',
+    tag: { ro: 'Protocol', en: 'Protocol', ru: 'Протокол' },
+    title: {
+      ro: 'Protocol individualizat · alimentație complementară (sugari)',
+      en: 'Individual complementary-feeding protocol (infants)',
+      ru: 'Индивидуальный протокол прикорма (для грудничков)',
+    },
+    desc: {
+      ro: 'Protocol de diversificare individualizat pentru sugari, livrat în scris.',
+      en: 'An individualized complementary-feeding protocol for infants, delivered in writing.',
+      ru: 'Индивидуальный протокол введения прикорма для грудничков — присылается письменно.',
+    },
+    price: '98 €',
+  },
+];
+
 export default async function PricingPage({
   params,
 }: {
@@ -89,6 +161,18 @@ export default async function PricingPage({
     book: ru ? 'Записаться' : en ? 'Book' : 'Rezervă',
     min: ru ? 'мин' : en ? 'min' : 'min',
     included: ru ? 'Что входит' : en ? "What's included" : 'Ce include',
+  };
+
+  const lc = (b: DBi) => (ru ? b.ru : en ? b.en : b.ro);
+  const td = {
+    eyebrow: ru ? 'Продукты' : en ? 'Deliverables' : 'Livrabile',
+    title: ru ? 'Персональные продукты' : en ? 'Personalized products' : 'Produse personalizate',
+    intro: ru
+      ? 'Оплата → короткая форма → готовый результат в письменном виде. Оплата подтверждается вручную.'
+      : en
+        ? 'Pay → a short form → a finished result delivered in writing. Payment is confirmed manually.'
+        : 'Plată → un formular scurt → un rezultat finalizat, livrat în scris. Plata se confirmă manual.',
+    order: ru ? 'Заказать' : en ? 'Order' : 'Comandă',
   };
 
   return (
@@ -189,6 +273,50 @@ export default async function PricingPage({
               </div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* Group C — personalized deliverable products (menus + protocols) */}
+      <section className="shell pb-20 md:pb-28">
+        <div className="border-t border-[var(--rule)] pt-16 md:pt-20">
+          <p className="eyebrow">{td.eyebrow}</p>
+          <h2 className="serif mt-4 text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.05] tracking-[-0.02em] text-balance">
+            {td.title}
+          </h2>
+          <p className="mt-5 max-w-[52ch] text-[1.0125rem] leading-relaxed text-ink-soft text-pretty">
+            {td.intro}
+          </p>
+          <div className="mt-10 border-t border-[var(--rule)]">
+            {DELIVERABLES.map((d, i) => (
+              <Reveal
+                key={d.id}
+                as="div"
+                className="grid items-start gap-x-8 gap-y-3 border-b border-[var(--rule)] py-6 md:grid-cols-[1fr_1.3fr_auto] md:gap-x-12"
+                delay={i * 60}
+              >
+                <div>
+                  <div className="mono text-[11px] uppercase tracking-[0.14em] text-sage-text">
+                    {lc(d.tag)}
+                  </div>
+                  <h3 className="serif mt-1.5 text-[1.4rem] leading-snug text-pretty">
+                    {lc(d.title)}
+                  </h3>
+                </div>
+                <p className="text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
+                  {lc(d.desc)}
+                </p>
+                <div className="flex items-center justify-between gap-6 md:flex-col md:items-end md:gap-2.5">
+                  <div className="serif text-[1.5rem] leading-none lining-nums">{d.price}</div>
+                  <Link
+                    href={`/${locale}/contact`}
+                    className="mono inline-flex items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                  >
+                    {td.order} →
+                  </Link>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
