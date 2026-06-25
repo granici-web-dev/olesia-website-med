@@ -125,7 +125,7 @@ export function MaterialLibrary({
           onChange={(e) => setQuery(e.target.value)}
           placeholder={lc(T.searchPlaceholder)}
           aria-label={lc(T.searchPlaceholder)}
-          className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 pr-8 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none"
+          className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 pr-8 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
         />
         <span aria-hidden="true" className="mono pointer-events-none absolute right-1 top-2.5 text-ink-soft">
           ⌕
@@ -327,7 +327,7 @@ function EmailGate({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={lc(T.emailPlaceholder)}
-            className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none"
+            className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
           />
           <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-[0.85rem] leading-relaxed text-ink-soft">
             <input

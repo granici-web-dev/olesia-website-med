@@ -118,7 +118,9 @@
     },
     "contactLabel": "Contact",
     "rights": "© Olesea Jalba · 2026",
-    "legal": "GDPR · Termeni"
+    "legal": "GDPR · Termeni",
+    "legalGdpr": "GDPR",
+    "legalTerms": "Termeni"
   },
   "leadForm": {
     "monitoring": {

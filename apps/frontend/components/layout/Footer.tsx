@@ -91,11 +91,11 @@ export function Footer() {
         <FooterLangSwitch />
         <span>
           <Link href="/gdpr" className={styles.legalLink}>
-            {t('legal').split('·')[0].trim()}
+            {t('legalGdpr')}
           </Link>
           {' · '}
           <Link href="/terms" className={styles.legalLink}>
-            {t('legal').split('·').slice(1).join('·').trim()}
+            {t('legalTerms')}
           </Link>
         </span>
       </div>

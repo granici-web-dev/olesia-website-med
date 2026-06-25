@@ -66,10 +66,26 @@ export function CalendlyButton({
   const open = () => {
     track('booking_click', { service: reason });
     ensureWidgetAssets();
-    window.Calendly?.initPopupWidget({
-      url,
-      prefill: { customAnswers: { a1: reason } },
-    });
+    const popup = () =>
+      window.Calendly?.initPopupWidget({
+        url,
+        prefill: { customAnswers: { a1: reason } },
+      });
+    if (window.Calendly) {
+      popup();
+      return;
+    }
+    // Widget script not ready yet (fast click on a slow network): poll briefly
+    // until Calendly is available, then open — so the button never dead-ends.
+    let tries = 0;
+    const id = window.setInterval(() => {
+      if (window.Calendly) {
+        window.clearInterval(id);
+        popup();
+      } else if (++tries > 40) {
+        window.clearInterval(id); // ~4s timeout — give up silently
+      }
+    }, 100);
   };
 
   return (

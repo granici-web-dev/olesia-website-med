@@ -33,14 +33,30 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'Dr. Olesea Jalba — Pediatrics & Nutrition',
-  description:
-    'Online pediatrics and nutrition consultations. Video call, written plan, long-term follow-up.',
-  ...(ANALYTICS.gscVerification
-    ? { verification: { google: ANALYTICS.gscVerification } }
-    : {}),
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const en = locale === 'en';
+  const ru = locale === 'ru';
+  return {
+    title: ru
+      ? 'Dr. Olesea Jalba — Педиатрия и нутрициология'
+      : en
+        ? 'Dr. Olesea Jalba — Pediatrics & Nutrition'
+        : 'Dr. Olesea Jalba — Pediatrie & Nutriție',
+    description: ru
+      ? 'Онлайн-консультации педиатра и нутрициолога. Видеозвонок, письменный план, долгосрочное наблюдение.'
+      : en
+        ? 'Online pediatrics and nutrition consultations. Video call, written plan, long-term follow-up.'
+        : 'Consultații pediatrice și de nutriție online. Apel video, plan scris, urmărire pe termen lung.',
+    ...(ANALYTICS.gscVerification
+      ? { verification: { google: ANALYTICS.gscVerification } }
+      : {}),
+  };
+}
 
 export default async function LocaleLayout({
   children,
