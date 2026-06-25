@@ -38,7 +38,7 @@
       "steps": {
         "booking": { "title": "Programare", "description": "Alegi un slot din calendar și completezi un scurt formular cu motivul vizitei." },
         "preparation": { "title": "Pregătire", "description": "Cu 24h înainte primești instrucțiuni și o listă de informații utile (analize, jurnal alimentar etc.)." },
-        "consultation": { "title": "Consultația", "description": "Ne întâlnim pe video. Lungimea variază între 50–90 min, în funcție de tipul de consultație." },
+        "consultation": { "title": "Consultația", "description": "Ne întâlnim pe Google Meet — primești linkul în confirmare. Lungimea variază între 30–90 min, în funcție de tipul de consultație." },
         "plan": { "title": "Plan scris", "description": "În 24h primești un document cu recomandări, plan alimentar (dacă e cazul) și pașii următori." }
       },
       "footerNote": "Platforma video, formularul și planul scris — toate gestionate într-un singur portal.",

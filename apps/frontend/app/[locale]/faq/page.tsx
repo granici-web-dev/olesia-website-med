@@ -58,9 +58,9 @@ const CATEGORIES: FaqCategory[] = [
       {
         q: { ro: 'Cum decurge o consultație online?', en: 'How does an online consultation work?', ru: 'Как проходит онлайн-консультация?' },
         a: {
-          ro: 'Consultația are loc prin apel video, la ora programată. Primești un link în browser, fără să instalezi nimic, cu instrucțiunile cu 24 de ore înainte.',
-          en: 'The consultation takes place by video call at the scheduled time. You get a browser link — nothing to install — with instructions 24 hours ahead.',
-          ru: 'Консультация проходит по видеосвязи в назначенное время. Ссылка открывается прямо в браузере — ничего устанавливать не нужно, — а инструкции придут за 24 часа.',
+          ro: 'Consultația are loc pe Google Meet, la ora programată — primești linkul automat în e-mailul de confirmare, fără să instalezi nimic. La cerere, putem folosi și WhatsApp, Viber sau Instagram video. Instrucțiunile vin cu 24 de ore înainte.',
+          en: 'The consultation takes place on Google Meet at the scheduled time — you get the link automatically in the confirmation email, with nothing to install. On request, we can also use WhatsApp, Viber, or Instagram video. Instructions arrive 24 hours ahead.',
+          ru: 'Консультация проходит в Google Meet в назначенное время — ссылку вы получаете автоматически в письме-подтверждении, ничего устанавливать не нужно. По желанию можем использовать WhatsApp, Viber или Instagram video. Инструкции придут за 24 часа.',
         },
       },
       {

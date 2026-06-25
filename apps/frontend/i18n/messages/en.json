@@ -38,7 +38,7 @@
       "steps": {
         "booking": { "title": "Booking", "description": "Choose a slot from the calendar and fill in a short form with the reason for your visit." },
         "preparation": { "title": "Preparation", "description": "24h before, you receive instructions and a list of useful information (tests, food diary, etc.)." },
-        "consultation": { "title": "Consultation", "description": "We meet on video. Duration varies between 50–90 min depending on the type of consultation." },
+        "consultation": { "title": "Consultation", "description": "We meet on Google Meet — the link comes with your confirmation. Duration varies between 30–90 min depending on the type of consultation." },
         "plan": { "title": "Written plan", "description": "Within 24h you receive a document with recommendations, meal plan (if applicable) and next steps." }
       },
       "footerNote": "The video platform, the form and the written plan — all managed in a single portal.",
