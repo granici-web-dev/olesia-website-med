@@ -69,7 +69,7 @@ export default async function LocaleLayout({
           {children}
           <Footer />
           <DevTools />
-          <Analytics locale={locale} />
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>

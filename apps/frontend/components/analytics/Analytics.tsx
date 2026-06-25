@@ -2,33 +2,54 @@
 
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
-import { ANALYTICS, analyticsConfigured, readConsent, type Consent } from '@/lib/analytics';
-import { ConsentBanner } from './ConsentBanner';
+import { ANALYTICS } from '@/lib/analytics';
 
-/* Loads the configured trackers (GTM / GA4 / Meta Pixel) only after the visitor
-   grants consent — GDPR-correct: nothing runs before "Accept". Renders the
-   consent banner while the decision is pending. Pure no-op when no IDs are set. */
+/* Loads the Cookiebot CMP (which renders the consent banner and auto-blocks
+   third-party cookies), then loads each tracker only once its consent category
+   is granted — GTM/GA4 on `statistics`, the Meta Pixel on `marketing`. Pure
+   no-op when no Cookiebot CBID is set. GDPR-correct: nothing tracks before
+   consent. Real IDs are configured via env when the client provides them. */
 
-export function Analytics({ locale }: { locale: string }) {
-  const [consent, setConsent] = useState<Consent | null>(null);
-  const [ready, setReady] = useState(false);
+export function Analytics() {
+  const [consent, setConsent] = useState({ statistics: false, marketing: false });
 
   useEffect(() => {
-    setConsent(readConsent());
-    setReady(true);
+    const sync = () => {
+      const c = window.Cookiebot?.consent;
+      if (c) setConsent({ statistics: !!c.statistics, marketing: !!c.marketing });
+    };
+    // Cookiebot fires these on the window as it resolves / changes consent.
+    window.addEventListener('CookiebotOnConsentReady', sync);
+    window.addEventListener('CookiebotOnAccept', sync);
+    window.addEventListener('CookiebotOnDecline', sync);
+    sync(); // in case consent already resolved before this mounted
+    return () => {
+      window.removeEventListener('CookiebotOnConsentReady', sync);
+      window.removeEventListener('CookiebotOnAccept', sync);
+      window.removeEventListener('CookiebotOnDecline', sync);
+    };
   }, []);
 
-  const load = ready && consent === 'granted' && analyticsConfigured;
+  if (!ANALYTICS.cookiebotId) return null;
 
   return (
     <>
-      {load && ANALYTICS.gtmId && (
+      {/* CMP — must keep id="Cookiebot" for auto-blocking to work. */}
+      <Script
+        id="Cookiebot"
+        src="https://consent.cookiebot.com/uc.js"
+        data-cbid={ANALYTICS.cookiebotId}
+        data-blockingmode="auto"
+        strategy="afterInteractive"
+      />
+
+      {consent.statistics && ANALYTICS.gtmId && (
         <Script id="gtm" strategy="afterInteractive">
           {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${ANALYTICS.gtmId}');`}
         </Script>
       )}
 
-      {load && ANALYTICS.ga4Id && (
+      {consent.statistics && ANALYTICS.ga4Id && (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${ANALYTICS.ga4Id}`}
@@ -40,18 +61,10 @@ export function Analytics({ locale }: { locale: string }) {
         </>
       )}
 
-      {load && ANALYTICS.pixelId && (
+      {consent.marketing && ANALYTICS.pixelId && (
         <Script id="meta-pixel" strategy="afterInteractive">
           {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${ANALYTICS.pixelId}');fbq('track','PageView');`}
         </Script>
-      )}
-
-      {ready && consent === null && analyticsConfigured && (
-        <ConsentBanner
-          locale={locale}
-          onAccept={() => setConsent('granted')}
-          onReject={() => setConsent('denied')}
-        />
       )}
     </>
   );

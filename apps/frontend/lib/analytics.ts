@@ -1,12 +1,14 @@
 /**
- * Analytics config + event/consent helpers (brief §6b). Everything is gated on
- * env IDs AND user consent: with no IDs set this is a complete no-op, and no
- * tracker loads until the visitor accepts cookies (GDPR). Supports a GTM
- * container, GA4 direct, and the Meta Pixel — set whichever the client provides.
- * The real IDs are still pending the client; wire them via env when they land.
+ * Analytics config + event helper (brief §6b). Consent is handled by the
+ * Cookiebot CMP (https://www.cookiebot.com): it shows the banner and we load
+ * each tracker only once its consent category is granted — GTM/GA4 on
+ * `statistics`, the Meta Pixel on `marketing`. Everything is env-gated too, so
+ * with no IDs set this is a complete no-op. Real IDs are pending the client.
  */
 
 export const ANALYTICS = {
+  /** Cookiebot domain-group id (CBID) — enables the CMP + consent banner. */
+  cookiebotId: process.env.NEXT_PUBLIC_COOKIEBOT_CBID ?? '',
   gtmId: process.env.NEXT_PUBLIC_GTM_ID ?? '',
   ga4Id: process.env.NEXT_PUBLIC_GA4_ID ?? '',
   pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? '',
@@ -14,33 +16,25 @@ export const ANALYTICS = {
   gscVerification: process.env.NEXT_PUBLIC_GSC_VERIFICATION ?? '',
 };
 
-/** True when at least one tracker is configured — gates the consent banner. */
+/** True when at least one tracker is configured. */
 export const analyticsConfigured = Boolean(
   ANALYTICS.gtmId || ANALYTICS.ga4Id || ANALYTICS.pixelId,
 );
 
-export const CONSENT_COOKIE = 'cookie_consent';
-export type Consent = 'granted' | 'denied';
+export interface CookiebotConsent {
+  necessary: boolean;
+  preferences: boolean;
+  statistics: boolean;
+  marketing: boolean;
+}
 
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
     gtag?: (...args: unknown[]) => void;
     fbq?: ((...args: unknown[]) => void) & { queue?: unknown[] };
+    Cookiebot?: { consent: CookiebotConsent };
   }
-}
-
-/** Read the stored consent decision, or null if the visitor hasn't decided. */
-export function readConsent(): Consent | null {
-  if (typeof document === 'undefined') return null;
-  const m = document.cookie.match(/(?:^|;\s*)cookie_consent=(granted|denied)/);
-  return m ? (m[1] as Consent) : null;
-}
-
-/** Persist the consent decision for 180 days. */
-export function writeConsent(value: Consent): void {
-  if (typeof document === 'undefined') return;
-  document.cookie = `${CONSENT_COOKIE}=${value}; path=/; max-age=${60 * 60 * 24 * 180}; samesite=lax`;
 }
 
 /**
