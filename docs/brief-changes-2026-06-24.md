@@ -6,6 +6,43 @@ Status legend: ✅ ready to do · ⛔ blocked on client · ❓ needs Serghei's d
 
 ---
 
+## 📌 PICK-UP LIST — what's deferred (as of 2026-06-25)
+
+The **frontend slice of every brief feature is built** (Phases 0–7; see per-phase status below). Branch `feat/responsive-burger-and-architecture`. What remains is grouped here so we can resume fast.
+
+### ⛔ Blocked on the client (can't proceed without their input)
+- **Subscription prices** — 4 types × 1/2/3/6 months matrix (Phase 1 / §3, blocker #1). Nothing priced in the brief.
+- **Legal entity data + lawyer review** — for /gdpr, /terms, /privacy (Phase 8, blocker #2). Pages are DRAFT.
+- **Analytics IDs** — Cookiebot CBID + GTM + GA4 + Meta Pixel + GSC token (Phase 3). Code is env-gated and ready; just set env on Vercel.
+- **Newsletter provider + endpoint** — pick Mailchimp/Brevo/Resend/own API (Phase 4, blocker #8). Code env-gated; set `NEXT_PUBLIC_NEWSLETTER_ENDPOINT` (prefer same-origin to dodge CORS).
+- **"~1h" SLA confirmation + working hours** (blocker #6) — gates updating the back-office operational 48h countdown (`dueAt`/deadline-indicator). Public copy already says ~1h.
+- **Real Calendly event-type API URIs** for `nutrition_copii` / `nutrition_adulti` (webhook routing). Booking buttons already use the scheduling URLs.
+- **Calendly dashboard config** — connect host Google account + set Location=Google Meet on each group-A event type (Phase 7). Account-owner action; can't be done in code.
+- **Apariții media** — real list of TV/interviews/conferences + logos/links (Phase 5 / §7.4).
+- **Final service texts + article texts/images** — via the agreed Google Drive folder (share to designer.nefele@gmail.com). Interim copy is in place.
+- **Exact clinic address** (§5).
+- **Cookie-consent provider FINAL decision** — Cookiebot wired as interim no-op; revisit at end of build. See [[cookie-consent-deferred]].
+
+### 🛠️ Deferred to the BACKEND pass (our work; needs apps/api + back-office)
+- **Data-driven catalog** (decided option A): services as DB rows the back office can edit/add (§10). Currently `code` is a fixed enum.
+- **Nutrition full split** into two catalog codes (`nutrition_copii`/`nutrition_adulti`) → separate /pricing rows + homepage/services tiles + landing pages + Prisma migration. (Frontend uses 1 service + 2 booking buttons for now.)
+- **Group C catalog modeling** + `ServiceGroup` C + dedicated order form/upload + delivery flow (§2). (Frontend shows them on /pricing, order→/contact.)
+- **Subscriptions** 4×4 structure in the model (once prices unblocked).
+- **Biblioteca Digitală backend**: `materials` API module + back-office CRUD + real PDFs + paid-download flow + newsletter persistence (Phase 2). (Frontend storefront + email-gate built on local data.)
+- **Age tagging** on `posts` + `materials` API models so live content carries ages (Phase 6). (Frontend filter + shared taxonomy done.)
+- **Calendly → store/show Meet link** from the webhook `location` payload when the appointments module lands (Phase 7).
+- **Operational 48h→~1h SLA** (`dueAt`/deadline-indicator) once blocker #6 confirmed.
+
+### 🟢 Small/optional frontend leftovers
+- **Services slogan** (CSV row 371) — candidate for the /services intro. Not placed.
+- **/gdpr cookie section** — name the GA4/GTM/Pixel cookies once the tools are confirmed.
+- **"Cum decurge colaborarea"** section — skipped (duplicates homepage HowItWorks); build only if the client wants a distinct block.
+
+### LOW review items intentionally NOT done
+All HIGH/MED review findings fixed. Remaining LOW were addressed in commit `b478522` **except**: GTM-vs-GA4 double-count is documented (not enforced) since only one ID will be set.
+
+---
+
 ## 0. Headline impact
 
 The brief **redefines the service catalog** and adds several large features. Three heavy items:
