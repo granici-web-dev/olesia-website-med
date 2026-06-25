@@ -1,0 +1,357 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { Reveal } from '@/components/ui/Reveal';
+import type { AgeGroup } from '@/lib/age-taxonomy';
+import type { Material, MaterialCategory, MaterialFlag } from '@/lib/placeholder-materials';
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Digital Library storefront (brief §6a). Owns the client-side interactions:
+   search, category + child-age filters, free/paid badges, merchandising flags,
+   and the email-gate that collects an address before a free download. Content
+   arrives as trilingual data from the server page; this component localizes by
+   `locale`. The email-gate is UI-only for now (no newsletter backend yet —
+   blocker #8): it unlocks the download on submit; persistence/opt-in lands with
+   the materials/newsletter modules. Paid materials route to /contact (manual).
+   ────────────────────────────────────────────────────────────────────────── */
+
+type Locale = 'ro' | 'en' | 'ru';
+type Bi = { ro: string; en: string; ru: string };
+
+const T: Record<string, Bi> = {
+  searchPlaceholder: { ro: 'Caută în bibliotecă…', en: 'Search the library…', ru: 'Поиск по библиотеке…' },
+  all: { ro: 'Toate', en: 'All', ru: 'Все' },
+  allAges: { ro: 'Toate vârstele', en: 'All ages', ru: 'Все возрасты' },
+  category: { ro: 'Categorie', en: 'Category', ru: 'Категория' },
+  age: { ro: 'Vârstă', en: 'Age', ru: 'Возраст' },
+  free: { ro: 'Gratuit', en: 'Free', ru: 'Бесплатно' },
+  download: { ro: 'Descarcă', en: 'Download', ru: 'Скачать' },
+  order: { ro: 'Comandă', en: 'Order', ru: 'Заказать' },
+  soon: { ro: 'În curând', en: 'Coming soon', ru: 'Скоро' },
+  count: { ro: 'materiale', en: 'materials', ru: 'материалов' },
+  emptyTitle: { ro: 'Niciun material găsit', en: 'No materials found', ru: 'Ничего не найдено' },
+  emptyBody: { ro: 'Încearcă altă categorie, vârstă sau termen de căutare.', en: 'Try another category, age, or search term.', ru: 'Попробуйте другую категорию, возраст или запрос.' },
+  reset: { ro: 'Resetează filtrele', en: 'Reset filters', ru: 'Сбросить фильтры' },
+  gateTitle: { ro: 'Descarcă gratuit', en: 'Free download', ru: 'Бесплатное скачивание' },
+  gateBody: { ro: 'Lasă-ți adresa de email și primești materialul. Te poți abona și la noutăți.', en: 'Leave your email to get the material. You can also subscribe to updates.', ru: 'Оставьте email, чтобы получить материал. Можно также подписаться на новости.' },
+  email: { ro: 'Email', en: 'Email', ru: 'Email' },
+  emailPlaceholder: { ro: 'email@exemplu.md', en: 'email@example.com', ru: 'email@example.com' },
+  consent: { ro: 'Sunt de acord să primesc materialul și noutăți pe email.', en: 'I agree to receive the material and updates by email.', ru: 'Согласен(на) получать материал и новости по email.' },
+  getIt: { ro: 'Primește materialul', en: 'Get the material', ru: 'Получить материал' },
+  cancel: { ro: 'Anulează', en: 'Cancel', ru: 'Отмена' },
+  ready: { ro: 'Gata! Descărcarea ta este pregătită.', en: 'Done! Your download is ready.', ru: 'Готово! Файл готов к скачиванию.' },
+  flagRecommended: { ro: 'Recomandat', en: 'Recommended', ru: 'Рекомендуем' },
+  flagPopular: { ro: 'Popular', en: 'Popular', ru: 'Популярное' },
+  flagNew: { ro: 'Nou', en: 'New', ru: 'Новое' },
+};
+
+const FLAG_LABEL: Record<MaterialFlag, Bi> = {
+  recommended: T.flagRecommended,
+  popular: T.flagPopular,
+  new: T.flagNew,
+};
+
+function DocIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="34" height="34" fill="none" aria-hidden="true">
+      <path d="M6 3.5h7L18 8v12.5H6V3.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M13 3.5V8h5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M12 11v5m0 0 2-2m-2 2-2-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const chip = (on: boolean) =>
+  `cursor-pointer rounded-full border px-3.5 py-1.5 text-[12px] font-medium uppercase tracking-[0.07em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage ${
+    on ? 'border-ink bg-ink text-cream' : 'border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage'
+  }`;
+
+export function MaterialLibrary({
+  locale,
+  materials,
+  categories,
+  ages,
+  contactHref,
+}: {
+  locale: Locale;
+  materials: Material[];
+  categories: MaterialCategory[];
+  ages: AgeGroup[];
+  contactHref: string;
+}) {
+  const lc = (b: Bi) => b[locale] ?? b.ro;
+  const [query, setQuery] = useState('');
+  const [cat, setCat] = useState('all');
+  const [age, setAge] = useState('all');
+  const [gate, setGate] = useState<Material | null>(null);
+  const [unlocked, setUnlocked] = useState<Set<string>>(new Set());
+
+  const catLabel = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.key, lc(c.label)])),
+    [categories, locale],
+  );
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return materials.filter((m) => {
+      if (cat !== 'all' && m.categoryKey !== cat) return false;
+      if (age !== 'all' && m.ageKeys.length > 0 && !m.ageKeys.includes(age)) return false;
+      if (q) {
+        const hay = `${lc(m.title)} ${lc(m.description)}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [materials, query, cat, age, locale]);
+
+  const reset = () => {
+    setQuery('');
+    setCat('all');
+    setAge('all');
+  };
+
+  const unlock = (slug: string) => setUnlocked((prev) => new Set(prev).add(slug));
+
+  return (
+    <div>
+      {/* Search */}
+      <div className="relative max-w-[440px]">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={lc(T.searchPlaceholder)}
+          aria-label={lc(T.searchPlaceholder)}
+          className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 pr-8 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none"
+        />
+        <span aria-hidden="true" className="mono pointer-events-none absolute right-1 top-2.5 text-ink-soft">
+          ⌕
+        </span>
+      </div>
+
+      {/* Category filter */}
+      <div className="mt-8">
+        <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.category)}</p>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setCat('all')} className={chip(cat === 'all')}>
+            {lc(T.all)}
+          </button>
+          {categories.map((c) => (
+            <button key={c.key} type="button" onClick={() => setCat(c.key)} className={chip(cat === c.key)}>
+              {lc(c.label)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Age filter */}
+      <div className="mt-6">
+        <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.age)}</p>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setAge('all')} className={chip(age === 'all')}>
+            {lc(T.allAges)}
+          </button>
+          {ages.map((a) => (
+            <button key={a.key} type="button" onClick={() => setAge(a.key)} className={chip(age === a.key)}>
+              {lc(a.label)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="mono mt-8 text-[11px] uppercase tracking-[0.1em] text-ink-soft">
+        {filtered.length} {lc(T.count)}
+      </p>
+
+      {/* Grid / empty state */}
+      {filtered.length === 0 ? (
+        <div className="border-t border-[var(--rule)] py-20 text-center md:py-24">
+          <h3 className="serif text-[clamp(1.6rem,3vw,2.2rem)] leading-tight tracking-[-0.02em] text-balance">
+            {lc(T.emptyTitle)}
+          </h3>
+          <p className="mx-auto mt-3 max-w-[44ch] leading-relaxed text-ink-soft text-pretty">{lc(T.emptyBody)}</p>
+          <button
+            type="button"
+            onClick={reset}
+            className="mt-7 inline-flex cursor-pointer items-center bg-ink px-[22px] py-[13px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage"
+          >
+            {lc(T.reset)}
+          </button>
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((m, i) => {
+            const isUnlocked = unlocked.has(m.slug);
+            const ready = (m.fileHref ?? '').length > 0;
+            return (
+              <Reveal key={m.slug} delay={(i % 3) * 70}>
+                <article className="group flex h-full flex-col border border-[var(--rule)] bg-paper transition-colors hover:border-sage">
+                  <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-cream-2 text-sage">
+                    <span className="mono absolute left-4 top-4 rounded-full border border-[var(--rule)] bg-paper/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-sage-text">
+                      {catLabel[m.categoryKey]}
+                    </span>
+                    <span
+                      className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
+                        m.access === 'free' ? 'bg-sage/15 text-sage-text' : 'bg-ink text-cream'
+                      }`}
+                    >
+                      {m.access === 'free' ? lc(T.free) : m.price}
+                    </span>
+                    <span className="transition-transform duration-500 group-hover:scale-110">
+                      <DocIcon />
+                    </span>
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-6">
+                    {m.flags && m.flags.length > 0 && (
+                      <div className="mb-2.5 flex flex-wrap gap-1.5">
+                        {m.flags.map((f) => (
+                          <span
+                            key={f}
+                            className="mono rounded-full border border-sage/40 px-2 py-0.5 text-[9px] uppercase tracking-[0.12em] text-sage-text"
+                          >
+                            {lc(FLAG_LABEL[f])}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <h3 className="serif text-[1.3rem] leading-snug tracking-[-0.01em] text-ink text-pretty">
+                      {lc(m.title)}
+                    </h3>
+                    <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(m.description)}</p>
+                    <p className="mono mt-4 text-[11px] uppercase tracking-[0.08em] text-ink-soft">{lc(m.format)}</p>
+
+                    <div className="mt-6 pt-1">
+                      {m.access === 'paid' ? (
+                        <a
+                          href={contactHref}
+                          className="inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                        >
+                          {lc(T.order)} · {m.price}
+                        </a>
+                      ) : isUnlocked ? (
+                        ready ? (
+                          <a
+                            href={m.fileHref}
+                            download
+                            className="inline-flex cursor-pointer items-center gap-2 border-b border-sage pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-sage-text"
+                          >
+                            {lc(T.download)} <span aria-hidden="true">↓</span>
+                          </a>
+                        ) : (
+                          <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
+                            {lc(T.soon)}
+                          </span>
+                        )
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setGate(m)}
+                          className="inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                        >
+                          {lc(T.download)} <span aria-hidden="true" className="transition-transform group-hover:translate-y-0.5">↓</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Email gate */}
+      {gate && (
+        <EmailGate
+          material={gate}
+          lc={lc}
+          onClose={() => setGate(null)}
+          onSubmit={() => {
+            unlock(gate.slug);
+            setGate(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EmailGate({
+  material,
+  lc,
+  onClose,
+  onSubmit,
+}: {
+  material: Material;
+  lc: (b: Bi) => string;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
+  const valid = /\S+@\S+\.\S+/.test(email) && consent;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label={lc(T.gateTitle)}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-[420px] border border-[var(--rule)] bg-cream p-7 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="mono text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.gateTitle)}</p>
+        <h3 className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty">{lc(material.title)}</h3>
+        <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(T.gateBody)}</p>
+
+        <form
+          className="mt-6"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (valid) onSubmit();
+          }}
+        >
+          <label className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text">{lc(T.email)}</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={lc(T.emailPlaceholder)}
+            className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none"
+          />
+          <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-[0.85rem] leading-relaxed text-ink-soft">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="mt-0.5 size-4 shrink-0 accent-[var(--sage,#7a8b6f)]"
+            />
+            <span>{lc(T.consent)}</span>
+          </label>
+
+          <div className="mt-7 flex items-center gap-4">
+            <button
+              type="submit"
+              disabled={!valid}
+              className="inline-flex cursor-pointer items-center bg-ink px-[22px] py-[13px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {lc(T.getIt)}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="cursor-pointer text-[13px] uppercase tracking-[0.04em] text-ink-soft transition-colors hover:text-ink"
+            >
+              {lc(T.cancel)}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
