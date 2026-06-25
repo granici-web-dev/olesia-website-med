@@ -1,6 +1,6 @@
 /**
  * Contact-form messages — the public Contact page ("Mesaje" in the back office).
- * Non-medical questions only (medical ones go through "Întrebare rapidă"), so
+ * Non-medical questions only (medical ones go through "Întrebare EXPRESS"), so
  * the record carries no clinical data. `reply`/`repliedAt` are reserved for the
  * email-reply step that lands once SMTP is configured.
  *

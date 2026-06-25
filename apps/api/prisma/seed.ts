@@ -84,14 +84,14 @@ const SERVICES = [
   {
     code: 'quick_question',
     group: 'B_portal',
-    titleRo: 'Întrebare rapidă',
-    titleEn: 'Quick question',
-    descriptionRo: 'Răspuns scris la o întrebare punctuală, în 48 de ore.',
-    descriptionEn: 'A written answer to a specific question within 48 hours.',
+    titleRo: 'Întrebare EXPRESS',
+    titleEn: 'Express question',
+    descriptionRo: 'Răspuns scris la o întrebare punctuală, în ~1 oră în timpul programului de lucru.',
+    descriptionEn: 'A written answer to a specific question, within ~1 hour during working hours.',
     durationMin: null,
     price: 8,
-    priceLabelRo: '48 h · răspuns scris',
-    priceLabelEn: '48 h · written reply',
+    priceLabelRo: '~1 h · răspuns scris',
+    priceLabelEn: '~1 h · written reply',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
     sortOrder: 5,
@@ -209,8 +209,8 @@ I believe every family deserves clear support, without pressure and without myth
     {
       qRo: 'Cât durează și cât costă?',
       qEn: 'How long and how much?',
-      aRo: 'Între 50 și 90 de minute, în funcție de serviciu. Tarifele sunt afișate transparent pe pagina Tarife.',
-      aEn: 'Between 50 and 90 minutes depending on the service. Prices are listed transparently on the Pricing page.',
+      aRo: 'Între 30 și 90 de minute, în funcție de serviciu. Tarifele sunt afișate transparent pe pagina Tarife.',
+      aEn: 'Between 30 and 90 minutes depending on the service. Prices are listed transparently on the Pricing page.',
     },
     {
       qRo: 'Cum se face plata?',
@@ -221,8 +221,8 @@ I believe every family deserves clear support, without pressure and without myth
     {
       qRo: 'Pot pune o singură întrebare, fără consultație?',
       qEn: 'Can I ask just one question, without a consultation?',
-      aRo: 'Da — serviciul „Întrebare rapidă" îți oferă un răspuns scris în maximum 48 de ore.',
-      aEn: 'Yes — the "Quick question" service gives you a written answer within 48 hours.',
+      aRo: 'Da — serviciul „Întrebare EXPRESS" îți oferă un răspuns scris în ~1 oră în timpul programului de lucru.',
+      aEn: 'Yes — the "Express question" service gives you a written answer within ~1 hour during working hours.',
     },
     {
       qRo: 'Prima discuție chiar este gratuită?',

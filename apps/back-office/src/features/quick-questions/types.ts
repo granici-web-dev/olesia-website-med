@@ -1,5 +1,5 @@
 /**
- * Quick-question tickets — the "Întrebare rapidă" service (05, group B):
+ * Quick-question tickets — the "Întrebare EXPRESS" service (05, group B):
  * a written answer within 48h, with optional attachments.
  *
  * The spec (module_calendly.md §3.2.5, §11, §15) requires: ticket list, 48h

@@ -707,7 +707,7 @@ export const ro = {
       source: {
         appointment: 'Programare',
         subscription: 'Abonament',
-        quick_question: 'Întrebare rapidă',
+        quick_question: 'Întrebare EXPRESS',
       },
     },
 
@@ -838,7 +838,7 @@ export const ro = {
 
     empty: {
       title: 'Nicio întrebare',
-      body: 'Tichetele „Întrebare rapidă” apar aici după trimiterea formularului de pe site.',
+      body: 'Tichetele „Întrebare EXPRESS” apar aici după trimiterea formularului de pe site.',
       filteredTitle: 'Niciun rezultat',
       filteredBody: 'Niciun tichet nu corespunde filtrelor selectate.',
     },
