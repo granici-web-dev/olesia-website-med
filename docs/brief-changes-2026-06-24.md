@@ -205,8 +205,13 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 - [x] Applied to **materials** (Phase 2 library) and **blog** (commit `27a7620`): posts tagged with `ageKeys` (empty = all ages); `BlogList` gained an age-filter row combined with the category filter; /articles shows only age groups present in the listing. Browser-verified.
 - [ ] Backend: add age tagging to the `posts` + `materials` API models so live content carries ages (deferred — backend pass; live posts currently pass `ageKeys: []`).
 
-### Phase 7 — Calendly Google Meet
-- [ ] Configure event types to auto-generate Google Meet links in confirmations.
+### Phase 7 — Calendly Google Meet — 🟡 FRONTEND DONE 2026-06-25 (commit `f08b81e`)
+- [x] **Frontend copy** sets expectations (brief §9): FAQ "Cum decurge o consultație online?" + homepage "how it works" now say the consult runs on **Google Meet** (link auto-sent in confirmation), with WhatsApp/Viber/Instagram video on request. Fixed stale 50→30 min duration too.
+- [ ] ⛔ **Client/account-owner config (in Calendly dashboard — cannot be done in code):**
+  1. Connect the host **Google account** to Calendly (Account → Connect → Google Calendar/Meet).
+  2. For each group-A event type (pediatric, nutrition copii, nutrition adulti, integrative, free consult), set **Location = Google Meet**.
+  3. Calendly then auto-creates the Meet link and includes it in the confirmation email + calendar invite — no code needed.
+- [ ] Backend (deferred): when the appointments module lands, persist/display the Meet link from the Calendly webhook `location` payload.
 
 ### Phase 8 — Legal finalization (after blocker #2)
 - [ ] Fill /terms, /gdpr, /privacy with real entity data; lift DRAFT status.
