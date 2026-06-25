@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Reveal } from '@/components/ui/Reveal';
 import { track } from '@/lib/analytics';
+import { subscribe } from '@/lib/newsletter';
 import type { AgeGroup } from '@/lib/age-taxonomy';
 import type { Material, MaterialCategory, MaterialFlag } from '@/lib/placeholder-materials';
 
@@ -268,8 +269,11 @@ export function MaterialLibrary({
           material={gate}
           lc={lc}
           onClose={() => setGate(null)}
-          onSubmit={() => {
+          onSubmit={(email) => {
             track('material_download', { slug: gate.slug, category: gate.categoryKey });
+            // Email-gate doubles as a newsletter opt-in (brief §6a); no-ops when
+            // the newsletter isn't configured yet.
+            void subscribe(email, { source: 'library', locale });
             unlock(gate.slug);
             setGate(null);
           }}
@@ -288,7 +292,7 @@ function EmailGate({
   material: Material;
   lc: (b: Bi) => string;
   onClose: () => void;
-  onSubmit: () => void;
+  onSubmit: (email: string) => void;
 }) {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
@@ -314,7 +318,7 @@ function EmailGate({
           className="mt-6"
           onSubmit={(e) => {
             e.preventDefault();
-            if (valid) onSubmit();
+            if (valid) onSubmit(email);
           }}
         >
           <label className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text">{lc(T.email)}</label>
