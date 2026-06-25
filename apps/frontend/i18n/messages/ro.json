@@ -12,7 +12,7 @@
       "nutrition": "Consultație nutrițională",
       "integrative": "Consultație integrativă",
       "monitoring": "Monitorizare 3 luni",
-      "quick": "Întrebare rapidă"
+      "quick": "Întrebare EXPRESS"
     },
     "bookOnline": "Programează online →"
   },
@@ -78,11 +78,11 @@
           "duration": "3 luni"
         },
         "quick": {
-          "tag": "Rapid",
-          "title": "Întrebare rapidă",
-          "description": "Pentru întrebări punctuale care nu necesită o consultație completă. Trimiți întrebarea + context prin formular și primești un răspuns scris, documentat, în 48 de ore.",
+          "tag": "EXPRESS",
+          "title": "Întrebare EXPRESS",
+          "description": "Pentru întrebări punctuale care nu necesită o consultație completă. Trimiți întrebarea + context prin formular și primești un răspuns scris, documentat, în ~1 oră în timpul programului de lucru.",
           "price": "8 €",
-          "duration": "48h · scris"
+          "duration": "~1h · scris"
         }
       },
       "book": "Rezervă →"
@@ -107,7 +107,7 @@
       "nutrition": "Consultație nutrițională",
       "integrative": "Integrativă",
       "subscription": "Abonament",
-      "quick": "Întrebare rapidă"
+      "quick": "Întrebare EXPRESS"
     },
     "resourcesLabel": "Resurse",
     "resources": {
@@ -127,9 +127,9 @@
       "subtitle": "Lasă-ne datele tale și te contactăm pentru a stabili împreună pașii următori."
     },
     "quick": {
-      "tag": "Întrebare rapidă",
-      "title": "Întrebare rapidă",
-      "subtitle": "Scrie întrebarea ta — îți răspundem în maximum 48 de ore."
+      "tag": "Întrebare EXPRESS",
+      "title": "Întrebare EXPRESS",
+      "subtitle": "Scrie întrebarea ta — îți răspundem în ~1 oră în timpul programului de lucru."
     },
     "name": "Nume complet",
     "email": "Email",

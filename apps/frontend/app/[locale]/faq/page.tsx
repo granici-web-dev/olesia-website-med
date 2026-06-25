@@ -212,16 +212,16 @@ const CATEGORIES: FaqCategory[] = [
     title: { ro: 'Servicii prin portal', en: 'Portal services', ru: 'Услуги через портал' },
     items: [
       {
-        q: { ro: 'Cum funcționează „Întreabă medicul"?', en: 'How does “Ask the doctor” work?', ru: 'Как работает «Быстрый вопрос»?' },
+        q: { ro: 'Cum funcționează „Întreabă medicul"?', en: 'How does “Ask the doctor” work?', ru: 'Как работает «Экспресс-вопрос»?' },
         a: {
-          ro: 'Scrii întrebarea, achiți prin transfer și primești un răspuns scris în 48 de ore.',
-          en: 'You write your question, pay by transfer, and get a written answer within 48 hours.',
-          ru: 'Вы пишете вопрос, оплачиваете переводом и в течение 48 часов получаете письменный ответ.',
+          ro: 'Scrii întrebarea, achiți prin transfer și primești un răspuns scris în ~1 oră în timpul programului de lucru.',
+          en: 'You write your question, pay by transfer, and get a written answer within ~1 hour during working hours.',
+          ru: 'Вы пишете вопрос, оплачиваете переводом и в течение ~1 часа в рабочее время получаете письменный ответ.',
         },
       },
       {
-        q: { ro: '„48 de ore" înseamnă zile lucrătoare?', en: 'Does “48 hours” mean business days?', ru: '«48 часов» — это рабочие дни?' },
-        a: { ro: 'Da, 48 de ore lucrătoare.', en: 'Yes — 48 business hours.', ru: 'Да, 48 рабочих часов.' },
+        q: { ro: '„~1 oră" înseamnă timp de lucru?', en: 'Does “~1 hour” mean working hours?', ru: '«~1 час» — это в рабочее время?' },
+        a: { ro: 'Da — aproximativ o oră în timpul programului de lucru.', en: 'Yes — about an hour during working hours.', ru: 'Да, примерно час в рабочее время.' },
       },
       {
         q: { ro: 'Ce include „Monitorizare 3 luni"?', en: 'What does “3-month monitoring” include?', ru: 'Что включает «Наблюдение 3 месяца»?' },
@@ -441,7 +441,7 @@ export default async function FaqPage({
                   {ru ? 'Медицинский вопрос' : en ? 'A medical question' : 'O întrebare medicală'}
                 </span>
                 <span className="shrink-0 text-[13px] font-medium uppercase tracking-[0.06em] text-sage-text">
-                  {ru ? 'Быстрый вопрос · 48ч' : en ? 'Ask the doctor · 48h' : 'Întreabă medicul · 48h'}{' '}
+                  {ru ? 'Экспресс-вопрос · ~1ч' : en ? 'Ask the doctor · ~1h' : 'Întreabă medicul · ~1h'}{' '}
                   <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
                 </span>
               </Link>
@@ -475,7 +475,7 @@ export default async function FaqPage({
                   {ru ? 'Посмотреть услуги' : en ? 'See the services' : 'Vezi serviciile'}
                 </Link>
                 <Link href="/quick-question" className={creamUnderline}>
-                  {ru ? 'Или задайте быстрый вопрос · 48ч →' : en ? 'Or ask a quick question · 48h →' : 'Sau o întrebare punctuală · 48h →'}
+                  {ru ? 'Или задайте экспресс-вопрос · ~1ч →' : en ? 'Or ask an express question · ~1h →' : 'Sau o întrebare EXPRESS · ~1h →'}
                 </Link>
               </div>
             </div>

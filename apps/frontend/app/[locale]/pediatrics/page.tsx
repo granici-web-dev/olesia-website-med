@@ -556,7 +556,7 @@ export default async function PediatricsPage({
                   {ru ? 'Всего один вопрос? ' : en ? 'Have just one question? ' : 'Ai o singură întrebare? '}
                   <BookGroupBButton
                     service="quick_question"
-                    label={ru ? 'Спросить врача (ответ за 48 ч) →' : en ? 'Ask the doctor (48h reply) →' : 'Întreabă medicul (răspuns în 48h) →'}
+                    label={ru ? 'Спросить врача (ответ за ~1 ч) →' : en ? 'Ask the doctor (~1h reply) →' : 'Întreabă medicul (răspuns în ~1h) →'}
                     className={creamUnderline}
                   />
                 </span>

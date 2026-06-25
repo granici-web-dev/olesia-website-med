@@ -6,7 +6,7 @@ import { LeadFormModal } from './LeadFormModal';
 import type { LeadService } from '@/lib/leads';
 
 /**
- * "Rezervă" trigger for group-B services (Monitorizare / Întrebare rapidă):
+ * "Rezervă" trigger for group-B services (Monitorizare / Întrebare EXPRESS):
  * opens the lead-form modal instead of navigating. Styled by the caller via
  * `className` so it matches the surrounding link/button.
  */

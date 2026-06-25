@@ -6,7 +6,7 @@ import { submitContactMessage, type ContactSubject } from '@/lib/leads';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Contact form — non-medical questions only (appointments, payment, how it
-   works, other). Medical questions are routed to "Întrebare rapidă" by design,
+   works, other). Medical questions are routed to "Întrebare EXPRESS" by design,
    so this form collects no medical data and says so. Posts to /leads/contact.
    Bilingual (RO default · EN); copy lives here so it travels with the form.
    Accessibility: visible labels, errors tied to fields (aria-describedby),

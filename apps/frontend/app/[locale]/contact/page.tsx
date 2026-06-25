@@ -58,7 +58,7 @@ const TRIAGE: { situation: Bi; route: Bi; href: string; anchor?: boolean }[] = [
       en: 'I have a medical question for the doctor',
       ru: 'У меня медицинский вопрос к врачу',
     },
-    route: { ro: 'Întreabă medicul · 48h', en: 'Ask the doctor · 48h', ru: 'Спросить врача · 48ч' },
+    route: { ro: 'Întreabă medicul · ~1h', en: 'Ask the doctor · ~1h', ru: 'Спросить врача · ~1ч' },
     href: '/quick-question',
   },
   {
@@ -163,10 +163,10 @@ export default async function ContactPage({
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
-                  ? 'Медицинский вопрос о ребёнке или о себе? Воспользуйтесь сервисом «Спросить врача» — обоснованный ответ придёт в течение 48 часов, с уважением к согласию и границам.'
+                  ? 'Медицинский вопрос о ребёнке или о себе? Воспользуйтесь сервисом «Спросить врача» — обоснованный ответ придёт в течение ~1 часа в рабочее время, с уважением к согласию и границам.'
                   : en
-                  ? 'For a medical question about your child or yourself, use the “Ask the doctor” service — you’ll get a documented answer within 48 hours, with proper consent and boundaries.'
-                  : 'Pentru o întrebare medicală despre copilul tău sau despre tine, folosește serviciul „Întreabă medicul" — primești un răspuns documentat în 48 de ore, cu acordul și limitele corecte.'}
+                  ? 'For a medical question about your child or yourself, use the “Ask the doctor” service — you’ll get a documented answer within ~1 hour during working hours, with proper consent and boundaries.'
+                  : 'Pentru o întrebare medicală despre copilul tău sau despre tine, folosește serviciul „Întreabă medicul" — primești un răspuns documentat în ~1 oră în timpul programului de lucru, cu acordul și limitele corecte.'}
               </p>
               <Link
                 href="/quick-question"

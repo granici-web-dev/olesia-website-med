@@ -8,9 +8,9 @@ import { Reveal } from '@/components/ui/Reveal';
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Single-service landing for the Quick question (group B · portal). No
+   Single-service landing for the Express question (group B · portal). No
    calendar/video booking — the CTA opens the lead form (`quick_question`). The
-   page's job: a specific, non-urgent question → a written answer in 48h, with a
+   page's job: a specific, non-urgent question → a written answer in ~1h, with a
    clear "not for emergencies" boundary. Bilingual (RO default · EN); local copy.
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -24,15 +24,15 @@ export async function generateMetadata({
   const ru = locale === 'ru';
   return {
     title: ru
-      ? 'Быстрый вопрос — ответ за 48 ч | Dr. Olesea Jalba'
+      ? 'Экспресс-вопрос — ответ за ~1 час | Dr. Olesea Jalba'
       : en
-      ? 'Quick question — answer in 48h | Dr. Olesea Jalba'
-      : 'Întrebare rapidă — răspuns în 48h | Dr. Olesea Jalba',
+      ? 'Express question — answer in ~1h | Dr. Olesea Jalba'
+      : 'Întrebare EXPRESS — răspuns în ~1h | Dr. Olesea Jalba',
     description: ru
-      ? 'Есть конкретный, неэкстренный вопрос? Получите письменный, обоснованный ответ от педиатра за 48 часов. Можно приложить фото и документы.'
+      ? 'Есть конкретный, неэкстренный вопрос? Получите письменный, обоснованный ответ от педиатра за ~1 час в рабочее время. Можно приложить фото и документы.'
       : en
-      ? 'Have one specific, non-urgent question? Get a written, documented answer from a pediatrician within 48 hours. Photos and documents welcome.'
-      : 'Ai o întrebare punctuală, non-urgentă? Primești un răspuns scris și documentat de la un medic pediatru în 48 de ore. Poți atașa poze și documente.',
+      ? 'Have one specific, non-urgent question? Get a written, documented answer from a pediatrician within ~1 hour during working hours. Photos and documents welcome.'
+      : 'Ai o întrebare punctuală, non-urgentă? Primești un răspuns scris și documentat de la un medic pediatru în ~1 oră în timpul programului de lucru. Poți atașa poze și documente.',
   };
 }
 
@@ -56,25 +56,25 @@ const STEPS: { title: Bi; text: Bi }[] = [
     },
   },
   {
-    title: { ro: 'Răspuns în 48h', en: 'Answer in 48h', ru: 'Ответ за 48ч' },
+    title: { ro: 'Răspuns în ~1h', en: 'Answer in ~1h', ru: 'Ответ за ~1ч' },
     text: {
-      ro: 'Primești răspunsul scris în 48 de ore, cu o rundă de clarificări.',
-      en: 'You get the written answer within 48 hours, with one round of clarification.',
-      ru: 'Письменный ответ придёт за 48 часов. Можно один раз задать уточняющие вопросы.',
+      ro: 'Primești răspunsul scris pe email sau WhatsApp în ~1 oră în timpul programului de lucru, cu o rundă de clarificări.',
+      en: 'You get the written answer by email or WhatsApp within ~1 hour during working hours, with one round of clarification.',
+      ru: 'Письменный ответ придёт на email или в WhatsApp за ~1 час в рабочее время. Можно один раз задать уточняющие вопросы.',
     },
   },
 ];
 
 const GET: Bi[] = [
   { ro: 'Trimiți întrebarea (cu poze sau documente, dacă e cazul)', en: 'Submit your question (with photos or documents if needed)', ru: 'Отправляете вопрос (с фото или документами, если нужно)' },
-  { ro: 'Un răspuns scris și documentat în 48 de ore', en: 'A written, documented answer within 48 hours', ru: 'Письменный, обоснованный ответ за 48 часов' },
+  { ro: 'Un răspuns scris și documentat în ~1 oră în timpul programului de lucru', en: 'A written, documented answer within ~1 hour during working hours', ru: 'Письменный, обоснованный ответ за ~1 час в рабочее время' },
   { ro: 'O rundă de clarificări', en: 'One round of clarification', ru: 'Возможность один раз задать уточняющие вопросы' },
 ];
 
 const FAQ: { q: Bi; a: Bi }[] = [
   {
     q: { ro: 'Cât de repede primesc răspunsul?', en: 'How fast do I get the answer?', ru: 'Как быстро я получу ответ?' },
-    a: { ro: 'În maximum 48 de ore de la trimiterea întrebării.', en: 'Within 48 hours of sending your question.', ru: 'Не позднее 48 часов с момента отправки вопроса.' },
+    a: { ro: 'În aproximativ 1 oră în timpul programului de lucru de la trimiterea întrebării.', en: 'Within about 1 hour during working hours of sending your question.', ru: 'Примерно за 1 час в рабочее время с момента отправки вопроса.' },
   },
   {
     q: { ro: 'Pot atașa poze sau documente?', en: 'Can I attach photos or documents?', ru: 'Можно ли приложить фото или документы?' },
@@ -91,9 +91,9 @@ const FAQ: { q: Bi; a: Bi }[] = [
   {
     q: { ro: 'Este pentru urgențe?', en: 'Is it for emergencies?', ru: 'Это для экстренных случаев?' },
     a: {
-      ro: 'Nu. Întrebarea rapidă este pentru situații non-urgente. Dacă situația e urgentă, sună la 112.',
-      en: 'No. Quick question is for non-urgent situations. If it’s urgent, call 112.',
-      ru: 'Нет. Быстрый вопрос — для неэкстренных ситуаций. Если случай экстренный, звоните 112.',
+      ro: 'Nu. Întrebarea EXPRESS este pentru situații non-urgente. Dacă situația e urgentă, sună la 112.',
+      en: 'No. Express question is for non-urgent situations. If it’s urgent, call 112.',
+      ru: 'Нет. Экспресс-вопрос — для неэкстренных ситуаций. Если случай экстренный, звоните 112.',
     },
   },
   {
@@ -137,7 +137,7 @@ export default async function QuickQuestionPage({
         items={[
           { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
           { label: ru ? 'Услуги' : en ? 'Services' : 'Servicii', href: '/services' },
-          { label: ru ? 'Быстрый вопрос' : en ? 'Quick question' : 'Întrebare rapidă' },
+          { label: ru ? 'Экспресс-вопрос' : en ? 'Express question' : 'Întrebare EXPRESS' },
         ]}
       />
       {/* 1 · Hero — editorial split: statement left, description right (no photo) */}
@@ -145,22 +145,22 @@ export default async function QuickQuestionPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {ru ? 'Быстрый вопрос · Онлайн-портал' : en ? 'Quick question · Online portal' : 'Întrebare rapidă · Portal online'}
+            {ru ? 'Экспресс-вопрос · Онлайн-портал' : en ? 'Express question · Online portal' : 'Întrebare EXPRESS · Portal online'}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[16ch] text-[clamp(2.4rem,5.4vw,4.8rem)] leading-[1.05] tracking-[-0.015em] text-balance">
                 {ru ? (
                   <>
-                    Один вопрос, <span className="serif-it text-sage">ответ</span> за 48 часов
+                    Один вопрос, <span className="serif-it text-sage">ответ</span> за ~1 час
                   </>
                 ) : en ? (
                   <>
-                    One question, an <span className="serif-it text-sage">answer</span> in 48 hours
+                    One question, an <span className="serif-it text-sage">answer</span> in ~1 hour
                   </>
                 ) : (
                   <>
-                    O întrebare, un <span className="serif-it text-sage">răspuns</span> în 48 de ore
+                    O întrebare, un <span className="serif-it text-sage">răspuns</span> în ~1 oră
                   </>
                 )}
               </h1>
@@ -184,7 +184,7 @@ export default async function QuickQuestionPage({
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {ru ? 'Онлайн-портал · ответ за 48 ч' : en ? 'Online portal · 48h reply' : 'Portal online · răspuns în 48h'}
+                {ru ? 'Онлайн-портал · ответ за ~1ч' : en ? 'Online portal · ~1h reply' : 'Portal online · răspuns în ~1h'}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
@@ -315,23 +315,30 @@ export default async function QuickQuestionPage({
             <p className="max-w-[56ch] leading-relaxed text-ink-soft text-pretty">
               {ru ? (
                 <>
-                  Быстрый вопрос — не для экстренных случаев. Если ситуация экстренная или быстро
+                  Экспресс-вопрос — не для экстренных случаев. Если ситуация экстренная или быстро
                   ухудшается, звоните <span className="font-medium text-ink">112</span> или
                   обращайтесь в ближайшую службу неотложной помощи.
                 </>
               ) : en ? (
                 <>
-                  Quick question isn’t for emergencies. If the situation is urgent or worsening
+                  Express question isn’t for emergencies. If the situation is urgent or worsening
                   fast, call <span className="font-medium text-ink">112</span> or go to the nearest
                   emergency service.
                 </>
               ) : (
                 <>
-                  Întrebarea rapidă nu este pentru urgențe. Dacă situația e urgentă sau se agravează
+                  Întrebarea EXPRESS nu este pentru urgențe. Dacă situația e urgentă sau se agravează
                   rapid, sună la <span className="font-medium text-ink">112</span> sau mergi la cel
                   mai apropiat serviciu de urgență.
                 </>
               )}
+            </p>
+            <p className="mt-4 max-w-[56ch] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Один запрос — один основной вопрос. Это не заменяет полноценную консультацию: для сложных случаев выберите видеоконсультацию.'
+                : en
+                ? 'One request covers one main question. It doesn’t replace a full consultation — for complex cases, choose a video consultation.'
+                : 'O cerere acoperă o singură întrebare principală. Nu înlocuiește o consultație completă — pentru cazuri complexe, alege o consultație video.'}
             </p>
           </div>
         </div>

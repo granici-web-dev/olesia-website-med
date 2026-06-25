@@ -415,7 +415,7 @@ export default async function MenusPage({
                   {ru ? 'Консультация нутрициолога' : en ? 'Nutrition consultation' : 'Consultație de nutriție'}
                 </Link>
                 <Link href="/quick-question" className={creamUnderline}>
-                  {ru ? 'Или задать короткий вопрос · 48ч →' : en ? 'Or ask a quick question · 48h →' : 'Sau o întrebare punctuală · 48h →'}
+                  {ru ? 'Или задать короткий вопрос · ~1ч →' : en ? 'Or ask a quick question · ~1h →' : 'Sau o întrebare punctuală · ~1h →'}
                 </Link>
               </div>
             </div>

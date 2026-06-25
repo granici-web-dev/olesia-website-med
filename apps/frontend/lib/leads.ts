@@ -1,6 +1,6 @@
 /**
  * Public lead-intake client (browser → NestJS API). Posts the group-B service
- * forms (Monitorizare / Întrebare rapidă) to the public `/leads/*` endpoints.
+ * forms (Monitorizare / Întrebare EXPRESS) to the public `/leads/*` endpoints.
  * The API base is `NEXT_PUBLIC_API_URL` (must be browser-reachable); defaults
  * to the local API. CORS for the site origin is enabled server-side.
  */

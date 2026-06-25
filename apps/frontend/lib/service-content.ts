@@ -37,7 +37,7 @@ export const SERVICE_PRICE_META: Record<string, { price: Bi; duration: Bi }> = {
   },
   quick_question: {
     price: { ro: '8 €', en: '8 €', ru: '8 €' },
-    duration: { ro: '48h · scris', en: '48h · written', ru: '48 ч · письменно' },
+    duration: { ro: '~1h · scris', en: '~1h · written', ru: '~1ч · письменно' },
   },
 };
 
@@ -63,9 +63,9 @@ export const SERVICE_DESCRIPTIONS: Record<string, Bi> = {
     ru: 'Непрерывное сопровождение в течение трёх месяцев — слежу за прогрессом между консультациями.',
   },
   quick_question: {
-    ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în 48 de ore.',
-    en: 'Have one question? Get a written answer from the doctor within 48 hours.',
-    ru: 'Есть один вопрос? Получите письменный ответ от врача в течение 48 часов.',
+    ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în ~1 oră în timpul programului de lucru.',
+    en: 'Have one question? Get a written answer from the doctor within ~1 hour during working hours.',
+    ru: 'Есть один вопрос? Получите письменный ответ от врача в течение ~1 часа в рабочее время.',
   },
 };
 
@@ -153,17 +153,17 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
   quick_question: {
     ro: [
       'Trimiți întrebarea (cu poze sau documente, dacă e cazul)',
-      'Răspuns scris în 48 de ore',
+      'Răspuns scris în ~1 oră în timpul programului de lucru',
       'O rundă de clarificări',
     ],
     en: [
       'Submit your question (with photos or documents if needed)',
-      'A written reply within 48 hours',
+      'A written reply within ~1 hour during working hours',
       'One round of clarification',
     ],
     ru: [
       'Отправляете вопрос (с фото или документами, если нужно)',
-      'Письменный ответ в течение 48 часов',
+      'Письменный ответ в течение ~1 часа в рабочее время',
       'Один круг уточнений',
     ],
   },

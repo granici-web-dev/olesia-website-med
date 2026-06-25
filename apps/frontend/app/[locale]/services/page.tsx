@@ -229,13 +229,13 @@ const SERVICES_B: ServiceContent[] = [
     code: 'quick_question',
     group: 'B_portal',
     num: '05',
-    tag: { ro: 'Rapid', en: 'Quick', ru: 'Быстро' },
-    title: { ro: 'Întrebare rapidă', en: 'Quick question', ru: 'Быстрый вопрос' },
-    duration: { ro: 'răspuns în 48h · scris', en: '48h reply · written', ru: 'ответ за 48 ч · письменно' },
+    tag: { ro: 'EXPRESS', en: 'Express', ru: 'Экспресс' },
+    title: { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
+    duration: { ro: 'răspuns în ~1h · scris', en: '~1h reply · written', ru: 'ответ за ~1ч · письменно' },
     value: {
-      ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în 48 de ore.',
-      en: 'Have one question? Get a written answer from the doctor within 48 hours.',
-      ru: 'Есть один вопрос? Получите письменный ответ от врача в течение 48 часов.',
+      ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în ~1 oră în timpul programului de lucru.',
+      en: 'Have one question? Get a written answer from the doctor within ~1 hour during working hours.',
+      ru: 'Есть один вопрос? Получите письменный ответ от врача в течение ~1 часа в рабочее время.',
     },
     bestFor: {
       ro: 'Pentru o întrebare punctuală, non-urgentă, care nu cere o consultație completă.',
@@ -245,17 +245,17 @@ const SERVICES_B: ServiceContent[] = [
     included: {
       ro: [
         'Trimiți întrebarea (cu poze sau documente, dacă e cazul)',
-        'Răspuns scris în 48 de ore',
+        'Răspuns scris în ~1 oră în timpul programului de lucru',
         'O rundă de clarificări',
       ],
       en: [
         'Submit your question (with photos or documents if needed)',
-        'A written reply within 48 hours',
+        'A written reply within ~1 hour during working hours',
         'One round of clarification',
       ],
       ru: [
         'Отправляете вопрос (с фото или документами, если нужно)',
-        'Письменный ответ в течение 48 часов',
+        'Письменный ответ в течение ~1 часа в рабочее время',
         'Одно уточнение по ответу',
       ],
     },
@@ -274,7 +274,7 @@ const CHOICE: { to: string; situation: Bi; service: Bi }[] = [
   {
     to: 'quick_question',
     situation: { ro: 'O singură întrebare punctuală', en: 'One specific question', ru: 'Один конкретный вопрос' },
-    service: { ro: 'Întrebare rapidă', en: 'Quick question', ru: 'Быстрый вопрос' },
+    service: { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
   },
   {
     to: 'pediatric',
@@ -312,7 +312,7 @@ const COMPARE_COLS: Bi[] = [
   { ro: 'Nutrițională', en: 'Nutrition', ru: 'По питанию' },
   { ro: 'Integrativă', en: 'Integrative', ru: 'Интегративная' },
   { ro: 'Monitorizare 3 luni', en: '3-month monitoring', ru: 'Наблюдение 3 месяца' },
-  { ro: 'Întrebare rapidă', en: 'Quick question', ru: 'Быстрый вопрос' },
+  { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
 ];
 
 const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
@@ -333,7 +333,7 @@ const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
       { ro: '60 min', en: '60 min', ru: '60 мин' },
       { ro: '90 min', en: '90 min', ru: '90 мин' },
       { ro: '3 luni', en: '3 months', ru: '3 месяца' },
-      { ro: '48h', en: '48h', ru: '48 ч' },
+      { ro: '~1h', en: '~1h', ru: '~1ч' },
     ],
   },
   {

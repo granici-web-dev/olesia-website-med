@@ -54,9 +54,9 @@ const FALLBACK_SERVICES: ServiceDto[] = [
   },
   {
     id: 'quick_question', code: 'quick_question', group: 'B_portal',
-    titleRo: 'Întrebare rapidă', titleEn: 'Quick question',
+    titleRo: 'Întrebare EXPRESS', titleEn: 'Express question',
     descriptionRo: '', descriptionEn: '', durationMin: null, price: 8,
-    priceLabelRo: '48 h · răspuns scris', priceLabelEn: '48 h · written reply',
+    priceLabelRo: '~1 h · răspuns scris', priceLabelEn: '~1 h · written reply',
     calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 5, active: true,
   },
 ];

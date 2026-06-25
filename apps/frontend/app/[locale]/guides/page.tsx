@@ -463,7 +463,7 @@ export default async function GuidesPage({
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/quick-question" className={creamPill}>
-                  {ru ? 'Спросить врача · 48 ч' : en ? 'Ask the doctor · 48h' : 'Întreabă medicul · 48h'}
+                  {ru ? 'Спросить врача · ~1ч' : en ? 'Ask the doctor · ~1h' : 'Întreabă medicul · ~1h'}
                 </Link>
                 <Link href="/services" className={creamUnderline}>
                   {ru ? 'Смотреть консультации →' : en ? 'See the consultations →' : 'Vezi consultațiile →'}

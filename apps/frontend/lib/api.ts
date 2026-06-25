@@ -125,7 +125,7 @@ export function serviceTag(locale: string, s: ServiceDto): string {
     case 'monitoring':
       return l('Acompaniere', 'Support');
     case 'quick_question':
-      return l('Întrebare rapidă', 'Quick question');
+      return l('Întrebare EXPRESS', 'Express question');
     default:
       return s.group === 'A_booking'
         ? l('Consultație video', 'Video consultation')

@@ -12,7 +12,7 @@
       "nutrition": "Nutrition consultation",
       "integrative": "Integrative consultation",
       "monitoring": "3-month monitoring",
-      "quick": "Quick question"
+      "quick": "Express question"
     },
     "bookOnline": "Book online →"
   },
@@ -78,11 +78,11 @@
           "duration": "3 months"
         },
         "quick": {
-          "tag": "Quick",
-          "title": "Quick question",
-          "description": "For specific questions that don't require a full consultation. You send the question + context through a form and receive a written, documented answer within 48 hours.",
+          "tag": "Express",
+          "title": "Express question",
+          "description": "For specific questions that don't require a full consultation. You send the question + context through a form and receive a written, documented answer within ~1 hour during working hours.",
           "price": "8 €",
-          "duration": "48h · written"
+          "duration": "~1h · written"
         }
       },
       "book": "Book →"
@@ -107,7 +107,7 @@
       "nutrition": "Nutrition consultation",
       "integrative": "Integrative",
       "subscription": "Subscription",
-      "quick": "Quick question"
+      "quick": "Express question"
     },
     "resourcesLabel": "Resources",
     "resources": {
@@ -127,9 +127,9 @@
       "subtitle": "Leave your details and we’ll get in touch to plan the next steps together."
     },
     "quick": {
-      "tag": "Quick question",
-      "title": "Quick question",
-      "subtitle": "Write your question — we reply within 48 hours."
+      "tag": "Express question",
+      "title": "Express question",
+      "subtitle": "Write your question — we reply within ~1 hour during working hours."
     },
     "name": "Full name",
     "email": "Email",
