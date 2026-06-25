@@ -196,9 +196,12 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 ### Phase 4 — Newsletter (after blocker #8)
 - [ ] Pick provider; signup component; library email-gate integration.
 
-### Phase 5 — Content sections (after client texts)
-- [ ] De ce să lucrezi cu mine / Cum decurge colaborarea / Valori / Apariții media / Diplome.
-- [ ] Homepage/About italic quotes + slogan.
+### Phase 5 — Content sections (after client texts) — 🟡 PARTIAL 2026-06-25 (commit `d456c4a`)
+- [x] **De ce să lucrezi cu mine** (7 reasons), **Valori profesionale**, + 2 italic philosophy quotes — added to /about with the client's exact RO text + EN/RU translations.
+- [ ] **Cum decurge colaborarea** — skipped (duplicates the homepage "Cum funcționează" / HowItWorks 4-step section). Revisit if the client wants a distinct collaboration-flow block.
+- [ ] **Diplome, certificări** — skipped (already covered by the /about Curriculum section).
+- [ ] ⛔ **Apariții media** — blocked: brief lists categories (TV/interviews/conferences/projects) but no actual appearances. Build when the client sends the real list (+ logos/links).
+- [ ] Services slogan (CSV row 371) — not placed yet; candidate for the /services intro. Optional.
 
 ### Phase 6 — Age filter — ✅ FRONTEND DONE 2026-06-25
 - [x] Shared age taxonomy `apps/frontend/lib/age-taxonomy.ts` (built in Phase 2).
