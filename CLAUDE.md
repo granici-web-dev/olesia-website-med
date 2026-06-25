@@ -2,6 +2,19 @@
 
 Entry point for Claude Code agents. **Procedural rules and read order live in `AGENTS.md`.**
 
+## ⚠️ ACTIVE WORK — client brief changes (2026-06-24)
+
+Client answered our brief (`docs/Бриф проекта — Dr. Olesea Jalba.csv`). It **redefines the service catalog** and adds large features. **Full plan, blockers, and phased TODO live in `docs/brief-changes-2026-06-24.md` — read it before starting brief work.** Headlines:
+
+- **Currency MDL → EUR**, durations changed, catalog grows from 5 to ~13 services (see the doc's price table). The "Services (5)" fact below is now **superseded** by the new catalog.
+- **New service group C (deliverables):** 3 personalized menus (7/14/30 zile) + 2 protocols — async pay→form→delivery products.
+- **Întrebare rapidă → "Întrebare EXPRESS":** SLA 48h → ~1h, 180 lei → 8 EUR, email/WhatsApp delivery.
+- **Subscriptions (Abonament):** 4 types × 1/2/3/6 months (prices ⛔ pending client).
+- **Catalog must be data-driven** (admin-editable prices/descriptions + add new services) — open architectural decision (doc §10).
+- **New features:** Biblioteca Digitală (downloads, email-gate, free+paid, search, age filter), Analytics (GA4/GTM/GSC/Meta Pixel), Newsletter, Q17 homepage/About sections, age filter for blog+library, Calendly→Google Meet auto-link.
+- **Real contacts ready to swap:** phone +373 68837774, email oleseajalba@gmail.com; socials IG `dr.olesea_jalba_pediatru`, FB `olesea.jalba.2025`, Telegram `dr_olesea_jalba_official` (drop LinkedIn).
+- **Blocked on client:** subscription prices, legal entity data, final service texts, article texts/images + upload channel, exact address, newsletter/SMTP provider, paid-downloads payment model.
+
 ## Quick orientation
 
 - **Monorepo:** Nx + pnpm workspaces.
@@ -48,7 +61,7 @@ The repo is expanding from a frontend-only app into a **3-app monorepo + shared 
 **Key facts**
 
 - **Auth:** JWT (short access + refresh), roles `admin` / `editor`; closed registration (admin creates users); passwords hashed (argon2/bcrypt).
-- **Services (5):** group **A** = Calendly video slots (`pediatric`, `nutrition`, `integrative`); group **B** = portal only, no calendar (`monitoring` = sub 04, `quick_question` = 05). Map a booking to a service **by `event_type` URI only** — never by the editable `a1` answer.
+- **Services:** ⚠️ **being reworked per the 2026-06-24 brief — see `docs/brief-changes-2026-06-24.md` (now ~13 services in EUR, +group C deliverables, data-driven catalog).** Legacy model (still in code until Phase 1): group **A** = Calendly video slots (`pediatric`, `nutrition`, `integrative`); group **B** = portal only, no calendar (`monitoring` = sub 04, `quick_question` = 05). Map a booking to a service **by `event_type` URI only** — never by the editable `a1` answer.
 - **Content:** every content entity is bilingual RO/EN (`*_ro` / `*_en`); public GETs are read-only/unauthenticated; lists are paginated.
 - **Payments:** out of scope — manual. Entities carry `payment_status` `pending` → `confirmed` (set by hand in back office).
 - **Calendly:** env `CALENDLY_API_TOKEN`, `CALENDLY_ORG_URI`, `CALENDLY_WEBHOOK_SIGNING_KEY`; verify webhook signature; idempotency by `scheduled_event.uri`.
