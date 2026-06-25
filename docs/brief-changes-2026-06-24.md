@@ -171,7 +171,7 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
   - adulti → `…/consultatie-nutritionala-pentru-adulti`
   - URLs in `apps/frontend/lib/calendly.ts` (`nutrition_copii` / `nutrition_adulti`).
   - **Still deferred (backend pass):** full catalog split into two codes (`nutrition_copii`/`nutrition_adulti`) = separate /pricing rows + homepage/services tiles + landing pages + shared/Prisma enum + migration + back-office. And the real `event_type` API URIs (`api.calendly.com/event_types/<uuid>`) for webhook routing — the booking buttons use scheduling URLs only; backend mapping needs the UUIDs.
-- [ ] **Add group C deliverables:** 3 menus (7/14/30 → 28/48/88) + 2 protocols (98/98). DEFERRED — new `ServiceGroup` + async pay→form→delivery flow.
+- [~] **Add group C deliverables:** 3 menus (7/14/30 → 28/48/88€) + 2 protocols (98€). PARTIAL (commit `3d74f08`) — surfaced as a **"Livrabile" section on /pricing** (local array, trilingual), ordering → /contact (manual interim). Prices final, copy interim (client texts pending). **Still deferred (backend pass):** `ServiceGroup` C + catalog modeling + dedicated order form/upload + delivery flow.
 - [ ] **Restructure subscriptions:** 4 types × 4 durations. DEFERRED — ⛔ prices blocked (#1). Monitoring shown as "Preț la cerere" (price 0) interim.
 - [ ] Update `packages/shared` enums/DTOs + Prisma schema + seed. PARTIAL — catalog **values** updated; new enum codes (nutrition split, group C) pending the deferred items above.
 
