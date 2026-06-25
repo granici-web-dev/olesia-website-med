@@ -166,7 +166,11 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 - [x] Switch currency MDL → EUR across pricing UI + `SERVICE_PRICE_META` + seed + back-office (commit `43e1624`).
 - [x] Update durations/prices: pediatric 30min/28€; nutrition 60/38€; integrative 90/58€; quick 8€.
 - [x] Rename quick_question → "Întrebare EXPRESS", SLA 48h→~1h (public copy), email/WhatsApp delivery, disclaimers (commit `a007e20`).
-- [ ] **Split `nutrition` → `nutrition_copii` (60/38) + `nutrition_adulti` (60/38).** DEFERRED — needs new enum codes + Prisma migration + new Calendly event types (booking won't route until client provides them).
+- [~] **Split `nutrition` → copii / adulti.** PARTIAL (commit `3e5b06e`) — chose the **contained frontend approach**: 1 catalog service "Consultație nutrițională", two audience-specific Calendly events surfaced as two booking buttons on /nutrition (`Programează · copii` / `· adulți`). Same 60min/38€. Client supplied two dedicated, non-colliding Calendly events:
+  - copii → `…/consultatie-nutritionala-pentru-copii`
+  - adulti → `…/consultatie-nutritionala-pentru-adulti`
+  - URLs in `apps/frontend/lib/calendly.ts` (`nutrition_copii` / `nutrition_adulti`).
+  - **Still deferred (backend pass):** full catalog split into two codes (`nutrition_copii`/`nutrition_adulti`) = separate /pricing rows + homepage/services tiles + landing pages + shared/Prisma enum + migration + back-office. And the real `event_type` API URIs (`api.calendly.com/event_types/<uuid>`) for webhook routing — the booking buttons use scheduling URLs only; backend mapping needs the UUIDs.
 - [ ] **Add group C deliverables:** 3 menus (7/14/30 → 28/48/88) + 2 protocols (98/98). DEFERRED — new `ServiceGroup` + async pay→form→delivery flow.
 - [ ] **Restructure subscriptions:** 4 types × 4 durations. DEFERRED — ⛔ prices blocked (#1). Monitoring shown as "Preț la cerere" (price 0) interim.
 - [ ] Update `packages/shared` enums/DTOs + Prisma schema + seed. PARTIAL — catalog **values** updated; new enum codes (nutrition split, group C) pending the deferred items above.
