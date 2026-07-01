@@ -188,15 +188,15 @@ const SERVICES_B: ServiceContent[] = [
     num: '04',
     tag: { ro: 'Acompaniere', en: 'Support', ru: 'Сопровождение' },
     title: {
-      ro: 'Monitorizare 3 luni',
-      en: '3-month monitoring',
-      ru: 'Наблюдение 3 месяца (Абонемент)',
+      ro: 'Monitorizare și abonamente',
+      en: 'Monitoring & subscriptions',
+      ru: 'Наблюдение и абонементы',
     },
-    duration: { ro: '3 luni · portal', en: '3 months · portal', ru: '3 месяца · портал' },
+    duration: { ro: '1–6 luni · portal', en: '1–6 months · portal', ru: '1–6 месяцев · портал' },
     value: {
-      ro: 'Acompaniere continuă timp de trei luni — urmăresc progresul între consultații.',
-      en: 'Continuous guidance over three months — I follow your progress between consultations.',
-      ru: 'Непрерывное сопровождение в течение трёх месяцев — слежу за динамикой между консультациями.',
+      ro: 'Monitorizare și suport continuu — 4 tipuri de abonament, pe 1, 2, 3 sau 6 luni. Durata și prețul le stabilim individual cu medicul.',
+      en: 'Continuous monitoring and support — 4 subscription types, over 1, 2, 3, or 6 months. Duration and price are set individually with the doctor.',
+      ru: 'Постоянное наблюдение и поддержка — 4 типа абонемента на 1, 2, 3 или 6 месяцев. Длительность и цену врач согласует индивидуально.',
     },
     bestFor: {
       ro: 'Pentru familiile care vor sprijin constant, nu o vizită singulară.',
@@ -205,25 +205,25 @@ const SERVICES_B: ServiceContent[] = [
     },
     included: {
       ro: [
-        'Monitorizarea cazului timp de 3 luni',
-        'Verificări periodice',
-        'Ajustarea planului pe parcurs',
-        'Mesagerie prioritară cu medicul',
+        'Patru tipuri: Pediatrie · Nutriție copii · Nutriție adulți · Complex',
+        'Monitorizare periodică și ajustarea planului pe parcurs',
+        'Comunicare directă cu medicul (email/WhatsApp)',
+        'Prioritate la programarea consultațiilor',
       ],
       en: [
-        'Case monitoring for 3 months',
-        'Periodic check-ins',
-        'Plan adjustments as things change',
-        'Priority messaging with the doctor',
+        'Four types: Pediatrics · Child nutrition · Adult nutrition · Complex',
+        'Periodic monitoring and plan adjustments over time',
+        'Direct communication with the doctor (email/WhatsApp)',
+        'Priority when booking consultations',
       ],
       ru: [
-        'Наблюдение в течение 3 месяцев',
-        'Регулярные проверки самочувствия',
-        'Корректировка плана по мере изменений',
-        'Приоритетная переписка с врачом',
+        'Четыре типа: педиатрия · питание детей · питание взрослых · комплекс',
+        'Периодическое наблюдение и корректировка плана',
+        'Прямая связь с врачом (email/WhatsApp)',
+        'Приоритет при записи на консультации',
       ],
     },
-    cta: { ro: 'Solicită un loc', en: 'Request a place', ru: 'Оставить заявку' },
+    cta: { ro: 'Solicită un abonament', en: 'Request a subscription', ru: 'Оставить заявку' },
   },
   {
     code: 'quick_question',
@@ -311,7 +311,7 @@ const COMPARE_COLS: Bi[] = [
   { ro: 'Pediatrică', en: 'Pediatric', ru: 'Педиатрическая' },
   { ro: 'Nutrițională', en: 'Nutrition', ru: 'По питанию' },
   { ro: 'Integrativă', en: 'Integrative', ru: 'Интегративная' },
-  { ro: 'Monitorizare 3 luni', en: '3-month monitoring', ru: 'Наблюдение 3 месяца' },
+  { ro: 'Monitorizare și abonamente', en: 'Monitoring & subscriptions', ru: 'Наблюдение и абонементы' },
   { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
 ];
 
@@ -332,7 +332,7 @@ const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
       { ro: '30 min', en: '30 min', ru: '30 мин' },
       { ro: '60 min', en: '60 min', ru: '60 мин' },
       { ro: '90 min', en: '90 min', ru: '90 мин' },
-      { ro: '3 luni', en: '3 months', ru: '3 месяца' },
+      { ro: '1–6 luni', en: '1–6 months', ru: '1–6 месяцев' },
       { ro: '~1h', en: '~1h', ru: '~1ч' },
     ],
   },
@@ -549,12 +549,17 @@ export default async function ServicesPage({
         ? 'Video consultations and ongoing support — at your pace.'
         : 'Consultații video și acompaniere — în ritmul tău.',
     heroDesc: ru
-      ? 'Пять услуг в двух форматах — от одной видеоконсультации до наблюдения в течение трёх месяцев. Выберите подходящую и запишитесь за несколько минут.'
+      ? 'Пять услуг в двух форматах — от одной видеоконсультации до абонемента с наблюдением. Выберите подходящую и запишитесь за несколько минут.'
       : en
-        ? 'Five services in two formats — from a single video consultation to three-month monitoring. Pick the one that fits and book in minutes.'
-        : 'Cinci servicii în două formate: de la o consultație video la urmărire de trei luni. Alege-l pe cel potrivit și programează în câteva minute.',
+        ? 'Five services in two formats — from a single video consultation to a monitoring subscription. Pick the one that fits and book in minutes.'
+        : 'Cinci servicii în două formate: de la o consultație video la un abonament cu monitorizare. Alege-l pe cel potrivit și programează în câteva minute.',
     ctaBook: ru ? 'Записаться на бесплатную беседу' : en ? 'Book a free intro call' : 'Programează o discuție gratuită',
     seePricing: ru ? 'Смотреть цены' : en ? 'See pricing' : 'Vezi tarifele',
+    slogan: ru
+      ? 'Оказываю услуги педиатрии и клинической нутрициологии для детей и взрослых — с акцентом на профилактику, гармоничный рост и развитие, введение прикорма, здоровье пищеварения, пищевые непереносимости и аллергии, метаболические нарушения и оптимизацию образа жизни.'
+      : en
+        ? 'I offer pediatric and clinical nutrition services for children and adults, with a focus on prevention, healthy growth and development, complementary feeding, digestive health, food intolerances and allergies, metabolic conditions, and lifestyle optimization.'
+        : 'Ofer servicii de pediatrie și nutriție clinică pentru copii și adulți, cu accent pe prevenție, creștere și dezvoltare armonioasă, alimentație complementară, sănătate digestivă, intoleranțe și alergii alimentare, boli metabolice și optimizarea stilului de viață.',
     trust: ru
       ? 'Врач-педиатр · магистр нутрициологии (USMF) · член Общества педиатрии'
       : en
@@ -684,6 +689,17 @@ export default async function ServicesPage({
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* 1b · Services slogan (brief §7.3) — first-person mission statement */}
+      <section className="border-b border-[var(--rule)]">
+        <div className="shell py-14 md:py-20">
+          <blockquote className="serif mx-auto max-w-[46rem] text-center text-[clamp(1.35rem,2.8vw,2.1rem)] leading-[1.35] tracking-[-0.01em] text-ink text-balance">
+            <span className="serif-it text-sage">“</span>
+            {T.slogan}
+            <span className="serif-it text-sage">”</span>
+          </blockquote>
         </div>
       </section>
 
@@ -919,7 +935,7 @@ export default async function ServicesPage({
         <div className="md:max-w-none mx-auto w-full max-w-[420px]">
           <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
             <Image
-              src="/assets/olesea-portrait.webp"
+              src="/assets/olesea-services.webp"
               alt={
                 ru
                   ? 'Д-р Олеся Жалба, врач-педиатр и специалист по питанию'

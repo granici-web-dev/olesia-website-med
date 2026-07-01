@@ -11,7 +11,7 @@
       "pediatric": "Pediatric consultation",
       "nutrition": "Nutrition consultation",
       "integrative": "Integrative consultation",
-      "monitoring": "3-month monitoring",
+      "monitoring": "Monitoring & subscriptions",
       "quick": "Express question"
     },
     "bookOnline": "Book online →"
@@ -47,7 +47,7 @@
     "services": {
       "eyebrow": "Services · Five formats",
       "title": "How we work<br></br><accent>together.</accent>",
-      "headerSub": "Five ways to collaborate — from a one-off question to a three-month follow-up. Choose the pace that fits you.",
+      "headerSub": "Five ways to collaborate — from a one-off question to a monitoring subscription. Choose the pace that fits you.",
       "items": {
         "pediatric": {
           "tag": "Pediatrics",
@@ -72,10 +72,10 @@
         },
         "subscription": {
           "tag": "Subscription",
-          "title": "3-month monitoring",
-          "description": "Three months of active follow-up: direct messaging for questions between consultations, periodic plan adjustments, two monthly video calls. Recommended for long-term goals.",
+          "title": "Monitoring & subscriptions",
+          "description": "4 subscription types (Pediatrics, Child nutrition, Adult nutrition, Complex), over 1, 2, 3, or 6 months: periodic monitoring, plan adjustments, and direct communication with the doctor. Duration and price are set individually.",
           "price": "on request",
-          "duration": "3 months"
+          "duration": "1–6 months"
         },
         "quick": {
           "tag": "Express",
@@ -124,14 +124,18 @@
   },
   "leadForm": {
     "monitoring": {
-      "tag": "Monitoring",
-      "title": "3-month monitoring",
-      "subtitle": "Leave your details and we’ll get in touch to plan the next steps together."
+      "tag": "Subscription",
+      "title": "Monitoring & subscriptions",
+      "subtitle": "Tell us briefly which subscription you’d like (Pediatrics, Child/Adult nutrition, or Complex). We’ll get in touch to set the duration and price together."
     },
     "quick": {
       "tag": "Express question",
       "title": "Express question",
       "subtitle": "Write your question — we reply within ~1 hour during working hours."
+    },
+    "deliverable": {
+      "tag": "Order",
+      "subtitle": "Leave your details and, briefly, what you’d like. We’ll get in touch to confirm the order and payment."
     },
     "name": "Full name",
     "email": "Email",

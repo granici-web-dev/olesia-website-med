@@ -68,9 +68,9 @@ const STEPS: { title: Bi; text: Bi }[] = [
   {
     title: { ro: 'Apel video', en: 'Video call', ru: 'Видеозвонок' },
     text: {
-      ro: 'Te conectezi la apelul video de 90 de minute, unde analizăm situația în ansamblu.',
-      en: 'Join the 90-minute video call, where we look at the whole picture.',
-      ru: 'Подключаетесь к видеозвонку на 90 минут, где мы разбираем ситуацию в целом.',
+      ro: 'Te conectezi la apelul video de 90 de minute pe Google Meet, unde analizăm situația în ansamblu — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
+      en: 'Join the 90-minute video call on Google Meet, where we look at the whole picture — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
+      ru: 'Подключаетесь к 90-минутному видеозвонку в Google Meet, где мы разбираем ситуацию в целом — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
     },
   },
   {
@@ -118,17 +118,17 @@ const FAQ: { q: Bi; a: Bi }[] = [
   {
     q: { ro: 'Ce include monitorizarea?', en: 'What does the monitoring include?', ru: 'Что включает наблюдение?' },
     a: {
-      ro: 'O îndrumare inițială de urmărire după consultație — verificăm progresul și ajustăm planul. Pentru urmărire continuă pe mai multe luni există programul de Monitorizare 3 luni.',
-      en: 'Initial follow-up guidance after the consultation — we check progress and adjust the plan. For continuous, multi-month follow-up there’s the 3-month monitoring program.',
-      ru: 'Первые рекомендации по наблюдению сразу после консультации — проверяем, как идут дела, и корректируем план. Если наблюдать нужно несколько месяцев подряд, для этого есть программа «Наблюдение 3 месяца».',
+      ro: 'O îndrumare inițială de urmărire după consultație — verificăm progresul și ajustăm planul. Pentru urmărire continuă pe mai multe luni există abonamentele de monitorizare (1–6 luni).',
+      en: 'Initial follow-up guidance after the consultation — we check progress and adjust the plan. For continuous, multi-month follow-up there are the monitoring subscriptions (1–6 months).',
+      ru: 'Первые рекомендации по наблюдению сразу после консультации — проверяем, как идут дела, и корректируем план. Если наблюдать нужно несколько месяцев подряд, для этого есть абонементы наблюдения (1–6 месяцев).',
     },
   },
   {
     q: { ro: 'Cât durează urmărirea după consultație?', en: 'How long does follow-up last?', ru: 'Сколько длится наблюдение после консультации?' },
     a: {
-      ro: 'Urmărirea inițială este inclusă imediat după consultație; pentru o perioadă mai lungă, vezi Monitorizare 3 luni.',
-      en: 'Initial follow-up is included right after the consultation; for a longer period, see 3-month monitoring.',
-      ru: 'Первое наблюдение входит в консультацию сразу после неё; если нужно дольше — смотрите «Наблюдение 3 месяца».',
+      ro: 'Urmărirea inițială este inclusă imediat după consultație; pentru o perioadă mai lungă, vezi Monitorizare și abonamente.',
+      en: 'Initial follow-up is included right after the consultation; for a longer period, see Monitoring & subscriptions.',
+      ru: 'Первое наблюдение входит в консультацию сразу после неё; если нужно дольше — смотрите «Наблюдение и абонементы».',
     },
   },
   {
@@ -496,7 +496,7 @@ export default async function IntegrativePage({
         <div className="mx-auto w-full max-w-[420px] md:max-w-none">
           <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
             <Image
-              src="/assets/olesea-portrait.webp"
+              src="/assets/olesea-portrait-2026.webp"
               alt={
                 ru
                   ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'
@@ -522,13 +522,13 @@ export default async function IntegrativePage({
             </h3>
             <p className="mt-4 max-w-[48ch] leading-relaxed text-ink-soft text-pretty">
               {ru
-                ? 'Если нужно наблюдение несколько месяцев подряд, посмотрите программу наблюдения на 3 месяца.'
+                ? 'Если нужно наблюдение несколько месяцев подряд, посмотрите наблюдение и абонементы (1–6 месяцев).'
                 : en
-                  ? 'If you want continuous follow-up over several months, see the 3-month monitoring program.'
-                  : 'Dacă vrei urmărire continuă timp de mai multe luni, vezi programul de monitorizare de 3 luni.'}
+                  ? 'If you want continuous follow-up over several months, see monitoring & subscriptions (1–6 months).'
+                  : 'Dacă vrei urmărire continuă timp de mai multe luni, vezi monitorizare și abonamente (1–6 luni).'}
             </p>
             <Link href="/monitoring" className={`mt-6 ${underlineLg}`}>
-              {ru ? 'Наблюдение 3 месяца' : en ? '3-month monitoring' : 'Monitorizare 3 luni'} →
+              {ru ? 'Наблюдение и абонементы' : en ? 'Monitoring & subscriptions' : 'Monitorizare și abonamente'} →
             </Link>
           </div>
           <div>
@@ -657,7 +657,7 @@ export default async function IntegrativePage({
                 </li>
                 <li>
                   <Link href="/monitoring" className={creamUnderline}>
-                    {ru ? 'Поддержка на месяцы? → Наблюдение 3 месяца' : en ? 'Support over months? → 3-month monitoring' : 'Sprijin pe mai multe luni? → Monitorizare 3 luni'}
+                    {ru ? 'Поддержка на месяцы? → Наблюдение и абонементы' : en ? 'Support over months? → Monitoring & subscriptions' : 'Sprijin pe mai multe luni? → Monitorizare și abonamente'}
                   </Link>
                 </li>
               </ul>

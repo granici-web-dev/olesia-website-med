@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
+import { Certificates } from '@/components/sections/Certificates';
 
 export const revalidate = 60;
 
@@ -319,7 +320,7 @@ export default async function AboutPage({
           <div className="mx-auto w-full max-w-[440px] md:max-w-none">
             <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
               <Image
-                src="/assets/olesea-portrait.webp"
+                src="/assets/olesea-about.webp"
                 alt={
                   ru
                     ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'
@@ -566,6 +567,9 @@ export default async function AboutPage({
           </div>
         </div>
       </section>
+
+      {/* 5.4 · Certificates — visual proof for the "Formare continuă" record */}
+      <Certificates locale={locale} />
 
       {/* 5.5 · Valori profesionale + mission (brief §7.3 / §7.7) */}
       <section className="shell border-t border-[var(--rule)] py-20 md:py-28">

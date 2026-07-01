@@ -24,6 +24,28 @@ export interface QuickQuestionLeadInput {
   question: string;
 }
 
+/**
+ * Group-C deliverable order (menus + protocols, brief §2). Unlike group-B this
+ * is a one-off product, so the lead must carry WHICH product was chosen:
+ * `product` is the stable code (e.g. `menu_7`) and `productTitle` the human
+ * label — both stored so the back office shows the exact service ordered.
+ */
+export type DeliverableProduct =
+  | 'menu_7'
+  | 'menu_14'
+  | 'menu_30'
+  | 'protocol_pednutri'
+  | 'protocol_complementary';
+
+export interface DeliverableLeadInput {
+  name: string;
+  email: string;
+  phone?: string;
+  message?: string;
+  product: DeliverableProduct;
+  productTitle: string;
+}
+
 export type ContactSubject = 'appointment' | 'payment' | 'how_it_works' | 'other';
 
 export interface ContactMessageInput {
@@ -56,4 +78,10 @@ export function submitQuickQuestionLead(
 
 export function submitContactMessage(input: ContactMessageInput): Promise<void> {
   return postLead('/leads/contact', input);
+}
+
+export function submitDeliverableLead(
+  input: DeliverableLeadInput,
+): Promise<void> {
+  return postLead('/leads/deliverable', input);
 }

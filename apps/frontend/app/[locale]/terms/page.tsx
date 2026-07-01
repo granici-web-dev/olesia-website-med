@@ -274,7 +274,7 @@ export default async function TermsPage({
                 <>
                   Мы предлагаем видеоконсультации — педиатрические, по питанию и
                   интегративные — а также услуги через портал: «Спросите врача» и
-                  3-месячное наблюдение. Детали и продолжительность каждой услуги описаны
+                  наблюдение с абонементами. Детали и продолжительность каждой услуги описаны
                   на странице{' '}
                   <Link href="/services" className={inlineLink}>
                     Услуги
@@ -284,7 +284,7 @@ export default async function TermsPage({
               ) : en ? (
                 <>
                   We offer video consultations — pediatric, nutrition, and integrative —
-                  and portal-based services: “Ask the doctor” and 3-month monitoring. The
+                  and portal-based services: “Ask the doctor” and monitoring subscriptions. The
                   details and duration of each service are described on the{' '}
                   <Link href="/services" className={inlineLink}>
                     Services
@@ -294,7 +294,7 @@ export default async function TermsPage({
               ) : (
                 <>
                   Oferim consultații video — pediatrică, de nutriție și integrativă — și
-                  servicii prin portal: „Întreabă medicul” și monitorizare de 3 luni.
+                  servicii prin portal: „Întreabă medicul” și monitorizare cu abonamente.
                   Detaliile și durata fiecărui serviciu sunt descrise pe pagina{' '}
                   <Link href="/services" className={inlineLink}>
                     Servicii

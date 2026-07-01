@@ -7,10 +7,18 @@ import { Modal } from './Modal';
 import {
   submitMonitoringLead,
   submitQuickQuestionLead,
+  submitDeliverableLead,
   type LeadService,
+  type DeliverableProduct,
 } from '@/lib/leads';
 import { track } from '@/lib/analytics';
 import styles from './LeadFormModal.module.css';
+
+/** Group-C order context — the specific product being ordered. */
+export interface DeliverableContext {
+  code: DeliverableProduct;
+  title: string;
+}
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -25,16 +33,23 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LeadFormModal({
   service,
+  deliverable,
   open,
   onClose,
 }: {
-  service: LeadService;
+  service?: LeadService;
+  deliverable?: DeliverableContext;
   open: boolean;
   onClose: () => void;
 }) {
   const t = useTranslations('leadForm');
+  const isDeliverable = !!deliverable;
   const isQuick = service === 'quick_question';
-  const copy = isQuick ? 'quick' : 'monitoring';
+  const copy = isDeliverable ? 'deliverable' : isQuick ? 'quick' : 'monitoring';
+  // Header title: for a product order, show the exact product name so the user
+  // sees what they're ordering; otherwise the per-service i18n title.
+  const headerTitle = deliverable ? deliverable.title : t(`${copy}.title`);
+  const trackId = service ?? deliverable?.code ?? 'lead';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -77,7 +92,16 @@ export function LeadFormModal({
     if (!validate()) return;
     setStatus('submitting');
     try {
-      if (isQuick) {
+      if (isDeliverable) {
+        await submitDeliverableLead({
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
+          message: text.trim() || undefined,
+          product: deliverable!.code,
+          productTitle: deliverable!.title,
+        });
+      } else if (isQuick) {
         await submitQuickQuestionLead({
           name: name.trim(),
           email: email.trim(),
@@ -92,7 +116,7 @@ export function LeadFormModal({
           message: text.trim() || undefined,
         });
       }
-      track('lead_submit', { service });
+      track('lead_submit', { service: trackId });
       setStatus('success');
     } catch {
       setStatus('error');
@@ -128,7 +152,7 @@ export function LeadFormModal({
           <header className={styles.header}>
             <p className={styles.eyebrow}>{t(`${copy}.tag`)}</p>
             <h2 id="lead-form-title" className={styles.title}>
-              {t(`${copy}.title`)}
+              {headerTitle}
             </h2>
             <p className={styles.subtitle}>{t(`${copy}.subtitle`)}</p>
           </header>

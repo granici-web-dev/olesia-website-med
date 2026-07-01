@@ -5,8 +5,9 @@ import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
+import { OrderDeliverableButton } from '@/components/ui/OrderDeliverableButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
-import type { LeadService } from '@/lib/leads';
+import type { LeadService, DeliverableProduct } from '@/lib/leads';
 import {
   SERVICE_DESCRIPTIONS,
   SERVICE_INCLUDED,
@@ -47,7 +48,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
   },
   {
     id: 'monitoring', code: 'monitoring', group: 'B_portal',
-    titleRo: 'Monitorizare 3 luni', titleEn: '3-month monitoring',
+    titleRo: 'Monitorizare și abonamente', titleEn: 'Monitoring & subscriptions',
     descriptionRo: '', descriptionEn: '', durationMin: null, price: 0,
     priceLabelRo: 'Preț la cerere', priceLabelEn: 'Price on request',
     calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 4, active: true,
@@ -73,7 +74,7 @@ function price(locale: string, s: ServiceDto): string {
    form + delivery flow lands in the backend pass. Prices are final; the short
    copy is interim (client texts pending). */
 type DBi = { ro: string; en: string; ru: string };
-const DELIVERABLES: { id: string; tag: DBi; title: DBi; desc: DBi; price: string }[] = [
+const DELIVERABLES: { id: DeliverableProduct; tag: DBi; title: DBi; desc: DBi; price: string }[] = [
   {
     id: 'menu_7',
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
@@ -187,7 +188,7 @@ export default async function PricingPage({
         </p>
 
         {/* Editorial service rows — same design as the homepage Services section. */}
-        <div className="mt-12 border-b border-[var(--rule)]">
+        <div className="mt-12">
           {services.map((s, i) => (
             <Reveal key={s.id} as="div" className={styles.serviceRow} delay={i * 70}>
               <div className={styles.serviceNum}>
@@ -307,12 +308,12 @@ export default async function PricingPage({
                 </p>
                 <div className="flex items-center justify-between gap-6 md:flex-col md:items-end md:gap-2.5">
                   <div className="serif text-[1.5rem] leading-none lining-nums">{d.price}</div>
-                  <Link
-                    href={`/${locale}/contact`}
-                    className="mono inline-flex items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
-                  >
-                    {td.order} →
-                  </Link>
+                  <OrderDeliverableButton
+                    code={d.id}
+                    title={lc(d.title)}
+                    label={`${td.order} →`}
+                    className="mono inline-flex cursor-pointer items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                  />
                 </div>
               </Reveal>
             ))}

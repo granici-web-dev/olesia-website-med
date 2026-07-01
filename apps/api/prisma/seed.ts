@@ -24,8 +24,9 @@ const SERVICES = [
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri:
-      'https://api.calendly.com/event_types/2c590066-eeb1-4f68-a306-c53a0cb71073',
-    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/30min',
+      'https://api.calendly.com/event_types/615c76de-63dd-4870-b3c5-141aef15a844',
+    calendlySchedulingUrl:
+      'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
     sortOrder: 1,
     active: true,
   },
@@ -41,9 +42,9 @@ const SERVICES = [
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri:
-      'https://api.calendly.com/event_types/615c76de-63dd-4870-b3c5-141aef15a844',
+      'https://api.calendly.com/event_types/25950172-362c-43cf-aeea-323ac47d961c',
     calendlySchedulingUrl:
-      'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
+      'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
     sortOrder: 2,
     active: true,
   },
@@ -59,9 +60,9 @@ const SERVICES = [
     priceLabelRo: null,
     priceLabelEn: null,
     calendlyEventTypeUri:
-      'https://api.calendly.com/event_types/25950172-362c-43cf-aeea-323ac47d961c',
+      'https://api.calendly.com/event_types/02306705-7d03-4bfa-bdbd-b6548b519771',
     calendlySchedulingUrl:
-      'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
+      'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
     sortOrder: 3,
     active: true,
   },

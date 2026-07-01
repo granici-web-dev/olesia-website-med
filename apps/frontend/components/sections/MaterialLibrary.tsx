@@ -64,10 +64,38 @@ function DocIcon() {
   );
 }
 
-const chip = (on: boolean) =>
-  `cursor-pointer rounded-full border px-3.5 py-1.5 text-[12px] font-medium uppercase tracking-[0.07em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage ${
-    on ? 'border-ink bg-ink text-cream' : 'border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage'
-  }`;
+/* Two filter axes that must never read as one long chip strip. Each gets its
+   own active color: Category → solid dark (ink), Age → sage tint. Both states
+   clear 4.5:1, so the coding is decorative-safe. */
+const chip = (on: boolean, tone: 'ink' | 'sage' = 'ink') => {
+  const base =
+    'cursor-pointer rounded-full border px-3.5 py-1.5 text-[12px] font-medium uppercase tracking-[0.07em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
+  if (!on) return `${base} border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage`;
+  return tone === 'sage'
+    ? `${base} border-sage bg-sage/15 text-sage-deep`
+    : `${base} border-ink bg-ink text-cream`;
+};
+
+/* Small anchors so each filter row is labelled inline (not by an identical
+   floating eyebrow). Different glyph per axis reinforces topic vs. audience. */
+function TagIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+      <path d="M4 4h7l9 9-7 7-9-9V4Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <circle cx="8.4" cy="8.4" r="1.3" fill="currentColor" />
+    </svg>
+  );
+}
+function AgeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+      <circle cx="12" cy="7.2" r="3.2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+const filterLabel =
+  'flex shrink-0 items-center gap-2 pt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink sm:w-[112px]';
 
 export function MaterialLibrary({
   locale,
@@ -132,33 +160,48 @@ export function MaterialLibrary({
         </span>
       </div>
 
-      {/* Category filter */}
-      <div className="mt-8">
-        <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.category)}</p>
-        <div role="group" aria-label={lc(T.category)} className="flex flex-wrap gap-2">
-          <button type="button" aria-pressed={cat === 'all'} onClick={() => setCat('all')} className={chip(cat === 'all')}>
-            {lc(T.all)}
-          </button>
-          {categories.map((c) => (
-            <button key={c.key} type="button" aria-pressed={cat === c.key} onClick={() => setCat(c.key)} className={chip(cat === c.key)}>
-              {lc(c.label)}
+      {/* Filters — two distinct axes. Category (what a material is about) uses
+          dark chips + a tag; Age (who it's for) uses sage chips + mono numeric
+          ranges. Inline labels anchor each row so they never merge visually. */}
+      <div className="mt-8 flex flex-col gap-4 border-t border-[var(--rule)] pt-6">
+        {/* Category — topic */}
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-baseline sm:gap-4">
+          <span className={filterLabel}>
+            <span className="text-sage">
+              <TagIcon />
+            </span>
+            {lc(T.category)}
+          </span>
+          <div role="group" aria-label={lc(T.category)} className="flex flex-wrap gap-2">
+            <button type="button" aria-pressed={cat === 'all'} onClick={() => setCat('all')} className={chip(cat === 'all', 'ink')}>
+              {lc(T.all)}
             </button>
-          ))}
+            {categories.map((c) => (
+              <button key={c.key} type="button" aria-pressed={cat === c.key} onClick={() => setCat(c.key)} className={chip(cat === c.key, 'ink')}>
+                {lc(c.label)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Age filter */}
-      <div className="mt-6">
-        <p className="mono mb-3 text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.age)}</p>
-        <div role="group" aria-label={lc(T.age)} className="flex flex-wrap gap-2">
-          <button type="button" aria-pressed={age === 'all'} onClick={() => setAge('all')} className={chip(age === 'all')}>
-            {lc(T.allAges)}
-          </button>
-          {ages.map((a) => (
-            <button key={a.key} type="button" aria-pressed={age === a.key} onClick={() => setAge(a.key)} className={chip(age === a.key)}>
-              {lc(a.label)}
+        {/* Age — audience */}
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-baseline sm:gap-4">
+          <span className={filterLabel}>
+            <span className="text-sage">
+              <AgeIcon />
+            </span>
+            {lc(T.age)}
+          </span>
+          <div role="group" aria-label={lc(T.age)} className="flex flex-wrap gap-2">
+            <button type="button" aria-pressed={age === 'all'} onClick={() => setAge('all')} className={`${chip(age === 'all', 'sage')} mono`}>
+              {lc(T.allAges)}
             </button>
-          ))}
+            {ages.map((a) => (
+              <button key={a.key} type="button" aria-pressed={age === a.key} onClick={() => setAge(a.key)} className={`${chip(age === a.key, 'sage')} mono tabular-nums`}>
+                {lc(a.label)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

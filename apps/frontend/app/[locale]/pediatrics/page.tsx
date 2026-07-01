@@ -113,9 +113,9 @@ const STEPS: { title: Bi; text: Bi }[] = [
   {
     title: { ro: 'Apel video', en: 'Video call', ru: 'Видеозвонок' },
     text: {
-      ro: 'Te conectezi la apelul video de 30 de minute.',
-      en: 'Join the 30-minute video call.',
-      ru: 'Подключаетесь к 30-минутному видеозвонку.',
+      ro: 'Te conectezi la apelul video de 30 de minute pe Google Meet — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
+      en: 'Join the 30-minute video call on Google Meet — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
+      ru: 'Подключаетесь к 30-минутному видеозвонку в Google Meet — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
     },
   },
   {
@@ -427,7 +427,7 @@ export default async function PediatricsPage({
         <div className="mx-auto w-full max-w-[420px] md:max-w-none">
           <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
             <Image
-              src="/assets/olesea-portrait.webp"
+              src="/assets/olesea-pediatrics.webp"
               alt={
                 ru
                   ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'
@@ -436,7 +436,7 @@ export default async function PediatricsPage({
                   : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
               }
               fill
-              className="object-cover object-top"
+              className="object-cover object-bottom"
               sizes="(max-width: 768px) 100vw, 45vw"
             />
           </div>

@@ -224,11 +224,11 @@ const CATEGORIES: FaqCategory[] = [
         a: { ro: 'Da — aproximativ o oră în timpul programului de lucru.', en: 'Yes — about an hour during working hours.', ru: 'Да, примерно час в рабочее время.' },
       },
       {
-        q: { ro: 'Ce include „Monitorizare 3 luni"?', en: 'What does “3-month monitoring” include?', ru: 'Что включает «Наблюдение 3 месяца»?' },
+        q: { ro: 'Ce include „Monitorizare și abonamente"?', en: 'What does “Monitoring & subscriptions” include?', ru: 'Что включает «Наблюдение и абонементы»?' },
         a: {
-          ro: 'Acompaniere timp de 3 luni: verificări periodice, ajustarea planului pe parcurs și mesagerie prioritară cu medicul.',
-          en: 'Three months of support: periodic check-ins, plan adjustments along the way, and priority messaging with the doctor.',
-          ru: 'Сопровождение в течение 3 месяцев: регулярные проверки, корректировка плана по ходу и приоритетная переписка с врачом.',
+          ro: 'Sunt 4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex), pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului pe parcurs și comunicare directă cu medicul. Durata și prețul le stabilim individual — lași o solicitare și te contactăm.',
+          en: 'There are 4 subscription types (Pediatrics, Child nutrition, Adult nutrition, Complex), over 1, 2, 3, or 6 months: periodic monitoring, plan adjustments along the way, and direct communication with the doctor. Duration and price are set individually — leave a request and we’ll get in touch.',
+          ru: 'Есть 4 типа абонемента (педиатрия, питание детей, питание взрослых, комплекс) на 1, 2, 3 или 6 месяцев: периодическое наблюдение, корректировка плана и прямая связь с врачом. Длительность и цену согласуем индивидуально — оставьте заявку, и мы свяжемся с вами.',
         },
       },
       {

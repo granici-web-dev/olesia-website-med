@@ -11,22 +11,28 @@ Status legend: ✅ ready to do · ⛔ blocked on client · ❓ needs Serghei's d
 The **frontend slice of every brief feature is built** (Phases 0–7; see per-phase status below). Branch `feat/responsive-burger-and-architecture`. What remains is grouped here so we can resume fast.
 
 ### ⛔ Blocked on the client (can't proceed without their input)
-- **Subscription prices** — 4 types × 1/2/3/6 months matrix (Phase 1 / §3, blocker #1). Nothing priced in the brief.
+- ~~**Subscription prices**~~ — ✅ RESOLVED 2026-07-01: subscriptions are **on-request** (no price matrix needed). Client lead → doctor contacts directly and sets duration (1/2/3/6 mo) + price. Frontend reframed "Monitorizare 3 luni" → "Monitorizare și abonamente" (4 types, on-request) across landing/pricing/services/faq/terms/nav/i18n. Blocker #1 dropped.
 - **Legal entity data + lawyer review** — for /gdpr, /terms, /privacy (Phase 8, blocker #2). Pages are DRAFT.
 - **Analytics IDs** — Cookiebot CBID + GTM + GA4 + Meta Pixel + GSC token (Phase 3). Code is env-gated and ready; just set env on Vercel.
 - **Newsletter provider + endpoint** — pick Mailchimp/Brevo/Resend/own API (Phase 4, blocker #8). Code env-gated; set `NEXT_PUBLIC_NEWSLETTER_ENDPOINT` (prefer same-origin to dodge CORS).
 - **"~1h" SLA confirmation + working hours** (blocker #6) — gates updating the back-office operational 48h countdown (`dueAt`/deadline-indicator). Public copy already says ~1h.
 - **Real Calendly event-type API URIs** for `nutrition_copii` / `nutrition_adulti` (webhook routing). Booking buttons already use the scheduling URLs.
+- **Calendly links audited + normalized (2026-07-01):** the mapping had scrambled test-clone slugs (nutrition→`pediatrica`, integrative→`nutri-ionala`, pediatric→generic `30min`). Normalized so **each service points to a slug named after it**, consistently across `lib/calendly.ts` + `seed.ts` + back-office `mock.ts`: pediatric→`consulta-ie-pediatrica-clone`, nutrition→`consulta-ie-nutri-ionala-clone`, integrative & free→`consulta-ie-integrativa-monitorizare-clone`, copii/adulti→`...nutritionala-pentru-copii`/`-adulti`. ⚠ **The `designer-nefele` Calendly TRIAL has EXPIRED**, so all of these currently render "This Calendly URL is not valid" in the popup — expected, not a code bug. **Swap all for the client's real (paid) Calendly before launch** (booking won't work until then). Verified in-browser: popup opens, slugs are correct; only the account is unpaid.
 - **Calendly dashboard config** — connect host Google account + set Location=Google Meet on each group-A event type (Phase 7). Account-owner action; can't be done in code.
 - **Apariții media** — real list of TV/interviews/conferences + logos/links (Phase 5 / §7.4).
 - **Final service texts + article texts/images** — via the agreed Google Drive folder (share to designer.nefele@gmail.com). Interim copy is in place.
 - **Exact clinic address** (§5).
 - **Cookie-consent provider FINAL decision** — Cookiebot wired as interim no-op; revisit at end of build. See [[cookie-consent-deferred]].
 
+### 🎥 Hardcoded client media (2026-07-01) — make editable in the back office later
+- **Homepage hero = video** (client-provided). `docs/olesea jalba.mp4` (139 MB) compressed with ffmpeg → `public/assets/olesea-hero.mp4` (900w · H.264 · no audio · **4.4 MB**) + poster `olesea-hero-poster.jpg`. `Hero.tsx` now renders `<video autoplay muted loop playsinline poster>` in the old photo slot (`.video` in `Hero.module.css`, `object-position: center 22%`). Old `olesea-hero.png` no longer referenced. ⚠ **Reduced-motion:** currently always autoplays — add a `prefers-reduced-motion` pause (show poster) in the polish pass.
+- **New client photos** from the wfolio gallery (2 picks, 1280×1920, → webp): **Photo A** (white blazer + stethoscope, warm) → `olesea-about.webp` on **/about** intro portrait; **Photo B** (teal suit, seated by window) → `olesea-portrait-2026.webp` on the **service pages** "Despre medic" portraits (pediatrics/nutrition/integrative/monitoring/services). Original `olesea-portrait.webp` restored from git (unused now). NOTE: replacing a same-named asset hits the next/image + browser cache → **use a new filename when swapping images**, not an overwrite.
+- All three are **hardcoded to show + get client approval**; the plan is to make hero media + portraits editable from the back office (media module) in the backend pass.
+
 ### 🛠️ Deferred to the BACKEND pass (our work; needs apps/api + back-office)
 - **Data-driven catalog** (decided option A): services as DB rows the back office can edit/add (§10). Currently `code` is a fixed enum.
 - **Nutrition full split** into two catalog codes (`nutrition_copii`/`nutrition_adulti`) → separate /pricing rows + homepage/services tiles + landing pages + Prisma migration. (Frontend uses 1 service + 2 booking buttons for now.)
-- **Group C catalog modeling** + `ServiceGroup` C + dedicated order form/upload + delivery flow (§2). (Frontend shows them on /pricing, order→/contact.)
+- **Group C catalog modeling** + `ServiceGroup` C + dedicated order form/upload + delivery flow (§2). Frontend now has a **per-product order popup** on /pricing (each "Comandă" opens `LeadFormModal` in deliverable mode; posts `{name,email,phone,message,product,productTitle}` to **`/leads/deliverable`** via `submitDeliverableLead`). **Backend still owes:** the `/leads/deliverable` endpoint + a Prisma model (e.g. `DeliverableOrder`) + a back-office "Comenzi/Orders" view so the lead shows the exact product ordered. Until then, the frontend submit will error (endpoint 404) like the other lead forms without the API.
 - **Subscriptions** 4×4 structure in the model (once prices unblocked).
 - **Biblioteca Digitală backend**: `materials` API module + back-office CRUD + real PDFs + paid-download flow + newsletter persistence (Phase 2). (Frontend storefront + email-gate built on local data.)
 - **Age tagging** on `posts` + `materials` API models so live content carries ages (Phase 6). (Frontend filter + shared taxonomy done.)
@@ -34,7 +40,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Operational 48h→~1h SLA** (`dueAt`/deadline-indicator) once blocker #6 confirmed.
 
 ### 🟢 Small/optional frontend leftovers
-- **Services slogan** (CSV row 371) — candidate for the /services intro. Not placed.
+- ~~**Services slogan** (CSV row 371)~~ — ✅ DONE 2026-07-01 (quote band on /services, trilingual).
 - **/gdpr cookie section** — name the GA4/GTM/Pixel cookies once the tools are confirmed.
 - **"Cum decurge colaborarea"** section — skipped (duplicates homepage HowItWorks); build only if the client wants a distinct block.
 
@@ -202,14 +208,14 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 - [x] Decide data-driven (A) vs hardcode (B). → **(A)**; services already are a DB model + CRUD + back-office screen, so no new infra needed — Phase 1 is data/copy.
 - [x] Switch currency MDL → EUR across pricing UI + `SERVICE_PRICE_META` + seed + back-office (commit `43e1624`).
 - [x] Update durations/prices: pediatric 30min/28€; nutrition 60/38€; integrative 90/58€; quick 8€.
-- [x] Rename quick_question → "Întrebare EXPRESS", SLA 48h→~1h (public copy), email/WhatsApp delivery, disclaimers (commit `a007e20`).
+- [x] Rename quick_question → "Întrebare EXPRESS", SLA 48h→~1h (public copy), email/WhatsApp delivery, disclaimers (commit `a007e20`). **+2026-07-01:** completed the §Q3 content on the landing — added the **"Exemple de întrebări"** section (8 example requests from the brief), the **"answer based solely on submitted info"** disclaimer, and enriched "Ce primești" with brief's "ce include" items (guidance on next steps, suggestion of further tests / full consult). Trilingual. Page now fully matches brief §Q3.
 - [~] **Split `nutrition` → copii / adulti.** PARTIAL (commit `3e5b06e`) — chose the **contained frontend approach**: 1 catalog service "Consultație nutrițională", two audience-specific Calendly events surfaced as two booking buttons on /nutrition (`Programează · copii` / `· adulți`). Same 60min/38€. Client supplied two dedicated, non-colliding Calendly events:
   - copii → `…/consultatie-nutritionala-pentru-copii`
   - adulti → `…/consultatie-nutritionala-pentru-adulti`
   - URLs in `apps/frontend/lib/calendly.ts` (`nutrition_copii` / `nutrition_adulti`).
   - **Still deferred (backend pass):** full catalog split into two codes (`nutrition_copii`/`nutrition_adulti`) = separate /pricing rows + homepage/services tiles + landing pages + shared/Prisma enum + migration + back-office. And the real `event_type` API URIs (`api.calendly.com/event_types/<uuid>`) for webhook routing — the booking buttons use scheduling URLs only; backend mapping needs the UUIDs.
 - [~] **Add group C deliverables:** 3 menus (7/14/30 → 28/48/88€) + 2 protocols (98€). PARTIAL (commit `3d74f08`) — surfaced as a **"Livrabile" section on /pricing** (local array, trilingual), ordering → /contact (manual interim). Prices final, copy interim (client texts pending). **Still deferred (backend pass):** `ServiceGroup` C + catalog modeling + dedicated order form/upload + delivery flow.
-- [ ] **Restructure subscriptions:** 4 types × 4 durations. DEFERRED — ⛔ prices blocked (#1). Monitoring shown as "Preț la cerere" (price 0) interim.
+- [x] **Restructure subscriptions:** ✅ 2026-07-01 — decided **on-request** model (no price matrix). "Monitorizare 3 luni" reframed → **"Monitorizare și abonamente"**: 4 types (Pediatrie / Nutriție copii / Nutriție adulți / Complex) shown as text, durations 1/2/3/6 luni as chips, price "la cerere". One lead form ("Solicită un abonament") → doctor contacts client and sets duration + price directly. Applied across `monitoring/page.tsx` (landing + new "Tipuri" section + flow), `pricing/page.tsx`, `services/page.tsx` (tile + compare matrix), `service-content.ts`, `faq/page.tsx`, `terms/page.tsx`, `integrative/page.tsx` cross-links, nav/home/footer/leadForm i18n (ro/en/ru). **Backend pass still owes:** the 4×4 structure in the Prisma model + back-office (frontend is copy-only for now).
 - [ ] Update `packages/shared` enums/DTOs + Prisma schema + seed. PARTIAL — catalog **values** updated; new enum codes (nutrition split, group C) pending the deferred items above.
 
   ⚠️ **Before launch (blocker #6):** confirm "~1h" SLA is realistic + get exact `program de lucru`; then update the back-office operational 48h SLA countdown (`dueAt`/deadline-indicator) to match the public promise.
@@ -237,9 +243,9 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 ### Phase 5 — Content sections (after client texts) — 🟡 PARTIAL 2026-06-25 (commit `d456c4a`)
 - [x] **De ce să lucrezi cu mine** (7 reasons), **Valori profesionale**, + 2 italic philosophy quotes — added to /about with the client's exact RO text + EN/RU translations.
 - [ ] **Cum decurge colaborarea** — skipped (duplicates the homepage "Cum funcționează" / HowItWorks 4-step section). Revisit if the client wants a distinct collaboration-flow block.
-- [ ] **Diplome, certificări** — skipped (already covered by the /about Curriculum section).
+- [x] **Diplome, certificări** — /about Curriculum section covers text; **+2026-07-01** added a visual **"Certificări recente"** section (`components/sections/Certificates.tsx` + `.module.css`) after Curriculum: 2 training certificates (Pediatric Feeding Difficulties Program 39h; Bottle Aversion in Infants 1h) as framed document thumbnails → lightbox (reuses `Modal`, a11y/Escape/focus). Images in `public/assets/cert-*.jpg`. Trilingual, browser-verified. **Honesty note:** the certs' partner-institution logos (Stanford/UNICEF/Ludwig-Maximilians/etc.) carry an explicit "not an endorsement/accreditation" disclaimer, so they are NOT re-surfaced as trust badges — only course title/issuer/hours/date + the document image itself. **Optional follow-up:** could also surface the feeding certs on /nutrition + the complementary-feeding protocol (directly relevant) — not built yet.
 - [ ] ⛔ **Apariții media** — blocked: brief lists categories (TV/interviews/conferences/projects) but no actual appearances. Build when the client sends the real list (+ logos/links).
-- [ ] Services slogan (CSV row 371) — not placed yet; candidate for the /services intro. Optional.
+- [x] Services slogan (CSV row 371) — ✅ 2026-07-01: placed as a centered first-person quote band on /services (between hero and the choice helper), trilingual (RO original + EN/RU).
 
 ### Phase 6 — Age filter — ✅ FRONTEND DONE 2026-06-25
 - [x] Shared age taxonomy `apps/frontend/lib/age-taxonomy.ts` (built in Phase 2).
@@ -247,7 +253,7 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 - [ ] Backend: add age tagging to the `posts` + `materials` API models so live content carries ages (deferred — backend pass; live posts currently pass `ageKeys: []`).
 
 ### Phase 7 — Calendly Google Meet — 🟡 FRONTEND DONE 2026-06-25 (commit `f08b81e`)
-- [x] **Frontend copy** sets expectations (brief §9): FAQ "Cum decurge o consultație online?" + homepage "how it works" now say the consult runs on **Google Meet** (link auto-sent in confirmation), with WhatsApp/Viber/Instagram video on request. Fixed stale 50→30 min duration too.
+- [x] **Frontend copy** sets expectations (brief §9): FAQ "Cum decurge o consultație online?" + homepage "how it works" now say the consult runs on **Google Meet** (link auto-sent in confirmation), with WhatsApp/Viber/Instagram video on request. Fixed stale 50→30 min duration too. **+2026-07-01:** extended the same Google Meet + alt-channel copy to the "Apel video" step on all 3 consultation landings (pediatrics/nutrition/integrative), trilingual. Also fixed 2 stale "Monitorizare 3 luni" refs in the integrative FAQ → "abonamentele de monitorizare (1–6 luni)".
 - [ ] ⛔ **Client/account-owner config (in Calendly dashboard — cannot be done in code):**
   1. Connect the host **Google account** to Calendly (Account → Connect → Google Calendar/Meet).
   2. For each group-A event type (pediatric, nutrition copii, nutrition adulti, integrative, free consult), set **Location = Google Meet**.

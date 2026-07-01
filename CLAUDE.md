@@ -9,7 +9,7 @@ Client answered our brief (`docs/Бриф проекта — Dr. Olesea Jalba.cs
 - **Currency MDL → EUR**, durations changed, catalog grows from 5 to ~13 services (see the doc's price table). The "Services (5)" fact below is now **superseded** by the new catalog.
 - **New service group C (deliverables):** 3 personalized menus (7/14/30 zile) + 2 protocols — async pay→form→delivery products.
 - **Întrebare rapidă → "Întrebare EXPRESS":** SLA 48h → ~1h, 180 lei → 8 EUR, email/WhatsApp delivery.
-- **Subscriptions (Abonament):** 4 types × 1/2/3/6 months (prices ⛔ pending client).
+- **Subscriptions (Abonament):** 4 types × 1/2/3/6 months, **on-request** (decided 2026-07-01 — no price matrix; doctor contacts the client and sets duration + price directly). Frontend reframed "Monitorizare 3 luni" → "Monitorizare și abonamente". Backend still owes the 4×4 model.
 - **Catalog must be data-driven** (admin-editable prices/descriptions + add new services) — open architectural decision (doc §10).
 - **New features:** Biblioteca Digitală (downloads, email-gate, free+paid, search, age filter), Analytics (GA4/GTM/GSC/Meta Pixel), Newsletter, Q17 homepage/About sections, age filter for blog+library, Calendly→Google Meet auto-link.
 - **Real contacts ready to swap:** phone +373 68837774, email oleseajalba@gmail.com; socials IG `dr.olesea_jalba_pediatru`, FB `olesea.jalba.2025`, Telegram `dr_olesea_jalba_official` (drop LinkedIn).

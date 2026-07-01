@@ -66,9 +66,23 @@ const STEPS: { title: Bi; text: Bi }[] = [
 ];
 
 const GET: Bi[] = [
-  { ro: 'Trimiți întrebarea (cu poze sau documente, dacă e cazul)', en: 'Submit your question (with photos or documents if needed)', ru: 'Отправляете вопрос (с фото или документами, если нужно)' },
-  { ro: 'Un răspuns scris și documentat în ~1 oră în timpul programului de lucru', en: 'A written, documented answer within ~1 hour during working hours', ru: 'Письменный, обоснованный ответ за ~1 час в рабочее время' },
+  { ro: 'Analiza informațiilor și a documentelor trimise', en: 'Review of the information and documents you send', ru: 'Разбор присланной информации и документов' },
+  { ro: 'Un răspuns scris și personalizat în ~1 oră în timpul programului de lucru', en: 'A written, personalized answer within ~1 hour during working hours', ru: 'Письменный, персональный ответ за ~1 час в рабочее время' },
+  { ro: 'Recomandări orientative privind conduita ulterioară', en: 'Guidance on the next steps to take', ru: 'Ориентировочные рекомендации по дальнейшим действиям' },
+  { ro: 'Recomandarea unor investigații suplimentare sau a unei consultații complete, dacă e nevoie', en: 'A suggestion for further tests or a full consultation, if needed', ru: 'Рекомендация дополнительных обследований или полной консультации, если нужно' },
   { ro: 'O rundă de clarificări', en: 'One round of clarification', ru: 'Возможность один раз задать уточняющие вопросы' },
+];
+
+/* Examples of what you can ask (brief §Q3 "Exemple de solicitări"). */
+const EXAMPLES: Bi[] = [
+  { ro: 'Interpretarea unei analize sau a unor rezultate de laborator', en: 'Interpreting a test or lab results', ru: 'Интерпретация анализа или результатов лабораторных исследований' },
+  { ro: 'Recomandări privind alimentația copilului sau a adultului', en: 'Advice on a child’s or adult’s nutrition', ru: 'Рекомендации по питанию ребёнка или взрослого' },
+  { ro: 'O întrebare din alimentația complementară la sugari', en: 'A question about complementary feeding for infants', ru: 'Вопрос по введению прикорма у грудничков' },
+  { ro: 'Administrarea vitaminelor, mineralelor sau a suplimentelor', en: 'Taking vitamins, minerals, or supplements', ru: 'Приём витаминов, минералов или добавок' },
+  { ro: 'Clarificarea unei recomandări medicale primite anterior', en: 'Clarifying a medical recommendation you received', ru: 'Уточнение ранее полученной медицинской рекомендации' },
+  { ro: 'O a doua opinie privind un diagnostic sau un plan de tratament', en: 'A second opinion on a diagnosis or treatment plan', ru: 'Второе мнение по диагнозу или плану лечения' },
+  { ro: 'O situație pediatrică frecventă (febră, mușcătură de insectă, vomă, diaree)', en: 'A common pediatric situation (fever, insect bite, vomiting, diarrhea)', ru: 'Частая педиатрическая ситуация (температура, укус насекомого, рвота, диарея)' },
+  { ro: 'Orientare privind investigațiile sau pașii următori', en: 'Guidance on tests or the next steps', ru: 'Ориентир по обследованиям или дальнейшим шагам' },
 ];
 
 const FAQ: { q: Bi; a: Bi }[] = [
@@ -297,6 +311,44 @@ export default async function QuickQuestionPage({
         </div>
       </section>
 
+      {/* 3b · Examples of what you can ask (brief §Q3) */}
+      <section className="border-t border-[var(--rule)]">
+        <div className="shell py-16 md:py-24">
+          <div className="max-w-[40rem]">
+            <p className="eyebrow mb-3">{ru ? 'Что можно спросить' : en ? 'What you can ask' : 'Ce poți întreba'}</p>
+            <h2 className="serif text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.05] tracking-[-0.02em] text-balance">
+              {ru ? (
+                <>
+                  Примеры <span className="serif-it text-sage">вопросов</span>
+                </>
+              ) : en ? (
+                <>
+                  Example <span className="serif-it text-sage">questions</span>
+                </>
+              ) : (
+                <>
+                  Exemple de <span className="serif-it text-sage">întrebări</span>
+                </>
+              )}
+            </h2>
+          </div>
+          <ul className="mt-10 grid gap-x-16 gap-y-5 sm:grid-cols-2">
+            {EXAMPLES.map((it, i) => (
+              <Reveal
+                key={it.en}
+                delay={(i % 2) * 70}
+                className="grid grid-cols-[1.2em_1fr] gap-x-3 border-t border-[var(--rule)] pt-4 text-[1.05rem] leading-relaxed text-ink"
+              >
+                <span aria-hidden="true" className="text-sage-text">
+                  —
+                </span>
+                <span className="text-pretty">{lc(it)}</span>
+              </Reveal>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       {/* 4 · Not for emergencies (calm safety band) */}
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-2 md:gap-20 md:py-20">
@@ -339,6 +391,13 @@ export default async function QuickQuestionPage({
                 : en
                 ? 'One request covers one main question. It doesn’t replace a full consultation — for complex cases, choose a video consultation.'
                 : 'O cerere acoperă o singură întrebare principală. Nu înlocuiește o consultație completă — pentru cazuri complexe, alege o consultație video.'}
+            </p>
+            <p className="mt-4 max-w-[56ch] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Ответ даётся исключительно на основе присланной информации и документов.'
+                : en
+                ? 'The answer is given solely on the basis of the information and documents you submit.'
+                : 'Răspunsul este oferit exclusiv pe baza informațiilor și documentelor transmise.'}
             </p>
           </div>
         </div>

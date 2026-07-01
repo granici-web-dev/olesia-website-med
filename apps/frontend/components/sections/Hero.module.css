@@ -144,6 +144,72 @@
   object-position: center top;
 }
 
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  background: #e9e1d0;
+  cursor: pointer;
+}
+
+/* Play / pause control — prominent over the poster, recedes while playing. */
+.videoBtn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  padding-left: 3px; /* optically center the play triangle */
+  border-radius: 999px;
+  border: 1px solid rgba(245, 241, 234, 0.35);
+  background: rgba(42, 51, 21, 0.58);
+  color: var(--cream);
+  cursor: pointer;
+  box-shadow: 0 10px 30px -10px rgba(28, 21, 12, 0.5);
+  transition:
+    opacity 0.35s ease-out,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.2s ease-out;
+}
+
+.videoBtn:hover {
+  background: rgba(42, 51, 21, 0.78);
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.videoBtn:focus-visible {
+  outline: 2px solid var(--cream);
+  outline-offset: 3px;
+}
+
+/* While playing, the button fades out; it returns on hover/focus of the frame. */
+.videoBtnPlaying {
+  width: 52px;
+  height: 52px;
+  padding-left: 2px;
+  opacity: 0;
+}
+
+.photoFrame:hover .videoBtnPlaying,
+.videoBtnPlaying:focus-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .videoBtn,
+  .videoBtn:hover {
+    transition: opacity 0.2s ease-out;
+    transform: translate(-50%, -50%);
+  }
+}
+
 .photoCaption {
   margin-top: 20px;
   display: flex;

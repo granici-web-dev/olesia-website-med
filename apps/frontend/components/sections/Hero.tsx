@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { HeroVideo } from './HeroVideo';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import styles from './Hero.module.css';
 
@@ -51,14 +51,10 @@ export function Hero() {
 
       <div className={styles.photoWrapper}>
         <div className={styles.photoFrame}>
-          <Image
-            src="/assets/olesea-hero.png"
-            alt="Dr. Olesea Jalba"
-            fill
-            className={styles.photo}
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
+          {/* Hardcoded intro video (client-provided) with a play/pause control
+             and sound — the visitor starts it themselves.
+             TODO: make source editable from the back office later. */}
+          <HeroVideo />
         </div>
         <div className={styles.photoCaption}>
           <span>{t('photoName')}</span>

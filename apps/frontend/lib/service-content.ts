@@ -33,7 +33,7 @@ export const SERVICE_PRICE_META: Record<string, { price: Bi; duration: Bi }> = {
   },
   monitoring: {
     price: { ro: 'la cerere', en: 'on request', ru: 'по запросу' },
-    duration: { ro: '3 luni', en: '3 months', ru: '3 месяца' },
+    duration: { ro: '1–6 luni', en: '1–6 months', ru: '1–6 месяцев' },
   },
   quick_question: {
     price: { ro: '8 €', en: '8 €', ru: '8 €' },
@@ -58,9 +58,9 @@ export const SERVICE_DESCRIPTIONS: Record<string, Bi> = {
     ru: 'Подробная консультация, объединяющая педиатрию и нутрициологию, с планом на будущее.',
   },
   monitoring: {
-    ro: 'Acompaniere continuă timp de trei luni — urmăresc progresul între consultații.',
-    en: 'Continuous guidance over three months — I follow your progress between consultations.',
-    ru: 'Непрерывное сопровождение в течение трёх месяцев — слежу за прогрессом между консультациями.',
+    ro: 'Monitorizare și suport continuu — 4 tipuri de abonament, pe 1, 2, 3 sau 6 luni. Durata și prețul le stabilim individual cu medicul.',
+    en: 'Continuous monitoring and support — 4 subscription types, over 1, 2, 3, or 6 months. Duration and price are set individually with the doctor.',
+    ru: 'Постоянное наблюдение и поддержка — 4 типа абонемента на 1, 2, 3 или 6 месяцев. Длительность и цену врач согласует индивидуально.',
   },
   quick_question: {
     ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în ~1 oră în timpul programului de lucru.',
@@ -132,22 +132,22 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
   },
   monitoring: {
     ro: [
-      'Monitorizarea cazului timp de 3 luni',
-      'Verificări periodice',
-      'Ajustarea planului pe parcurs',
-      'Mesagerie prioritară cu medicul',
+      'Monitorizare periodică (greutate, creștere, alimentație, analize)',
+      'Ajustarea planului medical sau alimentar pe parcurs',
+      'Comunicare directă cu medicul (email/WhatsApp)',
+      'Prioritate la programarea consultațiilor',
     ],
     en: [
-      'Case monitoring for 3 months',
-      'Periodic check-ins',
-      'Plan adjustments as things change',
-      'Priority messaging with the doctor',
+      'Periodic monitoring (weight, growth, diet, lab results)',
+      'Adjusting the medical or nutrition plan over time',
+      'Direct communication with the doctor (email/WhatsApp)',
+      'Priority when booking consultations',
     ],
     ru: [
-      'Наблюдение в течение 3 месяцев',
-      'Регулярные проверки',
-      'Корректировка плана по мере изменений',
-      'Приоритетная переписка с врачом',
+      'Периодическое наблюдение (вес, рост, питание, анализы)',
+      'Корректировка медицинского или пищевого плана',
+      'Прямая связь с врачом (email/WhatsApp)',
+      'Приоритет при записи на консультации',
     ],
   },
   quick_question: {

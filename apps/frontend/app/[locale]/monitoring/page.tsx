@@ -9,10 +9,12 @@ import { Reveal } from '@/components/ui/Reveal';
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Single-service landing for 3-month monitoring (group B · portal). No
-   calendar/video booking — the CTA opens the lead form (`monitoring`). The
-   page's job is to frame this as continuous support over time, distinct from a
-   one-off consultation. Bilingual (RO default · EN); content is local.
+   Single-service landing for monitoring & subscriptions (group B · portal).
+   Brief §3: 4 subscription types (Pediatrie / Nutriție copii / Nutriție adulți /
+   Complex) over 1/2/3/6 months, all "on request" — the doctor contacts the
+   client and sets the duration and price directly. No calendar/video booking —
+   the CTA opens the lead form (`monitoring`). Trilingual (RO default · EN · RU);
+   content is local.
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -25,15 +27,15 @@ export async function generateMetadata({
   const ru = locale === 'ru';
   return {
     title: ru
-      ? 'Наблюдение 3 месяца | Dr. Olesea Jalba'
+      ? 'Наблюдение и абонементы | Dr. Olesea Jalba'
       : en
-        ? '3-month monitoring | Dr. Olesea Jalba'
-        : 'Monitorizare 3 luni | Dr. Olesea Jalba',
+        ? 'Monitoring & subscriptions | Dr. Olesea Jalba'
+        : 'Monitorizare și abonamente | Dr. Olesea Jalba',
     description: ru
-      ? 'Непрерывное сопровождение в течение трёх месяцев: периодические проверки, корректировки плана и приоритетная переписка с педиатром и нутрициологом.'
+      ? '4 типа абонемента (педиатрия, питание детей, питание взрослых, комплекс) на 1, 2, 3 или 6 месяцев: периодическое наблюдение, корректировка плана и прямая связь с врачом. Длительность и цену врач согласует индивидуально.'
       : en
-        ? 'Continuous support over three months: periodic check-ins, plan adjustments, and priority messaging with a pediatrician and nutrition specialist.'
-        : 'Acompaniere continuă timp de trei luni: verificări periodice, ajustări ale planului și mesagerie prioritară cu un medic pediatru și nutriționist.',
+        ? '4 subscription types (Pediatrics, Child nutrition, Adult nutrition, Complex) over 1, 2, 3, or 6 months: periodic monitoring, plan adjustments, and direct communication with the doctor. Duration and price are set individually.'
+        : '4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex) pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului și comunicare directă cu medicul. Durata și prețul se stabilesc individual.',
   };
 }
 
@@ -47,75 +49,105 @@ const CHOOSE_WHEN: Bi[] = [
 ];
 
 const INCLUDES: Bi[] = [
-  { ro: 'Monitorizarea cazului timp de 3 luni', en: 'Case monitoring for 3 months', ru: 'Наблюдение в течение 3 месяцев' },
-  { ro: 'Verificări periodice', en: 'Periodic check-ins', ru: 'Периодические проверки' },
-  { ro: 'Ajustarea planului pe parcurs', en: 'Plan adjustments along the way', ru: 'Корректировка плана по ходу' },
-  { ro: 'Mesagerie prioritară cu medicul', en: 'Priority messaging with the doctor', ru: 'Приоритетная переписка с врачом' },
+  { ro: 'Monitorizare periodică (greutate, creștere, alimentație, analize)', en: 'Periodic monitoring (weight, growth, diet, lab results)', ru: 'Периодическое наблюдение (вес, рост, питание, анализы)' },
+  { ro: 'Ajustarea planului medical sau alimentar pe parcurs', en: 'Adjusting the medical or nutrition plan over time', ru: 'Корректировка медицинского или пищевого плана' },
+  { ro: 'Comunicare directă cu medicul (email/WhatsApp)', en: 'Direct communication with the doctor (email/WhatsApp)', ru: 'Прямая связь с врачом (email/WhatsApp)' },
+  { ro: 'Prioritate la programarea consultațiilor', en: 'Priority when booking consultations', ru: 'Приоритет при записи на консультации' },
+];
+
+/* The 4 subscription types (brief §3). Shown as text; a single lead form
+   collects the request — the doctor then sets duration (1/2/3/6 months) and
+   price directly with the client. */
+const TYPES: { name: Bi; note: Bi }[] = [
+  {
+    name: { ro: 'Abonament Pediatrie', en: 'Pediatrics subscription', ru: 'Абонемент «Педиатрия»' },
+    note: { ro: 'Sănătatea și dezvoltarea copilului', en: 'Child health and development', ru: 'Здоровье и развитие ребёнка' },
+  },
+  {
+    name: { ro: 'Abonament Nutriție copii', en: 'Child nutrition subscription', ru: 'Абонемент «Питание детей»' },
+    note: { ro: 'Alimentație și creștere pentru copii', en: 'Feeding and growth for children', ru: 'Питание и рост для детей' },
+  },
+  {
+    name: { ro: 'Abonament Nutriție adulți', en: 'Adult nutrition subscription', ru: 'Абонемент «Питание взрослых»' },
+    note: { ro: 'Obiective de nutriție pentru adulți', en: 'Nutrition goals for adults', ru: 'Цели по питанию для взрослых' },
+  },
+  {
+    name: { ro: 'Abonament Complex (Pediatrie + Nutriție)', en: 'Complex subscription (Pediatrics + Nutrition)', ru: 'Комплексный абонемент (педиатрия + питание)' },
+    note: { ro: 'Abordare integrată, sănătate și alimentație împreună', en: 'Integrated approach — health and nutrition together', ru: 'Комплексный подход: здоровье и питание вместе' },
+  },
+];
+
+/* Durations offered (brief §3). Price is set per case with the doctor. */
+const DURATIONS: Bi[] = [
+  { ro: '1 lună', en: '1 month', ru: '1 месяц' },
+  { ro: '2 luni', en: '2 months', ru: '2 месяца' },
+  { ro: '3 luni', en: '3 months', ru: '3 месяца' },
+  { ro: '6 luni', en: '6 months', ru: '6 месяцев' },
 ];
 
 const STEPS: { title: Bi; text: Bi }[] = [
   {
     title: { ro: 'Solicitare', en: 'Request', ru: 'Заявка' },
     text: {
-      ro: 'Soliciți un loc și ne spui pe scurt despre situație și obiective.',
-      en: 'Request a spot and tell us briefly about the situation and goals.',
-      ru: 'Вы оставляете заявку и кратко рассказываете о ситуации и целях.',
+      ro: 'Alegi tipul de abonament și ne spui pe scurt despre situație și obiective.',
+      en: 'Choose the subscription type and tell us briefly about the situation and goals.',
+      ru: 'Вы выбираете тип абонемента и кратко рассказываете о ситуации и целях.',
     },
   },
   {
-    title: { ro: 'Plan de pornire', en: 'Starting plan', ru: 'Стартовый план' },
+    title: { ro: 'Te contactăm', en: 'We get in touch', ru: 'Мы связываемся' },
     text: {
-      ro: 'Stabilim împreună planul de pornire și pașii pentru următoarele luni.',
-      en: 'Together we set the starting plan and the steps for the coming months.',
-      ru: 'Вместе мы определяем стартовый план и шаги на ближайшие месяцы.',
+      ro: 'Medicul te contactează și stabiliți împreună durata (1/2/3/6 luni) și prețul.',
+      en: 'The doctor gets in touch and together you set the duration (1/2/3/6 months) and the price.',
+      ru: 'Врач связывается с вами, и вы вместе определяете длительность (1/2/3/6 мес) и цену.',
     },
   },
   {
-    title: { ro: 'Urmărire 3 luni', en: '3-month follow-up', ru: 'Сопровождение 3 месяца' },
+    title: { ro: 'Formular și plan', en: 'Form and plan', ru: 'Форма и план' },
     text: {
-      ro: 'Te urmăresc timp de trei luni — verificări periodice și mesagerie.',
-      en: 'I follow you for three months — periodic check-ins and messaging.',
-      ru: 'Я сопровождаю вас в течение трёх месяцев — периодические проверки и переписка.',
+      ro: 'Completezi formularul medical și nutrițional, apoi primești planul de pornire.',
+      en: 'You fill in the medical and nutrition form, then receive the starting plan.',
+      ru: 'Вы заполняете медицинскую и нутрициологическую форму и получаете стартовый план.',
     },
   },
   {
-    title: { ro: 'Ajustări', en: 'Adjustments', ru: 'Корректировки' },
+    title: { ro: 'Monitorizare', en: 'Monitoring', ru: 'Наблюдение' },
     text: {
-      ro: 'Ajustăm planul pe parcurs, pe măsură ce lucrurile se schimbă.',
-      en: 'We adjust the plan along the way, as things change.',
-      ru: 'Мы корректируем план по ходу, когда меняется ситуация.',
+      ro: 'Te urmăresc pe durata abonamentului — verificări periodice, ajustări și mesagerie.',
+      en: 'I follow you for the length of the subscription — periodic check-ins, adjustments, and messaging.',
+      ru: 'Я сопровождаю вас на протяжении абонемента — периодические проверки, корректировки и переписка.',
     },
   },
 ];
 
 const FAQ: { q: Bi; a: Bi }[] = [
   {
-    q: { ro: 'Ce include monitorizarea de 3 luni?', en: 'What does 3-month monitoring include?', ru: 'Что входит в наблюдение на 3 месяца?' },
+    q: { ro: 'Ce tipuri de abonament există?', en: 'What subscription types are there?', ru: 'Какие бывают типы абонемента?' },
     a: {
-      ro: 'Urmărirea cazului timp de trei luni, verificări periodice, ajustarea planului pe parcurs și mesagerie prioritară pentru întrebări între consultații.',
-      en: 'Case follow-up over three months, periodic check-ins, plan adjustments along the way, and priority messaging for questions between consultations.',
-      ru: 'Сопровождение в течение трёх месяцев, периодические проверки, корректировка плана по ходу и приоритетная переписка с врачом между консультациями.',
+      ro: 'Patru: Pediatrie, Nutriție copii, Nutriție adulți și Complex (Pediatrie + Nutriție). Alegi tipul potrivit când soliciți abonamentul.',
+      en: 'Four: Pediatrics, Child nutrition, Adult nutrition, and Complex (Pediatrics + Nutrition). You choose the right one when you request the subscription.',
+      ru: 'Четыре: педиатрия, питание детей, питание взрослых и комплекс (педиатрия + питание). Нужный тип вы выбираете при оформлении заявки.',
     },
   },
   {
-    q: { ro: 'Cât de des comunicăm?', en: 'How often do we talk?', ru: 'Как часто мы общаемся?' },
+    q: { ro: 'Ce durată pot alege?', en: 'What durations can I choose?', ru: 'Какую длительность можно выбрать?' },
     a: {
-      ro: 'Prin verificări periodice și mesagerie pentru întrebări între consultații — în ritmul potrivit situației tale.',
-      en: 'Through periodic check-ins and messaging for questions between consultations — at the pace your situation needs.',
-      ru: 'Через периодические проверки и переписку — задавайте вопросы между консультациями в удобном для вас ритме.',
+      ro: 'Abonamentul poate fi pe 1, 2, 3 sau 6 luni. Durata potrivită o stabilim împreună, în funcție de obiective.',
+      en: 'The subscription can be 1, 2, 3, or 6 months. We set the right length together, based on your goals.',
+      ru: 'Абонемент может быть на 1, 2, 3 или 6 месяцев. Подходящую длительность определяем вместе, исходя из целей.',
+    },
+  },
+  {
+    q: { ro: 'Cât costă?', en: 'How much does it cost?', ru: 'Сколько это стоит?' },
+    a: {
+      ro: 'Prețul se stabilește individual, în funcție de tipul de abonament și de durată. După ce lași o solicitare, medicul te contactează și stabiliți împreună durata și prețul.',
+      en: 'The price is set individually, based on the subscription type and duration. After you leave a request, the doctor contacts you and you set the duration and price together.',
+      ru: 'Цена определяется индивидуально — в зависимости от типа абонемента и длительности. После заявки врач связывается с вами, и вы вместе согласуете срок и цену.',
     },
   },
   {
     q: { ro: 'Este pentru copii sau și pentru adulți?', en: 'Is it for children or adults too?', ru: 'Это для детей или также для взрослых?' },
     a: { ro: 'Pentru copii și adulți.', en: 'For children and adults.', ru: 'Для детей и взрослых.' },
-  },
-  {
-    q: { ro: 'Pot continua după 3 luni?', en: 'Can I continue after 3 months?', ru: 'Могу ли я продолжить после 3 месяцев?' },
-    a: {
-      ro: 'Da, poți continua programul dacă vrei sprijin în continuare.',
-      en: 'Yes — you can continue the program if you want ongoing support.',
-      ru: 'Да, вы можете продолжить программу, если хотите дальнейшую поддержку.',
-    },
   },
   {
     q: { ro: 'Cum se face plata?', en: 'How do I pay?', ru: 'Как происходит оплата?' },
@@ -154,7 +186,7 @@ export default async function MonitoringPage({
         items={[
           { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
           { label: ru ? 'Услуги' : en ? 'Services' : 'Servicii', href: '/services' },
-          { label: ru ? 'Наблюдение 3 месяца' : en ? '3-month monitoring' : 'Monitorizare 3 luni' },
+          { label: ru ? 'Наблюдение и абонементы' : en ? 'Monitoring & subscriptions' : 'Monitorizare și abonamente' },
         ]}
       />
       {/* 1 · Hero — editorial split: statement left, description right (no photo) */}
@@ -162,36 +194,36 @@ export default async function MonitoringPage({
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
             <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {ru ? 'Сопровождение · Онлайн-портал' : en ? 'Support · Online portal' : 'Acompaniere · Portal online'}
+            {ru ? 'Абонементы · Онлайн-портал' : en ? 'Subscriptions · Online portal' : 'Abonamente · Portal online'}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[15ch] text-[clamp(2.6rem,6vw,5.4rem)] leading-[1.04] tracking-[-0.015em] text-balance">
                 {ru ? (
                   <>
-                    <span className="serif-it text-sage">Наблюдение</span> 3 месяца
+                    Наблюдение и <span className="serif-it text-sage">абонементы</span>
                   </>
                 ) : en ? (
                   <>
-                    <span className="serif-it text-sage">3-month</span> monitoring
+                    Monitoring &amp; <span className="serif-it text-sage">subscriptions</span>
                   </>
                 ) : (
                   <>
-                    Monitorizare <span className="serif-it text-sage">3 luni</span>
+                    Monitorizare și <span className="serif-it text-sage">abonamente</span>
                   </>
                 )}
               </h1>
               <p className="mt-7 max-w-[34ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
                 {ru
-                  ? 'Непрерывное сопровождение между консультациями.'
+                  ? 'Постоянное сопровождение между консультациями — на 1, 2, 3 или 6 месяцев.'
                   : en
-                    ? 'Continuous guidance, between consultations.'
-                    : 'Acompaniere continuă, între consultații.'}
+                    ? 'Continuous guidance between consultations — over 1, 2, 3, or 6 months.'
+                    : 'Acompaniere continuă între consultații — pe 1, 2, 3 sau 6 luni.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <BookGroupBButton
                   service="monitoring"
-                  label={ru ? 'Записаться' : en ? 'Request a place' : 'Solicită un loc'}
+                  label={ru ? 'Оставить заявку' : en ? 'Request a subscription' : 'Solicită un abonament'}
                   className={btnDark}
                 />
                 <Link href="/pricing" className={underlineLg}>
@@ -201,14 +233,14 @@ export default async function MonitoringPage({
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {ru ? 'Онлайн-портал · 3 месяца' : en ? 'Online portal · 3 months' : 'Portal online · 3 luni'}
+                {ru ? 'Онлайн-портал · 1–6 месяцев' : en ? 'Online portal · 1–6 months' : 'Portal online · 1–6 luni'}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
-                  ? 'Я слежу за вашим прогрессом в течение трёх месяцев — периодические проверки, корректировки плана и прямая переписка по вопросам между консультациями.'
+                  ? 'Четыре типа абонемента — педиатрия, питание детей, питание взрослых или комплекс. Я слежу за вашим прогрессом: периодические проверки, корректировки плана и прямая переписка между консультациями. Длительность и цену согласуем индивидуально.'
                   : en
-                    ? 'I follow your progress for three months — periodic check-ins, plan adjustments, and direct messaging for questions between consultations.'
-                    : 'Îți urmăresc progresul timp de trei luni — verificări periodice, ajustări ale planului și mesagerie directă pentru întrebări între consultații.'}
+                    ? 'Four subscription types — pediatrics, child nutrition, adult nutrition, or complex. I follow your progress: periodic check-ins, plan adjustments, and direct messaging between consultations. Duration and price are set individually.'
+                    : 'Patru tipuri de abonament — pediatrie, nutriție copii, nutriție adulți sau complex. Îți urmăresc progresul: verificări periodice, ajustări ale planului și mesagerie directă între consultații. Durata și prețul le stabilim individual.'}
               </p>
               <p className="mono mt-8 border-t border-[var(--rule)] pt-6 text-[11px] uppercase tracking-[0.1em] leading-relaxed text-ink-soft">
                 {ru
@@ -219,6 +251,62 @@ export default async function MonitoringPage({
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* 1b · Subscription types + durations (brief §3) */}
+      <section className="bg-paper">
+        <div className="shell grid gap-10 py-16 md:grid-cols-[1fr_1.3fr] md:gap-20 md:py-24">
+          <div className="md:sticky md:top-[133px] md:self-start">
+            <p className="eyebrow mb-3">{ru ? 'Абонементы' : en ? 'Subscriptions' : 'Abonamente'}</p>
+            <h2 className="serif text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.05] tracking-[-0.02em] text-balance">
+              {ru ? (
+                <>
+                  Четыре <span className="serif-it text-sage">типа</span>
+                </>
+              ) : en ? (
+                <>
+                  Four <span className="serif-it text-sage">types</span>
+                </>
+              ) : (
+                <>
+                  Patru <span className="serif-it text-sage">tipuri</span>
+                </>
+              )}
+            </h2>
+            <p className="mt-5 max-w-[42ch] text-[1.0125rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Длительность — 1, 2, 3 или 6 месяцев. Цена — по запросу: после заявки врач связывается с вами и вместе с вами назначает срок и цену.'
+                : en
+                  ? 'Duration — 1, 2, 3, or 6 months. Price — on request: after your request, the doctor contacts you and sets the length and price together with you.'
+                  : 'Durată — 1, 2, 3 sau 6 luni. Preț — la cerere: după solicitare, medicul te contactează și stabiliți împreună durata și prețul.'}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {DURATIONS.map((d) => (
+                <span
+                  key={d.en}
+                  className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3 py-1 text-[11px] uppercase tracking-[0.1em] text-ink-soft"
+                >
+                  {lc(d)}
+                </span>
+              ))}
+            </div>
+          </div>
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {TYPES.map((it) => (
+              <li
+                key={it.name.en}
+                className="border-t border-[var(--rule)] pt-5"
+              >
+                <h3 className="serif text-[1.35rem] leading-snug text-ink text-pretty">
+                  {lc(it.name)}
+                </h3>
+                <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
+                  {lc(it.note)}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -363,10 +451,10 @@ export default async function MonitoringPage({
           </h2>
           <p className="mt-6 max-w-[58ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">
             {ru
-              ? 'Dr. Olesea Jalba — врач-педиатр с магистратурой по специальности «Общественное здоровье – Питание человека». Три месяца она ведёт вас целостно — здоровье и питание вместе — и корректирует план по мере того, как меняется ваша ситуация.'
+              ? 'Dr. Olesea Jalba — врач-педиатр с магистратурой по специальности «Общественное здоровье – Питание человека». На протяжении абонемента она ведёт вас целостно — здоровье и питание вместе — и корректирует план по мере того, как меняется ваша ситуация.'
               : en
-                ? 'Dr. Olesea Jalba is a pediatrician with a Master’s in Public Health – Human Nutrition. Over three months she follows your case as a whole — health and nutrition together — and adjusts the plan as your situation evolves.'
-                : 'Dr. Olesea Jalba este medic pediatru cu master în Sănătate Publică – Nutriție Umană. Timp de trei luni îți urmărește cazul în ansamblu — sănătate și alimentație împreună — și ajustează planul pe măsură ce situația evoluează.'}
+                ? 'Dr. Olesea Jalba is a pediatrician with a Master’s in Public Health – Human Nutrition. Throughout the subscription she follows your case as a whole — health and nutrition together — and adjusts the plan as your situation evolves.'
+                : 'Dr. Olesea Jalba este medic pediatru cu master în Sănătate Publică – Nutriție Umană. Pe durata abonamentului îți urmărește cazul în ansamblu — sănătate și alimentație împreună — și ajustează planul pe măsură ce situația evoluează.'}
           </p>
           <Link href="/about" className={`mt-9 ${underlineLg}`}>
             {ru ? 'Смотреть полный профиль' : en ? 'See full profile' : 'Vezi profilul complet'} →
@@ -376,7 +464,7 @@ export default async function MonitoringPage({
         <div className="mx-auto w-full max-w-[420px] md:max-w-none">
           <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
             <Image
-              src="/assets/olesea-portrait.webp"
+              src="/assets/olesea-monitoring.webp"
               alt={
                 ru
                   ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'
@@ -485,22 +573,22 @@ export default async function MonitoringPage({
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
                 {ru ? (
                   <>
-                    Записаться на <span className="serif-it text-[var(--sage-soft)]">наблюдение</span>
+                    Оставить заявку на <span className="serif-it text-[var(--sage-soft)]">абонемент</span>
                   </>
                 ) : en ? (
                   <>
-                    Request a place in <span className="serif-it text-[var(--sage-soft)]">monitoring</span>
+                    Request a <span className="serif-it text-[var(--sage-soft)]">subscription</span>
                   </>
                 ) : (
                   <>
-                    Solicită un loc în <span className="serif-it text-[var(--sage-soft)]">monitorizare</span>
+                    Solicită un <span className="serif-it text-[var(--sage-soft)]">abonament</span>
                   </>
                 )}
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <BookGroupBButton
                   service="monitoring"
-                  label={ru ? 'Записаться' : en ? 'Request a place' : 'Solicită un loc'}
+                  label={ru ? 'Оставить заявку' : en ? 'Request a subscription' : 'Solicită un abonament'}
                   className={creamPill}
                 />
                 <span className="text-sm text-[var(--sage-soft)]">

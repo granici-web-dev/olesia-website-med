@@ -56,3 +56,6 @@ plan-sheet-*.png
 /*-desktop*.png
 # Extracted Russian text for Textovod proofreading (scratch, regenerated)
 /ru-proofread.txt
+
+# raw source video (compressed copy lives in apps/frontend/public/assets)
+docs/olesea jalba.mp4

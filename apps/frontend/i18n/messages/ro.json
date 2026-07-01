@@ -11,7 +11,7 @@
       "pediatric": "Consultație pediatrică",
       "nutrition": "Consultație nutrițională",
       "integrative": "Consultație integrativă",
-      "monitoring": "Monitorizare 3 luni",
+      "monitoring": "Monitorizare și abonamente",
       "quick": "Întrebare EXPRESS"
     },
     "bookOnline": "Programează online →"
@@ -47,7 +47,7 @@
     "services": {
       "eyebrow": "Servicii · Cinci formate",
       "title": "Cum lucrăm<br></br><accent>împreună.</accent>",
-      "headerSub": "Cinci moduri de a colabora — de la o întrebare punctuală la urmărire de trei luni. Alege ritmul potrivit pentru tine.",
+      "headerSub": "Cinci moduri de a colabora — de la o întrebare punctuală la un abonament cu monitorizare. Alege ritmul potrivit pentru tine.",
       "items": {
         "pediatric": {
           "tag": "Pediatrie",
@@ -72,10 +72,10 @@
         },
         "subscription": {
           "tag": "Abonament",
-          "title": "Monitorizare 3 luni",
-          "description": "Trei luni de urmărire activă: mesagerie directă pentru întrebări între consultații, ajustări periodice ale planului, două video-call-uri lunare. Recomandat pentru obiective de durată.",
+          "title": "Monitorizare și abonamente",
+          "description": "4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex), pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului și comunicare directă cu medicul. Durata și prețul le stabilim individual.",
           "price": "la cerere",
-          "duration": "3 luni"
+          "duration": "1–6 luni"
         },
         "quick": {
           "tag": "EXPRESS",
@@ -124,14 +124,18 @@
   },
   "leadForm": {
     "monitoring": {
-      "tag": "Monitorizare",
-      "title": "Monitorizare 3 luni",
-      "subtitle": "Lasă-ne datele tale și te contactăm pentru a stabili împreună pașii următori."
+      "tag": "Abonament",
+      "title": "Monitorizare și abonamente",
+      "subtitle": "Spune-ne pe scurt tipul de abonament dorit (Pediatrie, Nutriție copii/adulți sau Complex). Te contactăm pentru a stabili împreună durata și prețul."
     },
     "quick": {
       "tag": "Întrebare EXPRESS",
       "title": "Întrebare EXPRESS",
       "subtitle": "Scrie întrebarea ta — îți răspundem în ~1 oră în timpul programului de lucru."
+    },
+    "deliverable": {
+      "tag": "Comandă",
+      "subtitle": "Lasă datele tale și, pe scurt, ce îți dorești. Te contactăm pentru a confirma comanda și plata."
     },
     "name": "Nume complet",
     "email": "Email",
