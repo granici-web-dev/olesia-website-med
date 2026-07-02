@@ -19,6 +19,22 @@ export const btnDark =
 export const creamPill =
   'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
 
+/** Outline box — secondary action on light backgrounds (pairs with btnDark, e.g. the hero). */
+export const btnOutline =
+  'inline-flex cursor-pointer items-center border border-ink bg-transparent px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:bg-ink hover:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
+
+/** Cream square button — primary action on dark backgrounds where a pill isn't wanted (footer). */
+export const creamBox =
+  'inline-flex cursor-pointer items-center bg-cream px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:bg-[var(--sage-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
+
+/**
+ * Compact dark button for the site header. Same look as btnDark but smaller, and
+ * it shrinks further on narrow viewports (mirrors the old Nav.module.css `.cta`
+ * breakpoints: ≤767px and ≤480px).
+ */
+export const btnNav =
+  'inline-flex cursor-pointer items-center bg-ink px-[20px] py-[12px] text-[11px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage max-[767px]:px-[14px] max-[767px]:py-[10px] max-[767px]:text-[10px] max-[767px]:tracking-[0.03em] max-[480px]:px-[12px] max-[480px]:py-[9px]';
+
 /** Underlined text link — secondary action on light backgrounds. */
 export const underlineLg =
   'inline-block cursor-pointer border-b border-ink pb-1 text-sm text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
@@ -26,6 +42,9 @@ export const underlineLg =
 /** Smaller underlined text link (13px) — dense secondary action on light backgrounds. */
 export const underline =
   'inline-block cursor-pointer border-b border-ink pb-[3px] text-[13px] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
+
+/** Service-row "book" link — the `underline` token plus the responsive top margin shared by the homepage and pricing service rows. */
+export const serviceLink = `${underline} mt-[20px] max-[600px]:mt-[12px]`;
 
 /** Underlined text link — secondary action on dark (sage) backgrounds. */
 export const creamUnderline =

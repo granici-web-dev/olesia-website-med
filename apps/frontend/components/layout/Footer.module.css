@@ -28,28 +28,6 @@
   line-height: 1.6;
 }
 
-.bookBtn {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 24px;
-  padding: 14px 22px;
-  font-family: var(--font-manrope), sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: var(--cream);
-  color: var(--ink);
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.bookBtn:hover {
-  background: var(--sage-soft);
-}
-
 .colLabel {
   font-size: 11px;
   letter-spacing: 0.16em;

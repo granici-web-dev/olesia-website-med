@@ -7,6 +7,7 @@ import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { OrderDeliverableButton } from '@/components/ui/OrderDeliverableButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
+import { serviceLink } from '@/components/ui/cta';
 import type { LeadService, DeliverableProduct } from '@/lib/leads';
 import {
   SERVICE_DESCRIPTIONS,
@@ -255,18 +256,18 @@ export default async function PricingPage({
                     url={s.calendlySchedulingUrl}
                     reason={loc(locale, s.titleRo, s.titleEn)}
                     label={t.book}
-                    className={styles.serviceLink}
+                    className={serviceLink}
                   />
                 ) : s.group === 'B_portal' ? (
                   <BookGroupBButton
                     service={s.code as LeadService}
                     label={t.book}
-                    className={styles.serviceLink}
+                    className={serviceLink}
                   />
                 ) : (
                   <Link
                     href={`/${locale}/contact`}
-                    className={styles.serviceLink}
+                    className={serviceLink}
                   >
                     {t.book}
                   </Link>

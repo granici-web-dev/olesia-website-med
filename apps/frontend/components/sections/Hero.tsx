@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { HeroVideo } from './HeroVideo';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { btnDark, btnOutline } from '@/components/ui/cta';
 import styles from './Hero.module.css';
 
 const STAT_KEYS = ['experience', 'specializations', 'families'] as const;
@@ -31,10 +32,10 @@ export function Hero() {
             url={FREE_CONSULT_CALENDLY_URL}
             reason="Consultație gratuită"
             label={t('ctaBook')}
-            className={styles.btnDark}
+            className={btnDark}
             withArrow={false}
           />
-          <a href="#how-it-works" className={styles.btnOutline}>
+          <a href="#how-it-works" className={btnOutline}>
             {t('ctaHow')}
           </a>
         </div>

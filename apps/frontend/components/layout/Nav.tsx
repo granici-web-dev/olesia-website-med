@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { btnNav } from '@/components/ui/cta';
 import styles from './Nav.module.css';
 
 /** Top-level links shown after the Services dropdown. */
@@ -184,7 +185,7 @@ export function Nav({ locale }: NavProps) {
           url={FREE_CONSULT_CALENDLY_URL}
           reason="Consultație gratuită"
           label={t('bookOnline')}
-          className={styles.cta}
+          className={btnNav}
           withArrow={false}
         />
         <button

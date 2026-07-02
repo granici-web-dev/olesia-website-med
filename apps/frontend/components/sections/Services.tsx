@@ -7,6 +7,7 @@ import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import type { LeadService } from '@/lib/leads';
 import { SERVICE_INCLUDED } from '@/lib/service-content';
+import { serviceLink } from '@/components/ui/cta';
 import styles from './Services.module.css';
 
 const SERVICES = [
@@ -104,17 +105,17 @@ export async function Services() {
                   url={url}
                   reason={t(`items.${key}.title`)}
                   label={t('book')}
-                  className={styles.serviceLink}
+                  className={serviceLink}
                   withArrow={false}
                 />
               ) : leadService ? (
                 <BookGroupBButton
                   service={leadService}
                   label={t('book')}
-                  className={styles.serviceLink}
+                  className={serviceLink}
                 />
               ) : (
-                <Link href="/contact" className={styles.serviceLink}>
+                <Link href="/contact" className={serviceLink}>
                   {t('book')}
                 </Link>
               )}

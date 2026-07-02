@@ -130,26 +130,8 @@
   font-weight: 600;
 }
 
-.cta {
-  display: inline-flex;
-  align-items: center;
-  padding: 12px 20px;
-  font-family: var(--font-manrope), sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: var(--ink);
-  color: var(--cream);
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.cta:hover {
-  background: var(--sage);
-}
+/* The header booking button uses the shared `btnNav` token (components/ui/cta.ts),
+   which includes the ≤767px / ≤480px size steps that used to live here. */
 
 /* Burger + mobile overlay panel. Hidden by default — only used on ≤1023px,
    where the inline links and right cluster are removed from the bar. The logo
@@ -317,12 +299,6 @@
   .logo {
     height: 44px;
   }
-
-  .cta {
-    padding: 10px 14px;
-    font-size: 10px;
-    letter-spacing: 0.03em;
-  }
 }
 
 @media (max-width: 480px) {
@@ -336,10 +312,6 @@
 
   .right {
     gap: 10px;
-  }
-
-  .cta {
-    padding: 9px 12px;
   }
 
   .panel {

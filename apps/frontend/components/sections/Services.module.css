@@ -105,24 +105,6 @@
   letter-spacing: 0.06em;
 }
 
-.serviceLink {
-  display: inline-block;
-  margin-top: 20px;
-  font-size: 13px;
-  color: var(--ink);
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 3px;
-  text-decoration: none;
-  cursor: pointer;
-  background: none;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.serviceLink:hover {
-  color: var(--sage);
-  border-color: var(--sage);
-}
-
 /* Responsive */
 
 /* Small desktop: tighten the 4-column row before the tablet switch. */
@@ -207,10 +189,6 @@
 
   .serviceMeta {
     text-align: left;
-  }
-
-  .serviceLink {
-    margin-top: 12px;
   }
 }
 

@@ -6,6 +6,7 @@ import { FooterLangSwitch } from './FooterLangSwitch';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
 import { newsletterEnabled } from '@/lib/newsletter';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { creamBox } from '@/components/ui/cta';
 import styles from './Footer.module.css';
 
 const SERVICE_LINKS = [
@@ -41,7 +42,7 @@ export function Footer() {
             url={FREE_CONSULT_CALENDLY_URL}
             reason="Consultație gratuită"
             label={t('book')}
-            className={styles.bookBtn}
+            className={`${creamBox} mt-[24px]`}
             withArrow={false}
           />
         </div>
