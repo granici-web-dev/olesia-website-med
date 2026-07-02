@@ -14,14 +14,14 @@
       "monitoring": "Monitorizare și abonamente",
       "quick": "Întrebare EXPRESS"
     },
-    "bookOnline": "Programează online →"
+    "bookOnline": "Programează online"
   },
   "home": {
     "hero": {
       "eyebrow": "Consultații exclusiv online · Pediatrie & Nutriție",
       "headline": "Consultații<br></br><accent>video</accent>, plan<br></br>scris, urmărire.",
       "sub": "Pediatrie și nutriție de calitate, fără să ieși din casă. Toate consultațiile se desfășoară online, iar planul scris ajunge la tine în 24 de ore.",
-      "ctaBook": "Programează consultație →",
+      "ctaBook": "Programează consultație",
       "ctaHow": "Cum funcționează",
       "stats": {
         "experience": { "value": "12+", "label": "Ani practică clinică" },
@@ -85,7 +85,7 @@
           "duration": "~1h · scris"
         }
       },
-      "book": "Rezervă →"
+      "book": "Rezervă"
     },
     "about": {
       "eyebrow": "Despre",
@@ -100,7 +100,7 @@
   },
   "footer": {
     "tagline": "Cabinet online de pediatrie și nutriție. Consultații prin video-call, plan scris la final, urmărire pe termen lung.",
-    "book": "Programează →",
+    "book": "Programează",
     "servicesLabel": "Servicii",
     "services": {
       "pediatric": "Consultație pediatrică",

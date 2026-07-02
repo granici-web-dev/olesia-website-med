@@ -11,6 +11,7 @@ import {
   MENU_SEGMENTS as SEGMENTS,
   type Bi,
 } from '@/lib/placeholder-menus';
+import { btnDark, underlineLg, creamPill, creamUnderline, cardCta } from '@/components/ui/cta';
 
 export const revalidate = 60;
 
@@ -51,14 +52,6 @@ export async function generateMetadata({
 /* Segments + menus now live in lib/placeholder-menus.ts — the single source
    shared with the menu detail page, so listing links never 404. */
 
-const btnDark =
-  'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
-const underlineLg =
-  'inline-block cursor-pointer border-b border-ink pb-1 text-sm text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
-const creamPill =
-  'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
-const creamUnderline =
-  'inline-block cursor-pointer border-b border-[var(--sage-soft)] pb-0.5 text-sm text-cream transition-colors hover:border-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sage-soft)]';
 
 export default async function MenusPage({
   params,
@@ -168,7 +161,7 @@ export default async function MenusPage({
                   </p>
                   <a
                     href={menuHref(featured.slug)}
-                    className="mt-6 inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                    className={`mt-6 ${cardCta}`}
                   >
                     {ru ? 'Смотреть меню' : en ? 'View menu' : 'Vezi meniul'}
                     <span aria-hidden="true">→</span>

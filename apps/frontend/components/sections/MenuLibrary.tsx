@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Reveal } from '@/components/ui/Reveal';
+import { cardCta } from '@/components/ui/cta';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Weekly-menu library — age-segment filter + responsive card grid, with a
@@ -70,7 +71,7 @@ function MenuCard({ m, labels }: { m: MenuItem; labels: MenuLibraryLabels }) {
         <div className="mt-6 pt-1">
           <a
             href={m.href}
-            className="inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+            className={cardCta}
           >
             {labels.view}
             <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">

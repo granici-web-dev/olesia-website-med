@@ -48,7 +48,7 @@ export function CalendlyButton({
   reason,
   label,
   className,
-  withArrow = true,
+  withArrow = false,
 }: {
   /** Public Calendly scheduling URL (Service.calendlySchedulingUrl). */
   url: string;
@@ -56,7 +56,11 @@ export function CalendlyButton({
   reason: string;
   label: string;
   className?: string;
-  /** Append a trailing " →" to the label (default true). */
+  /**
+   * Append a trailing " →" to the label. Defaults to false: booking actions
+   * render without an arrow (arrows are reserved for navigational links), which
+   * keeps every "Rezervă"/"Programează" CTA consistent across the site.
+   */
   withArrow?: boolean;
 }) {
   useEffect(() => {

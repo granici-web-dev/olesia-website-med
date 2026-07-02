@@ -311,7 +311,7 @@ export default async function PricingPage({
                   <OrderDeliverableButton
                     code={d.id}
                     title={lc(d.title)}
-                    label={`${td.order} →`}
+                    label={td.order}
                     className="mono inline-flex cursor-pointer items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
                   />
                 </div>

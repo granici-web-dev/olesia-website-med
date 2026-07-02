@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { MaterialLibrary } from '@/components/sections/MaterialLibrary';
 import { AGE_GROUPS } from '@/lib/age-taxonomy';
 import { MATERIALS, MATERIAL_CATEGORIES } from '@/lib/placeholder-materials';
+import { btnDark, underlineLg, creamPill, creamUnderline, cardCta } from '@/components/ui/cta';
 
 export const revalidate = 60;
 
@@ -42,14 +43,6 @@ export async function generateMetadata({
 
 type Bi = { ro: string; en: string; ru: string };
 
-const btnDark =
-  'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
-const underlineLg =
-  'inline-block cursor-pointer border-b border-ink pb-1 text-sm text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
-const creamPill =
-  'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
-const creamUnderline =
-  'inline-block cursor-pointer border-b border-[var(--sage-soft)] pb-0.5 text-sm text-cream transition-colors hover:border-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sage-soft)]';
 
 export default async function LibraryPage({
   params,
@@ -165,7 +158,7 @@ export default async function LibraryPage({
                   </p>
                   <a
                     href="#library"
-                    className="mt-6 inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                    className={`mt-6 ${cardCta}`}
                   >
                     {ru ? 'Открыть в библиотеке' : en ? 'Open in the library' : 'Vezi în bibliotecă'}
                     <span aria-hidden="true">→</span>

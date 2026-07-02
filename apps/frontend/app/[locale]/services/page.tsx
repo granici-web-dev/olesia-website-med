@@ -4,6 +4,7 @@ import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
 import { Reveal } from '@/components/ui/Reveal';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { btnDark, underlineLg, underline } from '@/components/ui/cta';
 
 /** Service code → its dedicated landing page. Rows link here ("Detalii"). */
 const DETAIL_ROUTE: Record<string, string> = {
@@ -423,15 +424,6 @@ const FAQ: { q: Bi; a: Bi }[] = [
     },
   },
 ];
-
-/* ── Shared class strings (mirror the homepage sections) ─────────────────── */
-
-const btnDark =
-  'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
-const underline =
-  'inline-block cursor-pointer border-b border-ink pb-[3px] text-[13px] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
-const underlineLg =
-  'inline-block cursor-pointer border-b border-ink pb-1 text-sm text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
 
 /** A described service — homepage-style numbered editorial row. */
 function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {

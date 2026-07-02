@@ -1,5 +1,6 @@
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { Reveal } from '@/components/ui/Reveal';
+import { creamPill } from '@/components/ui/cta';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 
 /** Free 30-min orientation call — helps the visitor pick the right service. */
@@ -30,7 +31,7 @@ export function FreeConsult({ locale }: { locale: string }) {
             reason={t('Consultație gratuită', 'Free consultation', 'Бесплатная консультация')}
             label={t('Programează discuția', 'Book the call', 'Записаться на разговор')}
             withArrow={false}
-            className="inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5"
+            className={creamPill}
           />
         </Reveal>
       </div>

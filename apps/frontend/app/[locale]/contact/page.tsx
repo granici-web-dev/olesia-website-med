@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { ContactForm } from '@/components/ui/ContactForm';
 import { Reveal } from '@/components/ui/Reveal';
+import { underlineLg } from '@/components/ui/cta';
 
 export const revalidate = 60;
 
@@ -107,9 +108,6 @@ const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
     ),
   },
 ];
-
-const underlineLg =
-  'inline-block cursor-pointer border-b border-ink pb-1 text-sm text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
 
 export default async function ContactPage({
   params,

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Reveal } from '@/components/ui/Reveal';
+import { creamPill, creamUnderline } from '@/components/ui/cta';
 import {
   findPlaceholderMenu,
   menuSegmentLabel,
@@ -35,11 +36,6 @@ export async function generateMetadata({
     description: ru ? menu.description.ru : en ? menu.description.en : menu.description.ro,
   };
 }
-
-const creamPill =
-  'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
-const creamUnderline =
-  'inline-block cursor-pointer border-b border-[var(--sage-soft)] pb-0.5 text-sm text-cream transition-colors hover:border-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sage-soft)]';
 
 export default async function MenuDetailPage({
   params,

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { creamPill, creamUnderline } from '@/components/ui/cta';
 
 export const revalidate = 60;
 
@@ -264,10 +265,6 @@ const RIGHTS: { term: Bi; desc: Bi }[] = [
   },
 ];
 
-const creamPill =
-  'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
-const creamUnderline =
-  'inline-block cursor-pointer border-b border-[var(--sage-soft)] pb-0.5 text-sm text-cream transition-colors hover:border-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sage-soft)]';
 
 function Dot() {
   return (

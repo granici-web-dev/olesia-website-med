@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import { loc } from '@/lib/api';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
+import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
 
 export const revalidate = 60;
 
@@ -158,16 +159,6 @@ const FAQ: { q: Bi; a: Bi }[] = [
     },
   },
 ];
-
-/* Shared class strings (mirror the other service landings). */
-const btnDark =
-  'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
-const underlineLg =
-  'inline-block cursor-pointer border-b border-ink pb-1 text-sm text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage';
-const creamPill =
-  'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
-const creamUnderline =
-  'inline-block cursor-pointer border-b border-[var(--sage-soft)] pb-0.5 text-sm text-cream transition-colors hover:border-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sage-soft)]';
 
 export default async function MonitoringPage({
   params,

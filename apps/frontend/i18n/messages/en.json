@@ -14,14 +14,14 @@
       "monitoring": "Monitoring & subscriptions",
       "quick": "Express question"
     },
-    "bookOnline": "Book online →"
+    "bookOnline": "Book online"
   },
   "home": {
     "hero": {
       "eyebrow": "Online consultations only · Pediatrics & Nutrition",
       "headline": "<accent>Video</accent> consultations,<br></br>written plan,<br></br>follow-up.",
       "sub": "Quality pediatrics and nutrition without leaving home. All consultations are held online, and the written plan arrives within 24 hours.",
-      "ctaBook": "Book a consultation →",
+      "ctaBook": "Book a consultation",
       "ctaHow": "How it works",
       "stats": {
         "experience": { "value": "12+", "label": "Years of clinical practice" },
@@ -85,7 +85,7 @@
           "duration": "~1h · written"
         }
       },
-      "book": "Book →"
+      "book": "Book"
     },
     "about": {
       "eyebrow": "About",
@@ -100,7 +100,7 @@
   },
   "footer": {
     "tagline": "Online pediatrics and nutrition practice. Video consultations, written plan, long-term follow-up.",
-    "book": "Book →",
+    "book": "Book",
     "servicesLabel": "Services",
     "services": {
       "pediatric": "Pediatric consultation",

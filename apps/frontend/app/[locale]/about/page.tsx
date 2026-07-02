@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Certificates } from '@/components/sections/Certificates';
+import { btnDark, creamPill } from '@/components/ui/cta';
 
 export const revalidate = 60;
 
@@ -268,14 +269,6 @@ const QUOTE_MISSION: Bi = {
   en: 'My mission is to give families individualized medical and nutritional advice, grounded in current scientific evidence, in clear, practical language that’s easy to apply in everyday life.',
   ru: 'Моя миссия — давать семьям индивидуальные медицинские и нутрициологические рекомендации на основе актуальных научных данных, понятным и практичным языком, который легко применять каждый день.',
 };
-
-/* Shared class strings (mirror the other landings). */
-const btnDark =
-  'inline-flex cursor-pointer items-center bg-ink px-[22px] py-[14px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
-const creamPill =
-  'inline-flex cursor-pointer items-center rounded-full bg-cream px-6 py-3 text-sm font-semibold text-sage-deep transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sage-soft)]';
-const creamUnderline =
-  'inline-block cursor-pointer border-b border-[var(--sage-soft)] pb-0.5 text-sm text-cream transition-colors hover:border-cream focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sage-soft)]';
 
 export default async function AboutPage({
   params,

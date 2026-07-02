@@ -3,6 +3,7 @@
 import { useId, useMemo, useState } from 'react';
 import { Reveal } from '@/components/ui/Reveal';
 import { Modal } from '@/components/ui/Modal';
+import { cardCta } from '@/components/ui/cta';
 import { track } from '@/lib/analytics';
 import { subscribe } from '@/lib/newsletter';
 import type { AgeGroup } from '@/lib/age-taxonomy';
@@ -271,7 +272,7 @@ export function MaterialLibrary({
                       {m.access === 'paid' ? (
                         <a
                           href={contactHref}
-                          className="inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                          className={cardCta}
                         >
                           {lc(T.order)} · {m.price}
                         </a>
@@ -293,7 +294,7 @@ export function MaterialLibrary({
                         <button
                           type="button"
                           onClick={() => setGate(m)}
-                          className="inline-flex cursor-pointer items-center gap-2 border-b border-ink pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                          className={cardCta}
                         >
                           {lc(T.download)} <span aria-hidden="true" className="transition-transform group-hover:translate-y-0.5">↓</span>
                         </button>
