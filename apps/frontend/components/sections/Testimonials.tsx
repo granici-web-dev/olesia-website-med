@@ -1,5 +1,9 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AboutTestimonial } from '@/lib/api';
 import { Reveal } from '@/components/ui/Reveal';
+import styles from './Testimonials.module.css';
 
 /** Testimonial with optional RU copy (fallback items are trilingual; API items are RO/EN only). */
 type Testimonial = AboutTestimonial & { quoteRu?: string; roleRu?: string };
@@ -85,7 +89,11 @@ const FALLBACK_TESTIMONIALS: Testimonial[] = [
   },
 ];
 
-/** Parent reviews. Editable from the back office; falls back to placeholders when empty. */
+/**
+ * Parent reviews. Editable from the back office; falls back to placeholders when empty.
+ * Renders as a slider — 3 cards per view on desktop (2 on tablet, 1 on mobile) with
+ * a native scroll-snap track navigated by arrows or swipe, so all reviews are reachable.
+ */
 export function Testimonials({
   locale,
   items,
@@ -97,31 +105,101 @@ export function Testimonials({
     locale === 'ru' ? ru : locale === 'en' ? en : ro;
 
   const list: Testimonial[] = items.length > 0 ? items : FALLBACK_TESTIMONIALS;
+
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+  const [canScroll, setCanScroll] = useState(false);
+
+  const sync = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setAtStart(el.scrollLeft <= 1);
+    setAtEnd(el.scrollLeft >= max - 1);
+    setCanScroll(max > 1);
+  }, []);
+
+  useEffect(() => {
+    sync();
+    window.addEventListener('resize', sync);
+    return () => window.removeEventListener('resize', sync);
+  }, [sync, list.length]);
+
+  /** Advance the track by one viewport (~one row of cards), clamped to its bounds. */
+  const page = (dir: 1 | -1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const to = Math.max(0, Math.min(max, el.scrollLeft + dir * el.clientWidth));
+    el.scrollTo({ left: to, behavior: 'smooth' });
+  };
+
   if (list.length === 0) return null;
+
+  const labels = {
+    title: t('Ce spun părinții', 'What parents say', 'Что говорят родители'),
+    prev: t('Anterior', 'Previous', 'Назад'),
+    next: t('Următor', 'Next', 'Далее'),
+  };
 
   return (
     <section className="shell bg-[var(--cream-2)] border-y border-[var(--rule)] py-16 md:py-24">
-      <h2 className="serif text-[clamp(1.6rem,3vw,2.2rem)] tracking-[-0.01em]">
-        {t('Ce spun părinții', 'What parents say', 'Что говорят родители')}
-      </h2>
-      <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((it, i) => (
-          <Reveal key={i} as="figure" className="flex flex-col" delay={(i % 3) * 70}>
-            <blockquote className="serif-it text-[1.3rem] leading-snug text-ink text-pretty">
-              “{t(it.quoteRo, it.quoteEn, it.quoteRu ?? it.quoteRo)}”
-            </blockquote>
-            <figcaption className="mt-5 text-sm">
-              <span className="font-semibold text-ink">{it.author}</span>
-              {(it.roleRo || it.roleEn) && (
-                <span className="text-ink-soft">
-                  {' '}
-                  — {t(it.roleRo, it.roleEn, it.roleRu ?? it.roleRo)}
-                </span>
-              )}
-            </figcaption>
-          </Reveal>
-        ))}
+      <div className="flex items-end justify-between gap-6">
+        <h2 className="serif text-[clamp(1.6rem,3vw,2.2rem)] tracking-[-0.01em]">
+          {labels.title}
+        </h2>
+        {canScroll && (
+          <div className="hidden shrink-0 gap-2 sm:flex">
+            <button
+              type="button"
+              className={styles.arrow}
+              aria-label={labels.prev}
+              disabled={atStart}
+              onClick={() => page(-1)}
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              className={styles.arrow}
+              aria-label={labels.next}
+              disabled={atEnd}
+              onClick={() => page(1)}
+            >
+              →
+            </button>
+          </div>
+        )}
       </div>
+
+      <Reveal className="mt-10">
+        <div
+          ref={trackRef}
+          onScroll={sync}
+          className={`${styles.track} flex snap-x snap-mandatory gap-6 overflow-x-auto pb-1`}
+        >
+          {list.map((it, i) => (
+            <figure
+              key={i}
+              className="flex shrink-0 basis-full snap-start flex-col sm:basis-[calc(50%-0.75rem)] lg:basis-[calc((100%-3rem)/3)]"
+            >
+              <blockquote className="serif-it text-[1.3rem] leading-snug text-ink text-pretty">
+                “{t(it.quoteRo, it.quoteEn, it.quoteRu ?? it.quoteRo)}”
+              </blockquote>
+              <figcaption className="mt-5 text-sm">
+                <span className="font-semibold text-ink">{it.author}</span>
+                {(it.roleRo || it.roleEn) && (
+                  <span className="text-ink-soft">
+                    {' '}
+                    — {t(it.roleRo, it.roleEn, it.roleRu ?? it.roleRo)}
+                  </span>
+                )}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </Reveal>
     </section>
   );
 }

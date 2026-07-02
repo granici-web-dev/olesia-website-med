@@ -1,0 +1,40 @@
+/* Horizontal testimonials slider — native scroll-snap track + arrow controls. */
+
+.track {
+  /* Hide the scrollbar; navigation is via arrows / swipe. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    opacity 0.18s ease;
+}
+.arrow:hover:not(:disabled) {
+  background: var(--cream);
+  border-color: var(--ink);
+}
+.arrow:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+}
+.arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
