@@ -35,6 +35,9 @@ importers:
       '@nestjs/swagger':
         specifier: ^11.4.4
         version: 11.4.4(@nestjs/common@11.1.26(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.26)(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.1.14)
+      '@nestjs/throttler':
+        specifier: ^6.5.0
+        version: 6.5.0(@nestjs/common@11.1.26(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.26)(reflect-metadata@0.1.14)
       '@olesia/shared':
         specifier: workspace:^
         version: link:packages/shared
@@ -113,6 +116,9 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
+      helmet:
+        specifier: ^8.3.0
+        version: 8.3.0
       lucide-react:
         specifier: ^1.17.0
         version: 1.17.0(react@19.2.4)
@@ -2212,6 +2218,13 @@ packages:
         optional: true
       '@nestjs/platform-express':
         optional: true
+
+  '@nestjs/throttler@6.5.0':
+    resolution: {integrity: sha512-9j0ZRfH0QE1qyrj9JjIRDz5gQLPqq9yVC2nHsrosDVAfI5HHw08/aUAWx9DZLSdQf4HDkmhTTEGLrRFHENvchQ==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+      '@nestjs/core': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+      reflect-metadata: ^0.1.13 || ^0.2.0
 
   '@next/env@16.2.7':
     resolution: {integrity: sha512-tMJizPlj6ZYpBMMdK8S0LJufrP4QTdR6pcv9KQ/bVETPAmg0j1mlHE9G2c38UyGHxoBapgwuj7XjbGJ2RcDFOg==}
@@ -5988,6 +6001,10 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+
+  helmet@8.3.0:
+    resolution: {integrity: sha512-Qgpiaws3Sm30Av8Eah6sjMCZZwjlBu+E68rhpCWBshY1lb09HtLwj5GviX0OyQIn+ulUS0iX0AxN5n3tLZzz1w==}
+    engines: {node: '>=18.0.0'}
 
   homedir-polyfill@1.0.3:
     resolution: {integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==}
@@ -11586,6 +11603,12 @@ snapshots:
     optionalDependencies:
       '@nestjs/platform-express': 11.1.26(@nestjs/common@11.1.26(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.26)
 
+  '@nestjs/throttler@6.5.0(@nestjs/common@11.1.26(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@11.1.26)(reflect-metadata@0.1.14)':
+    dependencies:
+      '@nestjs/common': 11.1.26(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)
+      '@nestjs/core': 11.1.26(@nestjs/common@11.1.26(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@11.1.26)(reflect-metadata@0.1.14)(rxjs@7.8.2)
+      reflect-metadata: 0.1.14
+
   '@next/env@16.2.7': {}
 
   '@next/swc-darwin-arm64@16.2.7':
@@ -15756,6 +15779,8 @@ snapshots:
       '@types/hast': 3.0.4
 
   he@1.2.0: {}
+
+  helmet@8.3.0: {}
 
   homedir-polyfill@1.0.3:
     dependencies:

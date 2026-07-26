@@ -6,6 +6,7 @@ loadEnv({ path: join(__dirname, '..', '.env') });
 
 import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser = require('cookie-parser');
@@ -31,6 +32,27 @@ async function bootstrap() {
       res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     },
   });
+
+  /**
+   * Behind a reverse proxy (Vercel, nginx, the cloudflared tunnel) the socket
+   * address is the proxy's. Without this the rate limiter would bucket every
+   * visitor together — one noisy client would lock out everyone.
+   */
+  app.set('trust proxy', 1);
+
+  /**
+   * Security headers (client answers v2 §10). No CSP here: this API serves
+   * JSON and uploaded files, not HTML, and a policy would only be a
+   * maintenance burden. `crossOriginResourcePolicy` stays off because uploads
+   * are deliberately served cross-origin to the frontend (see the static
+   * assets above, which set their own CORP header).
+   */
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: false,
+    }),
+  );
 
   // Refresh token travels in an httpOnly cookie.
   app.use(cookieParser());

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -26,6 +28,15 @@ import { CaptchaModule } from './common/captcha/captcha.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    /**
+     * Rate limiting (client answers v2 §10, "protecție împotriva atacurilor").
+     * A generous default for ordinary browsing of the public content; the
+     * routes worth attacking — login and the public lead forms — tighten it
+     * further with their own @Throttle. Storage is in-memory, which is correct
+     * for a single instance; a multi-instance deployment needs a shared store
+     * (Redis) or the limit becomes per-instance.
+     */
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     CaptchaModule,
     PrismaModule,
     HealthModule,
@@ -46,6 +57,10 @@ import { CaptchaModule } from './common/captcha/captcha.module';
     LeadsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Applies the default limit everywhere; per-route @Throttle overrides it.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}

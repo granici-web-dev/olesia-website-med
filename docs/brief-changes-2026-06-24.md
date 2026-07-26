@@ -289,7 +289,7 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 | Google reCAPTCHA | ✅ **DONE 2026-07-26** — see Phase 9 below. Env-gated both ends; ⛔ still needs the client's site/secret keys. |
 | Automatic backups | ❌ depends on prod Postgres hosting (question 28, unanswered). A managed Postgres with PITR satisfies it |
 | "Automatic updates" | ⚠️ WordPress-shaped expectation. Our equivalent = Dependabot/Renovate + a periodic upgrade pass. **Explain this to her so expectations match** |
-| Attack protection | ❌ add Vercel WAF/rate limiting + API throttling |
+| Attack protection | ✅ **DONE 2026-07-26** — API rate limits + security headers; ⛔ the Vercel WAF part is a dashboard action, see Phase 9 |
 | Admin 2FA | ✅ **DONE 2026-07-26** — TOTP + recovery codes + back-office enrolment UI; see Phase 9 |
 
 ### 11.12 Back-office coverage vs what she expects to edit
@@ -447,7 +447,17 @@ All of these are **not started**. Ordered by dependency, not by client priority.
   - Back office: **Securitate** page (QR, manual key, confirm, recovery codes with copy, disable) + nav entry; `UserDto` gained `totpEnabled` (never the secret or the hashes).
   - Verified end-to-end via a script (12 checks: plain login, enrolment, `totp_required`, wrong code, TOTP login, recovery-code login, replay rejected, `/auth/me` leaks nothing, disable) **and** in the browser through the back office.
   - ❓ **Deliberately opt-in, not enforced.** Enforcing 2FA for every `admin` would lock out an account that has not enrolled yet; when the client's real accounts exist, add a `REQUIRE_ADMIN_2FA` flag and enrol her first.
-- [ ] **Rate limiting / WAF**: throttle auth + public POST endpoints; enable Vercel firewall rules on the frontend.
+- [x] **Rate limiting + security headers** — ✅ DONE 2026-07-26.
+  - `@nestjs/throttler`: a generous default (120 req/min per IP) for ordinary browsing, and tighter limits where an attack would actually pay — **login 8/min** (room for a mistyped password or a 2FA retry, far too slow to walk a password list), **2FA enable/disable 10/min**, **public lead forms 6/min**. The captcha stops bots that solve for a score; this stops the ones that simply hammer.
+  - `app.set('trust proxy', 1)` — behind Vercel / nginx / the cloudflared tunnel the socket address is the proxy's, and without this every visitor would share one bucket and one noisy client could lock out everyone.
+  - `helmet` on the API (no CSP: it serves JSON and files, not HTML; `crossOriginResourcePolicy` left off because uploads are deliberately cross-origin to the frontend).
+  - Frontend security headers in `next.config.ts`: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` (camera/mic/geolocation all denied), `Strict-Transport-Security`.
+  - Verified against the running stack: the 9th login attempt in a minute returns 429, the 7th lead does too, and both apps serve the headers.
+  - ⚠️ Throttler storage is **in-memory** — correct for a single instance, but a multi-instance deployment needs a shared store (Redis) or each instance enforces its own limit. Revisit with the prod hosting decision.
+  - ❓ **No Content-Security-Policy yet**, on purpose: the site embeds YouTube and Facebook, loads reCAPTCHA, and will load GTM/GA4/Pixel once the IDs arrive. A CSP written now would either be too loose to prove anything or would break a page in production. Add it once the analytics stack is final.
+  - ⛔ **Client/account-owner action — Vercel WAF** (cannot be done in code): in the Vercel project → Firewall, enable **Attack Challenge Mode** availability, add a rate-limit rule on `/api/*` if the API ever moves behind Vercel, and turn on **BotID** for the form routes. Vercel's automatic DDoS mitigation is already on by default.
+
+- [x] **Fixed along the way:** the Nx project graph could not evaluate `apps/frontend/next.config.ts` — next-intl resolves its request-config path against `process.cwd()`, which differs between `pnpm dev` (apps/frontend) and Nx (workspace root), and Turbopack rejects absolute paths. The config now derives a cwd-relative path, so both work. This was pre-existing, not caused by the header change; it only surfaced when the graph cache was invalidated.
 - [ ] **Automated backups** — falls out of the prod Postgres choice (blocker #13); pick a managed provider with PITR and document the restore procedure.
 - [ ] **Dependency updates** — enable Renovate/Dependabot + a documented periodic upgrade pass. Explain to the client that this is what "actualizări automate" means here.
 

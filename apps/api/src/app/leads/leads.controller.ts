@@ -1,5 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../common/decorators/public.decorator';
 import { CaptchaGuard, CaptchaProtected } from '../common/captcha/captcha.guard';
@@ -27,6 +28,9 @@ import {
   required: false,
   description: 'reCAPTCHA v3 token; required once RECAPTCHA_SECRET is configured.',
 })
+// Nobody legitimately sends six enquiries a minute; the captcha stops bots
+// that solve for a score, this stops the ones that just hammer.
+@Throttle({ default: { ttl: 60_000, limit: 6 } })
 @UseGuards(CaptchaGuard)
 @Controller('leads')
 export class LeadsController {

@@ -9,6 +9,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import type { AuthTokens, UserDto } from '@olesia/shared';
 
@@ -43,6 +44,9 @@ export class AuthController {
     private readonly totp: TotpService,
   ) {}
 
+  /** 8 attempts a minute per IP: enough for a mistyped password or a 2FA
+   *  retry, far too slow to walk a password list. */
+  @Throttle({ default: { ttl: 60_000, limit: 8 } })
   @Public()
   @HttpCode(200)
   @Post('login')
@@ -104,6 +108,7 @@ export class AuthController {
   }
 
   /** Step 2: prove the authenticator works, then switch 2FA on. */
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiBearerAuth()
   @HttpCode(200)
   @Post('2fa/enable')
@@ -115,6 +120,7 @@ export class AuthController {
   }
 
   /** Turning it off also needs a valid code — a stolen session must not suffice. */
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiBearerAuth()
   @HttpCode(200)
   @Post('2fa/disable')
