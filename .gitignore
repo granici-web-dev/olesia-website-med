@@ -57,5 +57,8 @@ plan-sheet-*.png
 # Extracted Russian text for Textovod proofreading (scratch, regenerated)
 /ru-proofread.txt
 
-# raw source video (compressed copy lives in apps/frontend/public/assets)
-docs/olesea jalba.mp4
+# raw source video from the client (hero source + TV appearance recordings).
+# Never commit these: 30–170 MB each, and GitHub hard-rejects files > 100 MB.
+# Compressed/derived copies live in apps/frontend/public/assets; TV appearances
+# should be embedded from their original publication URL, not self-hosted.
+docs/*.mp4

@@ -13,7 +13,17 @@ Client answered our brief (`docs/Бриф проекта — Dr. Olesea Jalba.cs
 - **Catalog must be data-driven** (admin-editable prices/descriptions + add new services) — open architectural decision (doc §10).
 - **New features:** Biblioteca Digitală (downloads, email-gate, free+paid, search, age filter), Analytics (GA4/GTM/GSC/Meta Pixel), Newsletter, Q17 homepage/About sections, age filter for blog+library, Calendly→Google Meet auto-link.
 - **Real contacts ready to swap:** phone +373 68837774, email oleseajalba@gmail.com; socials IG `dr.olesea_jalba_pediatru`, FB `olesea.jalba.2025`, Telegram `dr_olesea_jalba_official` (drop LinkedIn).
-- **Blocked on client:** subscription prices, legal entity data, final service texts, article texts/images + upload channel, exact address, newsletter/SMTP provider, paid-downloads payment model.
+- **Blocked on client:** legal entity data, article texts/images + upload channel, exact address, newsletter/SMTP provider, working hours, media-appearance list. (Subscription prices, service texts, "~1h" SLA and the lawyer gate were resolved — see the doc.)
+
+### ⚠️ SECOND scope change — client answers v2 (2026-07-26)
+
+Client answered a 14-point follow-up (`docs/response_v2.md`). **Details + phased TODO in `docs/brief-changes-2026-06-24.md` §11 and Phases 9–13.** Headlines:
+
+- **Online payments are now IN scope** — card (Visa/MC), MIA, Revolut, PayPal, SEPA, paid *inside* the booking flow (service → slot → pay → auto-confirmation). This **reverses** "Payments: out of scope — manual" in `module_calendly.md` and the earlier manual-confirm decisions. **Blocked on scope/budget sign-off — do not start coding.**
+- **Patients must upload analyses/documents before consults** — new surface, special-category GDPR data, no patient accounts exist today.
+- **Security package:** reCAPTCHA (nothing exists), admin 2FA/TOTP (nothing exists), automated backups, WAF/rate limiting, dependency-update process.
+- **Back office must edit:** texts, prices, photos, articles, PDF guides, **FAQ, testimonials, media appearances** — the last three plus site media have no modules yet. Content models are RO/EN only while the site is RO/EN/**RU** → RU fields needed.
+- **Confirmed:** paid Calendly incoming · standard legal drafts OK for launch (lawyer later) · EXPRESS ~1h *during working hours* (schedule pending) · dedicated `/media` page · RO video + EN/RU **subtitles** (no AI dubbing) · cookie banner with Accept all / Reject / Customize · blog + newsletter.
 
 ## Quick orientation
 
