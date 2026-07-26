@@ -1,0 +1,145 @@
+/* Click-to-load video card for /media. The poster is a button: pressing it
+   swaps in the provider iframe, so no third-party cookie is set on first paint
+   (see MediaGallery.tsx). Quiet frame by default, soft lift + play cue on
+   hover/focus — same vocabulary as the certificate cards on /about. */
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+}
+
+/* 16:9 media well — holds either the poster button or the loaded iframe. */
+.well {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  background: var(--cream-2, #efe9df);
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+.posterImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.poster:hover .posterImg,
+.poster:focus-visible .posterImg {
+  transform: scale(1.03);
+}
+
+.poster:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: -4px;
+}
+
+/* Scrim keeps the badges and the play button legible over any frame. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(24, 22, 18, 0.34) 0%,
+    rgba(24, 22, 18, 0.06) 38%,
+    rgba(24, 22, 18, 0.42) 100%
+  );
+  transition: background 0.35s ease-out;
+}
+
+.poster:hover .scrim,
+.poster:focus-visible .scrim {
+  background: linear-gradient(
+    to bottom,
+    rgba(24, 22, 18, 0.42) 0%,
+    rgba(24, 22, 18, 0.14) 38%,
+    rgba(24, 22, 18, 0.5) 100%
+  );
+}
+
+.play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  color: var(--cream);
+  background: rgba(42, 51, 21, 0.86);
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.35s ease-out;
+}
+
+.poster:hover .play,
+.poster:focus-visible .play {
+  background: var(--sage-deep);
+  transform: translate(-50%, -50%) scale(1.07);
+}
+
+/* Small overlay chips: outlet (top-left) and runtime (bottom-right). */
+.chip {
+  position: absolute;
+  padding: 5px 10px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: rgba(24, 22, 18, 0.62);
+  border-radius: 999px;
+  backdrop-filter: blur(2px);
+}
+
+.chipOutlet {
+  top: 14px;
+  left: 14px;
+}
+
+.chipDuration {
+  right: 14px;
+  bottom: 14px;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .posterImg,
+  .scrim,
+  .play {
+    transition: none;
+  }
+
+  .poster:hover .posterImg,
+  .poster:focus-visible .posterImg {
+    transform: none;
+  }
+
+  .poster:hover .play,
+  .poster:focus-visible .play {
+    transform: translate(-50%, -50%);
+  }
+}

@@ -564,6 +564,29 @@ export default async function AboutPage({
       {/* 5.4 · Certificates — visual proof for the "Formare continuă" record */}
       <Certificates locale={locale} />
 
+      {/* 5.45 · Media teaser — the full list lives on /media (brief §7.4) */}
+      <section className="border-t border-[var(--rule)]">
+        <div className="shell flex flex-col gap-6 py-14 md:flex-row md:items-center md:justify-between md:py-16">
+          <div>
+            <p className="eyebrow mb-3">{ru ? 'СМИ' : en ? 'In the media' : 'Apariții media'}</p>
+            <p className="serif max-w-[34ch] text-[clamp(1.4rem,2.4vw,2rem)] leading-[1.15] tracking-[-0.01em] text-balance">
+              {ru
+                ? 'Гостья программ Moldova 1, TVR Moldova и Canal 2'
+                : en
+                  ? 'A guest on Moldova 1, TVR Moldova and Canal 2'
+                  : 'Invitată la Moldova 1, TVR Moldova și Canal 2'}
+            </p>
+          </div>
+          <Link
+            href="/media"
+            className="inline-flex shrink-0 items-center gap-2 border-b border-ink pb-0.5 text-[0.95rem] text-ink transition-colors hover:border-sage hover:text-sage"
+          >
+            {ru ? 'Смотреть выпуски' : en ? 'See the appearances' : 'Vezi aparițiile'}
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </section>
+
       {/* 5.5 · Valori profesionale + mission (brief §7.3 / §7.7) */}
       <section className="shell border-t border-[var(--rule)] py-20 md:py-28">
         <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16 lg:gap-24">
