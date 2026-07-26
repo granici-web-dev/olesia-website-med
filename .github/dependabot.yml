@@ -1,0 +1,53 @@
+# Automated dependency updates (client answers v2 §10, "actualizări automate").
+#
+# Dependabot rather than Renovate on purpose: it is native to GitHub and starts
+# working the moment this file lands on the default branch, with no app to
+# install. Renovate is the better monorepo tool, but a config that sits dormant
+# because nobody installed the app would leave the client's requirement unmet.
+#
+# The grouping below exists so this does not become noise nobody reads: one PR
+# per area per week beats twenty individual ones. Security updates ignore the
+# schedule and open immediately — that is Dependabot's own behaviour.
+version: 2
+
+updates:
+  - package-ecosystem: npm # covers the pnpm workspace, lockfile included
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Europe/Chisinau
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    labels:
+      - dependencies
+    groups:
+      # Patch/minor across the board: routine, reviewed as one batch.
+      routine:
+        patterns: ['*']
+        update-types: ['minor', 'patch']
+      # Framework majors are migrations, not updates — they get their own PR
+      # so nobody merges a Next.js or NestJS major inside a bulk bump.
+      next:
+        patterns: ['next', '@next/*', 'react', 'react-dom', '@types/react*']
+        update-types: ['major']
+      nest:
+        patterns: ['@nestjs/*', 'prisma', '@prisma/*']
+        update-types: ['major']
+      nx:
+        patterns: ['nx', '@nx/*']
+        update-types: ['major']
+    ignore:
+      # Nx majors move the whole workspace and want `nx migrate`, not a PR diff.
+      - dependency-name: 'nx'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@nx/*'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies

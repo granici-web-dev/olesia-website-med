@@ -288,7 +288,7 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 | SSL | ✅ automatic on Vercel; API depends on the (undecided) prod host |
 | Google reCAPTCHA | ✅ **DONE 2026-07-26** — see Phase 9 below. Env-gated both ends; ⛔ still needs the client's site/secret keys. |
 | Automatic backups | ❌ depends on prod Postgres hosting (question 28, unanswered). A managed Postgres with PITR satisfies it |
-| "Automatic updates" | ⚠️ WordPress-shaped expectation. Our equivalent = Dependabot/Renovate + a periodic upgrade pass. **Explain this to her so expectations match** |
+| "Automatic updates" | ✅ **DONE 2026-07-26** — Dependabot, grouped weekly. ⚠️ still **explain to her** what it does and does not mean, see Phase 9 |
 | Attack protection | ✅ **DONE 2026-07-26** — API rate limits + security headers; ⛔ the Vercel WAF part is a dashboard action, see Phase 9 |
 | Admin 2FA | ✅ **DONE 2026-07-26** — TOTP + recovery codes + back-office enrolment UI; see Phase 9 |
 
@@ -459,7 +459,12 @@ All of these are **not started**. Ordered by dependency, not by client priority.
 
 - [x] **Fixed along the way:** the Nx project graph could not evaluate `apps/frontend/next.config.ts` — next-intl resolves its request-config path against `process.cwd()`, which differs between `pnpm dev` (apps/frontend) and Nx (workspace root), and Turbopack rejects absolute paths. The config now derives a cwd-relative path, so both work. This was pre-existing, not caused by the header change; it only surfaced when the graph cache was invalidated.
 - [ ] **Automated backups** — falls out of the prod Postgres choice (blocker #13); pick a managed provider with PITR and document the restore procedure.
-- [ ] **Dependency updates** — enable Renovate/Dependabot + a documented periodic upgrade pass. Explain to the client that this is what "actualizări automate" means here.
+- [x] **Dependency updates** — ✅ DONE 2026-07-26: `.github/dependabot.yml`.
+  - **Dependabot, not Renovate**, on purpose: it is native to GitHub and starts working the moment the file reaches the default branch, with no app to install. Renovate is the better monorepo tool, but a config nobody activates would leave the client's requirement unmet on paper only.
+  - Weekly, **grouped** so it does not become noise nobody reads: one "routine" PR for all minor/patch, and separate PRs for framework majors (Next/React, NestJS/Prisma) because those are migrations, not updates. Security advisories ignore the schedule and open immediately — Dependabot's own behaviour.
+  - **Nx majors are ignored** deliberately: they move the whole workspace and want `nx migrate`, not a PR diff.
+  - 📣 **To tell the client:** "actualizări automate" on a custom site is not the WordPress one-click thing. What she gets is: the system watches every library weekly, opens a proposal when something is out of date, and shouts immediately on a security advisory — but a human still reviews and merges, because an unreviewed auto-merge on a site handling medical data is a worse risk than a slightly outdated library. Add a periodic upgrade pass to the maintenance agreement.
+  - ⚠️ There is **no CI in the repo yet** (`.github/workflows` is empty), so nothing verifies a Dependabot PR automatically. A minimal workflow — install, typecheck both apps, build — would make these PRs safe to merge on sight. Worth doing before handover.
 
 ### Phase 10 — Back-office content modules (§11.12)
 - [ ] `faq` module + CRUD (frontend /faq is hardcoded copy today).
