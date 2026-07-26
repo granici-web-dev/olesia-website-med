@@ -222,7 +222,11 @@ const CATEGORIES: FaqCategory[] = [
       },
       {
         q: { ro: '„~1 oră" înseamnă timp de lucru?', en: 'Does “~1 hour” mean working hours?', ru: '«~1 час» — это в рабочее время?' },
-        a: { ro: 'Da — aproximativ o oră în timpul programului de lucru.', en: 'Yes — about an hour during working hours.', ru: 'Да, примерно час в рабочее время.' },
+        a: {
+          ro: 'Da — aproximativ o oră în timpul programului de lucru. Întrebările trimise în afara programului primesc răspuns în următorul interval de lucru.',
+          en: 'Yes — about an hour during working hours. Questions sent outside the schedule are answered in the next working interval.',
+          ru: 'Да, примерно час в рабочее время. На вопросы, отправленные вне графика, ответ приходит в следующий рабочий интервал.',
+        },
       },
       {
         q: { ro: 'Ce include „Monitorizare și abonamente"?', en: 'What does “Monitoring & subscriptions” include?', ru: 'Что включает «Наблюдение и абонементы»?' },

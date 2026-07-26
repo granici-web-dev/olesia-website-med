@@ -5,94 +5,64 @@ import type { AboutTestimonial } from '@/lib/api';
 import { Reveal } from '@/components/ui/Reveal';
 import styles from './Testimonials.module.css';
 
-/** Testimonial with optional RU copy (fallback items are trilingual; API items are RO/EN only). */
-type Testimonial = AboutTestimonial & { quoteRu?: string; roleRu?: string };
+/** Testimonial with optional RU/EN copy (local items are trilingual; API items are RO/EN only). */
+type Testimonial = AboutTestimonial & {
+  quoteRu?: string;
+  roleRu?: string;
+  authorEn?: string;
+  authorRu?: string;
+};
 
 /**
- * PLACEHOLDER parent reviews — shown when the back office has no testimonials yet.
- * Realistic filler; the client will replace these with real reviews (via back office
- * once the API is live, or by editing this array). Kept trilingual RO/EN/RU inline,
- * matching the site's inline-copy convention.
+ * REAL parent reviews (received from the client 2026-07-26, source `docs/testemonials.md`).
+ * These replaced the placeholder set — no invented reviews are shown anywhere on the site.
+ *
+ * Handling rules for anything added here:
+ * · Wording is the reviewer's. Only typos/spacing were normalised — never the meaning.
+ * · Each review is authored in ONE language; the other two are faithful translations
+ *   (review 1 was written in RU, review 2 in RO).
+ * · Unsigned reviews get a neutral author label, not an invented name.
+ * · `source` names the platform when the review came from one (review 2 mentions
+ *   DoctorChat in its own text). ⛔ Ask the client whether DoctorChat requires a
+ *   formal credit beyond this.
+ *
+ * Moves to the back-office `testimonials` module in the backend pass; until then the
+ * API list (when non-empty) still wins over this array.
  */
-const FALLBACK_TESTIMONIALS: Testimonial[] = [
+const LOCAL_TESTIMONIALS: Testimonial[] = [
   {
     quoteRo:
-      'Consultația a fost calmă și fără grabă. Am plecat cu un plan clar pentru alimentația fetiței și, în sfârșit, fără anxietatea de dinainte.',
+      'Mulțumesc mult doamnei doctor pentru tratamentul competent și de calitate al copilului. Ne-am adresat sâmbătă, cu o tuse foarte puternică. Doctorul a fost foarte atent cu copilul și, după toate analizele, i-a explicat mamei pe înțeles schema de tratament. Acasă am urmat totul întocmai — deja în a treia zi tusea a început să cedeze (pneumonie pe dreapta). În a cincea zi copilul se simțea mult mai bine. Vă mulțumesc enorm pentru ajutor și pentru că la Chișinău am întâlnit un medic la fel de bun ca în Ucraina (Nikolaev). Pentru că atunci când copilul e bolnav e mereu panică, mai ales într-o altă țară.',
     quoteEn:
-      'The consultation was calm and unhurried. We left with a clear plan for our daughter’s nutrition and, finally, without the anxiety we came in with.',
+      'Thank you so much for the competent, high-quality care of our child. We came in on a Saturday with a very bad cough. The doctor was extremely attentive with the child and, after all the tests, explained the treatment plan to the mother in plain language. At home we followed it exactly — by the third day the cough began to ease (right-sided pneumonia). By the fifth day the child felt much better. Thank you enormously for your help, and for the fact that in Chișinău I met a doctor as good as the one back in Ukraine (Mykolaiv). Because when your child is ill there is always panic — especially in another country.',
     quoteRu:
-      'Консультация прошла спокойно и без спешки. Мы ушли с чётким планом питания для дочки и, наконец, без прежней тревоги.',
-    author: 'Maria P.',
-    roleRo: 'mamă a unei fetițe de 3 ani',
-    roleEn: 'mother of a 3-year-old',
-    roleRu: 'мама трёхлетней дочки',
+      'Спасибо большое доктору за грамотное, квалифицированное и качественное лечение ребёнка. Обратились в субботу с очень сильным кашлем. Доктор был очень внимателен к ребёнку и после всех анализов доступно объяснил маме курс лечения. Дома всё делали по назначению врача — уже на третий день лечения кашель начал уходить (правосторонняя пневмония). На пятый день ребёнок чувствовал себя намного лучше. Спасибо вам огромное за помощь и за то, что в Кишинёве мне встретился такой же грамотный врач, как и в Украине (Николаев). Потому что, когда болеет ребёнок, всегда паника — особенно в другой стране.',
+    author: 'Părinte',
+    authorEn: 'A parent',
+    authorRu: 'Родитель',
+    roleRo: 'copil tratat de pneumonie',
+    roleEn: 'child treated for pneumonia',
+    roleRu: 'ребёнок лечился от пневмонии',
   },
   {
     quoteRo:
-      'Cu doi gemeni, aveam mereu întrebări. Doamna doctor răspunde la fiecare mesaj cu răbdare și explică pe înțelesul nostru.',
+      'Prima mea experiență pe DoctorChat. E un instrument bun când ai nevoie de un sfat al medicului sau de o părere în plus. Dna Jalbă a fost atentă la detalii, a răspuns la toate întrebările care mă interesau și m-a ajutat să găsesc o soluție.',
     quoteEn:
-      'With twins, we always had questions. The doctor answers every message patiently and explains everything in plain language.',
+      'My first experience on DoctorChat. It’s a good tool when you need a doctor’s advice or a second opinion. Dr. Jalbă paid attention to the details, answered every question I had, and helped me find a solution.',
     quoteRu:
-      'С двойней вопросов всегда было много. Доктор терпеливо отвечает на каждое сообщение и объясняет понятным языком.',
-    author: 'Andrei & Elena',
-    roleRo: 'părinți de gemeni',
-    roleEn: 'parents of twins',
-    roleRu: 'родители двойни',
-  },
-  {
-    quoteRo:
-      'Prima lună cu bebelușul e grea. Sprijinul la alăptare și monitorizarea greutății ne-au dat încredere zi de zi.',
-    quoteEn:
-      'The first month with a newborn is hard. The breastfeeding support and weight monitoring gave us confidence day by day.',
-    quoteRu:
-      'Первый месяц с малышом даётся тяжело. Поддержка в грудном вскармливании и контроль веса возвращали уверенность день за днём.',
-    author: 'Cristina M.',
-    roleRo: 'mamă a unui nou-născut',
-    roleEn: 'mother of a newborn',
-    roleRu: 'мама новорождённого',
-  },
-  {
-    quoteRo:
-      'Abordarea integrativă ne-a ajutat să înțelegem cauza, nu doar simptomele. Recomandările au fost practice și realiste.',
-    quoteEn:
-      'The integrative approach helped us understand the cause, not just the symptoms. The recommendations were practical and realistic.',
-    quoteRu:
-      'Интегративный подход помог понять причину, а не только симптомы. Рекомендации были практичными и выполнимыми.',
-    author: 'Victor D.',
-    roleRo: 'tată',
-    roleEn: 'father',
-    roleRu: 'папа',
-  },
-  {
-    quoteRo:
-      'Copilul meu mânca extrem de selectiv. Cu pași mici din meniul personalizat, mesele au devenit în sfârșit liniștite.',
-    quoteEn:
-      'My child was an extremely picky eater. With the small steps in the personalized menu, mealtimes finally became calm.',
-    quoteRu:
-      'Мой ребёнок ел очень избирательно. Благодаря маленьким шагам из персонального меню приёмы пищи наконец стали спокойными.',
-    author: 'Ana T.',
-    roleRo: 'mamă a unui băiețel de 5 ani',
-    roleEn: 'mother of a 5-year-old',
-    roleRu: 'мама пятилетнего сына',
-  },
-  {
-    quoteRo:
-      'Ne-a plăcut că totul e clar și fără presiune. Am simțit că suntem ascultați și că deciziile le luăm împreună.',
-    quoteEn:
-      'We loved that everything was clear and pressure-free. We felt heard and that we were making decisions together.',
-    quoteRu:
-      'Понравилось, что всё ясно и без давления. Мы чувствовали, что нас слышат и решения принимаем вместе.',
-    author: 'Diana & Sergiu',
-    roleRo: 'părinți',
-    roleEn: 'parents',
-    roleRu: 'родители',
+      'Мой первый опыт на DoctorChat. Хороший инструмент, когда нужен совет врача или дополнительное мнение. Госпожа Жалбэ была внимательна к деталям, ответила на все интересовавшие меня вопросы и помогла найти решение.',
+    author: 'Zlobin Alexandru',
+    roleRo: 'prin DoctorChat',
+    roleEn: 'via DoctorChat',
+    roleRu: 'через DoctorChat',
   },
 ];
 
 /**
- * Parent reviews. Editable from the back office; falls back to placeholders when empty.
- * Renders as a slider — 3 cards per view on desktop (2 on tablet, 1 on mobile) with
- * a native scroll-snap track navigated by arrows or swipe, so all reviews are reachable.
+ * Parent reviews. Editable from the back office; falls back to the local set when empty.
+ * Renders as a slider — 2 cards per view from `sm` up (1 on mobile) with a native
+ * scroll-snap track navigated by arrows or swipe, so any further reviews stay reachable.
+ * With only two reviews the arrows hide themselves (`canScroll` is false).
  */
 export function Testimonials({
   locale,
@@ -104,7 +74,7 @@ export function Testimonials({
   const t = (ro: string, en: string, ru: string) =>
     locale === 'ru' ? ru : locale === 'en' ? en : ro;
 
-  const list: Testimonial[] = items.length > 0 ? items : FALLBACK_TESTIMONIALS;
+  const list: Testimonial[] = items.length > 0 ? items : LOCAL_TESTIMONIALS;
 
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [atStart, setAtStart] = useState(true);
@@ -182,13 +152,15 @@ export function Testimonials({
           {list.map((it, i) => (
             <figure
               key={i}
-              className="flex shrink-0 basis-full snap-start flex-col sm:basis-[calc(50%-0.75rem)] lg:basis-[calc((100%-3rem)/3)]"
+              className="flex shrink-0 basis-full snap-start flex-col sm:basis-[calc(50%-0.75rem)]"
             >
-              <blockquote className="serif-it text-[1.3rem] leading-snug text-ink text-pretty">
+              <blockquote className="serif-it text-[1.25rem] leading-snug text-ink text-pretty md:text-[1.3rem]">
                 “{t(it.quoteRo, it.quoteEn, it.quoteRu ?? it.quoteRo)}”
               </blockquote>
               <figcaption className="mt-5 text-sm">
-                <span className="font-semibold text-ink">{it.author}</span>
+                <span className="font-semibold text-ink">
+                  {t(it.author, it.authorEn ?? it.author, it.authorRu ?? it.author)}
+                </span>
                 {(it.roleRo || it.roleEn) && (
                   <span className="text-ink-soft">
                     {' '}

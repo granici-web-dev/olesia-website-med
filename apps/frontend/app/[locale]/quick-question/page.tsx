@@ -89,7 +89,11 @@ const EXAMPLES: Bi[] = [
 const FAQ: { q: Bi; a: Bi }[] = [
   {
     q: { ro: 'Cât de repede primesc răspunsul?', en: 'How fast do I get the answer?', ru: 'Как быстро я получу ответ?' },
-    a: { ro: 'În aproximativ 1 oră în timpul programului de lucru de la trimiterea întrebării.', en: 'Within about 1 hour during working hours of sending your question.', ru: 'Примерно за 1 час в рабочее время с момента отправки вопроса.' },
+    a: {
+      ro: 'În aproximativ 1 oră în timpul programului de lucru de la trimiterea întrebării. Dacă trimiți întrebarea în afara programului, răspunsul vine în următorul interval de lucru.',
+      en: 'Within about 1 hour during working hours of sending your question. If you send it outside working hours, the answer comes in the next working interval.',
+      ru: 'Примерно за 1 час в рабочее время с момента отправки вопроса. Если вопрос отправлен вне графика, ответ придёт в следующий рабочий интервал.',
+    },
   },
   {
     q: { ro: 'Pot atașa poze sau documente?', en: 'Can I attach photos or documents?', ru: 'Можно ли приложить фото или документы?' },
@@ -171,10 +175,10 @@ export default async function QuickQuestionPage({
               </h1>
               <p className="mt-7 max-w-[36ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
                 {ru
-                  ? 'Для конкретного вопроса, без полной консультации.'
+                  ? 'Для конкретного вопроса, без полной консультации. Ответ — в рабочее время.'
                   : en
-                  ? 'For a specific question, without a full consultation.'
-                  : 'Pentru o întrebare punctuală, fără o consultație completă.'}
+                  ? 'For a specific question, without a full consultation. Answered during working hours.'
+                  : 'Pentru o întrebare punctuală, fără o consultație completă. Răspunsul vine în timpul programului de lucru.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <BookGroupBButton
