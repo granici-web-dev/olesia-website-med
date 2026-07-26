@@ -12,6 +12,7 @@
  */
 
 import { track } from './analytics';
+import { getCaptchaToken } from './captcha';
 
 export const NEWSLETTER = {
   /** POST target for {email, locale, source, consent}. Empty = disabled. */
@@ -37,9 +38,16 @@ export interface SubscribeOpts {
 export async function subscribe(email: string, opts: SubscribeOpts): Promise<SubscribeResult> {
   if (!NEWSLETTER.endpoint) return 'disabled';
   try {
+    // Sent whenever a site key is configured. A third-party endpoint will
+    // ignore the header; a same-origin one (the preferred setup above) can
+    // verify it with the same guard the lead routes use.
+    const token = await getCaptchaToken('newsletter_subscribe');
     const res = await fetch(NEWSLETTER.endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'x-captcha-token': token } : {}),
+      },
       body: JSON.stringify({ email, locale: opts.locale, source: opts.source, consent: true }),
     });
     if (!res.ok) return 'error';

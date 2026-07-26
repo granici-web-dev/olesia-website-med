@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { newsletterEnabled, subscribe } from '@/lib/newsletter';
+import { CaptchaNotice } from './CaptchaNotice';
 
 /* Newsletter signup (brief §6c). Renders nothing until an endpoint is
    configured (newsletterEnabled), mirroring the analytics no-op pattern.
@@ -104,6 +105,8 @@ export function NewsletterSignup({ source = 'footer', className = '' }: { source
         {status === 'error' && (
           <p className="mt-2 text-[0.85rem] text-[var(--walnut,#8a5a3a)]">{lc(T.error)}</p>
         )}
+
+        <CaptchaNotice className="mt-3" />
       </form>
     </div>
   );

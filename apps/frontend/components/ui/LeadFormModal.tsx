@@ -13,6 +13,7 @@ import {
 } from '@/lib/leads';
 import { track } from '@/lib/analytics';
 import styles from './LeadFormModal.module.css';
+import { CaptchaNotice } from './CaptchaNotice';
 
 /** Group-C order context — the specific product being ordered. */
 export interface DeliverableContext {
@@ -232,6 +233,8 @@ export function LeadFormModal({
           >
             {status === 'submitting' ? t('submitting') : t('submit')}
           </button>
+
+          <CaptchaNotice className="mt-4" />
         </form>
       )}
     </Modal>

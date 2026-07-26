@@ -4,6 +4,7 @@ import { useId, useRef, useState } from 'react';
 
 import { submitContactMessage, type ContactSubject } from '@/lib/leads';
 import { track } from '@/lib/analytics';
+import { CaptchaNotice } from './CaptchaNotice';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Contact form — non-medical questions only (appointments, payment, how it
@@ -329,6 +330,8 @@ export function ContactForm({ locale }: { locale: string }) {
             : t('Trimite mesajul', 'Send message', 'Отправить сообщение')}
         </button>
       </div>
+
+      <CaptchaNotice className="mt-5 max-w-[52ch]" />
     </form>
   );
 }

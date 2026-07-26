@@ -147,3 +147,8 @@ body {
       transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
+/* reCAPTCHA v3 floats a badge bottom-right. Google allows hiding it as long as
+   the disclosure is shown next to the form — that is `CaptchaNotice`. */
+.grecaptcha-badge {
+  visibility: hidden;
+}

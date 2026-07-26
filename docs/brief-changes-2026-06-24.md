@@ -286,7 +286,7 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 | Requested | Reality (checked 2026-07-26) |
 |---|---|
 | SSL | ✅ automatic on Vercel; API depends on the (undecided) prod host |
-| Google reCAPTCHA | ❌ **no captcha anywhere in the repo**. Needed on: contact form, lead forms, EXPRESS, library email-gate, newsletter. (Turnstile would be the better tool, but she named reCAPTCHA.) |
+| Google reCAPTCHA | ✅ **DONE 2026-07-26** — see Phase 9 below. Env-gated both ends; ⛔ still needs the client's site/secret keys. |
 | Automatic backups | ❌ depends on prod Postgres hosting (question 28, unanswered). A managed Postgres with PITR satisfies it |
 | "Automatic updates" | ⚠️ WordPress-shaped expectation. Our equivalent = Dependabot/Renovate + a periodic upgrade pass. **Explain this to her so expectations match** |
 | Attack protection | ❌ add Vercel WAF/rate limiting + API throttling |
@@ -427,7 +427,17 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 All of these are **not started**. Ordered by dependency, not by client priority.
 
 ### Phase 9 — Security package (§11.10)
-- [ ] **reCAPTCHA** (client explicitly named Google reCAPTCHA) on contact form, lead forms, EXPRESS, library email-gate, newsletter → client-side widget + server-side token verification in `apps/api` (one guard/interceptor, not per-controller copies). Needs site/secret keys from the client's Google account.
+- [x] **reCAPTCHA v3** — ✅ DONE 2026-07-26, env-gated on both ends (no keys ⇒ current behaviour, no Google script ever loaded).
+  - API: `common/captcha/` — `CaptchaService` (siteverify + score threshold) and a `CaptchaGuard` driven by `@CaptchaProtected('<action>')`, registered globally, applied to all three `/leads/*` routes. One guard, not per-controller copies.
+  - Token travels in **`x-captcha-token`**, not the body: the global ValidationPipe runs `forbidNonWhitelisted`, and a header also keeps the token out of logged payloads.
+  - **Per-action tokens** (`lead_contact`, `lead_monitoring`, …) and the server checks the action matches the route, so a token minted on one form cannot be replayed against another.
+  - **Fail-open on Google being unreachable, fail-closed on a bad score.** A spam filter must never be the reason a parent cannot send a medical question; infrastructure failures are logged and let through.
+  - Frontend: `lib/captcha.ts` mints tokens and **loads the Google script lazily, on first submit** — visitors who never touch a form never contact Google. Wired into all `/leads/*` posts and the newsletter.
+  - `CaptchaNotice` renders Google's required disclosure next to each form (trilingual) and the floating badge is hidden — the disclosure is the sanctioned alternative.
+  - Verified in-browser with Google's public test key: zero requests to Google before submit, script + token on submit, header present on the POST.
+  - ⛔ **Client to provide:** reCAPTCHA v3 site + secret keys (her Google account). Set `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` (Vercel) and `RECAPTCHA_SECRET` (API).
+  - ⚠️ GDPR: reCAPTCHA sends data to Google; we treat it as strictly necessary for spam protection, which is why it sits outside the banner's optional categories — hence the lazy load. **Cloudflare Turnstile is the privacy-friendlier drop-in** if the client is open to it; she named reCAPTCHA.
+  - Still open: the library email-gate is UI-only (no POST yet), so it gets a token when its backend lands.
 - [ ] **Admin 2FA (TOTP)** in `auth`: enrolment (QR), verification step in the login flow, recovery codes, back-office UI. Enforce for `admin`, offer for `editor`.
 - [ ] **Rate limiting / WAF**: throttle auth + public POST endpoints; enable Vercel firewall rules on the frontend.
 - [ ] **Automated backups** — falls out of the prod Postgres choice (blocker #13); pick a managed provider with PITR and document the restore procedure.

@@ -4,6 +4,8 @@
  * The API base is `NEXT_PUBLIC_API_URL` (must be browser-reachable); defaults
  * to the local API. CORS for the site origin is enabled server-side.
  */
+import { getCaptchaToken, type CaptchaAction } from './captcha';
+
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333/api'
 ).replace(/\/+$/, '');
@@ -57,31 +59,47 @@ export interface ContactMessageInput {
   company?: string;
 }
 
-async function postLead(path: string, body: unknown): Promise<void> {
+/**
+ * Every lead carries a reCAPTCHA token in `x-captcha-token` — a header rather
+ * than a body field, because the API validates bodies with
+ * `forbidNonWhitelisted` and a header keeps the token out of logged payloads.
+ * The token is minted per action, so one form's token cannot be replayed
+ * against another. Without a site key `getCaptchaToken` returns null and the
+ * header is simply omitted.
+ */
+async function postLead(
+  path: string,
+  body: unknown,
+  action: CaptchaAction,
+): Promise<void> {
+  const token = await getCaptchaToken(action);
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'x-captcha-token': token } : {}),
+    },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`lead_failed_${res.status}`);
 }
 
 export function submitMonitoringLead(input: MonitoringLeadInput): Promise<void> {
-  return postLead('/leads/monitoring', input);
+  return postLead('/leads/monitoring', input, 'lead_monitoring');
 }
 
 export function submitQuickQuestionLead(
   input: QuickQuestionLeadInput,
 ): Promise<void> {
-  return postLead('/leads/quick-question', input);
+  return postLead('/leads/quick-question', input, 'lead_quick_question');
 }
 
 export function submitContactMessage(input: ContactMessageInput): Promise<void> {
-  return postLead('/leads/contact', input);
+  return postLead('/leads/contact', input, 'lead_contact');
 }
 
 export function submitDeliverableLead(
   input: DeliverableLeadInput,
 ): Promise<void> {
-  return postLead('/leads/deliverable', input);
+  return postLead('/leads/deliverable', input, 'lead_deliverable');
 }

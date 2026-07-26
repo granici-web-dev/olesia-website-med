@@ -20,11 +20,13 @@ import { PatientsModule } from './patients/patients.module';
 import { StorageModule } from './storage/storage.module';
 import { MailModule } from './mail/mail.module';
 import { LeadsModule } from './leads/leads.module';
+import { CaptchaModule } from './common/captcha/captcha.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    CaptchaModule,
     PrismaModule,
     HealthModule,
     AuthModule,
