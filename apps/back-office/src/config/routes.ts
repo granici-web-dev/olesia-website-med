@@ -13,6 +13,7 @@ export const paths = {
   contacts: '/contacte',
   about: '/despre-noi',
   users: '/utilizatori',
+  security: '/securitate',
 } as const;
 
 /** Editor route for a specific post. */

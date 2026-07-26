@@ -15,7 +15,7 @@ type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 interface AuthContextValue {
   user: User | null;
   status: AuthStatus;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, totpCode?: string) => Promise<void>;
   logout: () => void;
   hasRole: (roles?: Role[]) => boolean;
 }
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const login = React.useCallback(async (email: string, password: string) => {
+  const login = React.useCallback(async (email: string, password: string, totpCode?: string) => {
     if (USE_MOCKS) {
       await new Promise((resolve) => setTimeout(resolve, 600));
       if (!email || !password) throw new Error('invalid_credentials');
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const dto = await apiLogin({ email, password });
+    const dto = await apiLogin({ email, password, totpCode });
     setUser(toUser(dto));
     setStatus('authenticated');
   }, []);

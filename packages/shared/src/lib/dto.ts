@@ -31,6 +31,8 @@ export interface Paginated<T> {
 export interface LoginRequest {
   email: string;
   password: string;
+  /** TOTP or recovery code — sent on the retry after a `totp_required` 401. */
+  totpCode?: string;
 }
 
 /** Access token is returned in the body; the refresh token is an httpOnly cookie. */
@@ -44,8 +46,17 @@ export interface UserDto {
   name: string;
   role: Role;
   isActive: boolean;
+  /** Whether the account has two-factor authentication switched on. */
+  totpEnabled: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Returned by POST /auth/2fa/setup — the QR to scan, before 2FA is active. */
+export interface TotpEnrolment {
+  secret: string;
+  otpauthUrl: string;
+  qrDataUrl: string;
 }
 
 // --- Services / pricing ---

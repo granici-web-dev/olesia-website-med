@@ -290,7 +290,7 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 | Automatic backups | ❌ depends on prod Postgres hosting (question 28, unanswered). A managed Postgres with PITR satisfies it |
 | "Automatic updates" | ⚠️ WordPress-shaped expectation. Our equivalent = Dependabot/Renovate + a periodic upgrade pass. **Explain this to her so expectations match** |
 | Attack protection | ❌ add Vercel WAF/rate limiting + API throttling |
-| Admin 2FA | ❌ auth is JWT + password only (`apps/api/src/app/auth`). Needs TOTP + recovery codes + back-office enrolment UI |
+| Admin 2FA | ✅ **DONE 2026-07-26** — TOTP + recovery codes + back-office enrolment UI; see Phase 9 |
 
 ### 11.12 Back-office coverage vs what she expects to edit
 Existing back-office pages: `about, appointments, blog, contacts, dashboard, messages, patients, quick-questions, services, subscriptions, users`.
@@ -438,7 +438,15 @@ All of these are **not started**. Ordered by dependency, not by client priority.
   - ⛔ **Client to provide:** reCAPTCHA v3 site + secret keys (her Google account). Set `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` (Vercel) and `RECAPTCHA_SECRET` (API).
   - ⚠️ GDPR: reCAPTCHA sends data to Google; we treat it as strictly necessary for spam protection, which is why it sits outside the banner's optional categories — hence the lazy load. **Cloudflare Turnstile is the privacy-friendlier drop-in** if the client is open to it; she named reCAPTCHA.
   - Still open: the library email-gate is UI-only (no POST yet), so it gets a token when its backend lands.
-- [ ] **Admin 2FA (TOTP)** in `auth`: enrolment (QR), verification step in the login flow, recovery codes, back-office UI. Enforce for `admin`, offer for `editor`.
+- [x] **Admin 2FA (TOTP)** — ✅ DONE 2026-07-26.
+  - Prisma: `totpSecret` / `totpEnabled` / `totpEnabledAt` / `totpRecoveryCodes` on `User` (migration `user_totp`). Recovery codes are stored as **argon2 hashes** — a database leak must not hand over a way around the second factor.
+  - `TotpService` + three routes: `POST /auth/2fa/setup` (secret + otpauth URI + QR data-URL), `/2fa/enable` (needs a working code, returns the 8 recovery codes **once**), `/2fa/disable` (also needs a code — a stolen session must not suffice).
+  - **Enrolment cannot lock anyone out:** the secret is stored at step 1 but `totpEnabled` only flips after a code from the app verifies, so an abandoned setup leaves the account exactly as it was.
+  - Login stays one call: password first, and if the account has 2FA on and no code was sent the API answers **401 `totp_required`** — no half-authenticated session is issued in between. The back-office form then reveals a code field and re-posts.
+  - Recovery codes are single-use and deleted on use. otplib throws on anything that is not 6 digits, so that is caught and treated as "not a TOTP code" — otherwise a recovery code would 500 (it did; fixed).
+  - Back office: **Securitate** page (QR, manual key, confirm, recovery codes with copy, disable) + nav entry; `UserDto` gained `totpEnabled` (never the secret or the hashes).
+  - Verified end-to-end via a script (12 checks: plain login, enrolment, `totp_required`, wrong code, TOTP login, recovery-code login, replay rejected, `/auth/me` leaks nothing, disable) **and** in the browser through the back office.
+  - ❓ **Deliberately opt-in, not enforced.** Enforcing 2FA for every `admin` would lock out an account that has not enrolled yet; when the client's real accounts exist, add a `REQUIRE_ADMIN_2FA` flag and enrol her first.
 - [ ] **Rate limiting / WAF**: throttle auth + public POST endpoints; enable Vercel firewall rules on the frontend.
 - [ ] **Automated backups** — falls out of the prod Postgres choice (blocker #13); pick a managed provider with PITR and document the restore procedure.
 - [ ] **Dependency updates** — enable Renovate/Dependabot + a documented periodic upgrade pass. Explain to the client that this is what "actualizări automate" means here.

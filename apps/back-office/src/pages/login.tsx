@@ -17,6 +17,8 @@ import { ro } from '@/i18n/ro';
 const schema = z.object({
   email: z.string().email(ro.login.errorInvalid),
   password: z.string().min(6, ro.login.errorInvalid),
+  /** Only asked for after the API answers `totp_required`. */
+  totpCode: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -31,10 +33,12 @@ export function LoginPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', password: '', totpCode: '' },
   });
 
   const [rootError, setRootError] = React.useState<string | null>(null);
+  /** Second step: the account has 2FA on, so a code is required. */
+  const [needsTotp, setNeedsTotp] = React.useState(false);
 
   // Already signed in → bounce to the app.
   if (status === 'authenticated') {
@@ -44,10 +48,23 @@ export function LoginPage() {
   const onSubmit = async (values: FormValues) => {
     setRootError(null);
     try {
-      await login(values.email, values.password);
+      await login(values.email, values.password, values.totpCode || undefined);
       toast.success(ro.login.success);
       navigate(from, { replace: true });
-    } catch {
+    } catch (err) {
+      // The API answers 401 `totp_required` when the account has 2FA on and no
+      // code was sent — the password was correct, so we only add the code field
+      // rather than showing a credentials error.
+      const message = err instanceof Error ? err.message : '';
+      if (message.includes('totp_required')) {
+        setNeedsTotp(true);
+        return;
+      }
+      if (message.includes('totp_invalid_code')) {
+        setNeedsTotp(true);
+        setRootError(ro.login.totpError);
+        return;
+      }
       setRootError(ro.login.errorGeneric);
     }
   };
@@ -123,6 +140,23 @@ export function LoginPage() {
                 </p>
               )}
             </div>
+
+            {needsTotp && (
+              <div className="space-y-2">
+                <Label htmlFor="totpCode">{ro.login.totpLabel}</Label>
+                <Input
+                  id="totpCode"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  placeholder={ro.login.totpPlaceholder}
+                  {...form.register('totpCode')}
+                />
+                <p className="text-xs text-muted-foreground text-pretty">
+                  {ro.login.totpHint}
+                </p>
+              </div>
+            )}
 
             {rootError && (
               <p

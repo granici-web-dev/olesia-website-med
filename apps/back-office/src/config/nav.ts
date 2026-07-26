@@ -1,4 +1,5 @@
 import {
+  ShieldCheck,
   LayoutDashboard,
   CalendarCheck,
   Repeat2,
@@ -57,6 +58,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { to: paths.patients, label: ro.nav.patients, icon: Stethoscope },
       { to: paths.users, label: ro.nav.users, icon: Users, roles: ['admin'] },
+      { to: paths.security, label: ro.nav.security, icon: ShieldCheck },
     ],
   },
 ];

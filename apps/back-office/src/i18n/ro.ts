@@ -25,6 +25,7 @@ export const ro = {
     contacts: 'Contacte',
     about: 'Despre noi',
     users: 'Utilizatori',
+    security: 'Securitate',
   },
 
   header: {
@@ -46,6 +47,35 @@ export const ro = {
     editor: 'Editor',
   },
 
+  security: {
+    title: 'Securitate',
+    subtitle: 'Autentificare în doi pași pentru contul tău.',
+    cardTitle: 'Autentificare în doi pași',
+    cardDescription:
+      'La fiecare autentificare vei introduce, pe lângă parolă, un cod de 6 cifre generat de aplicația de pe telefon.',
+    statusOn: 'Activată',
+    statusOff: 'Dezactivată',
+    enableCta: 'Activează',
+    qrAlt: 'Cod QR pentru aplicația de autentificare',
+    scanHint:
+      'Scanează codul cu Google Authenticator, Microsoft Authenticator, 1Password sau orice aplicație TOTP.',
+    manualHint: 'Dacă nu poți scana, introdu manual această cheie:',
+    codeLabel: 'Codul din aplicație',
+    confirmCta: 'Confirmă',
+    cancel: 'Renunță',
+    recoveryTitle: 'Coduri de recuperare',
+    recoveryHint:
+      'Notează-le acum — se afișează o singură dată. Fiecare cod poate fi folosit o singură dată, dacă pierzi accesul la telefon.',
+    copy: 'Copiază',
+    copied: 'Copiate',
+    disableLabel: 'Introdu un cod pentru a dezactiva',
+    disableCta: 'Dezactivează',
+    disableHint: 'Cerem un cod valid și la dezactivare, ca o sesiune furată să nu fie suficientă.',
+    enabledToast: 'Autentificarea în doi pași este activă.',
+    disabledToast: 'Autentificarea în doi pași a fost dezactivată.',
+    invalidCode: 'Cod incorect. Mai încearcă o dată.',
+    errorGeneric: 'A apărut o eroare. Încearcă din nou.',
+  },
   login: {
     title: 'Autentificare',
     subtitle: 'Accesează panoul de administrare Olesia.',
@@ -59,6 +89,11 @@ export const ro = {
     errorInvalid: 'Email sau parolă incorecte.',
     errorGeneric: 'Autentificarea a eșuat. Încearcă din nou.',
     success: 'Bine ai revenit!',
+    totpLabel: 'Cod de verificare',
+    totpPlaceholder: '123456',
+    totpHint:
+      'Deschide aplicația de autentificare și introdu codul de 6 cifre. Poți folosi și un cod de recuperare.',
+    totpError: 'Cod incorect. Mai încearcă o dată.',
     footnote: 'Acces restricționat. Conturile sunt create de administrator.',
   },
 

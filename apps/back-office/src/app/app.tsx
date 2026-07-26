@@ -19,6 +19,7 @@ import { ServicesPage } from '@/pages/services';
 import { ContactsPage } from '@/pages/contacts';
 import { AboutPage } from '@/pages/about';
 import { UsersPage } from '@/pages/users';
+import { SecurityPage } from '@/pages/security';
 import { NotFoundPage } from '@/pages/not-found';
 
 export function App() {
@@ -53,6 +54,7 @@ export function App() {
               </RequireRole>
             }
           />
+          <Route path={paths.security} element={<SecurityPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>

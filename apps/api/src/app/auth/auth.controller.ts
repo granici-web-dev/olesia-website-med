@@ -16,7 +16,8 @@ import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { TotpService, type EnrolmentStart } from './totp.service';
+import { LoginDto, TotpCodeDto } from './dto/login.dto';
 import type { AuthUser } from './jwt.types';
 
 const REFRESH_COOKIE = 'olesia_rt';
@@ -39,16 +40,26 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly users: UsersService,
+    private readonly totp: TotpService,
   ) {}
 
   @Public()
   @HttpCode(200)
   @Post('login')
+  /**
+   * Password first, second factor second. When the account has 2FA on and no
+   * code was sent, this answers 401 `totp_required` — the client then re-posts
+   * the same credentials plus `totpCode`. No half-authenticated session is
+   * issued in between, so there is nothing to steal from that intermediate step.
+   */
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokens> {
     const user = await this.auth.validateUser(dto.email, dto.password);
+    if (user.totpEnabled) {
+      await this.totp.assertCode(user, dto.totpCode);
+    }
     const { accessToken, refreshToken } = await this.auth.issueTokens(user);
     setRefreshCookie(res, refreshToken);
     return { accessToken };
@@ -80,5 +91,37 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: AuthUser): Promise<UserDto> {
     return this.users.findOneDto(user.id);
+  }
+
+  // --- Two-factor authentication (answers v2 §10) ---
+
+  /** Step 1: mint a secret and show the QR. 2FA is NOT on yet. */
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('2fa/setup')
+  setupTotp(@CurrentUser() user: AuthUser): Promise<EnrolmentStart> {
+    return this.totp.startEnrolment({ id: user.id, email: user.email });
+  }
+
+  /** Step 2: prove the authenticator works, then switch 2FA on. */
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('2fa/enable')
+  async enableTotp(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: TotpCodeDto,
+  ): Promise<{ recoveryCodes: string[] }> {
+    return { recoveryCodes: await this.totp.confirmEnrolment(user.id, dto.code) };
+  }
+
+  /** Turning it off also needs a valid code — a stolen session must not suffice. */
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('2fa/disable')
+  async disableTotp(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: TotpCodeDto,
+  ): Promise<void> {
+    await this.totp.disable(user.id, dto.code);
   }
 }
