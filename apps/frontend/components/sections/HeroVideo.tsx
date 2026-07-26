@@ -7,11 +7,32 @@ import styles from './Hero.module.css';
 /* Client-controlled hero video (client-provided intro). No autoplay — the
    visitor starts it themselves, with sound. A poster covers the load; a
    play/pause control overlays the frame (prominent when paused, on-hover while
-   playing). Lives in the old photo slot (.photoFrame). */
+   playing). Lives in the old photo slot (.photoFrame).
+
+   Subtitles are BURNED INTO the picture, one encode per locale — the client's
+   call (answers v2 §7: keep the Romanian audio, subtitle the rest). Burned-in
+   beats a <track>: it survives muted/scrubbed playback and every mobile
+   browser's native player, and it needs no controls of its own.
+   They are ANIMATED (each phrase fades and rises in, then fades out), rendered
+   with Remotion from `docs/olesea jalba.mp4` + a whisper transcript. Phrase-level
+   rather than word-level on purpose: whisper times the Romanian audio, so
+   per-word highlighting on the EN/RU translations would be invented timing.
+   See `docs/brief-changes-2026-06-24.md` §11.7 for the pipeline and the
+   Remotion licensing caveat.
+   ⚠ The cues are placed to clear the hero's crop (`object-fit: cover;
+   object-position: center 22%` in a 4/5 frame shows only y≈104…1229 of 1600).
+   Re-cutting the video or changing that CSS means re-checking the placement. */
+const VIDEO_BY_LOCALE: Record<string, string> = {
+  ro: '/assets/olesea-hero-ro.mp4',
+  en: '/assets/olesea-hero-en.mp4',
+  ru: '/assets/olesea-hero-ru.mp4',
+};
+
 export function HeroVideo() {
   const locale = useLocale();
   const en = locale === 'en';
   const ru = locale === 'ru';
+  const src = VIDEO_BY_LOCALE[locale] ?? VIDEO_BY_LOCALE.ro;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -47,7 +68,7 @@ export function HeroVideo() {
         onEnded={() => setPlaying(false)}
         onClick={toggle}
       >
-        <source src="/assets/olesea-hero-sound.mp4" type="video/mp4" />
+        <source src={src} type="video/mp4" />
       </video>
       <button
         type="button"
