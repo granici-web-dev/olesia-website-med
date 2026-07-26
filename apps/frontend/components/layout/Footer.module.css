@@ -68,7 +68,9 @@
 
 .legalLink {
   color: inherit;
+  font: inherit;
   text-decoration: none;
+  cursor: pointer;
   transition: color 0.15s;
 }
 

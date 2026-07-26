@@ -1,14 +1,13 @@
 /**
- * Analytics config + event helper (brief §6b). Consent is handled by the
- * Cookiebot CMP (https://www.cookiebot.com): it shows the banner and we load
- * each tracker only once its consent category is granted — GTM/GA4 on
- * `statistics`, the Meta Pixel on `marketing`. Everything is env-gated too, so
- * with no IDs set this is a complete no-op. Real IDs are pending the client.
+ * Analytics config + event helper (brief §6b). Consent is handled by our own
+ * self-hosted CookieConsent v3 banner (`components/analytics/CookieConsent`),
+ * which dispatches CONSENT_EVENT; `Analytics.tsx` listens and loads each
+ * tracker only once its category is granted — GTM/GA4 on `analytics`, the Meta
+ * Pixel on `marketing`. Trackers are env-gated too, so with no IDs set this is
+ * a complete no-op. Real IDs are pending the client.
  */
 
 export const ANALYTICS = {
-  /** Cookiebot domain-group id (CBID) — enables the CMP + consent banner. */
-  cookiebotId: process.env.NEXT_PUBLIC_COOKIEBOT_CBID ?? '',
   gtmId: process.env.NEXT_PUBLIC_GTM_ID ?? '',
   ga4Id: process.env.NEXT_PUBLIC_GA4_ID ?? '',
   pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? '',
@@ -21,19 +20,23 @@ export const analyticsConfigured = Boolean(
   ANALYTICS.gtmId || ANALYTICS.ga4Id || ANALYTICS.pixelId,
 );
 
-export interface CookiebotConsent {
-  necessary: boolean;
-  preferences: boolean;
-  statistics: boolean;
+/** Which non-essential categories the visitor has allowed. */
+export interface ConsentState {
+  analytics: boolean;
   marketing: boolean;
 }
+
+/** Dispatched on `window` by the consent banner whenever the choice changes. */
+export const CONSENT_EVENT = 'olesea:consent';
 
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
     gtag?: (...args: unknown[]) => void;
     fbq?: ((...args: unknown[]) => void) & { queue?: unknown[] };
-    Cookiebot?: { consent: CookiebotConsent };
+  }
+  interface WindowEventMap {
+    [CONSENT_EVENT]: CustomEvent<ConsentState>;
   }
 }
 

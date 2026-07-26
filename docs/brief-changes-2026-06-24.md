@@ -24,7 +24,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - ~~**Final service texts**~~ — 🟡 client reviews them herself before launch and sends edits (answer v2 §4). Interim copy stays; add to the pre-launch checklist.
 - ~~**Hardcoded hero video + portraits**~~ — ✅ approved as interim (answer v2 §3); client expects to swap them **from the back office** later → confirms the site-media module (§11.12).
 - **Legal entity data** — for /gdpr, /terms, /privacy (Phase 8, blocker #2). Pages are DRAFT.
-- **Analytics IDs** — Cookiebot CBID + GTM + GA4 + Meta Pixel + GSC token (Phase 3). Code is env-gated and ready; just set env on Vercel.
+- **Analytics IDs** — GTM + GA4 + Meta Pixel + GSC token (Phase 3). Code is env-gated and ready; just set env on Vercel. (No CMP account needed any more — the banner is self-hosted, see Phase 3.)
 - **Newsletter provider + endpoint** — pick Mailchimp/Brevo/Resend/own API (Phase 4, blocker #8). Code env-gated; set `NEXT_PUBLIC_NEWSLETTER_ENDPOINT` (prefer same-origin to dodge CORS). Recommendation to put to the client: **Brevo** (one provider for transactional SMTP + newsletter).
 - **Working hours (`program de lucru`)** — gates the business-hours SLA logic (§11.5).
 - **Payment scope sign-off** — 5 methods requested (§11.8); needs a scope/budget/timeline decision before any code.
@@ -35,7 +35,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Apariții media** — ✅ CONFIRMED as a **dedicated page** (answer v2 §6), scope widened: TV **and radio** interviews, conferences, congresses, presentations, **diplomas and certificates**, with photos + links. **Page BUILT 2026-07-26** at `/media` with the first 3 TV appearances (see Phase 5 below). ⛔ still pending from the client: the rest of the list (radio, conferences, congresses, presentations) + the broadcast date of the TVR Moldova piece.
 - **Article texts/images** — via the agreed Google Drive folder (share to designer.nefele@gmail.com). Interim copy is in place. (Service texts: client reviews them herself, see above.)
 - **Exact clinic address** (§5).
-- **Cookie-consent provider FINAL decision** — Cookiebot wired as interim no-op; revisit at end of build. See [[cookie-consent-deferred]].
+- ~~**Cookie-consent provider FINAL decision**~~ — ✅ RESOLVED 2026-07-26: **self-hosted CookieConsent v3** (MIT), Cookiebot dropped. See Phase 3 and [[cookie-consent-deferred]].
 
 ### 🎥 Hardcoded client media (2026-07-01) — make editable in the back office later
 - **Homepage hero = video** (client-provided), source `docs/olesea jalba.mp4` (139 MB, 1080×1920) + poster `olesea-hero-poster.jpg`. ⚠️ **Superseded 2026-07-26 — see §11.7:** the hero is click-to-play **with sound** (not an autoplay muted loop), and the asset is now **three locale encodes with burned-in subtitles** (`olesea-hero-{ro,en,ru}.mp4`, ~5.5 MB each). The old silent/`-sound` files are gone. The reduced-motion note no longer applies — nothing autoplays.
@@ -82,7 +82,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 
 ### 🟢 Small/optional frontend leftovers
 - ~~**Services slogan** (CSV row 371)~~ — ✅ DONE 2026-07-01 (quote band on /services, trilingual).
-- **/gdpr cookie section** — name the GA4/GTM/Pixel cookies once the tools are confirmed.
+- ~~**/gdpr cookie section**~~ — ✅ DONE 2026-07-26: per-category breakdown on /gdpr (necessary / statistics / marketing) naming `olesea_consent`, `NEXT_LOCALE`, `_ga`/`_ga_*`/`_gid`, `_fbp`/`fr`, plus a note that the /media embeds only contact YouTube/Facebook after a click. Hand-maintained — a self-hosted CMP does no scanning.
 - **"Cum decurge colaborarea"** section — skipped (duplicates homepage HowItWorks); build only if the client wants a distinct block.
 
 ### LOW review items intentionally NOT done
@@ -232,7 +232,7 @@ Sources: our checklist `docs/questions_v2.md` (Russian, internal) + the numbered
 | 6 | Wants a **dedicated media page**: TV **+ radio**, conferences, congresses, presentations, **diplomas & certificates**, photos + links | New `/media` route (doesn't exist) + CRUD. Decide whether the existing /about "Certificări recente" block moves there or is duplicated |
 | 7 | RO/EN/RU; **no AI dubbing** — RO audio + **subtitles** for EN/RU; dubbing only if international demand appears | Cheaper than our estimate, but see §11.7 — captions need a player that can show them |
 | 8 | Payment methods: **card (Visa/MC), MIA, Revolut, PayPal, SEPA** | See §11.8 — biggest item |
-| 9 | Cookie banner with **Accept all / Reject / Customize** | Kills the no-op interim: a real CMP with granular categories is required. Cookiebot free tier covers this; the provider decision (Phase 3) can now be closed on that basis |
+| 9 | Cookie banner with **Accept all / Reject / Customize** | ✅ BUILT 2026-07-26 on a self-hosted CMP (see Phase 3) — three equal-weight buttons, per-category toggles, trilingual |
 | 10 | Security: SSL, **reCAPTCHA**, automatic backups, "automatic updates", attack protection, **admin 2FA** | See §11.10 — 5 of 6 don't exist |
 | 11 | Booking flow: service → date/time → **pay online** → automatic confirmation with all consultation info | Couples payments to booking; also needs working transactional email (still no SMTP) |
 | 12 | Wants to edit herself: texts, prices, photos, articles, PDF guides, **FAQ**, **testimonials**, **media appearances** | See §11.12 — several missing back-office modules |
@@ -377,9 +377,14 @@ Still open (provider choice): **Newsletter provider** — depends on blocker #8 
 
 ### Phase 3 — Analytics — 🟡 INFRA DONE 2026-06-25 (commit `01640b4`)
 - [x] GTM + GA4 + Meta Pixel + Search Console verification — **env-gated** infra (`lib/analytics.ts`, `components/analytics/`). No-op until IDs set. Wire IDs via env: `NEXT_PUBLIC_GTM_ID` / `NEXT_PUBLIC_GA4_ID` / `NEXT_PUBLIC_META_PIXEL_ID` / `NEXT_PUBLIC_GSC_VERIFICATION`.
-- [x] Cookie/consent banner (GDPR) — **Cookiebot CMP wired as the interim default** (env-gated, no-op without CBID), but the **provider is NOT finalized**. ❓ DECISION DEFERRED to end of build (2026-06-25): pick between (A) self-hosted open-source CMP (CookieConsent v3 / Klaro, free), (B) upgraded self-built banner + consent log, (C) keep Cookiebot (paid). Lawyer signs off — extra weight because the site handles **health data** (special category). Whichever is chosen, the tracker-gating wiring (statistics→GTM/GA4, marketing→Pixel) stays. Verified for Cookiebot: script injects, GTM does not load pre-consent.
+- [x] Cookie/consent banner (GDPR) — ✅ **DONE 2026-07-26. Decision: self-hosted `vanilla-cookieconsent` v3 (MIT)**; Cookiebot removed. Rationale: free with no per-domain fee, no third-party request before consent (a hosted CMP is itself a foreign script), and fully styleable, which matters on a site this typographic.
+  - `components/analytics/CookieConsent.tsx` + `cookie-consent.css` — three **equal-weight** buttons (Accept toate / Refuz / Personalizează; refusing is exactly as easy as accepting), preferences modal with per-category toggles, trilingual RO/EN/RU, language follows the site's switcher. Cookie `olesea_consent`, 365 days.
+  - Categories: `necessary` (locked) · `analytics` (GTM/GA4) · `marketing` (Meta Pixel). The banner dispatches `CONSENT_EVENT`; `Analytics.tsx` listens and mounts a tracker only when its category is granted **and** its env ID exists.
+  - "Setări cookie" in the footer reopens the modal — withdrawing consent must be as easy as giving it.
+  - Browser-verified in RO/EN/RU, desktop + 390px: banner appears, all three buttons work, the choice persists in the cookie, the footer link reopens it.
+  - ⚠ Trade-off accepted: no automatic cookie scanning and **no server-side consent log**. If the client ever needs consent records as evidence, that has to be built (an endpoint + a table).
 - [x] Events wired: `booking_click` (Calendly), `lead_open` + `lead_submit` (group-B + contact form), `material_download` (library email-gate). Push to dataLayer/gtag/fbq.
-- [ ] ⛔ **Client to provide:** **Cookiebot account + CBID** (paid plan — they shared pricing), GTM container + GA4 + Pixel IDs + GSC token. Then set env on Vercel.
+- [ ] ⛔ **Client to provide:** GTM container + GA4 + Pixel IDs + GSC token. Then set env on Vercel. (A CMP account is no longer needed.)
 - [ ] Update /gdpr cookie section to name GA4/GTM/Pixel cookies (after tools confirmed; page already DRAFT pending lawyer).
 
 ### Phase 4 — Newsletter — 🟡 INFRA DONE 2026-06-25 (commit `477da4a`)

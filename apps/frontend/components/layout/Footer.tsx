@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FooterLangSwitch } from './FooterLangSwitch';
+import { CookiePreferencesLink } from './CookiePreferencesLink';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
 import { newsletterEnabled } from '@/lib/newsletter';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
@@ -99,6 +100,8 @@ export function Footer() {
           <Link href="/terms" className={styles.legalLink}>
             {t('legalTerms')}
           </Link>
+          {' · '}
+          <CookiePreferencesLink className={styles.legalLink} />
         </span>
       </div>
     </footer>

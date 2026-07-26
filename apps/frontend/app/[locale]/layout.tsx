@@ -8,6 +8,7 @@ import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { DevTools } from '@/components/DevTools';
 import { Analytics } from '@/components/analytics/Analytics';
+import { CookieConsent } from '@/components/analytics/CookieConsent';
 import { ANALYTICS } from '@/lib/analytics';
 import './globals.css';
 
@@ -85,6 +86,7 @@ export default async function LocaleLayout({
           {children}
           <Footer />
           <DevTools />
+          <CookieConsent />
           <Analytics />
         </NextIntlClientProvider>
       </body>

@@ -1,0 +1,84 @@
+/* Dress CookieConsent v3 in the site's own palette and type. The library
+   exposes everything through CSS variables, so this is a theme, not a fight
+   with its markup. Buttons stay equal weight — refusing must look exactly as
+   available as accepting (client requirement, answers v2 §9). */
+
+#cc-main {
+  --cc-font-family: var(--font-manrope), -apple-system, system-ui, sans-serif;
+  --cc-bg: var(--paper);
+  --cc-primary-color: var(--ink);
+  --cc-secondary-color: var(--ink-soft, #5c5346);
+
+  --cc-btn-primary-bg: var(--sage-deep);
+  --cc-btn-primary-color: var(--cream);
+  --cc-btn-primary-border-color: var(--sage-deep);
+  --cc-btn-primary-hover-bg: var(--ink);
+  --cc-btn-primary-hover-color: var(--cream);
+  --cc-btn-primary-hover-border-color: var(--ink);
+
+  --cc-btn-secondary-bg: transparent;
+  --cc-btn-secondary-color: var(--ink);
+  --cc-btn-secondary-border-color: var(--rule);
+  --cc-btn-secondary-hover-bg: var(--cream-2);
+  --cc-btn-secondary-hover-color: var(--ink);
+  --cc-btn-secondary-hover-border-color: var(--ink);
+
+  --cc-btn-border-radius: 2px;
+  --cc-modal-border-radius: 2px;
+  --cc-modal-transition-duration: 0.35s;
+
+  --cc-link-color: var(--sage-text, var(--sage));
+  --cc-overlay-bg: rgba(24, 20, 14, 0.55);
+
+  --cc-toggle-on-bg: var(--sage-deep);
+  --cc-toggle-off-bg: #b6ab99;
+  --cc-toggle-readonly-bg: #ddd5c6;
+  --cc-toggle-on-knob-bg: var(--cream);
+  --cc-toggle-off-knob-bg: var(--cream);
+
+  --cc-cookie-category-block-bg: var(--cream);
+  --cc-cookie-category-block-border: var(--rule);
+  --cc-cookie-category-block-hover-bg: var(--cream-2);
+  --cc-cookie-category-block-hover-border: var(--rule);
+  --cc-cookie-category-expanded-block-bg: transparent;
+
+  --cc-separator-border-color: var(--rule);
+  --cc-footer-bg: var(--cream);
+  --cc-footer-color: var(--ink-soft, #5c5346);
+  --cc-footer-border-color: var(--rule);
+}
+
+/* The library's default is a rounded card with a heavy shadow; the site's
+   surfaces are flat with a hairline rule. */
+#cc-main .cm,
+#cc-main .pm {
+  border: 1px solid var(--rule);
+  box-shadow: 0 18px 44px -28px rgba(28, 21, 12, 0.5);
+}
+
+#cc-main .cm__title,
+#cc-main .pm__title {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+#cc-main .cm__desc,
+#cc-main .pm__section-desc {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+#cc-main .cm__btn,
+#cc-main .pm__btn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+#cc-main .pm__section-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}

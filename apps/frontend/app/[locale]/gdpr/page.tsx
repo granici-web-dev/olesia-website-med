@@ -77,6 +77,50 @@ const TOC: TocItem[] = [
 
 type Bi = { ro: string; en: string; ru: string };
 
+/** Cookie categories, mirroring `components/analytics/CookieConsent.tsx`.
+ *  Maintained by hand — a self-hosted CMP does no scanning. */
+const COOKIE_CATEGORIES = [
+  {
+    id: 'necessary',
+    titleRo: 'Strict necesare',
+    titleEn: 'Strictly necessary',
+    titleRu: 'Строго необходимые',
+    descRo:
+      'Fac site-ul utilizabil: rețin limba aleasă și opțiunea ta privind cookie-urile. Se folosesc mereu, fără acord — fără ele site-ul nu funcționează.',
+    descEn:
+      'Make the site usable: they remember your chosen language and your cookie choice. They are always used, without consent — the site cannot work without them.',
+    descRu:
+      'Обеспечивают работу сайта: запоминают выбранный язык и ваш выбор по cookie. Используются всегда, без согласия — без них сайт не работает.',
+    names: 'olesea_consent · NEXT_LOCALE',
+  },
+  {
+    id: 'analytics',
+    titleRo: 'Statistică',
+    titleEn: 'Statistics',
+    titleRu: 'Статистика',
+    descRo:
+      'Google Analytics 4, prin Google Tag Manager: ne arată anonim ce pagini sunt citite și de unde vin vizitatorii. Se încarcă doar dacă accepți categoria.',
+    descEn:
+      'Google Analytics 4, via Google Tag Manager: shows us anonymously which pages are read and where visitors come from. Loaded only if you accept this category.',
+    descRu:
+      'Google Analytics 4 через Google Tag Manager: анонимно показывает, какие страницы читают и откуда приходят посетители. Загружается только при вашем согласии.',
+    names: '_ga · _ga_* · _gid',
+  },
+  {
+    id: 'marketing',
+    titleRo: 'Marketing',
+    titleEn: 'Marketing',
+    titleRu: 'Маркетинг',
+    descRo:
+      'Meta Pixel: măsoară eficiența campaniilor și permite afișarea de anunțuri relevante. Se încarcă doar dacă accepți categoria.',
+    descEn:
+      'Meta Pixel: measures campaign performance and allows relevant ads to be shown. Loaded only if you accept this category.',
+    descRu:
+      'Meta Pixel: измеряет эффективность кампаний и позволяет показывать релевантную рекламу. Загружается только при вашем согласии.',
+    names: '_fbp · fr',
+  },
+];
+
 const SUMMARY: Bi[] = [
   {
     ro: 'Colectăm doar datele necesare pentru a-ți oferi consultații și a răspunde întrebărilor tale.',
@@ -589,6 +633,36 @@ export default async function GdprPage({
                 : en
                 ? 'We use cookies for the site to function and, if you accept, for usage statistics. You can manage your preferences at any time.'
                 : 'Folosim cookie-uri pentru funcționarea site-ului și, dacă accepți, pentru statistici de utilizare. Îți poți gestiona preferințele în orice moment.'}
+            </p>
+
+            {/* Category-by-category detail. Written by hand — the consent banner
+                is self-hosted (CookieConsent v3), so nothing scans the site and
+                fills this in for us. Keep it in step with the categories in
+                `components/analytics/CookieConsent.tsx`; the analytics and
+                marketing rows only ever apply once the client's tracker IDs are
+                configured, and nothing loads without consent. */}
+            <dl className="mt-8 grid max-w-[68ch] gap-6">
+              {COOKIE_CATEGORIES.map((c) => (
+                <div key={c.id} className="border-t border-[var(--rule)] pt-5">
+                  <dt className="text-[1.0625rem] font-semibold text-ink">
+                    {ru ? c.titleRu : en ? c.titleEn : c.titleRo}
+                  </dt>
+                  <dd className="mt-2 text-[0.9375rem] leading-relaxed text-ink-soft text-pretty">
+                    {ru ? c.descRu : en ? c.descEn : c.descRo}
+                    <span className="mono mt-2 block text-[0.8125rem] text-sage-text">
+                      {c.names}
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            <p className="mt-8 max-w-[68ch] text-[0.9375rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Изменить или отозвать согласие можно в любой момент — ссылка «Настройки cookie» есть в подвале каждой страницы. Видео из телеэфиров на странице «СМИ» загружаются с YouTube и Facebook только после того, как вы нажмёте play: до этого запросы к ним не отправляются.'
+                : en
+                ? 'You can change or withdraw your consent at any time — the “Cookie settings” link sits in the footer of every page. The TV clips on the media page load from YouTube and Facebook only after you press play; until then those providers are never contacted.'
+                : 'Îți poți schimba sau retrage acordul oricând — linkul „Setări cookie” se află în subsolul fiecărei pagini. Materialele TV de pe pagina de media se încarcă de pe YouTube și Facebook doar după ce apeși play; până atunci acești furnizori nu sunt contactați.'}
             </p>
           </Section>
 
