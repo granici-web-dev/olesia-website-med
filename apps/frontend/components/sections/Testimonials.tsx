@@ -5,10 +5,11 @@ import type { AboutTestimonial } from '@/lib/api';
 import { Reveal } from '@/components/ui/Reveal';
 import styles from './Testimonials.module.css';
 
-/** Testimonial with optional RU/EN copy (local items are trilingual; API items are RO/EN only). */
+/**
+ * The DTO already carries `quoteRu` / `roleRu`; only the author name is extra
+ * here, because a signature is data the back office does not localise.
+ */
 type Testimonial = AboutTestimonial & {
-  quoteRu?: string;
-  roleRu?: string;
   authorEn?: string;
   authorRu?: string;
 };
@@ -155,7 +156,7 @@ export function Testimonials({
               className="flex shrink-0 basis-full snap-start flex-col sm:basis-[calc(50%-0.75rem)]"
             >
               <blockquote className="serif-it text-[1.25rem] leading-snug text-ink text-pretty md:text-[1.3rem]">
-                “{t(it.quoteRo, it.quoteEn, it.quoteRu ?? it.quoteRo)}”
+                “{t(it.quoteRo, it.quoteEn, it.quoteRu || it.quoteRo)}”
               </blockquote>
               <figcaption className="mt-5 text-sm">
                 <span className="font-semibold text-ink">
@@ -164,7 +165,7 @@ export function Testimonials({
                 {(it.roleRo || it.roleEn) && (
                   <span className="text-ink-soft">
                     {' '}
-                    — {t(it.roleRo, it.roleEn, it.roleRu ?? it.roleRo)}
+                    — {t(it.roleRo, it.roleEn, it.roleRu || it.roleRo)}
                   </span>
                 )}
               </figcaption>

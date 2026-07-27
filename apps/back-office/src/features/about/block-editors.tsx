@@ -176,7 +176,7 @@ export function StatsEditor({ form }: { form: Form }) {
       addLabel={s.add}
       emptyLabel={s.empty}
       count={fields.length}
-      onAdd={() => append({ value: '', labelRo: '', labelEn: '' })}
+      onAdd={() => append({ value: '', labelRo: '', labelEn: '', labelRu: '' })}
     >
       {fields.map((f, i) => (
         <BlockRow
@@ -186,7 +186,7 @@ export function StatsEditor({ form }: { form: Form }) {
           onMove={move}
           onRemove={remove}
         >
-          <div className="grid gap-3 sm:grid-cols-[7rem_1fr_1fr]">
+          <div className="grid gap-3 sm:grid-cols-[7rem_1fr_1fr] lg:grid-cols-[7rem_1fr_1fr_1fr]">
             <Field
               label={s.value}
               placeholder={s.valuePlaceholder}
@@ -201,6 +201,11 @@ export function StatsEditor({ form }: { form: Form }) {
               label={s.labelEn}
               placeholder={s.labelPlaceholderEn}
               {...form.register(`stats.${i}.labelEn`)}
+            />
+            <Field
+              label={s.labelRu}
+              placeholder={s.labelPlaceholderRu}
+              {...form.register(`stats.${i}.labelRu`)}
             />
           </div>
         </BlockRow>
@@ -223,7 +228,7 @@ export function CredentialsEditor({ form }: { form: Form }) {
       addLabel={c.add}
       emptyLabel={c.empty}
       count={fields.length}
-      onAdd={() => append({ ro: '', en: '' })}
+      onAdd={() => append({ ro: '', en: '', ru: '' })}
     >
       {fields.map((f, i) => (
         <BlockRow
@@ -233,7 +238,7 @@ export function CredentialsEditor({ form }: { form: Form }) {
           onMove={move}
           onRemove={remove}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Field
               label={c.ro}
               placeholder={c.placeholderRo}
@@ -243,6 +248,11 @@ export function CredentialsEditor({ form }: { form: Form }) {
               label={c.en}
               placeholder={c.placeholderEn}
               {...form.register(`credentials.${i}.en`)}
+            />
+            <Field
+              label={c.ru}
+              placeholder={c.placeholderRu}
+              {...form.register(`credentials.${i}.ru`)}
             />
           </div>
         </BlockRow>
@@ -269,9 +279,11 @@ export function TestimonialsEditor({ form }: { form: Form }) {
         append({
           quoteRo: '',
           quoteEn: '',
+          quoteRu: '',
           author: '',
           roleRo: '',
           roleEn: '',
+          roleRu: '',
         })
       }
     >
@@ -283,7 +295,7 @@ export function TestimonialsEditor({ form }: { form: Form }) {
           onMove={move}
           onRemove={remove}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <AreaField
               label={t.quoteRo}
               {...form.register(`testimonials.${i}.quoteRo`)}
@@ -292,8 +304,12 @@ export function TestimonialsEditor({ form }: { form: Form }) {
               label={t.quoteEn}
               {...form.register(`testimonials.${i}.quoteEn`)}
             />
+            <AreaField
+              label={t.quoteRu}
+              {...form.register(`testimonials.${i}.quoteRu`)}
+            />
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Field
               label={t.author}
               placeholder={t.authorPlaceholder}
@@ -308,6 +324,11 @@ export function TestimonialsEditor({ form }: { form: Form }) {
               label={t.roleEn}
               placeholder={t.rolePlaceholderEn}
               {...form.register(`testimonials.${i}.roleEn`)}
+            />
+            <Field
+              label={t.roleRu}
+              placeholder={t.rolePlaceholderRu}
+              {...form.register(`testimonials.${i}.roleRu`)}
             />
           </div>
         </BlockRow>
@@ -330,7 +351,9 @@ export function FaqEditor({ form }: { form: Form }) {
       addLabel={q.add}
       emptyLabel={q.empty}
       count={fields.length}
-      onAdd={() => append({ qRo: '', qEn: '', aRo: '', aEn: '' })}
+      onAdd={() =>
+        append({ qRo: '', qEn: '', qRu: '', aRo: '', aEn: '', aRu: '' })
+      }
     >
       {fields.map((f, i) => (
         <BlockRow
@@ -340,7 +363,7 @@ export function FaqEditor({ form }: { form: Form }) {
           onMove={move}
           onRemove={remove}
         >
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Field
               label={q.questionRo}
               placeholder={q.questionPlaceholder}
@@ -350,8 +373,9 @@ export function FaqEditor({ form }: { form: Form }) {
               label={q.questionEn}
               {...form.register(`faq.${i}.qEn`)}
             />
+            <Field label={q.questionRu} {...form.register(`faq.${i}.qRu`)} />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <AreaField
               label={q.answerRo}
               placeholder={q.answerPlaceholder}
@@ -361,6 +385,7 @@ export function FaqEditor({ form }: { form: Form }) {
               label={q.answerEn}
               {...form.register(`faq.${i}.aEn`)}
             />
+            <AreaField label={q.answerRu} {...form.register(`faq.${i}.aRu`)} />
           </div>
         </BlockRow>
       ))}

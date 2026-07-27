@@ -101,6 +101,11 @@ model User {
 }
 
 // --- Service catalog (5 services) ---
+//
+// Every content model carries three locales. RO and EN are required (the site
+// launched bilingual); RU is nullable because the existing rows predate it and
+// because a half-translated page must still save. Readers fall back RU → RO,
+// so a missing translation degrades to Romanian instead of an empty screen.
 
 model Service {
   id                   String       @id @default(uuid())
@@ -108,12 +113,15 @@ model Service {
   group                ServiceGroup
   titleRo              String
   titleEn              String
+  titleRu              String?
   descriptionRo        String
   descriptionEn        String
+  descriptionRu        String?
   durationMin          Int?
   price                Int
   priceLabelRo         String?
   priceLabelEn         String?
+  priceLabelRu         String?
   calendlyEventTypeUri String?      @unique // API event_type URI (webhook mapping)
   calendlySchedulingUrl String?     // public booking link for the site embed
   sortOrder            Int          @default(0)
@@ -211,9 +219,10 @@ model QuickQuestion {
 
 model Category {
   id     String @id @default(uuid())
-  slug   String @unique
+  slug   String  @unique
   nameRo String
   nameEn String
+  nameRu String?
 
   posts Post[]
 }
@@ -223,10 +232,13 @@ model Post {
   slug          String     @unique
   titleRo       String
   titleEn       String
+  titleRu       String?
   excerptRo     String?
   excerptEn     String?
+  excerptRu     String?
   contentRo     String
   contentEn     String
+  contentRu     String?
   coverImageUrl String?
   status        PostStatus @default(draft)
   publishedAt   DateTime?
@@ -247,6 +259,7 @@ model Contact {
   type      ContactType
   labelRo   String
   labelEn   String
+  labelRu   String?
   value     String
   sortOrder Int         @default(0)
   active    Boolean     @default(true)
@@ -283,14 +296,18 @@ model AboutPage {
   id        String   @id @default(uuid())
   titleRo   String
   titleEn   String
+  titleRu   String?
   contentRo String
   contentEn String
+  contentRu String?
   images    Json?
-  // Structured, client-editable page blocks (JSON arrays of localized items):
-  stats        Json? // [{ value, labelRo, labelEn }]
-  credentials  Json? // [{ ro, en }]
-  testimonials Json? // [{ quoteRo, quoteEn, author, roleRo, roleEn }]
-  faq          Json? // [{ qRo, qEn, aRo, aEn }]
+  // Structured, client-editable page blocks (JSON arrays of localized items).
+  // The `*Ru` keys are optional inside the JSON too — rows written before RU
+  // existed simply lack them, and readers fall back to RO.
+  stats        Json? // [{ value, labelRo, labelEn, labelRu? }]
+  credentials  Json? // [{ ro, en, ru? }]
+  testimonials Json? // [{ quoteRo, quoteEn, quoteRu?, author, roleRo, roleEn, roleRu? }]
+  faq          Json? // [{ qRo, qEn, qRu?, aRo, aEn, aRu? }]
   updatedAt DateTime @updatedAt
 }
 

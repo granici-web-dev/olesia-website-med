@@ -22,8 +22,10 @@ export class AboutService {
         data: {
           titleRo: dto.titleRo,
           titleEn: dto.titleEn,
+          titleRu: dto.titleRu,
           contentRo: dto.contentRo,
           contentEn: dto.contentEn,
+          contentRu: dto.contentRu,
           images: dto.images,
           stats: dto.stats,
           credentials: dto.credentials,

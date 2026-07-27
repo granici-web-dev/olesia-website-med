@@ -24,10 +24,13 @@ function postToView(d: PostDto): Post {
     slug: d.slug,
     titleRo: d.titleRo,
     titleEn: d.titleEn,
+    titleRu: d.titleRu ?? '',
     excerptRo: d.excerptRo ?? '',
     excerptEn: d.excerptEn ?? '',
+    excerptRu: d.excerptRu ?? '',
     contentRo: d.contentRo,
     contentEn: d.contentEn,
+    contentRu: d.contentRu ?? '',
     coverImageUrl: d.coverImageUrl,
     status: d.status as Post['status'],
     publishedAt: d.publishedAt,
@@ -40,7 +43,13 @@ function postToView(d: PostDto): Post {
 }
 
 function categoryToView(d: CategoryDto): Category {
-  return { id: d.id, slug: d.slug, nameRo: d.nameRo, nameEn: d.nameEn };
+  return {
+    id: d.id,
+    slug: d.slug,
+    nameRo: d.nameRo,
+    nameEn: d.nameEn,
+    nameRu: d.nameRu,
+  };
 }
 
 function asList<T>(r: T[] | Paginated<T>): T[] {

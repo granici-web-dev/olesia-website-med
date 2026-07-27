@@ -25,11 +25,20 @@ export class CreateServiceDto {
   @MinLength(1)
   titleEn!: string;
 
+  /** RU is optional everywhere: the catalog must stay saveable half-translated. */
+  @IsOptional()
+  @IsString()
+  titleRu?: string | null;
+
   @IsString()
   descriptionRo!: string;
 
   @IsString()
   descriptionEn!: string;
+
+  @IsOptional()
+  @IsString()
+  descriptionRu?: string | null;
 
   @IsOptional()
   @IsInt()
@@ -47,6 +56,10 @@ export class CreateServiceDto {
   @IsOptional()
   @IsString()
   priceLabelEn?: string | null;
+
+  @IsOptional()
+  @IsString()
+  priceLabelRu?: string | null;
 
   @IsOptional()
   @IsString()

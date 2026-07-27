@@ -11,6 +11,7 @@ function toView(d: ContactDto): Contact {
     type: d.type as Contact['type'],
     labelRo: d.labelRo,
     labelEn: d.labelEn,
+    labelRu: d.labelRu,
     value: d.value,
     sortOrder: d.sortOrder,
     active: d.active,

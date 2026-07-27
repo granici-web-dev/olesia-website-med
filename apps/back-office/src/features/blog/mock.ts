@@ -45,10 +45,22 @@ export function formatDate(iso: string | null): string {
  * ------------------------------------------------------------------ */
 
 let categories: Category[] = [
-  { id: 'c1', slug: 'nutritie', nameRo: 'Nutriție', nameEn: 'Nutrition' },
-  { id: 'c2', slug: 'somn', nameRo: 'Somn', nameEn: 'Sleep' },
-  { id: 'c3', slug: 'dezvoltare', nameRo: 'Dezvoltare', nameEn: 'Development' },
-  { id: 'c4', slug: 'alaptare', nameRo: 'Alăptare', nameEn: 'Breastfeeding' },
+  { id: 'c1', slug: 'nutritie', nameRo: 'Nutriție', nameEn: 'Nutrition', nameRu: 'Питание' },
+  { id: 'c2', slug: 'somn', nameRo: 'Somn', nameEn: 'Sleep', nameRu: 'Сон' },
+  {
+    id: 'c3',
+    slug: 'dezvoltare',
+    nameRo: 'Dezvoltare',
+    nameEn: 'Development',
+    nameRu: 'Развитие',
+  },
+  {
+    id: 'c4',
+    slug: 'alaptare',
+    nameRo: 'Alăptare',
+    nameEn: 'Breastfeeding',
+    nameRu: 'Грудное вскармливание',
+  },
 ];
 
 const sampleRo = `## De ce contează diversificarea
@@ -77,17 +89,34 @@ Gradually introducing solid foods supports:
 
 For a personalized plan, book a [nutrition consultation](/services).`;
 
+const sampleRu = `## Почему важен прикорм
+
+Введение прикорма — **ключевой этап** первого года жизни.
+Постепенное знакомство с твёрдой пищей поддерживает:
+
+- развитие вкуса;
+- созревание пищеварительной системы;
+- самостоятельность за столом.
+
+> Обычно рекомендуют начинать около 6 месяцев, ориентируясь на признаки готовности ребёнка.
+
+Для персонального плана запишитесь на [консультацию по питанию](/servicii).`;
+
 let posts: Post[] = [
   {
     id: 'p1',
     slug: 'diversificarea-alimentatiei',
     titleRo: 'Diversificarea alimentației: ghid pentru părinți',
     titleEn: 'Food diversification: a guide for parents',
+    titleRu: 'Введение прикорма: руководство для родителей',
     excerptRo:
       'Când și cum introducem alimentele solide, fără stres și fără mituri.',
     excerptEn: 'When and how to introduce solid foods, without stress or myths.',
+    excerptRu:
+      'Когда и как вводить твёрдую пищу — без стресса и мифов.',
     contentRo: sampleRo,
     contentEn: sampleEn,
+    contentRu: sampleRu,
     coverImageUrl: 'https://picsum.photos/seed/olesia-food/640/400',
     status: 'published',
     publishedAt: '2026-06-02T08:00:00+03:00',
@@ -101,12 +130,16 @@ let posts: Post[] = [
     slug: 'rutina-de-somn-a-bebelusului',
     titleRo: 'Rutina de somn a bebelușului',
     titleEn: 'Your baby’s sleep routine',
+    titleRu: 'Режим сна малыша',
     excerptRo: 'Ritualuri simple care ajută copilul să adoarmă mai ușor.',
     excerptEn: 'Simple rituals that help your child fall asleep more easily.',
+    excerptRu: 'Простые ритуалы, которые помогают ребёнку легче засыпать.',
     contentRo:
       '## Un somn liniștit\n\nO rutină **predictibilă** îi oferă copilului siguranță. Câțiva pași utili:\n\n1. lumină scăzută cu o oră înainte de culcare;\n2. o baie caldă;\n3. o poveste scurtă.\n\nConsecvența este mai importantă decât perfecțiunea.',
     contentEn:
       '## A calm sleep\n\nA **predictable** routine gives the child a sense of security. A few useful steps:\n\n1. dim the lights an hour before bedtime;\n2. a warm bath;\n3. a short story.\n\nConsistency matters more than perfection.',
+    contentRu:
+      '## Спокойный сон\n\n**Предсказуемый** режим даёт ребёнку чувство безопасности. Несколько полезных шагов:\n\n1. приглушённый свет за час до сна;\n2. тёплая ванна;\n3. короткая сказка.\n\nПостоянство важнее идеальности.',
     coverImageUrl: 'https://picsum.photos/seed/olesia-sleep/640/400',
     status: 'published',
     publishedAt: '2026-05-28T09:30:00+03:00',
@@ -120,12 +153,16 @@ let posts: Post[] = [
     slug: 'mituri-despre-alaptare',
     titleRo: 'Mituri despre alăptare',
     titleEn: 'Myths about breastfeeding',
+    titleRu: 'Мифы о грудном вскармливании',
     excerptRo: 'Separăm faptele de zvonuri, cu blândețe și fără judecată.',
     excerptEn: 'Separating facts from rumors, gently and without judgment.',
+    excerptRu: 'Отделяем факты от слухов — мягко и без осуждения.',
     contentRo:
       '## Ce spune știința\n\nMulte temeri legate de alăptare pornesc din *mituri*. Le clarificăm pe rând într-un articol în lucru.',
     contentEn:
       '## What science says\n\nMany breastfeeding fears stem from *myths*. We clarify them one by one in an upcoming article.',
+    contentRu:
+      '## Что говорит наука\n\nМногие страхи вокруг грудного вскармливания рождаются из *мифов*. Разбираем их по очереди в готовящейся статье.',
     coverImageUrl: null,
     status: 'draft',
     publishedAt: null,

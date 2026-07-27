@@ -52,6 +52,8 @@ const schema = z.object({
   type: z.enum(CONTACT_TYPES as [ContactType, ...ContactType[]]),
   labelRo: z.string().trim().min(1, f.required),
   labelEn: z.string().trim().min(1, f.required),
+  /** RU stays optional — the site falls back to the RO label. */
+  labelRu: z.string(),
   value: z.string().trim().min(1, f.required),
   sortOrder: intString,
   active: z.boolean(),
@@ -64,6 +66,7 @@ function emptyValues(sortOrder: number): FormValues {
     type: 'phone',
     labelRo: '',
     labelEn: '',
+    labelRu: '',
     value: '',
     sortOrder: String(sortOrder),
     active: true,
@@ -75,6 +78,7 @@ function fromContact(c: Contact): FormValues {
     type: c.type,
     labelRo: c.labelRo,
     labelEn: c.labelEn,
+    labelRu: c.labelRu ?? '',
     value: c.value,
     sortOrder: String(c.sortOrder),
     active: c.active,
@@ -86,6 +90,7 @@ function toInput(values: FormValues): ContactInput {
     type: values.type,
     labelRo: values.labelRo.trim(),
     labelEn: values.labelEn.trim(),
+    labelRu: values.labelRu.trim() || null,
     value: values.value.trim(),
     sortOrder: Number(values.sortOrder),
     active: values.active,
@@ -180,7 +185,7 @@ export function ContactFormSheet({
             </div>
 
             {/* Labels */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Field
                 id="labelRo"
                 label={f.labelRo}
@@ -192,6 +197,11 @@ export function ContactFormSheet({
                 label={f.labelEn}
                 error={errors.labelEn?.message}
                 {...form.register('labelEn')}
+              />
+              <Field
+                id="labelRu"
+                label={f.labelRu}
+                {...form.register('labelRu')}
               />
             </div>
             <p className="-mt-3 text-xs text-muted-foreground">{f.labelHint}</p>

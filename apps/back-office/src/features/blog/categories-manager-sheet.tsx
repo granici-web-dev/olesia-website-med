@@ -56,12 +56,14 @@ export function CategoriesManagerSheet({
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [nameRo, setNameRo] = React.useState('');
   const [nameEn, setNameEn] = React.useState('');
+  const [nameRu, setNameRu] = React.useState('');
   const [deleting, setDeleting] = React.useState<Category | null>(null);
 
   const reset = () => {
     setEditingId(null);
     setNameRo('');
     setNameEn('');
+    setNameRu('');
   };
 
   const invalidate = () => {
@@ -75,6 +77,8 @@ export function CategoriesManagerSheet({
         slug: slugify(nameRo),
         nameRo: nameRo.trim(),
         nameEn: nameEn.trim(),
+        // Optional: an untranslated category shows its RO name on the site.
+        nameRu: nameRu.trim() || null,
       };
       return editingId
         ? updateCategory(editingId, input)
@@ -102,6 +106,7 @@ export function CategoriesManagerSheet({
     setEditingId(cat.id);
     setNameRo(cat.nameRo);
     setNameEn(cat.nameEn);
+    setNameRu(cat.nameRu ?? '');
   };
 
   const canSave = nameRo.trim() !== '' && nameEn.trim() !== '';
@@ -179,7 +184,7 @@ export function CategoriesManagerSheet({
           <p className="text-sm font-medium">
             {editingId ? ro.common.edit : c.addTitle}
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label htmlFor="cat-ro" className="text-xs">
                 {c.nameRo}
@@ -199,6 +204,17 @@ export function CategoriesManagerSheet({
                 id="cat-en"
                 value={nameEn}
                 onChange={(e) => setNameEn(e.target.value)}
+                className="h-8"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cat-ru" className="text-xs">
+                {c.nameRu}
+              </Label>
+              <Input
+                id="cat-ru"
+                value={nameRu}
+                onChange={(e) => setNameRu(e.target.value)}
                 className="h-8"
               />
             </div>

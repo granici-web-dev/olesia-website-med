@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
+  IsOptional,
   IsString,
   Min,
   MinLength,
@@ -20,6 +21,10 @@ export class CreateContactDto {
   @IsString()
   @MinLength(1)
   labelEn!: string;
+
+  @IsOptional()
+  @IsString()
+  labelRu?: string | null;
 
   @IsString()
   @MinLength(1)

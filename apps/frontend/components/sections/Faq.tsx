@@ -9,8 +9,9 @@ export function Faq({
   locale: string;
   items: AboutFaqItem[];
 }) {
-  const t = (ro: string, en: string, ru: string) =>
-    locale === 'ru' ? ru : locale === 'en' ? en : ro;
+  // RU is optional on these blocks — fall back to Romanian, never to blank.
+  const t = (ro: string, en: string, ru?: string) =>
+    locale === 'ru' ? ru || ro : locale === 'en' ? en : ro;
   if (items.length === 0) return null;
 
   return (
@@ -28,7 +29,7 @@ export function Faq({
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 [&::-webkit-details-marker]:hidden">
               <span className="serif text-[1.3rem] leading-snug text-ink">
-                {t(it.qRo, it.qEn, it.qRo)}
+                {t(it.qRo, it.qEn, it.qRu)}
               </span>
               <span
                 className="mono shrink-0 text-xl text-sage transition-transform duration-300 group-open:rotate-45"
@@ -38,7 +39,7 @@ export function Faq({
               </span>
             </summary>
             <p className="max-w-[64ch] pb-6 leading-relaxed text-ink-soft text-pretty">
-              {t(it.aRo, it.aEn, it.aRo)}
+              {t(it.aRo, it.aEn, it.aRu)}
             </p>
           </Reveal>
         ))}

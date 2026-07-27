@@ -67,12 +67,15 @@ export interface ServiceDto {
   group: ServiceGroup;
   titleRo: string;
   titleEn: string;
+  titleRu: string | null;
   descriptionRo: string;
   descriptionEn: string;
+  descriptionRu: string | null;
   durationMin: number | null;
   price: number;
   priceLabelRo: string | null;
   priceLabelEn: string | null;
+  priceLabelRu: string | null;
   /** Group A only — the Calendly event-type URI this service maps to. */
   calendlyEventTypeUri: string | null;
   /** Group A only — the public Calendly booking link for the site embed. */
@@ -157,6 +160,7 @@ export interface CategoryDto {
   slug: string;
   nameRo: string;
   nameEn: string;
+  nameRu: string | null;
 }
 
 export interface PostDto {
@@ -164,10 +168,13 @@ export interface PostDto {
   slug: string;
   titleRo: string;
   titleEn: string;
+  titleRu: string | null;
   excerptRo: string | null;
   excerptEn: string | null;
+  excerptRu: string | null;
   contentRo: string;
   contentEn: string;
+  contentRu: string | null;
   coverImageUrl: string | null;
   status: PostStatus;
   publishedAt: string | null;
@@ -184,6 +191,7 @@ export interface ContactDto {
   type: ContactType;
   labelRo: string;
   labelEn: string;
+  labelRu: string | null;
   value: string;
   sortOrder: number;
   active: boolean;
@@ -214,43 +222,54 @@ export interface ContactMessageDto {
 }
 
 // --- About (singleton) ---
+//
+// These blocks live in `Json` columns, so their RU keys are optional rather
+// than nullable: rows written before RU existed simply do not carry them.
 
 /** A headline figure (e.g. "12+" → "ani de practică"). */
 export interface AboutStat {
   value: string;
   labelRo: string;
   labelEn: string;
+  labelRu?: string;
 }
 
 /** A single qualification / credential line. */
 export interface AboutCredential {
   ro: string;
   en: string;
+  ru?: string;
 }
 
 /** A parent testimonial. */
 export interface AboutTestimonial {
   quoteRo: string;
   quoteEn: string;
+  quoteRu?: string;
   author: string;
   roleRo: string;
   roleEn: string;
+  roleRu?: string;
 }
 
 /** One FAQ entry. */
 export interface AboutFaqItem {
   qRo: string;
   qEn: string;
+  qRu?: string;
   aRo: string;
   aEn: string;
+  aRu?: string;
 }
 
 export interface AboutPageDto {
   id: string;
   titleRo: string;
   titleEn: string;
+  titleRu: string | null;
   contentRo: string;
   contentEn: string;
+  contentRu: string | null;
   images: string[] | null;
   stats: AboutStat[];
   credentials: AboutCredential[];

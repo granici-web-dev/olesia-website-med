@@ -38,14 +38,38 @@ import { paths } from '@/config/routes';
 
 const e = ro.blog.editor;
 
+/**
+ * The three locales the public site serves. Only RO is validated: an article
+ * may go live before its EN/RU translations exist, and the site falls back to
+ * Romanian for whatever is still empty.
+ */
+const LANGS = ['ro', 'en', 'ru'] as const;
+type Lang = (typeof LANGS)[number];
+
+const LANG_LABEL: Record<Lang, string> = {
+  ro: e.langRo,
+  en: e.langEn,
+  ru: e.langRu,
+};
+
+/** Field-name suffix per locale (`titleRo`, `titleEn`, `titleRu`). */
+const LANG_SUFFIX: Record<Lang, 'Ro' | 'En' | 'Ru'> = {
+  ro: 'Ro',
+  en: 'En',
+  ru: 'Ru',
+};
+
 const schema = z.object({
   slug: z.string().trim().min(1, e.required),
   titleRo: z.string().trim().min(1, e.missingTitle),
   titleEn: z.string(),
+  titleRu: z.string(),
   excerptRo: z.string(),
   excerptEn: z.string(),
+  excerptRu: z.string(),
   contentRo: z.string(),
   contentEn: z.string(),
+  contentRu: z.string(),
   coverImageUrl: z.string().nullable(),
   categoryIds: z.array(z.string()),
 });
@@ -56,10 +80,13 @@ const EMPTY: FormValues = {
   slug: '',
   titleRo: '',
   titleEn: '',
+  titleRu: '',
   excerptRo: '',
   excerptEn: '',
+  excerptRu: '',
   contentRo: '',
   contentEn: '',
+  contentRu: '',
   coverImageUrl: null,
   categoryIds: [],
 };
@@ -69,10 +96,13 @@ function fromPost(p: Post): FormValues {
     slug: p.slug,
     titleRo: p.titleRo,
     titleEn: p.titleEn,
+    titleRu: p.titleRu,
     excerptRo: p.excerptRo,
     excerptEn: p.excerptEn,
+    excerptRu: p.excerptRu,
     contentRo: p.contentRo,
     contentEn: p.contentEn,
+    contentRu: p.contentRu,
     coverImageUrl: p.coverImageUrl,
     categoryIds: p.categoryIds,
   };
@@ -96,7 +126,7 @@ export function BlogEditorPage() {
 
   const post = postQuery.data;
 
-  const [lang, setLang] = React.useState<'ro' | 'en'>('ro');
+  const [lang, setLang] = React.useState<Lang>('ro');
   const slugEdited = React.useRef(isEdit);
 
   const form = useForm<FormValues>({
@@ -138,10 +168,13 @@ export function BlogEditorPage() {
         slug: values.slug.trim() || slugify(values.titleRo),
         titleRo: values.titleRo.trim(),
         titleEn: values.titleEn.trim(),
+        titleRu: values.titleRu.trim(),
         excerptRo: values.excerptRo.trim(),
         excerptEn: values.excerptEn.trim(),
+        excerptRu: values.excerptRu.trim(),
         contentRo: values.contentRo,
         contentEn: values.contentEn,
+        contentRu: values.contentRu,
         coverImageUrl: values.coverImageUrl,
         status,
         publishedAt,
@@ -225,7 +258,7 @@ export function BlogEditorPage() {
         <Card className="gap-5 p-6">
           {/* Language switch */}
           <div className="inline-flex w-fit rounded-lg bg-muted p-1">
-            {(['ro', 'en'] as const).map((l) => {
+            {LANGS.map((l) => {
               const hasError = l === 'ro' && !!errors.titleRo;
               return (
                 <button
@@ -239,7 +272,7 @@ export function BlogEditorPage() {
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  {l === 'ro' ? e.langRo : e.langEn}
+                  {LANG_LABEL[l]}
                   {hasError && (
                     <span className="size-1.5 rounded-full bg-destructive" />
                   )}
@@ -248,8 +281,9 @@ export function BlogEditorPage() {
             })}
           </div>
 
-          <LangFields lang="ro" hidden={lang !== 'ro'} form={form} />
-          <LangFields lang="en" hidden={lang !== 'en'} form={form} />
+          {LANGS.map((l) => (
+            <LangFields key={l} lang={l} hidden={lang !== l} form={form} />
+          ))}
         </Card>
 
         {/* Sidebar */}
@@ -326,14 +360,14 @@ function LangFields({
   hidden,
   form,
 }: {
-  lang: 'ro' | 'en';
+  lang: Lang;
   hidden: boolean;
   form: UseFormReturn<FormValues>;
 }) {
-  const cap = lang === 'ro' ? 'Ro' : 'En';
-  const titleKey = `title${cap}` as 'titleRo' | 'titleEn';
-  const excerptKey = `excerpt${cap}` as 'excerptRo' | 'excerptEn';
-  const contentKey = `content${cap}` as 'contentRo' | 'contentEn';
+  const cap = LANG_SUFFIX[lang];
+  const titleKey = `title${cap}` as 'titleRo' | 'titleEn' | 'titleRu';
+  const excerptKey = `excerpt${cap}` as 'excerptRo' | 'excerptEn' | 'excerptRu';
+  const contentKey = `content${cap}` as 'contentRo' | 'contentEn' | 'contentRu';
   const titleError = lang === 'ro' ? form.formState.errors.titleRo : undefined;
 
   return (

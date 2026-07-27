@@ -22,12 +22,16 @@ export interface Service {
   group: ServiceGroup;
   titleRo: string;
   titleEn: string;
+  /** RU is optional — the catalog stays saveable while a translation is missing. */
+  titleRu: string | null;
   descriptionRo: string;
   descriptionEn: string;
+  descriptionRu: string | null;
   durationMin: number | null; // group A only
   price: number; // EUR (whole euros; 0 = on request)
   priceLabelRo: string | null;
   priceLabelEn: string | null;
+  priceLabelRu: string | null;
   calendlyEventTypeUri: string | null; // group A only — webhook mapping
   calendlySchedulingUrl: string | null; // group A only — public booking link
   sortOrder: number;

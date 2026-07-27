@@ -77,7 +77,9 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Patient document upload** (§11.14) — patients upload analyses/investigations before the consult. New surface, special-category GDPR data, no patient accounts exist today.
 - **Security package** (§11.10) — reCAPTCHA on all forms (nothing exists), **admin 2FA/TOTP** (nothing exists), automated DB backups, WAF/rate limiting, dependency-update process.
 - **New back-office modules** (§11.12) — FAQ, testimonials, media appearances, PDF materials, site media (hero video + portraits). None exist today.
-- **RU fields in content models** (§11.12) — Prisma content models are `*_ro`/`*_en` only while the site is trilingual; if the client edits copy herself, RU must be first-class, not a RO fallback.
+- ~~**RU fields in content models**~~ — ✅ **DONE 2026-07-27.** `*Ru` columns on `Service`, `Category`, `Post`, `Contact`, `AboutPage` (+ the About JSON blocks), shared DTOs, API DTOs/mappers, three-language back-office editors, and frontend consumption. RU is **nullable and never required** — the site falls back RU → RO (empty string counts as missing), so a half-translated page still saves. Migration `20260727190927_content_ru_fields`; the seed backfills RU only where it is still empty.
+
+  ⚠️ Rows the client already edited (About stats/credentials/testimonials/FAQ) keep **no RU** — the seed deliberately never clobbers edited blocks. Those must be typed in the back office, or the Russian page shows Romanian there.
 - **Video subtitles** (§11.7) — RO audio stays; EN/RU get `.vtt` subtitle tracks. Blocked by a UX decision: the hero video is a muted, control-less autoplay loop where captions can't surface.
 
 ### 🟢 Small/optional frontend leftovers
@@ -296,7 +298,7 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 Existing back-office pages: `about, appointments, blog, contacts, dashboard, messages, patients, quick-questions, services, subscriptions, users`.
 **Missing for her list:** FAQ · testimonials · media appearances · PDF materials (Biblioteca) · site media (hero video + portraits) — plus the already-planned data-driven catalog for prices/texts.
 Note: homepage testimonials are currently **hardcoded fakes** ([[testimonials-placeholder]]) — once a CRUD exists they must be replaced with real reviews before launch.
-**Localisation gap:** `Service` (and the other content models) are `titleRo/titleEn`, `descriptionRo/descriptionEn` — **no RU**, while the site ships RO/EN/RU. If she authors content herself, RU has to become a real field across services/blog/about/FAQ/testimonials/materials, otherwise the Russian site silently falls back to Romanian forever.
+**Localisation gap:** ✅ **CLOSED 2026-07-27** for every model that exists today — services, blog (posts + categories), contacts and About (title/content + all four JSON blocks) now carry `*Ru`, editable from a third language tab/column in the back office. The modules that do not exist yet (FAQ, testimonials, media appearances, materials, site media) must be **born trilingual** — RO/EN required, RU optional with a RO fallback, same as the rest.
 
 ### 11.14 Patient document upload — new feature, special-category data
 Requested: patients upload analyses/investigations/documents **before** the consultation. Today the portal is staff-only (`admin`/`editor`); there is no patient login.
@@ -473,7 +475,8 @@ All of these are **not started**. Ordered by dependency, not by client priority.
 - [ ] `media-appearances` module + CRUD — the **/media page is already live** (Phase 5, local data in `lib/media-appearances.ts`); the backend owes the model (kind, outlet, show, date, title/summary ×3 locales, url, embed provider+id, thumbnail) + thumbnail upload, so the client can add items herself. Decide then: move or duplicate the /about "Certificări recente" block onto /media.
 - [ ] `materials` module (already owed by Phase 2) — PDF guides editable from the back office.
 - [ ] **Site media** module: hero video + poster + portraits editable (client expects this, answer v2 §3). Keep the "new filename on swap" cache rule.
-- [ ] **RU fields across content models** (`*_ru` on services/blog/about/FAQ/testimonials/materials) + Prisma migration + back-office tri-lingual editors + frontend consumption. Without it the RU site stays a RO fallback forever.
+- [x] ~~**RU fields across content models**~~ — ✅ **DONE 2026-07-27** for services/blog/contacts/about (migration `20260727190927_content_ru_fields`). New modules below inherit the convention: RO/EN required, `*Ru` nullable, readers fall back RU → RO (`loc()` in `apps/frontend/lib/api.ts` treats `''` as missing).
+  - ⛔ Follow-up for the client: the About stats/credentials/testimonials/FAQ rows she already edited have empty RU — she fills them in the back office, we do not invent translations for her content.
 
 ### Phase 11 — Payments (§11.8) ⛔ blocked on scope sign-off (blocker #10)
 - [ ] Agree scope/budget/timeline and the method priority with the client **before any code**.

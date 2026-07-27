@@ -12,6 +12,7 @@ export interface Contact {
   type: ContactType;
   labelRo: string;
   labelEn: string;
+  labelRu: string | null;
   value: string;
   sortOrder: number;
   active: boolean;

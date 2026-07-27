@@ -32,6 +32,23 @@ import {
 
 const a = ro.about;
 
+/** The three locales of the public site; only RO is validated (see the schema). */
+const LANGS = ['ro', 'en', 'ru'] as const;
+type Lang = (typeof LANGS)[number];
+
+const LANG_LABEL: Record<Lang, string> = {
+  ro: a.langRo,
+  en: a.langEn,
+  ru: a.langRu,
+};
+
+/** Field-name suffix per locale (`titleRo`, `titleEn`, `titleRu`). */
+const LANG_SUFFIX: Record<Lang, 'Ro' | 'En' | 'Ru'> = {
+  ro: 'Ro',
+  en: 'En',
+  ru: 'Ru',
+};
+
 export function AboutPage() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
@@ -39,15 +56,17 @@ export function AboutPage() {
     queryFn: fetchAbout,
   });
 
-  const [lang, setLang] = React.useState<'ro' | 'en'>('ro');
+  const [lang, setLang] = React.useState<Lang>('ro');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(aboutFormSchema),
     defaultValues: {
       titleRo: '',
       titleEn: '',
+      titleRu: '',
       contentRo: '',
       contentEn: '',
+      contentRu: '',
       images: [],
       stats: [],
       credentials: [],
@@ -66,8 +85,10 @@ export function AboutPage() {
       updateAbout({
         titleRo: values.titleRo.trim(),
         titleEn: values.titleEn.trim(),
+        titleRu: values.titleRu.trim(),
         contentRo: values.contentRo,
         contentEn: values.contentEn,
+        contentRu: values.contentRu,
         images: values.images,
         stats: values.stats,
         credentials: values.credentials,
@@ -121,7 +142,7 @@ export function AboutPage() {
         <Card className="gap-5 p-6">
           {/* Language switch */}
           <div className="inline-flex w-fit rounded-lg bg-muted p-1">
-            {(['ro', 'en'] as const).map((l) => {
+            {LANGS.map((l) => {
               const hasError = l === 'ro' && !!titleError;
               return (
                 <button
@@ -135,7 +156,7 @@ export function AboutPage() {
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  {l === 'ro' ? a.langRo : a.langEn}
+                  {LANG_LABEL[l]}
                   {hasError && (
                     <span className="size-1.5 rounded-full bg-destructive" />
                   )}
@@ -144,8 +165,9 @@ export function AboutPage() {
             })}
           </div>
 
-          <LangFields lang="ro" hidden={lang !== 'ro'} form={form} />
-          <LangFields lang="en" hidden={lang !== 'en'} form={form} />
+          {LANGS.map((l) => (
+            <LangFields key={l} lang={l} hidden={lang !== l} form={form} />
+          ))}
         </Card>
 
         <Card className="h-fit gap-3 p-5">
@@ -173,13 +195,13 @@ function LangFields({
   hidden,
   form,
 }: {
-  lang: 'ro' | 'en';
+  lang: Lang;
   hidden: boolean;
   form: UseFormReturn<FormValues>;
 }) {
-  const cap = lang === 'ro' ? 'Ro' : 'En';
-  const titleKey = `title${cap}` as 'titleRo' | 'titleEn';
-  const contentKey = `content${cap}` as 'contentRo' | 'contentEn';
+  const cap = LANG_SUFFIX[lang];
+  const titleKey = `title${cap}` as 'titleRo' | 'titleEn' | 'titleRu';
+  const contentKey = `content${cap}` as 'contentRo' | 'contentEn' | 'contentRu';
   const titleError = lang === 'ro' ? form.formState.errors.titleRo : undefined;
 
   return (

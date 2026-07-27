@@ -63,6 +63,11 @@ const schema = z
     price: intString(f.invalidNumber),
     priceLabelRo: z.string(),
     priceLabelEn: z.string(),
+    // RU is never required: a service must stay saveable while its Russian
+    // copy is still missing — the public site falls back to RO.
+    titleRu: z.string(),
+    descriptionRu: z.string(),
+    priceLabelRu: z.string(),
     durationMin: z.string(),
     calendlyEventTypeUri: z.string(),
     calendlySchedulingUrl: z.string(),
@@ -89,11 +94,14 @@ function emptyValues(code: ServiceCode, sortOrder: number): FormValues {
     code,
     titleRo: '',
     titleEn: '',
+    titleRu: '',
     descriptionRo: '',
     descriptionEn: '',
+    descriptionRu: '',
     price: '',
     priceLabelRo: '',
     priceLabelEn: '',
+    priceLabelRu: '',
     durationMin: meta.defaultDuration ? String(meta.defaultDuration) : '',
     calendlyEventTypeUri: '',
     calendlySchedulingUrl: '',
@@ -107,11 +115,14 @@ function fromService(s: Service): FormValues {
     code: s.code,
     titleRo: s.titleRo,
     titleEn: s.titleEn,
+    titleRu: s.titleRu ?? '',
     descriptionRo: s.descriptionRo,
     descriptionEn: s.descriptionEn,
+    descriptionRu: s.descriptionRu ?? '',
     price: String(s.price),
     priceLabelRo: s.priceLabelRo ?? '',
     priceLabelEn: s.priceLabelEn ?? '',
+    priceLabelRu: s.priceLabelRu ?? '',
     durationMin: s.durationMin != null ? String(s.durationMin) : '',
     calendlyEventTypeUri: s.calendlyEventTypeUri ?? '',
     calendlySchedulingUrl: s.calendlySchedulingUrl ?? '',
@@ -128,11 +139,14 @@ function toInput(values: FormValues): ServiceInput {
     group,
     titleRo: values.titleRo.trim(),
     titleEn: values.titleEn.trim(),
+    titleRu: values.titleRu.trim() || null,
     descriptionRo: values.descriptionRo.trim(),
     descriptionEn: values.descriptionEn.trim(),
+    descriptionRu: values.descriptionRu.trim() || null,
     price: Number(values.price),
     priceLabelRo: values.priceLabelRo.trim() || null,
     priceLabelEn: values.priceLabelEn.trim() || null,
+    priceLabelRu: values.priceLabelRu.trim() || null,
     durationMin: isA && values.durationMin ? Number(values.durationMin) : null,
     calendlyEventTypeUri:
       isA && values.calendlyEventTypeUri.trim()
@@ -284,6 +298,8 @@ export function ServiceFormSheet({
                       <span className="size-1.5 rounded-full bg-destructive" />
                     )}
                   </TabsTrigger>
+                  {/* RU carries no error dot — none of its fields can fail. */}
+                  <TabsTrigger value="ru">{f.langRu}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="ro" className="mt-4 space-y-4">
@@ -327,6 +343,28 @@ export function ServiceFormSheet({
                     hint={f.priceLabelHint}
                     optional
                     {...form.register('priceLabelEn')}
+                  />
+                </TabsContent>
+
+                <TabsContent value="ru" className="mt-4 space-y-4">
+                  <TextField
+                    id="titleRu"
+                    label={f.titleField}
+                    optional
+                    hint={ro.common.ruFallbackHint}
+                    {...form.register('titleRu')}
+                  />
+                  <TextAreaField
+                    id="descriptionRu"
+                    label={f.description}
+                    {...form.register('descriptionRu')}
+                  />
+                  <TextField
+                    id="priceLabelRu"
+                    label={`${f.priceLabelField}`}
+                    hint={f.priceLabelHint}
+                    optional
+                    {...form.register('priceLabelRu')}
                   />
                 </TabsContent>
               </Tabs>

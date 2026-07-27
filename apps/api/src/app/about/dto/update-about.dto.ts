@@ -6,7 +6,13 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-/** A headline figure (e.g. "12+" → "ani de practică"). */
+/**
+ * A headline figure (e.g. "12+" → "ani de practică").
+ *
+ * RU is optional across every block: these are JSON payloads that predate the
+ * Russian locale, and the About page must stay saveable while a translation is
+ * still missing — the site falls back to RO.
+ */
 export class AboutStatDto {
   @IsString()
   value!: string;
@@ -16,6 +22,10 @@ export class AboutStatDto {
 
   @IsString()
   labelEn!: string;
+
+  @IsOptional()
+  @IsString()
+  labelRu?: string;
 }
 
 /** A single qualification / credential line. */
@@ -25,6 +35,10 @@ export class AboutCredentialDto {
 
   @IsString()
   en!: string;
+
+  @IsOptional()
+  @IsString()
+  ru?: string;
 }
 
 /** A parent testimonial. */
@@ -35,6 +49,10 @@ export class AboutTestimonialDto {
   @IsString()
   quoteEn!: string;
 
+  @IsOptional()
+  @IsString()
+  quoteRu?: string;
+
   @IsString()
   author!: string;
 
@@ -43,6 +61,10 @@ export class AboutTestimonialDto {
 
   @IsString()
   roleEn!: string;
+
+  @IsOptional()
+  @IsString()
+  roleRu?: string;
 }
 
 /** One FAQ entry. */
@@ -53,11 +75,19 @@ export class AboutFaqItemDto {
   @IsString()
   qEn!: string;
 
+  @IsOptional()
+  @IsString()
+  qRu?: string;
+
   @IsString()
   aRo!: string;
 
   @IsString()
   aEn!: string;
+
+  @IsOptional()
+  @IsString()
+  aRu?: string;
 }
 
 /** Partial update of the singleton About page. */
@@ -72,11 +102,19 @@ export class UpdateAboutDto {
 
   @IsOptional()
   @IsString()
+  titleRu?: string;
+
+  @IsOptional()
+  @IsString()
   contentRo?: string;
 
   @IsOptional()
   @IsString()
   contentEn?: string;
+
+  @IsOptional()
+  @IsString()
+  contentRu?: string;
 
   @IsOptional()
   @IsArray()

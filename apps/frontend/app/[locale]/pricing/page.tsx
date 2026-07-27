@@ -25,16 +25,22 @@ const FALLBACK_SERVICES: ServiceDto[] = [
   {
     id: 'pediatric', code: 'pediatric', group: 'A_booking',
     titleRo: 'Consultație pediatrică', titleEn: 'Pediatric consultation',
-    descriptionRo: '', descriptionEn: '', durationMin: 30, price: 28,
-    priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
+    titleRu: 'Педиатрическая консультация',
+    descriptionRo: '', descriptionEn: '', descriptionRu: null,
+    durationMin: 30, price: 28,
+    priceLabelRo: null, priceLabelEn: null, priceLabelRu: null,
+    calendlyEventTypeUri: null,
     calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.pediatric,
     sortOrder: 1, active: true,
   },
   {
     id: 'nutrition', code: 'nutrition', group: 'A_booking',
     titleRo: 'Consultație nutrițională', titleEn: 'Nutrition consultation',
-    descriptionRo: '', descriptionEn: '', durationMin: 60, price: 38,
-    priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
+    titleRu: 'Консультация по питанию',
+    descriptionRo: '', descriptionEn: '', descriptionRu: null,
+    durationMin: 60, price: 38,
+    priceLabelRo: null, priceLabelEn: null, priceLabelRu: null,
+    calendlyEventTypeUri: null,
     calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.nutrition,
     sortOrder: 2, active: true,
   },
@@ -42,29 +48,38 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     id: 'integrative', code: 'integrative', group: 'A_booking',
     titleRo: 'Consultație integrativă & monitorizare',
     titleEn: 'Integrative consultation & monitoring',
-    descriptionRo: '', descriptionEn: '', durationMin: 90, price: 58,
-    priceLabelRo: null, priceLabelEn: null, calendlyEventTypeUri: null,
+    titleRu: 'Интегративная консультация и наблюдение',
+    descriptionRo: '', descriptionEn: '', descriptionRu: null,
+    durationMin: 90, price: 58,
+    priceLabelRo: null, priceLabelEn: null, priceLabelRu: null,
+    calendlyEventTypeUri: null,
     calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.integrative,
     sortOrder: 3, active: true,
   },
   {
     id: 'monitoring', code: 'monitoring', group: 'B_portal',
     titleRo: 'Monitorizare și abonamente', titleEn: 'Monitoring & subscriptions',
-    descriptionRo: '', descriptionEn: '', durationMin: null, price: 0,
+    titleRu: 'Наблюдение и абонементы',
+    descriptionRo: '', descriptionEn: '', descriptionRu: null,
+    durationMin: null, price: 0,
     priceLabelRo: 'Preț la cerere', priceLabelEn: 'Price on request',
+    priceLabelRu: 'Цена по запросу',
     calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 4, active: true,
   },
   {
     id: 'quick_question', code: 'quick_question', group: 'B_portal',
     titleRo: 'Întrebare EXPRESS', titleEn: 'Express question',
-    descriptionRo: '', descriptionEn: '', durationMin: null, price: 8,
+    titleRu: 'Вопрос EXPRESS',
+    descriptionRo: '', descriptionEn: '', descriptionRu: null,
+    durationMin: null, price: 8,
     priceLabelRo: '~1 h · răspuns scris', priceLabelEn: '~1 h · written reply',
+    priceLabelRu: '~1 ч · письменный ответ',
     calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 5, active: true,
   },
 ];
 
 function price(locale: string, s: ServiceDto): string {
-  const label = loc(locale, s.priceLabelRo, s.priceLabelEn);
+  const label = loc(locale, s.priceLabelRo ?? '', s.priceLabelEn, s.priceLabelRu);
   if (label) return label;
   return `${new Intl.NumberFormat(locale === 'ru' ? 'ru-RU' : locale === 'en' ? 'en-US' : 'ro-RO').format(s.price)} €`;
 }
@@ -198,7 +213,7 @@ export default async function PricingPage({
               <div>
                 <div className={styles.serviceTag}>{serviceTag(locale, s)}</div>
                 <h2 className={styles.serviceTitle}>
-                  {loc(locale, s.titleRo, s.titleEn)}
+                  {loc(locale, s.titleRo, s.titleEn, s.titleRu)}
                 </h2>
               </div>
               <div>
@@ -207,7 +222,7 @@ export default async function PricingPage({
                     ? locale === 'ru'
                       ? SERVICE_DESCRIPTIONS[s.code].ru
                       : loc(locale, SERVICE_DESCRIPTIONS[s.code].ro, SERVICE_DESCRIPTIONS[s.code].en)
-                    : loc(locale, s.descriptionRo, s.descriptionEn)}
+                    : loc(locale, s.descriptionRo, s.descriptionEn, s.descriptionRu)}
                 </p>
                 {SERVICE_INCLUDED[s.code] && (
                   <div className="mt-5">
@@ -254,7 +269,7 @@ export default async function PricingPage({
                 {s.group === 'A_booking' && s.calendlySchedulingUrl ? (
                   <CalendlyButton
                     url={s.calendlySchedulingUrl}
-                    reason={loc(locale, s.titleRo, s.titleEn)}
+                    reason={loc(locale, s.titleRo, s.titleEn, s.titleRu)}
                     label={t.book}
                     className={serviceLink}
                   />

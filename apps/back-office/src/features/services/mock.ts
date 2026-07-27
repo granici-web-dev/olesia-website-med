@@ -43,14 +43,18 @@ let store: Service[] = [
     group: 'A_booking',
     titleRo: 'Consultație pediatrică',
     titleEn: 'Pediatric consultation',
+    titleRu: 'Педиатрическая консультация',
     descriptionRo:
       'Evaluare completă a stării de sănătate a copilului, cu recomandări personalizate.',
     descriptionEn:
       'Comprehensive assessment of the child’s health, with personalized recommendations.',
+    descriptionRu:
+      'Полная оценка состояния здоровья ребёнка с персональными рекомендациями.',
     durationMin: 30,
     price: 28,
     priceLabelRo: null,
     priceLabelEn: null,
+    priceLabelRu: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/PEDIATRIC',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
@@ -63,14 +67,18 @@ let store: Service[] = [
     group: 'A_booking',
     titleRo: 'Consultație nutrițională',
     titleEn: 'Nutrition consultation',
+    titleRu: 'Консультация по питанию',
     descriptionRo:
       'Plan alimentar adaptat vârstei și nevoilor copilului, cu obiective clare.',
     descriptionEn:
       'A meal plan tailored to the child’s age and needs, with clear goals.',
+    descriptionRu:
+      'План питания с учётом возраста и потребностей ребёнка, с чёткими целями.',
     durationMin: 60,
     price: 38,
     priceLabelRo: null,
     priceLabelEn: null,
+    priceLabelRu: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/NUTRITION',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
@@ -83,14 +91,18 @@ let store: Service[] = [
     group: 'A_booking',
     titleRo: 'Consultație integrativă & monitorizare',
     titleEn: 'Integrative consultation & monitoring',
+    titleRu: 'Интегративная консультация и наблюдение',
     descriptionRo:
       'Abordare integrativă a sănătății copilului, cu monitorizare pe parcurs.',
     descriptionEn:
       'An integrative approach to the child’s health, with ongoing monitoring.',
+    descriptionRu:
+      'Интегративный подход к здоровью ребёнка с наблюдением в динамике.',
     durationMin: 90,
     price: 58,
     priceLabelRo: null,
     priceLabelEn: null,
+    priceLabelRu: null,
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/INTEGRATIVE',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
@@ -103,14 +115,18 @@ let store: Service[] = [
     group: 'B_portal',
     titleRo: 'Monitorizare 3 luni',
     titleEn: '3-month monitoring',
+    titleRu: 'Наблюдение 3 месяца',
     descriptionRo:
       'Acompaniere timp de 3 luni: mesagerie, ajustări și 2 apeluri video pe lună.',
     descriptionEn:
       'Three months of support: messaging, adjustments and 2 video calls per month.',
+    descriptionRu:
+      'Сопровождение в течение 3 месяцев: переписка, корректировки и 2 видеозвонка в месяц.',
     durationMin: null,
     price: 0,
     priceLabelRo: 'Preț la cerere',
     priceLabelEn: 'Price on request',
+    priceLabelRu: 'Цена по запросу',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
     sortOrder: 4,
@@ -122,13 +138,17 @@ let store: Service[] = [
     group: 'B_portal',
     titleRo: 'Întrebare EXPRESS',
     titleEn: 'Express question',
+    titleRu: 'Вопрос EXPRESS',
     descriptionRo:
       'Răspuns scris la o întrebare punctuală, în ~1 oră în timpul programului de lucru.',
     descriptionEn: 'A written answer to a specific question, within ~1 hour during working hours.',
+    descriptionRu:
+      'Письменный ответ на конкретный вопрос примерно за 1 час в рабочее время.',
     durationMin: null,
     price: 8,
     priceLabelRo: '~1 h · răspuns scris',
     priceLabelEn: '~1 h · written reply',
+    priceLabelRu: '~1 ч · письменный ответ',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
     sortOrder: 5,

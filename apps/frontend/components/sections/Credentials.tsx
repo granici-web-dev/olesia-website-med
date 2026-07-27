@@ -10,8 +10,9 @@ export function Credentials({
   locale: string;
   stats: AboutStat[];
 }) {
-  const t = (ro: string, en: string, ru: string) =>
-    locale === 'ru' ? ru : locale === 'en' ? en : ro;
+  // RU is optional on these blocks — fall back to Romanian, never to blank.
+  const t = (ro: string, en: string, ru?: string) =>
+    locale === 'ru' ? ru || ro : locale === 'en' ? en : ro;
   if (stats.length === 0) return null;
 
   return (
@@ -24,7 +25,7 @@ export function Credentials({
                 {s.value}
               </div>
               <div className="mt-2 text-[0.9rem] text-cream/70">
-                {t(s.labelRo, s.labelEn, s.labelRo)}
+                {t(s.labelRo, s.labelEn, s.labelRu)}
               </div>
             </Reveal>
           ))}

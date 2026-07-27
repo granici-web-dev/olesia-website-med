@@ -13,12 +13,15 @@ export interface ServiceDto {
   group: ServiceGroup;
   titleRo: string;
   titleEn: string;
+  titleRu: string | null;
   descriptionRo: string;
   descriptionEn: string;
+  descriptionRu: string | null;
   durationMin: number | null;
   price: number;
   priceLabelRo: string | null;
   priceLabelEn: string | null;
+  priceLabelRu: string | null;
   calendlyEventTypeUri: string | null;
   calendlySchedulingUrl: string | null;
   sortOrder: number;
@@ -30,40 +33,51 @@ export interface ContactDto {
   type: 'phone' | 'email' | 'address' | 'social' | 'other';
   labelRo: string;
   labelEn: string;
+  labelRu: string | null;
   value: string;
   sortOrder: number;
   active: boolean;
 }
 
+// The About blocks live in JSON columns, so their RU keys are optional: rows
+// written before the Russian locale existed simply do not carry them.
 export interface AboutStat {
   value: string;
   labelRo: string;
   labelEn: string;
+  labelRu?: string;
 }
 export interface AboutCredential {
   ro: string;
   en: string;
+  ru?: string;
 }
 export interface AboutTestimonial {
   quoteRo: string;
   quoteEn: string;
+  quoteRu?: string;
   author: string;
   roleRo: string;
   roleEn: string;
+  roleRu?: string;
 }
 export interface AboutFaqItem {
   qRo: string;
   qEn: string;
+  qRu?: string;
   aRo: string;
   aEn: string;
+  aRu?: string;
 }
 
 export interface AboutPageDto {
   id: string;
   titleRo: string;
   titleEn: string;
+  titleRu: string | null;
   contentRo: string;
   contentEn: string;
+  contentRu: string | null;
   images: string[] | null;
   stats: AboutStat[];
   credentials: AboutCredential[];
@@ -87,6 +101,7 @@ export interface PostCategory {
   slug: string;
   nameRo: string;
   nameEn: string;
+  nameRu: string | null;
 }
 
 export interface PostDto {
@@ -94,10 +109,13 @@ export interface PostDto {
   slug: string;
   titleRo: string;
   titleEn: string;
+  titleRu: string | null;
   excerptRo: string | null;
   excerptEn: string | null;
+  excerptRu: string | null;
   contentRo: string;
   contentEn: string;
+  contentRu: string | null;
   coverImageUrl: string | null;
   publishedAt: string | null;
   categories: PostCategory[];
@@ -133,7 +151,19 @@ export function serviceTag(locale: string, s: ServiceDto): string {
   }
 }
 
-/** Pick the locale variant of a bilingual `*Ro` / `*En` pair. */
-export function loc<T>(locale: string, ro: T, en: T): T {
-  return locale === 'en' ? en : ro;
+/**
+ * Pick the locale variant of a `*Ro` / `*En` / `*Ru` triple.
+ *
+ * Romanian is the fallback, and an empty string counts as missing just like
+ * `null`: the back office writes `''` for a field the doctor left blank, and a
+ * blank heading on the public page would be worse than a Romanian one.
+ */
+export function loc(
+  locale: string,
+  ro: string,
+  en?: string | null,
+  ru?: string | null,
+): string {
+  const pick = locale === 'ru' ? ru : locale === 'en' ? en : ro;
+  return pick?.trim() ? pick : ro;
 }

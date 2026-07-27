@@ -22,6 +22,11 @@ export class CreatePostDto {
   @MinLength(1)
   titleEn!: string;
 
+  /** RU is optional: an article may be published before it is translated. */
+  @IsOptional()
+  @IsString()
+  titleRu?: string | null;
+
   @IsOptional()
   @IsString()
   excerptRo?: string;
@@ -30,11 +35,19 @@ export class CreatePostDto {
   @IsString()
   excerptEn?: string;
 
+  @IsOptional()
+  @IsString()
+  excerptRu?: string | null;
+
   @IsString()
   contentRo!: string;
 
   @IsString()
   contentEn!: string;
+
+  @IsOptional()
+  @IsString()
+  contentRu?: string | null;
 
   @IsOptional()
   @IsString()

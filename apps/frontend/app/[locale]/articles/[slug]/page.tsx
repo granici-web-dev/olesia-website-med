@@ -43,11 +43,7 @@ export default async function ArticlePage({
     ],
   };
 
-  // Russian content only exists on placeholder posts; live API posts fall back to RO.
-  const pick = (ro: string, enTxt: string, ruTxt?: string) =>
-    ru ? ruTxt ?? ro : loc(locale, ro, enTxt);
-
-  const title = pick(post.titleRo, post.titleEn, 'titleRu' in post ? post.titleRu : undefined);
+  const title = loc(locale, post.titleRo, post.titleEn, post.titleRu);
   const date = post.publishedAt
     ? new Intl.DateTimeFormat(ru ? 'ru-RU' : en ? 'en-US' : 'ro-RO', {
         day: '2-digit',
@@ -71,7 +67,7 @@ export default async function ArticlePage({
         <div className="flex flex-wrap items-center gap-3">
           {post.categories.map((c) => (
             <span key={c.id} className="eyebrow !text-sage-deep">
-              {pick(c.nameRo, c.nameEn, 'nameRu' in c ? c.nameRu : undefined)}
+              {loc(locale, c.nameRo, c.nameEn, c.nameRu)}
             </span>
           ))}
           {date ? <span className="mono text-xs text-ink-soft">{date}</span> : null}
@@ -91,7 +87,7 @@ export default async function ArticlePage({
         ) : null}
 
         <div className="mt-10 text-[1.08rem]">
-          {renderMarkdown(pick(post.contentRo, post.contentEn, 'contentRu' in post ? post.contentRu : undefined))}
+          {renderMarkdown(loc(locale, post.contentRo, post.contentEn, post.contentRu))}
         </div>
       </article>
     </main>

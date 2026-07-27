@@ -22,6 +22,7 @@ let about: AboutPage = {
   id: 'about',
   titleRo: 'Despre Olesia',
   titleEn: 'About Olesia',
+  titleRu: 'Об Олесе',
   contentRo: `## Cine sunt
 
 Sunt medic pediatru cu o abordare **integrativă**, axată pe nutriție și pe dezvoltarea armonioasă a copilului.
@@ -36,22 +37,58 @@ I am a pediatrician with an **integrative** approach, focused on nutrition and t
 I believe every family deserves clear support, without pressure and without myths. I work alongside parents toward informed, calm decisions.
 
 > A child's health begins with trust and quality information.`,
+  contentRu: `## Кто я
+
+Я педиатр с **интегративным** подходом, с акцентом на питание и гармоничное развитие ребёнка.
+
+Считаю, что каждая семья заслуживает понятной поддержки — без давления и мифов. Работаю вместе с родителями ради спокойных и осознанных решений.
+
+> Здоровье ребёнка начинается с доверия и качественной информации.`,
   images: [
     'https://picsum.photos/seed/olesia-about-1/640/420',
     'https://picsum.photos/seed/olesia-about-2/640/420',
   ],
   stats: [
-    { value: '12+', labelRo: 'ani de practică', labelEn: 'years in practice' },
-    { value: '24h', labelRo: 'timp de răspuns', labelEn: 'response time' },
-    { value: '100%', labelRo: 'consultații online', labelEn: 'online consultations' },
-    { value: 'RO · EN', labelRo: 'limbi de comunicare', labelEn: 'languages' },
+    {
+      value: '12+',
+      labelRo: 'ani de practică',
+      labelEn: 'years in practice',
+      labelRu: 'лет практики',
+    },
+    {
+      value: '24h',
+      labelRo: 'timp de răspuns',
+      labelEn: 'response time',
+      labelRu: 'время ответа',
+    },
+    {
+      value: '100%',
+      labelRo: 'consultații online',
+      labelEn: 'online consultations',
+      labelRu: 'онлайн-консультаций',
+    },
+    {
+      value: 'RO · EN',
+      labelRo: 'limbi de comunicare',
+      labelEn: 'languages',
+      labelRu: 'языки общения',
+    },
   ],
   credentials: [
-    { ro: 'Medic pediatru, diplomă USMF', en: 'Pediatrician, USMF degree' },
-    { ro: 'Formare în nutriție pediatrică', en: 'Pediatric nutrition training' },
+    {
+      ro: 'Medic pediatru, diplomă USMF',
+      en: 'Pediatrician, USMF degree',
+      ru: 'Врач-педиатр, диплом USMF',
+    },
+    {
+      ro: 'Formare în nutriție pediatrică',
+      en: 'Pediatric nutrition training',
+      ru: 'Обучение детской нутрициологии',
+    },
     {
       ro: 'Abordare integrativă & monitorizare',
       en: 'Integrative approach & monitoring',
+      ru: 'Интегративный подход и наблюдение',
     },
   ],
   testimonials: [
@@ -60,32 +97,42 @@ I believe every family deserves clear support, without pressure and without myth
         'Am plecat de la consultație cu un plan clar și fără anxietate. Bebelușul doarme mult mai bine.',
       quoteEn:
         'I left the consultation with a clear plan and no anxiety. Our baby sleeps much better now.',
+      quoteRu:
+        'После консультации у меня был чёткий план и никакой тревоги. Малыш стал спать намного лучше.',
       author: 'Maria I.',
       roleRo: 'mamă, Chișinău',
       roleEn: 'mother, Chișinău',
+      roleRu: 'мама, Кишинёв',
     },
     {
       quoteRo:
         'Explică pe înțelesul tuturor, cu răbdare. Diversificarea a devenit simplă.',
       quoteEn:
         'Explains everything clearly and patiently. Weaning finally became simple.',
+      quoteRu:
+        'Объясняет понятно и терпеливо. Введение прикорма наконец стало простым.',
       author: 'Andrei P.',
       roleRo: 'tată',
       roleEn: 'father',
+      roleRu: 'папа',
     },
   ],
   faq: [
     {
       qRo: 'Cum decurge o consultație online?',
       qEn: 'How does an online consultation work?',
+      qRu: 'Как проходит онлайн-консультация?',
       aRo: 'Pe apel video, prin link-ul primit după rezervare.',
       aEn: 'Over a video call, via the link you receive after booking.',
+      aRu: 'По видеосвязи, по ссылке, которую вы получите после записи.',
     },
     {
       qRo: 'Prima discuție chiar este gratuită?',
       qEn: 'Is the first call really free?',
+      qRu: 'Первый разговор действительно бесплатный?',
       aRo: 'Da, 15 minute de orientare pentru a alege serviciul potrivit.',
       aEn: 'Yes, 15 minutes of orientation to choose the right service.',
+      aRu: 'Да, 15 минут, чтобы сориентироваться и выбрать подходящую услугу.',
     },
   ],
   updatedAt: '2026-06-03T12:00:00+03:00',

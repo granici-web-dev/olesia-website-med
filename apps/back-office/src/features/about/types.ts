@@ -22,8 +22,11 @@ export interface AboutPage {
   id: string;
   titleRo: string;
   titleEn: string;
+  /** RU may be empty — the page saves half-translated; the site falls back to RO. */
+  titleRu: string;
   contentRo: string; // markdown
   contentEn: string; // markdown
+  contentRu: string; // markdown
   images: string[]; // URLs / data URLs
   stats: AboutStat[];
   credentials: AboutCredential[];
@@ -36,8 +39,10 @@ export type AboutInput = Pick<
   AboutPage,
   | 'titleRo'
   | 'titleEn'
+  | 'titleRu'
   | 'contentRo'
   | 'contentEn'
+  | 'contentRu'
   | 'images'
   | 'stats'
   | 'credentials'

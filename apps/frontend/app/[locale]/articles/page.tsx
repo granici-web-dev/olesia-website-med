@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
-import { api, type PostDto } from '@/lib/api';
+import { api, loc, type PostDto } from '@/lib/api';
 import {
   BlogList,
   type BlogPostItem,
@@ -95,11 +95,16 @@ export default async function ArticlesPage({
     ? live.map((p) => ({
         slug: p.slug,
         categoryKey: p.categories[0]?.slug ?? 'all',
-        categoryLabel: p.categories[0] ? lc({ ro: p.categories[0].nameRo, en: p.categories[0].nameEn, ru: p.categories[0].nameRo }) : '',
+        categoryLabel: p.categories[0]
+          ? loc(locale, p.categories[0].nameRo, p.categories[0].nameEn, p.categories[0].nameRu)
+          : '',
         ageKeys: [],
-        title: lc({ ro: p.titleRo, en: p.titleEn, ru: p.titleRo }),
-        excerpt: lc({ ro: p.excerptRo ?? '', en: p.excerptEn ?? '', ru: p.excerptRo ?? '' }),
-        meta: metaLine(p.publishedAt, readMin(en ? p.contentEn : p.contentRo)),
+        title: loc(locale, p.titleRo, p.titleEn, p.titleRu),
+        excerpt: loc(locale, p.excerptRo ?? '', p.excerptEn, p.excerptRu),
+        meta: metaLine(
+          p.publishedAt,
+          readMin(loc(locale, p.contentRo, p.contentEn, p.contentRu)),
+        ),
         coverUrl: p.coverImageUrl,
         href: href(p.slug),
       }))
@@ -123,7 +128,10 @@ export default async function ArticlesPage({
         new Map(
           live
             .flatMap((p) => p.categories)
-            .map((c) => [c.slug, { key: c.slug, label: lc({ ro: c.nameRo, en: c.nameEn, ru: c.nameRo }) }]),
+            .map((c) => [
+              c.slug,
+              { key: c.slug, label: loc(locale, c.nameRo, c.nameEn, c.nameRu) },
+            ]),
         ).values(),
       )
     : CATEGORIES.filter((c) => presentKeys.has(c.key)).map((c) => ({ key: c.key, label: lc(c) }));
