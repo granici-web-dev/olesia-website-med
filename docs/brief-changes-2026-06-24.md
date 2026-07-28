@@ -73,7 +73,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Operational 48h→~1h SLA**, **business-hours-aware** (`dueAt`/deadline-indicator) once the working hours arrive (§11.5).
 
 #### ➕ Added by client answers v2 (2026-07-26) — see §11 for detail
-- **Payments module** (§11.8+§11.11) — online payment inside the booking flow; 5 methods requested. **Reverses the earlier "payments out of scope / manual confirm" decision.** Needs scope sign-off first.
+- **Payments module** (§11.8+§11.11) — ⏸ **PARKED 2026-07-28** (Sergiu is clarifying with the client). Would have reversed the earlier "payments out of scope / manual confirm" decision; for now that earlier decision simply stands, and every paid surface keeps working manually. See Phase 11.
 - **Patient document upload** (§11.14) — patients upload analyses/investigations before the consult. New surface, special-category GDPR data, no patient accounts exist today.
 - **Security package** (§11.10) — reCAPTCHA on all forms (nothing exists), **admin 2FA/TOTP** (nothing exists), automated DB backups, WAF/rate limiting, dependency-update process.
 - **New back-office modules** (§11.12) — ~~FAQ~~, ~~testimonials~~, ~~media appearances~~, ~~PDF materials~~ (all ✅ 2026-07-28). Only **site media** (hero video + portraits) is left.
@@ -499,12 +499,17 @@ All of these are **not started**. Ordered by dependency, not by client priority.
   - **Storefront fix found while wiring it:** a free material with no file still showed a "Descarcă" button that opened the email gate — the visitor handed over an address and only then learned there was no file. It now says "În curând" up front. With 12/12 materials fileless, that path was about to be the common one.
 - [ ] ⛔ **Real PDFs — blocked on the client.** All 12 materials are seeded without a file. The catalog copy is also interim (titles/descriptions drafted from her topics, page counts and prices placeholders): she owns all of it from the back office now.
 - [ ] Email-gate persistence + newsletter — still blocked on her SMTP provider. The gate unlocks the download but stores nothing.
-- [ ] Paid materials still route to /contact; a real checkout waits on the payments module (Phase 11).
+- [ ] Paid materials still route to /contact; a real checkout waits on the payments module — ⏸ parked 2026-07-28 (Phase 11).
 - [ ] **Site media** module: hero video + poster + portraits editable (client expects this, answer v2 §3). Keep the "new filename on swap" cache rule.
 - [x] ~~**RU fields across content models**~~ — ✅ **DONE 2026-07-27** for services/blog/contacts/about (migration `20260727190927_content_ru_fields`). New modules below inherit the convention: RO/EN required, `*Ru` nullable, readers fall back RU → RO (`loc()` in `apps/frontend/lib/api.ts` treats `''` as missing).
   - ⛔ Follow-up for the client: the About stats/credentials rows she already edited have empty RU — she fills them in the back office, we do not invent translations for her content. (The About FAQ block was dropped with the `faq` module; its replacement is fully trilingual from the seed.)
 
-### Phase 11 — Payments (§11.8) ⛔ blocked on scope sign-off (blocker #10)
+### Phase 11 — Payments (§11.8) ⏸ **PARKED 2026-07-28** — out of scope until further notice
+
+**Sergiu's call, 2026-07-28: online payments come out of the plan; he is clarifying the question with the client.** Do not start any of the items below without an explicit go-ahead from him.
+
+Nothing had to be undone: no payment code was ever written, and every surface already works in manual mode and keeps working — paid library materials link to /contact, EXPRESS and subscriptions are lead forms, `paymentStatus` (pending → confirmed) is set by hand in the back office, and Calendly confirms a slot without taking money. The questions that would settle this (legal entity → Stripe eligibility, which merchant accounts are actually obtainable) are §1.1–1.3 of `docs/questions_v3.md`, still unsent.
+
 - [ ] Agree scope/budget/timeline and the method priority with the client **before any code**.
 - [ ] Verify merchant availability for a Moldovan entity: acquirer for card + MIA (maib / Victoriabank / Paynet), PayPal, Revolut. Record what is actually obtainable.
 - [ ] `payments` module: provider adapter(s), checkout session, webhook + signature verification, idempotency, `paymentStatus` transitions, refunds, receipts.
