@@ -15,6 +15,7 @@ export const paths = {
   faq: '/intrebari-frecvente',
   testimonials: '/recenzii',
   media: '/aparitii-media',
+  library: '/biblioteca',
   users: '/utilizatori',
   security: '/securitate',
 } as const;

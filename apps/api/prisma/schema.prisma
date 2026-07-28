@@ -267,6 +267,74 @@ model Contact {
   updatedAt DateTime    @updatedAt
 }
 
+// --- Biblioteca digitală (downloadable materials, /guides) ---
+
+enum MaterialAccess {
+  free
+  paid
+}
+
+/// Merchandising badges on a material card.
+enum MaterialFlag {
+  recommended
+  popular
+  new
+}
+
+model MaterialCategory {
+  id        String  @id @default(uuid())
+  slug      String  @unique
+  nameRo    String
+  nameEn    String
+  nameRu    String?
+  sortOrder Int     @default(0)
+
+  materials Material[]
+}
+
+model Material {
+  id         String           @id @default(uuid())
+  slug       String           @unique
+  category   MaterialCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  /// Keys from the shared child-age taxonomy ('0-6m', '6-12m', …). Empty means
+  /// the material is not age-specific, and the age filter always shows it.
+  ageKeys String[]
+
+  titleRo       String
+  titleEn       String
+  titleRu       String?
+  descriptionRo String
+  descriptionEn String
+  descriptionRu String?
+
+  /// Page count and language of the file, rendered as "PDF · 16 pag. · RO".
+  /// Stored as data rather than three hand-written strings, so the units follow
+  /// the visitor's locale.
+  pageCount Int?
+  fileLang  String?
+
+  access MaterialAccess @default(free)
+  /// Whole EUR, paid materials only. Selling them needs the payments module —
+  /// until it exists the storefront routes a purchase to the contact page.
+  price  Int?
+  flags  MaterialFlag[]
+
+  /// Public URL of the uploaded PDF. Null while the file is still missing: the
+  /// storefront then shows the card as "în curând" instead of a dead download.
+  fileUrl  String?
+  fileName String?
+
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([categoryId])
+}
+
 // --- Media appearances (the /media page) ---
 
 enum MediaKind {

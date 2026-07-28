@@ -85,6 +85,45 @@ export interface TestimonialDto {
   active: boolean;
 }
 
+export interface MaterialCategoryDto {
+  id: string;
+  slug: string;
+  nameRo: string;
+  nameEn: string;
+  nameRu: string | null;
+  sortOrder: number;
+}
+
+/**
+ * A downloadable library material. `fileUrl` is null while the PDF is still
+ * missing — the storefront shows "în curând" rather than a dead download.
+ */
+export interface MaterialDto {
+  id: string;
+  slug: string;
+  categoryId: string;
+  categorySlug: string;
+  /** Keys from the shared child-age taxonomy; empty means "all ages". */
+  ageKeys: string[];
+  titleRo: string;
+  titleEn: string;
+  titleRu: string | null;
+  descriptionRo: string;
+  descriptionEn: string;
+  descriptionRu: string | null;
+  pageCount: number | null;
+  /** Language the file itself is written in, e.g. "RO". */
+  fileLang: string | null;
+  access: 'free' | 'paid';
+  /** Whole EUR, paid materials only. */
+  price: number | null;
+  flags: ('recommended' | 'popular' | 'new')[];
+  fileUrl: string | null;
+  fileName: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
 export type MediaKind = 'tv' | 'radio' | 'conference' | 'press';
 export type MediaEmbedProvider = 'youtube' | 'facebook';
 
@@ -187,6 +226,9 @@ export const api = {
   testimonials: () => getJson<TestimonialDto[]>('/testimonials', []),
   mediaAppearances: () =>
     getJson<MediaAppearanceDto[]>('/media-appearances', []),
+  materials: () => getJson<MaterialDto[]>('/materials', []),
+  materialCategories: () =>
+    getJson<MaterialCategoryDto[]>('/materials/categories', []),
   posts: () => getJson<PostDto[]>('/blog/published', []),
   post: (slug: string) =>
     getJson<PostDto | null>(`/blog/published/${slug}`, null),

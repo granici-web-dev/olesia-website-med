@@ -7,16 +7,17 @@ import { cardCta } from '@/components/ui/cta';
 import { track } from '@/lib/analytics';
 import { subscribe } from '@/lib/newsletter';
 import type { AgeGroup } from '@/lib/age-taxonomy';
-import type { Material, MaterialCategory, MaterialFlag } from '@/lib/placeholder-materials';
+import type { MaterialCategoryDto, MaterialDto } from '@/lib/api';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Digital Library storefront (brief §6a). Owns the client-side interactions:
    search, category + child-age filters, free/paid badges, merchandising flags,
    and the email-gate that collects an address before a free download. Content
-   arrives as trilingual data from the server page; this component localizes by
-   `locale`. The email-gate is UI-only for now (no newsletter backend yet —
-   blocker #8): it unlocks the download on submit; persistence/opt-in lands with
-   the materials/newsletter modules. Paid materials route to /contact (manual).
+   arrives from the back-office `materials` module; this component localizes by
+   `locale`. The email-gate is still UI-only (no newsletter backend — blocked on
+   the client's SMTP provider): it unlocks the download on submit, and
+   persistence/opt-in lands with the newsletter work. Paid materials route to
+   /contact until the payments module exists.
    ────────────────────────────────────────────────────────────────────────── */
 
 type Locale = 'ro' | 'en' | 'ru';
@@ -49,7 +50,7 @@ const T: Record<string, Bi> = {
   flagNew: { ro: 'Nou', en: 'New', ru: 'Новое' },
 };
 
-const FLAG_LABEL: Record<MaterialFlag, Bi> = {
+const FLAG_LABEL: Record<string, Bi> = {
   recommended: T.flagRecommended,
   popular: T.flagPopular,
   new: T.flagNew,
@@ -106,30 +107,53 @@ export function MaterialLibrary({
   contactHref,
 }: {
   locale: Locale;
-  materials: Material[];
-  categories: MaterialCategory[];
+  materials: MaterialDto[];
+  categories: MaterialCategoryDto[];
   ages: AgeGroup[];
   contactHref: string;
 }) {
   const lc = (b: Bi) => b[locale] ?? b.ro;
+  /** RU falls back to RO, an empty string counting as missing — as everywhere. */
+  const tri = (ro: string, en: string, ru: string | null) =>
+    locale === 'ru' ? (ru?.trim() ? ru : ro) : locale === 'en' ? en : ro;
+  const title = (m: MaterialDto) => tri(m.titleRo, m.titleEn, m.titleRu);
+  const summary = (m: MaterialDto) =>
+    tri(m.descriptionRo, m.descriptionEn, m.descriptionRu);
+  const priceLabel = (m: MaterialDto) =>
+    m.price === null ? '' : `${m.price} €`;
+  /** "PDF · 16 pag. · RO" — assembled per locale from the stored page count. */
+  const formatLine = (m: MaterialDto) => {
+    const parts = ['PDF'];
+    if (m.pageCount !== null) {
+      parts.push(
+        `${m.pageCount} ${locale === 'ru' ? 'стр.' : locale === 'en' ? 'pp.' : 'pag.'}`,
+      );
+    }
+    if (m.fileLang) parts.push(m.fileLang);
+    return parts.join(' · ');
+  };
+
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState('all');
   const [age, setAge] = useState('all');
-  const [gate, setGate] = useState<Material | null>(null);
+  const [gate, setGate] = useState<MaterialDto | null>(null);
   const [unlocked, setUnlocked] = useState<Set<string>>(new Set());
 
   const catLabel = useMemo(
-    () => Object.fromEntries(categories.map((c) => [c.key, lc(c.label)])),
+    () =>
+      Object.fromEntries(
+        categories.map((c) => [c.slug, tri(c.nameRo, c.nameEn, c.nameRu)]),
+      ),
     [categories, locale],
   );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return materials.filter((m) => {
-      if (cat !== 'all' && m.categoryKey !== cat) return false;
+      if (cat !== 'all' && m.categorySlug !== cat) return false;
       if (age !== 'all' && m.ageKeys.length > 0 && !m.ageKeys.includes(age)) return false;
       if (q) {
-        const hay = `${lc(m.title)} ${lc(m.description)}`.toLowerCase();
+        const hay = `${title(m)} ${summary(m)}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -178,8 +202,8 @@ export function MaterialLibrary({
               {lc(T.all)}
             </button>
             {categories.map((c) => (
-              <button key={c.key} type="button" aria-pressed={cat === c.key} onClick={() => setCat(c.key)} className={chip(cat === c.key, 'ink')}>
-                {lc(c.label)}
+              <button key={c.slug} type="button" aria-pressed={cat === c.slug} onClick={() => setCat(c.slug)} className={chip(cat === c.slug, 'ink')}>
+                {tri(c.nameRo, c.nameEn, c.nameRu)}
               </button>
             ))}
           </div>
@@ -229,20 +253,20 @@ export function MaterialLibrary({
         <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((m, i) => {
             const isUnlocked = unlocked.has(m.slug);
-            const ready = (m.fileHref ?? '').length > 0;
+            const ready = !!m.fileUrl;
             return (
               <Reveal key={m.slug} delay={(i % 3) * 70}>
                 <article className="group flex h-full flex-col border border-[var(--rule)] bg-paper transition-colors hover:border-sage">
                   <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-cream-2 text-sage">
                     <span className="mono absolute left-4 top-4 rounded-full border border-[var(--rule)] bg-paper/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-sage-text">
-                      {catLabel[m.categoryKey]}
+                      {catLabel[m.categorySlug]}
                     </span>
                     <span
                       className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
                         m.access === 'free' ? 'bg-sage/15 text-sage-text' : 'bg-ink text-cream'
                       }`}
                     >
-                      {m.access === 'free' ? lc(T.free) : m.price}
+                      {m.access === 'free' ? lc(T.free) : priceLabel(m)}
                     </span>
                     <span className="transition-transform duration-500 group-hover:scale-110">
                       <DocIcon />
@@ -250,7 +274,7 @@ export function MaterialLibrary({
                   </div>
 
                   <div className="flex flex-1 flex-col p-6">
-                    {m.flags && m.flags.length > 0 && (
+                    {m.flags.length > 0 && (
                       <div className="mb-2.5 flex flex-wrap gap-1.5">
                         {m.flags.map((f) => (
                           <span
@@ -263,10 +287,14 @@ export function MaterialLibrary({
                       </div>
                     )}
                     <h3 className="serif text-[1.3rem] leading-snug tracking-[-0.01em] text-ink text-pretty">
-                      {lc(m.title)}
+                      {title(m)}
                     </h3>
-                    <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(m.description)}</p>
-                    <p className="mono mt-4 text-[11px] uppercase tracking-[0.08em] text-ink-soft">{lc(m.format)}</p>
+                    <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{summary(m)}</p>
+                    {formatLine(m) && (
+                      <p className="mono mt-4 text-[11px] uppercase tracking-[0.08em] text-ink-soft">
+                        {formatLine(m)}
+                      </p>
+                    )}
 
                     <div className="mt-6 pt-1">
                       {m.access === 'paid' ? (
@@ -274,22 +302,23 @@ export function MaterialLibrary({
                           href={contactHref}
                           className={cardCta}
                         >
-                          {lc(T.order)} · {m.price}
+                          {lc(T.order)} · {priceLabel(m)}
                         </a>
+                      ) : !ready ? (
+                        // Say "coming soon" up front. Asking for an email and
+                        // only then admitting there is no file is a bad trade
+                        // for the visitor — and most files are still missing.
+                        <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
+                          {lc(T.soon)}
+                        </span>
                       ) : isUnlocked ? (
-                        ready ? (
-                          <a
-                            href={m.fileHref}
-                            download
-                            className="inline-flex cursor-pointer items-center gap-2 border-b border-sage pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-sage-text"
-                          >
-                            {lc(T.download)} <span aria-hidden="true">↓</span>
-                          </a>
-                        ) : (
-                          <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                            {lc(T.soon)}
-                          </span>
-                        )
+                        <a
+                          href={m.fileUrl ?? '#'}
+                          download
+                          className="inline-flex cursor-pointer items-center gap-2 border-b border-sage pb-1 text-[13px] font-medium uppercase tracking-[0.04em] text-sage-text"
+                        >
+                          {lc(T.download)} <span aria-hidden="true">↓</span>
+                        </a>
                       ) : (
                         <button
                           type="button"
@@ -311,11 +340,11 @@ export function MaterialLibrary({
       {/* Email gate */}
       {gate && (
         <EmailGate
-          material={gate}
+          materialTitle={title(gate)}
           lc={lc}
           onClose={() => setGate(null)}
           onSubmit={(email) => {
-            track('material_download', { slug: gate.slug, category: gate.categoryKey });
+            track('material_download', { slug: gate.slug, category: gate.categorySlug });
             // Email-gate doubles as a newsletter opt-in (brief §6a); no-ops when
             // the newsletter isn't configured yet.
             void subscribe(email, { source: 'library', locale });
@@ -329,12 +358,13 @@ export function MaterialLibrary({
 }
 
 function EmailGate({
-  material,
+  materialTitle,
   lc,
   onClose,
   onSubmit,
 }: {
-  material: Material;
+  /** Localized by the parent, which owns the locale helpers. */
+  materialTitle: string;
   lc: (b: Bi) => string;
   onClose: () => void;
   onSubmit: (email: string) => void;
@@ -350,7 +380,7 @@ function EmailGate({
       <div className="p-7">
         <p className="mono text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.gateTitle)}</p>
         <h3 id={titleId} className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty">
-          {lc(material.title)}
+          {materialTitle}
         </h3>
         <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(T.gateBody)}</p>
 

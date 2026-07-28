@@ -67,8 +67,8 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Nutrition full split** into two catalog codes (`nutrition_copii`/`nutrition_adulti`) → separate /pricing rows + homepage/services tiles + landing pages + Prisma migration. (Frontend uses 1 service + 2 booking buttons for now.)
 - **Group C catalog modeling** + `ServiceGroup` C + dedicated order form/upload + delivery flow (§2). Frontend now has a **per-product order popup** on /pricing (each "Comandă" opens `LeadFormModal` in deliverable mode; posts `{name,email,phone,message,product,productTitle}` to **`/leads/deliverable`** via `submitDeliverableLead`). **Backend still owes:** the `/leads/deliverable` endpoint + a Prisma model (e.g. `DeliverableOrder`) + a back-office "Comenzi/Orders" view so the lead shows the exact product ordered. Until then, the frontend submit will error (endpoint 404) like the other lead forms without the API.
 - **Subscriptions** 4×4 structure in the model (once prices unblocked).
-- **Biblioteca Digitală backend**: `materials` API module + back-office CRUD + real PDFs + paid-download flow + newsletter persistence (Phase 2). (Frontend storefront + email-gate built on local data.)
-- **Age tagging** on `posts` + `materials` API models so live content carries ages (Phase 6). (Frontend filter + shared taxonomy done.)
+- **Biblioteca Digitală**: ~~`materials` API module + back-office CRUD~~ ✅ 2026-07-28. Still owed: **the real PDFs** (client), paid-download flow (payments module), newsletter persistence (SMTP).
+- **Age tagging**: ~~`materials`~~ ✅ 2026-07-28 (`ageKeys`). Still owed on **`posts`**, so blog articles carry ages too (Phase 6).
 - **Calendly → store/show Meet link** from the webhook `location` payload when the appointments module lands (Phase 7).
 - **Operational 48h→~1h SLA**, **business-hours-aware** (`dueAt`/deadline-indicator) once the working hours arrive (§11.5).
 
@@ -76,7 +76,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Payments module** (§11.8+§11.11) — online payment inside the booking flow; 5 methods requested. **Reverses the earlier "payments out of scope / manual confirm" decision.** Needs scope sign-off first.
 - **Patient document upload** (§11.14) — patients upload analyses/investigations before the consult. New surface, special-category GDPR data, no patient accounts exist today.
 - **Security package** (§11.10) — reCAPTCHA on all forms (nothing exists), **admin 2FA/TOTP** (nothing exists), automated DB backups, WAF/rate limiting, dependency-update process.
-- **New back-office modules** (§11.12) — ~~FAQ~~, ~~testimonials~~, ~~media appearances~~ (all ✅ 2026-07-28), PDF materials, site media (hero video + portraits). The last two do not exist yet.
+- **New back-office modules** (§11.12) — ~~FAQ~~, ~~testimonials~~, ~~media appearances~~, ~~PDF materials~~ (all ✅ 2026-07-28). Only **site media** (hero video + portraits) is left.
 - ~~**RU fields in content models**~~ — ✅ **DONE 2026-07-27.** `*Ru` columns on `Service`, `Category`, `Post`, `Contact`, `AboutPage` (+ the About JSON blocks), shared DTOs, API DTOs/mappers, three-language back-office editors, and frontend consumption. RU is **nullable and never required** — the site falls back RU → RO (empty string counts as missing), so a half-translated page still saves. Migration `20260727190927_content_ru_fields`; the seed backfills RU only where it is still empty.
 
   ⚠️ Rows the client already edited (About stats/credentials) keep **no RU** — the seed deliberately never clobbers edited blocks. Those must be typed in the back office, or the Russian page shows Romanian there. (The About FAQ block is gone — see Phase 10, `faq` module.)
@@ -296,9 +296,9 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 
 ### 11.12 Back-office coverage vs what she expects to edit
 Existing back-office pages: `about, appointments, blog, contacts, dashboard, messages, patients, quick-questions, services, subscriptions, users`.
-**Missing for her list:** ~~FAQ~~ · ~~testimonials~~ · ~~media appearances~~ (all ✅ 2026-07-28) · PDF materials (Biblioteca) · site media (hero video + portraits) — plus the already-planned data-driven catalog for prices/texts.
+**Missing for her list:** ~~FAQ~~ · ~~testimonials~~ · ~~media appearances~~ · ~~PDF materials (Biblioteca)~~ (all ✅ 2026-07-28, though the library has no files yet) · site media (hero video + portraits) — plus the already-planned data-driven catalog for prices/texts.
 Note: homepage testimonials are currently **hardcoded fakes** ([[testimonials-placeholder]]) — once a CRUD exists they must be replaced with real reviews before launch.
-**Localisation gap:** ✅ **CLOSED 2026-07-27** for every model that exists today — services, blog (posts + categories), contacts and About (title/content + all four JSON blocks) now carry `*Ru`, editable from a third language tab/column in the back office. The modules that do not exist yet (materials, site media) must be **born trilingual** — RO/EN required, RU optional with a RO fallback, same as the rest. The FAQ module (✅ 2026-07-28) was the first built to that rule.
+**Localisation gap:** ✅ **CLOSED 2026-07-27** for every model that exists today — services, blog (posts + categories), contacts and About (title/content + all four JSON blocks) now carry `*Ru`, editable from a third language tab/column in the back office. The module that does not exist yet (site media) must be **born trilingual** — RO/EN required, RU optional with a RO fallback, same as the rest. The FAQ module (✅ 2026-07-28) was the first built to that rule.
 
 ### 11.14 Patient document upload — new feature, special-category data
 Requested: patients upload analyses/investigations/documents **before** the consultation. Today the portal is staff-only (`admin`/`editor`); there is no patient login.
@@ -491,7 +491,15 @@ All of these are **not started**. Ordered by dependency, not by client priority.
   - No local fallback copy on the frontend (unlike /faq): it would drift from what she edits, and an empty page during an outage beats showing text she has already corrected.
   - `next.config.ts` now derives an `images.remotePatterns` entry from `API_URL`, otherwise `next/image` refuses thumbnails uploaded through the back office.
   - ⛔ Still open: the client's full list (radio, conferences, congresses, presentations) — only the 3 TV appearances exist. And the WHO-certificate usage restriction still applies before any certificate goes on /media. Decide separately whether the /about "Certificări recente" block moves or is duplicated here.
-- [ ] `materials` module (already owed by Phase 2) — PDF guides editable from the back office.
+- [x] ~~`materials` module~~ — ✅ **DONE 2026-07-28.** Migration `20260728150000_materials`; `lib/placeholder-materials.ts` deleted, `/guides` reads the API.
+  - `MaterialCategory` + `Material`: category, **age keys from the shared taxonomy**, free/paid + price in whole EUR, merchandising flags, page count, file language, uploaded file. Trilingual by the usual rule.
+  - **Page count and file language are stored as data**, not as three hand-written "PDF · 16 pag. · RO" strings — the units now follow the visitor's locale ("16 pag." / "16 pp." / "16 стр.").
+  - **File upload** reuses `storage.saveDocument` (PDF/DOC/DOCX, 20 MB) via `POST /materials/file`. A material saves **without** a file: `fileUrl` null is the normal state right now.
+  - The slug is unique and returns **409**, surfaced on the field rather than as a generic failure. Deleting a category with materials in it is also refused (409) instead of orphaning them; the manager sheet shows the count next to each name.
+  - **Storefront fix found while wiring it:** a free material with no file still showed a "Descarcă" button that opened the email gate — the visitor handed over an address and only then learned there was no file. It now says "În curând" up front. With 12/12 materials fileless, that path was about to be the common one.
+- [ ] ⛔ **Real PDFs — blocked on the client.** All 12 materials are seeded without a file. The catalog copy is also interim (titles/descriptions drafted from her topics, page counts and prices placeholders): she owns all of it from the back office now.
+- [ ] Email-gate persistence + newsletter — still blocked on her SMTP provider. The gate unlocks the download but stores nothing.
+- [ ] Paid materials still route to /contact; a real checkout waits on the payments module (Phase 11).
 - [ ] **Site media** module: hero video + poster + portraits editable (client expects this, answer v2 §3). Keep the "new filename on swap" cache rule.
 - [x] ~~**RU fields across content models**~~ — ✅ **DONE 2026-07-27** for services/blog/contacts/about (migration `20260727190927_content_ru_fields`). New modules below inherit the convention: RO/EN required, `*Ru` nullable, readers fall back RU → RO (`loc()` in `apps/frontend/lib/api.ts` treats `''` as missing).
   - ⛔ Follow-up for the client: the About stats/credentials rows she already edited have empty RU — she fills them in the back office, we do not invent translations for her content. (The About FAQ block was dropped with the `faq` module; its replacement is fully trilingual from the seed.)

@@ -3,7 +3,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Link } from '@/i18n/navigation';
 import { MaterialLibrary } from '@/components/sections/MaterialLibrary';
 import { AGE_GROUPS } from '@/lib/age-taxonomy';
-import { MATERIALS, MATERIAL_CATEGORIES } from '@/lib/placeholder-materials';
+import { api } from '@/lib/api';
 import { btnDark, underlineLg, creamPill, creamUnderline, cardCta } from '@/components/ui/cta';
 
 export const revalidate = 60;
@@ -54,11 +54,23 @@ export default async function LibraryPage({
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
-  const catLabel = (key: string) => {
-    const c = MATERIAL_CATEGORIES.find((x) => x.key === key);
-    return c ? lc(c.label) : key;
+  /** RU falls back to RO, an empty string counting as missing — as everywhere. */
+  const tri = (ro: string, enText: string, ruText: string | null) =>
+    ru ? (ruText?.trim() ? ruText : ro) : en ? enText : ro;
+
+  const [materials, categories] = await Promise.all([
+    api.materials(),
+    api.materialCategories(),
+  ]);
+
+  const catLabel = (slug: string) => {
+    const c = categories.find((x) => x.slug === slug);
+    return c ? tri(c.nameRo, c.nameEn, c.nameRu) : slug;
   };
-  const featured = MATERIALS.find((m) => m.flags?.includes('recommended')) ?? MATERIALS[0];
+  // The hero highlights one material; with an empty library there is none, and
+  // the block below is skipped rather than rendering a card full of blanks.
+  const featured =
+    materials.find((m) => m.flags.includes('recommended')) ?? materials[0];
 
   const HOW = [
     {
@@ -131,14 +143,16 @@ export default async function LibraryPage({
               <article className="flex flex-col border border-[var(--rule)] bg-paper">
                 <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden bg-cream-2 text-sage">
                   <span className="mono absolute left-4 top-4 rounded-full border border-[var(--rule)] bg-paper/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-sage-text">
-                    {catLabel(featured.categoryKey)}
+                    {catLabel(featured.categorySlug)}
                   </span>
                   <span
                     className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
                       featured.access === 'free' ? 'bg-sage/15 text-sage-text' : 'bg-ink text-cream'
                     }`}
                   >
-                    {featured.access === 'free' ? (ru ? 'Бесплатно' : en ? 'Free' : 'Gratuit') : featured.price}
+                    {featured.access === 'free'
+                      ? ru ? 'Бесплатно' : en ? 'Free' : 'Gratuit'
+                      : `${featured.price ?? 0} €`}
                   </span>
                   <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true">
                     <path d="M6 3.5h7L18 8v12.5H6V3.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
@@ -148,13 +162,24 @@ export default async function LibraryPage({
                 </div>
                 <div className="p-6">
                   <h2 className="serif text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty">
-                    {lc(featured.title)}
+                    {tri(featured.titleRo, featured.titleEn, featured.titleRu)}
                   </h2>
                   <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
-                    {lc(featured.description)}
+                    {tri(
+                      featured.descriptionRo,
+                      featured.descriptionEn,
+                      featured.descriptionRu,
+                    )}
                   </p>
                   <p className="mono mt-4 text-[11px] uppercase tracking-[0.08em] text-ink-soft">
-                    {lc(featured.format)}
+                    {['PDF',
+                      featured.pageCount !== null
+                        ? `${featured.pageCount} ${ru ? 'стр.' : en ? 'pp.' : 'pag.'}`
+                        : null,
+                      featured.fileLang,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </p>
                   <a
                     href="#library"
@@ -202,8 +227,8 @@ export default async function LibraryPage({
 
         <MaterialLibrary
           locale={(ru ? 'ru' : en ? 'en' : 'ro') as 'ro' | 'en' | 'ru'}
-          materials={MATERIALS}
-          categories={MATERIAL_CATEGORIES}
+          materials={materials}
+          categories={categories}
           ages={AGE_GROUPS}
           contactHref={`/${locale}/contact`}
         />

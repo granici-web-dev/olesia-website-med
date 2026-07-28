@@ -110,3 +110,16 @@ export enum MediaEmbedProvider {
   Youtube = 'youtube',
   Facebook = 'facebook',
 }
+
+/** Whether a library material is a free download or a paid one. */
+export enum MaterialAccess {
+  Free = 'free',
+  Paid = 'paid',
+}
+
+/** Merchandising badge on a material card. */
+export enum MaterialFlag {
+  Recommended = 'recommended',
+  Popular = 'popular',
+  New = 'new',
+}

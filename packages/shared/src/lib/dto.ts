@@ -2,6 +2,8 @@ import {
   AppointmentStatus,
   ContactMessageStatus,
   ContactType,
+  MaterialAccess,
+  MaterialFlag,
   MediaEmbedProvider,
   MediaKind,
   PatientEntryType,
@@ -274,6 +276,47 @@ export interface TestimonialDto {
   roleRu: string | null;
   /** Platform the review came from, e.g. "DoctorChat". */
   source: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
+// --- Biblioteca digitală (downloadable materials, /guides) ---
+
+export interface MaterialCategoryDto {
+  id: string;
+  slug: string;
+  nameRo: string;
+  nameEn: string;
+  nameRu: string | null;
+  sortOrder: number;
+}
+
+/**
+ * A downloadable material. `fileUrl` is null while the PDF is still missing —
+ * the storefront shows the card as "coming soon" rather than a dead link.
+ */
+export interface MaterialDto {
+  id: string;
+  slug: string;
+  categoryId: string;
+  categorySlug: string;
+  /** Keys from the shared child-age taxonomy; empty means "all ages". */
+  ageKeys: string[];
+  titleRo: string;
+  titleEn: string;
+  titleRu: string | null;
+  descriptionRo: string;
+  descriptionEn: string;
+  descriptionRu: string | null;
+  pageCount: number | null;
+  /** Language the file itself is written in, e.g. "RO". */
+  fileLang: string | null;
+  access: MaterialAccess;
+  /** Whole EUR, paid materials only. */
+  price: number | null;
+  flags: MaterialFlag[];
+  fileUrl: string | null;
+  fileName: string | null;
   sortOrder: number;
   active: boolean;
 }

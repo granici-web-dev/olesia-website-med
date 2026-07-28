@@ -9,6 +9,10 @@ import { PrismaClient } from '../src/generated/prisma/client';
 import { FAQ_SECTIONS } from './seed-faq';
 import { TESTIMONIALS } from './seed-testimonials';
 import { MEDIA_APPEARANCES } from './seed-media';
+import {
+  MATERIAL_CATEGORIES,
+  MATERIALS,
+} from './seed-materials';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL ?? '' }),
@@ -339,6 +343,44 @@ async function seedMedia() {
   console.log(`✓ seeded ${MEDIA_APPEARANCES.length} media appearances`);
 }
 
+/**
+ * Seed the digital library. All-or-nothing, like the other content modules.
+ * Every material starts without a file — none exist yet.
+ */
+async function seedMaterials() {
+  if ((await prisma.materialCategory.count()) > 0) {
+    console.log('• library already present — skipped (edit in back office)');
+    return;
+  }
+  const byslug = new Map<string, string>();
+  for (const [index, c] of MATERIAL_CATEGORIES.entries()) {
+    const created = await prisma.materialCategory.create({
+      data: { ...c, sortOrder: index + 1 },
+    });
+    byslug.set(created.slug, created.id);
+  }
+  for (const [index, m] of MATERIALS.entries()) {
+    const categoryId = byslug.get(m.categorySlug);
+    if (!categoryId) {
+      console.warn(`  ! unknown category ${m.categorySlug} for ${m.slug}`);
+      continue;
+    }
+    const { categorySlug: _drop, ...rest } = m;
+    await prisma.material.create({
+      data: {
+        ...rest,
+        categoryId,
+        // Romanian is the only language the PDFs will be written in for now.
+        fileLang: 'RO',
+        sortOrder: index + 1,
+      },
+    });
+  }
+  console.log(
+    `✓ seeded ${MATERIAL_CATEGORIES.length} library categories, ${MATERIALS.length} materials (no files yet)`,
+  );
+}
+
 async function main() {
   const email = (process.env.ADMIN_EMAIL ?? 'admin@olesia.md').toLowerCase();
   const password = process.env.ADMIN_PASSWORD ?? 'admin12345';
@@ -386,6 +428,7 @@ async function main() {
   await seedFaq();
   await seedTestimonials();
   await seedMedia();
+  await seedMaterials();
 }
 
 main()
