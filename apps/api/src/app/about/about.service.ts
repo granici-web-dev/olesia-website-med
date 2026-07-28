@@ -30,7 +30,6 @@ export class AboutService {
           stats: dto.stats,
           credentials: dto.credentials,
           testimonials: dto.testimonials,
-          faq: dto.faq,
         },
       }),
     );

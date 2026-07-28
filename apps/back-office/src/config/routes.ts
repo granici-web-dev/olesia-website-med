@@ -12,6 +12,7 @@ export const paths = {
   services: '/servicii',
   contacts: '/contacte',
   about: '/despre-noi',
+  faq: '/intrebari-frecvente',
   users: '/utilizatori',
   security: '/securitate',
 } as const;

@@ -117,24 +117,6 @@ I believe every family deserves clear support, without pressure and without myth
       roleRu: 'папа',
     },
   ],
-  faq: [
-    {
-      qRo: 'Cum decurge o consultație online?',
-      qEn: 'How does an online consultation work?',
-      qRu: 'Как проходит онлайн-консультация?',
-      aRo: 'Pe apel video, prin link-ul primit după rezervare.',
-      aEn: 'Over a video call, via the link you receive after booking.',
-      aRu: 'По видеосвязи, по ссылке, которую вы получите после записи.',
-    },
-    {
-      qRo: 'Prima discuție chiar este gratuită?',
-      qEn: 'Is the first call really free?',
-      qRu: 'Первый разговор действительно бесплатный?',
-      aRo: 'Da, 15 minute de orientare pentru a alege serviciul potrivit.',
-      aEn: 'Yes, 15 minutes of orientation to choose the right service.',
-      aRu: 'Да, 15 минут, чтобы сориентироваться и выбрать подходящую услугу.',
-    },
-  ],
   updatedAt: '2026-06-03T12:00:00+03:00',
 };
 

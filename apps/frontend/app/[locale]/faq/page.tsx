@@ -3,18 +3,17 @@ import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
+import { api } from '@/lib/api';
 
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
    FAQ — the site's consolidation point. Removes friction before conversion,
    offloads support, and routes correctly (emergencies → 112, medical → Quick
-   question). Content is local bilingual data for now (→ CMS as the single
-   source of truth later, with service_tags pulling items onto landing pages).
+   question). Content comes from the back office (`GET /faq`); the local
+   `FALLBACK_CATEGORIES` below is only the safety net for an unreachable API.
    Accessible native <details> accordions, deep-link category anchors, and
-   FAQPage JSON-LD for rich snippets. Bilingual (RO default · EN).
-   ⚠ Several answers are drafts pending the client's decisions (cancellation,
-   payment timing, refunds, prescriptions, ages, data policy) — see flagged.
+   FAQPage JSON-LD for rich snippets. Trilingual (RO default · EN · RU).
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -51,7 +50,12 @@ interface FaqCategory {
   items: FaqItem[];
 }
 
-const CATEGORIES: FaqCategory[] = [
+/**
+ * The content as it was seeded into the database. Rendered only when the API
+ * is unreachable — an FAQ page that answers nothing is worse than a slightly
+ * stale one, and this page is a support surface as much as a marketing one.
+ */
+const FALLBACK_CATEGORIES: FaqCategory[] = [
   {
     key: 'consultatii',
     title: { ro: 'Consultații online', en: 'Online consultations', ru: 'Онлайн-консультации' },
@@ -279,6 +283,44 @@ const CATEGORIES: FaqCategory[] = [
 ];
 
 
+/**
+ * Fetch the published FAQ and reshape it for this page.
+ *
+ * The RU fallback is resolved here rather than at render time, so `lc()` keeps
+ * working on plain trilingual strings: an untranslated question shows its
+ * Romanian text instead of a blank line. Same rule as `loc()` in `lib/api` —
+ * an empty string counts as missing, because that is what a cleared field in
+ * the back office produces.
+ */
+async function loadCategories(): Promise<FaqCategory[]> {
+  const sections = await api.faq();
+  if (sections.length === 0) return FALLBACK_CATEGORIES;
+
+  const ruOr = (ru: string | null, fallback: string) =>
+    ru?.trim() ? ru : fallback;
+
+  return sections.map((c) => ({
+    key: c.slug,
+    title: {
+      ro: c.titleRo,
+      en: c.titleEn,
+      ru: ruOr(c.titleRu, c.titleRo),
+    },
+    items: c.items.map((i) => ({
+      q: {
+        ro: i.questionRo,
+        en: i.questionEn,
+        ru: ruOr(i.questionRu, i.questionRo),
+      },
+      a: {
+        ro: i.answerRo,
+        en: i.answerEn,
+        ru: ruOr(i.answerRu, i.answerRo),
+      },
+    })),
+  }));
+}
+
 export default async function FaqPage({
   params,
 }: {
@@ -288,6 +330,8 @@ export default async function FaqPage({
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+
+  const CATEGORIES = await loadCategories();
 
   // FAQPage JSON-LD (rich snippets) — built from the current-locale answers.
   const faqJsonLd = {

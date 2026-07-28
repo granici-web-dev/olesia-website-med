@@ -267,6 +267,50 @@ model Contact {
   updatedAt DateTime    @updatedAt
 }
 
+// --- FAQ (the public /faq page) ---
+//
+// Two levels, because the page is built that way: a category is a section with
+// its own anchor (`slug` → `/faq#programare`, used by the sticky nav and by
+// deep links from the service pages), and the items are the question/answer
+// pairs inside it. Rows rather than one JSON blob, so a single question can be
+// reordered or hidden without rewriting the others — and so the FAQPage
+// JSON-LD is generated from what is actually published.
+
+model FaqCategory {
+  id        String   @id @default(uuid())
+  /// URL anchor, derived from the Romanian title when the category is created
+  /// and never re-derived afterwards: renaming a section must not break links
+  /// that are already out there.
+  slug      String   @unique
+  titleRo   String
+  titleEn   String
+  titleRu   String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items FaqItem[]
+}
+
+model FaqItem {
+  id         String      @id @default(uuid())
+  category   FaqCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+  questionRo String
+  questionEn String
+  questionRu String?
+  answerRo   String
+  answerEn   String
+  answerRu   String?
+  sortOrder  Int         @default(0)
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([categoryId, sortOrder])
+}
+
 // --- Contact-form messages (public Contact page → back-office "Mesaje") ---
 //
 // Non-medical messages submitted from the site's Contact form. The doctor
@@ -307,7 +351,9 @@ model AboutPage {
   stats        Json? // [{ value, labelRo, labelEn, labelRu? }]
   credentials  Json? // [{ ro, en, ru? }]
   testimonials Json? // [{ quoteRo, quoteEn, quoteRu?, author, roleRo, roleEn, roleRu? }]
-  faq          Json? // [{ qRo, qEn, qRu?, aRo, aEn, aRu? }]
+  // NOTE: `faq` used to live here as a JSON block. It was dropped in favour of
+  // the FaqCategory/FaqItem models above — the block rendered nowhere and gave
+  // the doctor a second, invisible FAQ to edit.
   updatedAt DateTime @updatedAt
 }
 

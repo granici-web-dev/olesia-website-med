@@ -9,6 +9,7 @@ import {
   Tags,
   Contact,
   BookOpenText,
+  HelpCircle,
   Users,
   Stethoscope,
   type LucideIcon,
@@ -51,6 +52,7 @@ export const navGroups: NavGroup[] = [
       { to: paths.services, label: ro.nav.services, icon: Tags },
       { to: paths.contacts, label: ro.nav.contacts, icon: Contact },
       { to: paths.about, label: ro.nav.about, icon: BookOpenText },
+      { to: paths.faq, label: ro.nav.faq, icon: HelpCircle },
     ],
   },
   {

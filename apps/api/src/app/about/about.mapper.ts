@@ -3,7 +3,6 @@ import type {
   AboutStat,
   AboutCredential,
   AboutTestimonial,
-  AboutFaqItem,
 } from '@olesia/shared';
 import type { AboutPage } from '../../generated/prisma/client';
 
@@ -25,7 +24,6 @@ export function toAboutDto(a: AboutPage): AboutPageDto {
     stats: asArray<AboutStat>(a.stats),
     credentials: asArray<AboutCredential>(a.credentials),
     testimonials: asArray<AboutTestimonial>(a.testimonials),
-    faq: asArray<AboutFaqItem>(a.faq),
     updatedAt: a.updatedAt.toISOString(),
   };
 }

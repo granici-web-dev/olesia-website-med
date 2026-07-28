@@ -61,15 +61,6 @@ export interface AboutTestimonial {
   roleEn: string;
   roleRu?: string;
 }
-export interface AboutFaqItem {
-  qRo: string;
-  qEn: string;
-  qRu?: string;
-  aRo: string;
-  aEn: string;
-  aRu?: string;
-}
-
 export interface AboutPageDto {
   id: string;
   titleRo: string;
@@ -82,8 +73,33 @@ export interface AboutPageDto {
   stats: AboutStat[];
   credentials: AboutCredential[];
   testimonials: AboutTestimonial[];
-  faq: AboutFaqItem[];
   updatedAt: string;
+}
+
+/** One question on the /faq page. RU is nullable; readers fall back to RO. */
+export interface FaqItemDto {
+  id: string;
+  categoryId: string;
+  questionRo: string;
+  questionEn: string;
+  questionRu: string | null;
+  answerRo: string;
+  answerEn: string;
+  answerRu: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
+/** A section of the FAQ page; `slug` is its anchor (`/faq#programare`). */
+export interface FaqCategoryDto {
+  id: string;
+  slug: string;
+  titleRo: string;
+  titleEn: string;
+  titleRu: string | null;
+  sortOrder: number;
+  active: boolean;
+  items: FaqItemDto[];
 }
 
 async function getJson<T>(path: string, fallback: T): Promise<T> {
@@ -125,6 +141,7 @@ export const api = {
   services: () => getJson<ServiceDto[]>('/services', []),
   contacts: () => getJson<ContactDto[]>('/contacts', []),
   about: () => getJson<AboutPageDto | null>('/about', null),
+  faq: () => getJson<FaqCategoryDto[]>('/faq', []),
   posts: () => getJson<PostDto[]>('/blog/published', []),
   post: (slug: string) =>
     getJson<PostDto | null>(`/blog/published/${slug}`, null),

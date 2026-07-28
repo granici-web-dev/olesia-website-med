@@ -6,6 +6,7 @@ import 'dotenv/config';
 import * as argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
+import { FAQ_SECTIONS } from './seed-faq';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL ?? '' }),
@@ -267,56 +268,6 @@ I believe every family deserves clear support, without pressure and without myth
       roleRu: 'мама',
     },
   ],
-  faq: [
-    {
-      qRo: 'Cum decurge o consultație online?',
-      qEn: 'How does an online consultation work?',
-      qRu: 'Как проходит онлайн-консультация?',
-      aRo: 'Pe apel video, prin link-ul primit după rezervare. Discutăm situația, iar după consultație primești un plan scris.',
-      aEn: 'Over a video call, via the link you receive after booking. We discuss the situation and you get a written plan afterwards.',
-      aRu: 'По видеосвязи, по ссылке, которую вы получите после записи. Обсуждаем ситуацию, а после консультации вы получаете письменный план.',
-    },
-    {
-      qRo: 'Cât durează și cât costă?',
-      qEn: 'How long and how much?',
-      qRu: 'Сколько длится и сколько стоит?',
-      aRo: 'Între 30 și 90 de minute, în funcție de serviciu. Tarifele sunt afișate transparent pe pagina Tarife.',
-      aEn: 'Between 30 and 90 minutes depending on the service. Prices are listed transparently on the Pricing page.',
-      aRu: 'От 30 до 90 минут — в зависимости от услуги. Цены открыто указаны на странице «Тарифы».',
-    },
-    {
-      qRo: 'Cum se face plata?',
-      qEn: 'How is payment handled?',
-      qRu: 'Как происходит оплата?',
-      aRo: 'Plata se confirmă manual după programare, prin transfer. Primești instrucțiunile la rezervare.',
-      aEn: 'Payment is confirmed manually after booking, by transfer. You receive the details when you book.',
-      aRu: 'Оплата подтверждается вручную после записи, переводом. Инструкции вы получите при бронировании.',
-    },
-    {
-      qRo: 'Pot pune o singură întrebare, fără consultație?',
-      qEn: 'Can I ask just one question, without a consultation?',
-      qRu: 'Можно задать один вопрос, без консультации?',
-      aRo: 'Da — serviciul „Întrebare EXPRESS" îți oferă un răspuns scris în ~1 oră în timpul programului de lucru.',
-      aEn: 'Yes — the "Express question" service gives you a written answer within ~1 hour during working hours.',
-      aRu: 'Да — услуга «Вопрос EXPRESS» даёт письменный ответ примерно за 1 час в рабочее время.',
-    },
-    {
-      qRo: 'Prima discuție chiar este gratuită?',
-      qEn: 'Is the first call really free?',
-      qRu: 'Первый разговор действительно бесплатный?',
-      aRo: 'Da, 15 minute de orientare pentru a alege serviciul potrivit, fără obligații.',
-      aEn: 'Yes, 15 minutes of orientation to choose the right service, with no obligations.',
-      aRu: 'Да, 15 минут, чтобы сориентироваться и выбрать подходящую услугу, без обязательств.',
-    },
-    {
-      qRo: 'Lucrezi în română și engleză?',
-      qEn: 'Do you work in Romanian and English?',
-      qRu: 'Вы работаете на румынском и английском?',
-      aRo: 'Da, consultațiile și materialele sunt disponibile în ambele limbi.',
-      aEn: 'Yes, consultations and materials are available in both languages.',
-      aRu: 'Да, консультации и материалы доступны на обоих языках.',
-    },
-  ],
 };
 
 /**
@@ -351,7 +302,6 @@ async function seedAbout() {
   if (len(existing.credentials) === 0) patch.credentials = ABOUT.credentials;
   if (len(existing.testimonials) === 0)
     patch.testimonials = ABOUT.testimonials;
-  if (len(existing.faq) === 0) patch.faq = ABOUT.faq;
 
   if (Object.keys(patch).length > 0) {
     await prisma.aboutPage.update({ where: { id: existing.id }, data: patch });
@@ -359,6 +309,39 @@ async function seedAbout() {
   } else {
     console.log('• about page already populated — left untouched');
   }
+}
+
+/**
+ * Seed the FAQ. All-or-nothing on purpose: once a single section exists, the
+ * doctor owns the page and a re-run must not push our copy back into it. To
+ * restore the defaults, delete the sections in the back office and re-seed.
+ */
+async function seedFaq() {
+  if ((await prisma.faqCategory.count()) > 0) {
+    console.log('• faq already present — skipped (edit in back office)');
+    return;
+  }
+  for (const [index, section] of FAQ_SECTIONS.entries()) {
+    await prisma.faqCategory.create({
+      data: {
+        slug: section.slug,
+        titleRo: section.titleRo,
+        titleEn: section.titleEn,
+        titleRu: section.titleRu,
+        sortOrder: index + 1,
+        items: {
+          create: section.items.map((item, i) => ({
+            ...item,
+            sortOrder: i + 1,
+          })),
+        },
+      },
+    });
+  }
+  const questions = FAQ_SECTIONS.reduce((n, s) => n + s.items.length, 0);
+  console.log(
+    `✓ seeded ${FAQ_SECTIONS.length} faq sections (${questions} questions)`,
+  );
 }
 
 async function main() {
@@ -405,6 +388,7 @@ async function main() {
   }
 
   await seedAbout();
+  await seedFaq();
 }
 
 main()

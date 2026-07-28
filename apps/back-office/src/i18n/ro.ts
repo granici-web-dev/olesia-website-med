@@ -24,6 +24,7 @@ export const ro = {
     services: 'Servicii',
     contacts: 'Contacte',
     about: 'Despre noi',
+    faq: 'Întrebări frecvente',
     users: 'Utilizatori',
     security: 'Securitate',
   },
@@ -1231,24 +1232,118 @@ export const ro = {
       rolePlaceholderEn: 'ex. mother, Chișinău',
       rolePlaceholderRu: 'ex. мама, Кишинёв',
     },
-    faq: {
-      title: 'Întrebări frecvente',
-      hint: 'Întrebări și răspunsuri afișate în secțiunea FAQ.',
-      add: 'Adaugă o întrebare',
-      empty: 'Nicio întrebare adăugată.',
-      questionRo: 'Întrebare (RO)',
-      questionEn: 'Întrebare (EN)',
-      questionRu: 'Întrebare (RU)',
-      answerRo: 'Răspuns (RO)',
-      answerEn: 'Răspuns (EN)',
-      answerRu: 'Răspuns (RU)',
-      questionPlaceholder: 'ex. Cum decurge o consultație online?',
-      answerPlaceholder: 'Răspunsul…',
-    },
     blocks: {
       moveUp: 'Mută în sus',
       moveDown: 'Mută în jos',
       remove: 'Elimină',
+    },
+  },
+
+  faq: {
+    title: 'Întrebări frecvente',
+    subtitle: 'Secțiunile și întrebările de pe pagina publică /faq.',
+    refresh: 'Reîmprospătează',
+    langRo: 'Română',
+    langEn: 'Engleză',
+    langRu: 'Rusă',
+    newCategory: 'Secțiune nouă',
+    newItem: 'Adaugă întrebare',
+    moveUp: 'Mută mai sus',
+    moveDown: 'Mută mai jos',
+    anchor: 'Ancoră',
+    /** Shown next to a section that the public page will not render. */
+    hiddenSection: 'Ascunsă pe site',
+    /** A section is only rendered when at least one question is visible. */
+    noVisibleItems: 'Fără întrebări vizibile — secțiunea nu apare pe site.',
+    /**
+     * Romanian counts in three shapes: 1 → singular, 2–19 → bare plural,
+     * 20 and up → "de" + plural (decided by the last two digits, so 101 is
+     * "101 întrebări" again).
+     */
+    questionCount: (n: number) => {
+      if (n === 0) return 'nicio întrebare';
+      if (n === 1) return 'o întrebare';
+      return n % 100 === 0 || n % 100 >= 20
+        ? `${n} de întrebări`
+        : `${n} întrebări`;
+    },
+    empty: {
+      title: 'Nicio secțiune încă',
+      body: 'Pagina de întrebări frecvente este goală. Începe cu o secțiune — de exemplu „Programare și anulare” — și adaugă întrebările în ea.',
+    },
+    emptyItems: {
+      body: 'Nicio întrebare în această secțiune.',
+    },
+    active: {
+      on: 'Vizibilă pe site',
+      off: 'Ascunsă de pe site',
+    },
+    deleteCategory: {
+      title: 'Ștergi secțiunea?',
+      body: 'Secțiunea dispare de pe site împreună cu toate întrebările din ea. Acțiunea nu poate fi anulată.',
+      withItems: (n: number) =>
+        n === 1
+          ? 'Se șterge și o întrebare din ea.'
+          : `Se șterg și cele ${n} întrebări din ea.`,
+      cta: 'Șterge secțiunea',
+    },
+    deleteItem: {
+      title: 'Ștergi întrebarea?',
+      body: 'Întrebarea dispare de pe site. Acțiunea nu poate fi anulată.',
+      cta: 'Șterge întrebarea',
+    },
+    toast: {
+      created: 'Secțiunea a fost adăugată.',
+      updated: 'Secțiunea a fost salvată.',
+      deleted: 'Secțiunea a fost ștearsă.',
+      itemCreated: 'Întrebarea a fost adăugată.',
+      itemUpdated: 'Întrebarea a fost salvată.',
+      itemDeleted: 'Întrebarea a fost ștearsă.',
+      shown: 'Acum este vizibilă pe site.',
+      hidden: 'Acum este ascunsă de pe site.',
+      reordered: 'Ordinea a fost actualizată.',
+      error: 'Acțiunea a eșuat. Încearcă din nou.',
+    },
+    categoryForm: {
+      createTitle: 'Secțiune nouă',
+      createSubtitle:
+        'Un grup de întrebări, cu titlu propriu pe pagina publică.',
+      editTitle: 'Editează secțiunea',
+      editSubtitle: 'Titlul secțiunii, în cele trei limbi ale site-ului.',
+      titleRo: 'Titlu (RO)',
+      titleEn: 'Titlu (EN)',
+      titleRu: 'Titlu (RU)',
+      titlePlaceholderRo: 'ex. Programare și anulare',
+      titlePlaceholderEn: 'ex. Booking & cancellation',
+      titlePlaceholderRu: 'ex. Запись и отмена',
+      anchorHint:
+        'Ancora din adresă se generează din titlul în română la creare și rămâne neschimbată după redenumire, ca linkurile deja trimise să funcționeze.',
+      activeField: 'Vizibilă pe site',
+      activeHint: 'Ascunsă, secțiunea rămâne aici, dar nu apare pe pagina publică.',
+      required: 'Câmp obligatoriu',
+      save: 'Salvează',
+      saving: 'Se salvează…',
+    },
+    itemForm: {
+      createTitle: 'Întrebare nouă',
+      createSubtitle: 'Se adaugă la finalul secțiunii alese.',
+      editTitle: 'Editează întrebarea',
+      editSubtitle: 'Întrebarea și răspunsul, în cele trei limbi.',
+      category: 'Secțiune',
+      question: 'Întrebare',
+      answer: 'Răspuns',
+      questionPlaceholderRo: 'ex. Cum decurge o consultație online?',
+      questionPlaceholderEn: 'ex. How does an online consultation work?',
+      questionPlaceholderRu: 'ex. Как проходит онлайн-консультация?',
+      answerPlaceholderRo: 'Răspunsul în română…',
+      answerPlaceholderEn: 'Răspunsul în engleză…',
+      answerPlaceholderRu: 'Răspunsul în rusă…',
+      activeField: 'Vizibilă pe site',
+      activeHint: 'Ascunsă, întrebarea rămâne aici, dar nu apare pe pagina publică.',
+      required: 'Câmp obligatoriu',
+      missingRequired: 'Completează întrebarea și răspunsul în română și engleză.',
+      save: 'Salvează',
+      saving: 'Se salvează…',
     },
   },
 } as const;

@@ -76,10 +76,10 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Payments module** (§11.8+§11.11) — online payment inside the booking flow; 5 methods requested. **Reverses the earlier "payments out of scope / manual confirm" decision.** Needs scope sign-off first.
 - **Patient document upload** (§11.14) — patients upload analyses/investigations before the consult. New surface, special-category GDPR data, no patient accounts exist today.
 - **Security package** (§11.10) — reCAPTCHA on all forms (nothing exists), **admin 2FA/TOTP** (nothing exists), automated DB backups, WAF/rate limiting, dependency-update process.
-- **New back-office modules** (§11.12) — FAQ, testimonials, media appearances, PDF materials, site media (hero video + portraits). None exist today.
+- **New back-office modules** (§11.12) — ~~FAQ~~ (✅ 2026-07-28), testimonials, media appearances, PDF materials, site media (hero video + portraits). The rest do not exist yet.
 - ~~**RU fields in content models**~~ — ✅ **DONE 2026-07-27.** `*Ru` columns on `Service`, `Category`, `Post`, `Contact`, `AboutPage` (+ the About JSON blocks), shared DTOs, API DTOs/mappers, three-language back-office editors, and frontend consumption. RU is **nullable and never required** — the site falls back RU → RO (empty string counts as missing), so a half-translated page still saves. Migration `20260727190927_content_ru_fields`; the seed backfills RU only where it is still empty.
 
-  ⚠️ Rows the client already edited (About stats/credentials/testimonials/FAQ) keep **no RU** — the seed deliberately never clobbers edited blocks. Those must be typed in the back office, or the Russian page shows Romanian there.
+  ⚠️ Rows the client already edited (About stats/credentials/testimonials) keep **no RU** — the seed deliberately never clobbers edited blocks. Those must be typed in the back office, or the Russian page shows Romanian there. (The About FAQ block is gone — see Phase 10, `faq` module.)
 - **Video subtitles** (§11.7) — RO audio stays; EN/RU get `.vtt` subtitle tracks. Blocked by a UX decision: the hero video is a muted, control-less autoplay loop where captions can't surface.
 
 ### 🟢 Small/optional frontend leftovers
@@ -296,9 +296,9 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 
 ### 11.12 Back-office coverage vs what she expects to edit
 Existing back-office pages: `about, appointments, blog, contacts, dashboard, messages, patients, quick-questions, services, subscriptions, users`.
-**Missing for her list:** FAQ · testimonials · media appearances · PDF materials (Biblioteca) · site media (hero video + portraits) — plus the already-planned data-driven catalog for prices/texts.
+**Missing for her list:** ~~FAQ~~ (✅ 2026-07-28) · testimonials · media appearances · PDF materials (Biblioteca) · site media (hero video + portraits) — plus the already-planned data-driven catalog for prices/texts.
 Note: homepage testimonials are currently **hardcoded fakes** ([[testimonials-placeholder]]) — once a CRUD exists they must be replaced with real reviews before launch.
-**Localisation gap:** ✅ **CLOSED 2026-07-27** for every model that exists today — services, blog (posts + categories), contacts and About (title/content + all four JSON blocks) now carry `*Ru`, editable from a third language tab/column in the back office. The modules that do not exist yet (FAQ, testimonials, media appearances, materials, site media) must be **born trilingual** — RO/EN required, RU optional with a RO fallback, same as the rest.
+**Localisation gap:** ✅ **CLOSED 2026-07-27** for every model that exists today — services, blog (posts + categories), contacts and About (title/content + all four JSON blocks) now carry `*Ru`, editable from a third language tab/column in the back office. The modules that do not exist yet (testimonials, media appearances, materials, site media) must be **born trilingual** — RO/EN required, RU optional with a RO fallback, same as the rest. The FAQ module (✅ 2026-07-28) was the first built to that rule.
 
 ### 11.14 Patient document upload — new feature, special-category data
 Requested: patients upload analyses/investigations/documents **before** the consultation. Today the portal is staff-only (`admin`/`editor`); there is no patient login.
@@ -469,14 +469,21 @@ All of these are **not started**. Ordered by dependency, not by client priority.
   - ⚠️ There is **no CI in the repo yet** (`.github/workflows` is empty), so nothing verifies a Dependabot PR automatically. A minimal workflow — install, typecheck both apps, build — would make these PRs safe to merge on sight. Worth doing before handover.
 
 ### Phase 10 — Back-office content modules (§11.12)
-- [ ] `faq` module + CRUD (frontend /faq is hardcoded copy today).
+- [x] ~~`faq` module + CRUD~~ — ✅ **DONE 2026-07-28.** Migration `20260728104500_faq_module`.
+  - **Two levels, because the page has two:** `FaqCategory` (a section with its own `slug` anchor — `/faq#programare` — used by the sticky nav and by deep links) → `FaqItem` (question/answer). Rows, not one JSON blob, so a single question reorders or hides without rewriting the rest, and the FAQPage JSON-LD is built from what is actually published.
+  - **The slug is derived from `titleRo` once, at creation, and never re-derived on rename** — the anchor is a public URL and outlives the wording of the heading.
+  - **`GET /faq` is filtered, unlike the other public content GETs:** deactivated sections and questions never reach the site, and a section with no visible questions is dropped entirely (otherwise it renders as a bare heading plus a dead nav entry). The back office reads `GET /faq/all`. The admin page warns inline when a live section has nothing published in it.
+  - **Seeded from the copy that was already live** (`prisma/seed-faq.ts`, 6 sections / 24 questions, lifted verbatim from the frontend). All-or-nothing: once one section exists, a re-run never pushes our copy back over hers.
+  - **Frontend `/faq` now reads the API**, keeping the old array as `FALLBACK_CATEGORIES` for an unreachable API — an FAQ page that answers nothing is worse than a stale one. RU falls back per field, so an untranslated question shows Romanian instead of a blank line.
+  - ⚠️ **Dropped the `AboutPage.faq` JSON block and deleted `components/sections/Faq.tsx`.** That block was editable on "Despre noi" and rendered *nowhere* — no page imported the component — while the FAQ visitors actually see was hardcoded. Its content was superseded seed copy ("Întrebare rapidă … 48 de ore"). Leaving it would have given the doctor two FAQ editors, the more prominent one being the one with no effect.
+  - Reordering is by ↑/↓ buttons that swap `sortOrder` with the neighbour, not by typing a number into a form — 24 questions across 6 sections makes the numeric field from `contacts` unusable.
 - [ ] `testimonials` module + CRUD; **replace the hardcoded fake reviews on the homepage** before launch ([[testimonials-placeholder]]). 📥 **First real reviews arrived: `docs/testemonials.md`** — 2 items (one RU, unsigned; one RO signed "Zlobin Alexandru", from the **DoctorChat** platform — check whether attribution/source must be credited). Enough to swap the fakes on the homepage slider (which shows 3) only once a third arrives, or after reducing the slider to 2. Ask the client for more.
 - [ ] Note for the CRUD: video appearances are always **embeds** (provider + id + local thumbnail), never uploaded files — see "📥 Incoming client materials" above, plus the WHO-certificate usage restriction before any certificate goes on /media.
 - [ ] `media-appearances` module + CRUD — the **/media page is already live** (Phase 5, local data in `lib/media-appearances.ts`); the backend owes the model (kind, outlet, show, date, title/summary ×3 locales, url, embed provider+id, thumbnail) + thumbnail upload, so the client can add items herself. Decide then: move or duplicate the /about "Certificări recente" block onto /media.
 - [ ] `materials` module (already owed by Phase 2) — PDF guides editable from the back office.
 - [ ] **Site media** module: hero video + poster + portraits editable (client expects this, answer v2 §3). Keep the "new filename on swap" cache rule.
 - [x] ~~**RU fields across content models**~~ — ✅ **DONE 2026-07-27** for services/blog/contacts/about (migration `20260727190927_content_ru_fields`). New modules below inherit the convention: RO/EN required, `*Ru` nullable, readers fall back RU → RO (`loc()` in `apps/frontend/lib/api.ts` treats `''` as missing).
-  - ⛔ Follow-up for the client: the About stats/credentials/testimonials/FAQ rows she already edited have empty RU — she fills them in the back office, we do not invent translations for her content.
+  - ⛔ Follow-up for the client: the About stats/credentials/testimonials rows she already edited have empty RU — she fills them in the back office, we do not invent translations for her content. (The About FAQ block was dropped with the `faq` module; its replacement is fully trilingual from the seed.)
 
 ### Phase 11 — Payments (§11.8) ⛔ blocked on scope sign-off (blocker #10)
 - [ ] Agree scope/budget/timeline and the method priority with the client **before any code**.

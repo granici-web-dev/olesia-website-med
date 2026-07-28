@@ -67,29 +67,6 @@ export class AboutTestimonialDto {
   roleRu?: string;
 }
 
-/** One FAQ entry. */
-export class AboutFaqItemDto {
-  @IsString()
-  qRo!: string;
-
-  @IsString()
-  qEn!: string;
-
-  @IsOptional()
-  @IsString()
-  qRu?: string;
-
-  @IsString()
-  aRo!: string;
-
-  @IsString()
-  aEn!: string;
-
-  @IsOptional()
-  @IsString()
-  aRu?: string;
-}
-
 /** Partial update of the singleton About page. */
 export class UpdateAboutDto {
   @IsOptional()
@@ -138,10 +115,4 @@ export class UpdateAboutDto {
   @ValidateNested({ each: true })
   @Type(() => AboutTestimonialDto)
   testimonials?: AboutTestimonialDto[];
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AboutFaqItemDto)
-  faq?: AboutFaqItemDto[];
 }

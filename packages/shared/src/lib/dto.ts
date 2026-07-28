@@ -252,16 +252,6 @@ export interface AboutTestimonial {
   roleRu?: string;
 }
 
-/** One FAQ entry. */
-export interface AboutFaqItem {
-  qRo: string;
-  qEn: string;
-  qRu?: string;
-  aRo: string;
-  aEn: string;
-  aRu?: string;
-}
-
 export interface AboutPageDto {
   id: string;
   titleRo: string;
@@ -274,8 +264,38 @@ export interface AboutPageDto {
   stats: AboutStat[];
   credentials: AboutCredential[];
   testimonials: AboutTestimonial[];
-  faq: AboutFaqItem[];
   updatedAt: string;
+}
+
+// --- FAQ (the public /faq page) ---
+
+/** One question/answer pair inside a category. */
+export interface FaqItemDto {
+  id: string;
+  categoryId: string;
+  questionRo: string;
+  questionEn: string;
+  questionRu: string | null;
+  answerRo: string;
+  answerEn: string;
+  answerRu: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
+/**
+ * A section of the FAQ page, with its questions nested. `slug` is the anchor
+ * (`/faq#programare`) the sticky category nav and any deep links point at.
+ */
+export interface FaqCategoryDto {
+  id: string;
+  slug: string;
+  titleRo: string;
+  titleEn: string;
+  titleRu: string | null;
+  sortOrder: number;
+  active: boolean;
+  items: FaqItemDto[];
 }
 
 // --- Dashboard (module_calendly.md §11) ---
