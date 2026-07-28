@@ -28,6 +28,7 @@ export const ro = {
     testimonials: 'Recenzii',
     media: 'Apariții media',
     library: 'Biblioteca digitală',
+    siteMedia: 'Imagini și video',
     users: 'Utilizatori',
     security: 'Securitate',
   },
@@ -1626,6 +1627,59 @@ export const ro = {
       empty: 'Nicio categorie încă.',
       required: 'Câmp obligatoriu',
       close: 'Închide',
+    },
+  },
+
+  siteMedia: {
+    title: 'Imagini și video',
+    subtitle: 'Videoclipul de pe pagina principală și fotografiile din pagini.',
+    refresh: 'Reîmprospătează',
+    intro:
+      'Fiecare loc de mai jos are un fișier livrat cu site-ul. Dacă încarci altul, el îl înlocuiește; „Revino la varianta inițială” aduce înapoi fișierul original.',
+    original: 'Varianta livrată cu site-ul',
+    replaced: 'Înlocuit',
+    replacedOn: 'Înlocuit la',
+    upload: 'Încarcă alt fișier',
+    uploading: 'Se încarcă…',
+    reset: 'Revino la varianta inițială',
+    open: 'Deschide fișierul',
+    /** Grouping label per page in the list. */
+    page: {
+      home: 'Pagina principală',
+      about: 'Despre noi',
+      services: 'Servicii',
+      pediatrics: 'Consultație pediatrică',
+      nutrition: 'Consultație nutrițională',
+      monitoring: 'Monitorizare și abonamente',
+      integrative: 'Consultație integrativă',
+    },
+    slot: {
+      hero_video_ro: 'Videoclip — română',
+      hero_video_en: 'Videoclip — engleză',
+      hero_video_ru: 'Videoclip — rusă',
+      hero_poster: 'Imaginea de start a videoclipului',
+      portrait_about: 'Fotografia din pagina „Despre noi”',
+      portrait_services: 'Fotografia din pagina „Servicii”',
+      portrait_pediatrics: 'Fotografia din pagina consultației pediatrice',
+      portrait_nutrition: 'Fotografia din pagina consultației nutriționale',
+      portrait_monitoring: 'Fotografia din pagina de monitorizare',
+      portrait_integrative: 'Fotografia din pagina consultației integrative',
+    },
+    /** Why there are three separate video slots rather than one. */
+    videoNote:
+      'Subtitrările sunt integrate în imagine, câte o variantă per limbă — de aceea sunt trei videoclipuri separate. Dacă înlocuiești unul, celelalte rămân neschimbate.',
+    hint: {
+      video: 'MP4 sau WebM, până la 50 MB.',
+      image: 'JPG, PNG sau WebP, până la 5 MB.',
+    },
+    toast: {
+      updated: 'Fișierul a fost înlocuit.',
+      reset: 'S-a revenit la varianta livrată cu site-ul.',
+      tooLargeVideo: 'Videoclipul depășește 50 MB.',
+      tooLargeImage: 'Imaginea depășește 5 MB.',
+      wrongTypeVideo: 'Sunt acceptate doar fișiere MP4 sau WebM.',
+      wrongTypeImage: 'Sunt acceptate doar fișiere JPG, PNG sau WebP.',
+      error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
   },
 } as const;

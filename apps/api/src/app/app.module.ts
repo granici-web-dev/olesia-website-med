@@ -18,6 +18,7 @@ import { FaqModule } from './faq/faq.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
 import { MediaAppearancesModule } from './media-appearances/media-appearances.module';
 import { MaterialsModule } from './materials/materials.module';
+import { SiteMediaModule } from './site-media/site-media.module';
 import { BlogModule } from './blog/blog.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { QuickQuestionsModule } from './quick-questions/quick-questions.module';
@@ -55,6 +56,7 @@ import { CaptchaModule } from './common/captcha/captcha.module';
     TestimonialsModule,
     MediaAppearancesModule,
     MaterialsModule,
+    SiteMediaModule,
     BlogModule,
     SubscriptionsModule,
     QuickQuestionsModule,

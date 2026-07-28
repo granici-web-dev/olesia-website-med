@@ -5,6 +5,7 @@ import { FreeConsult } from '@/components/sections/FreeConsult';
 import { Reveal } from '@/components/ui/Reveal';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import { btnDark, underlineLg, underline } from '@/components/ui/cta';
+import { siteMediaAsset } from '@/lib/site-media';
 
 /** Service code → its dedicated landing page. Rows link here ("Detalii"). */
 const DETAIL_ROUTE: Record<string, string> = {
@@ -524,6 +525,7 @@ export default async function ServicesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const portrait = await siteMediaAsset('portrait_services');
 
   const en = locale === 'en';
   const ru = locale === 'ru';
@@ -927,7 +929,7 @@ export default async function ServicesPage({
         <div className="md:max-w-none mx-auto w-full max-w-[420px]">
           <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
             <Image
-              src="/assets/olesea-services.webp"
+              src={portrait.url}
               alt={
                 ru
                   ? 'Д-р Олеся Жалба, врач-педиатр и специалист по питанию'

@@ -1,14 +1,18 @@
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { HeroVideo } from './HeroVideo';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import { btnDark, btnOutline } from '@/components/ui/cta';
+import { siteMedia } from '@/lib/site-media';
 import styles from './Hero.module.css';
 
 const STAT_KEYS = ['experience', 'specializations', 'families'] as const;
 
-export function Hero() {
-  const t = useTranslations('home.hero');
+export async function Hero() {
+  const [t, media] = await Promise.all([
+    getTranslations('home.hero'),
+    siteMedia(),
+  ]);
 
   return (
     <section className={styles.section}>
@@ -52,10 +56,17 @@ export function Hero() {
 
       <div className={styles.photoWrapper}>
         <div className={styles.photoFrame}>
-          {/* Hardcoded intro video (client-provided) with a play/pause control
-             and sound — the visitor starts it themselves.
-             TODO: make source editable from the back office later. */}
-          <HeroVideo />
+          {/* Intro video with a play/pause control and sound — the visitor
+             starts it themselves. Sources come from the `site-media` module,
+             so the client can replace any of them without a deploy. */}
+          <HeroVideo
+            sources={{
+              ro: media.hero_video_ro.url,
+              en: media.hero_video_en.url,
+              ru: media.hero_video_ru.url,
+            }}
+            poster={media.hero_poster.url}
+          />
         </div>
         <div className={styles.photoCaption}>
           <span>{t('photoName')}</span>

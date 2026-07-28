@@ -267,6 +267,30 @@ model Contact {
   updatedAt DateTime    @updatedAt
 }
 
+// --- Site media (hero video, poster, page portraits) ---
+//
+// A fixed set of SLOTS, not a gallery: each page asks for one specific picture
+// and the homepage for one video per locale, so the catalogue of keys lives in
+// code (`packages/shared`) and only the file behind each key is editable.
+//
+// A row here is an OVERRIDE. With no row the site serves the asset committed
+// under `apps/frontend/public/assets/`, which is also why swapping a file no
+// longer needs the "give it a new filename" trick: every upload lands on a
+// fresh UUID URL, so no cache anywhere is holding the old bytes.
+
+model SiteMedia {
+  /// Slot key from `SITE_MEDIA_SLOTS`, e.g. `hero_video_ro`, `portrait_about`.
+  key      String  @id
+  url      String
+  /// Intrinsic size — `next/image` needs it for photos; null for video.
+  width    Int?
+  height   Int?
+  /// Original filename, so the back office can show what was uploaded.
+  fileName String?
+
+  updatedAt DateTime @updatedAt
+}
+
 // --- Biblioteca digitală (downloadable materials, /guides) ---
 
 enum MaterialAccess {

@@ -33,6 +33,13 @@ const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_DIMENSION = 1600;
 const WEBP_QUALITY = 80;
 
+/** Videos (site media): stored as-is, no transcoding — see `saveVideo`. */
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+const VIDEO_EXT: Record<string, string> = {
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+};
+
 /** Documents (written plans): larger cap, office/PDF types, stored as-is. */
 const MAX_DOC_BYTES = 20 * 1024 * 1024;
 const DOC_EXT: Record<string, string> = {
@@ -125,6 +132,33 @@ export class StorageService {
     }
     if (file.size > MAX_DOC_BYTES) {
       throw new BadRequestException('Document exceeds the 20 MB limit.');
+    }
+
+    const filename = `${randomUUID()}.${ext}`;
+    await mkdir(STORAGE_DIR, { recursive: true });
+    await writeFile(join(STORAGE_DIR, filename), file.buffer);
+
+    return { url: `${PUBLIC_API_URL}${STORAGE_URL_PREFIX}/${filename}` };
+  }
+
+  /**
+   * Store a video as-is and return its public URL.
+   *
+   * No transcoding: the hero videos arrive already encoded, one per locale with
+   * the subtitles burned in, and re-encoding here would quietly degrade
+   * something the client had rendered deliberately. The cap is generous because
+   * those files run ~8 MB each and a longer cut is plausible.
+   */
+  async saveVideo(file: UploadedImage | undefined): Promise<{ url: string }> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded.');
+    }
+    const ext = VIDEO_EXT[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException('Unsupported video type (use MP4/WebM).');
+    }
+    if (file.size > MAX_VIDEO_BYTES) {
+      throw new BadRequestException('Video exceeds the 50 MB limit.');
     }
 
     const filename = `${randomUUID()}.${ext}`;

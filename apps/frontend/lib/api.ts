@@ -85,6 +85,16 @@ export interface TestimonialDto {
   active: boolean;
 }
 
+/** One replaced site-media file. Absent keys keep the committed asset. */
+export interface SiteMediaDto {
+  key: string;
+  url: string;
+  width: number | null;
+  height: number | null;
+  fileName: string | null;
+  updatedAt: string;
+}
+
 export interface MaterialCategoryDto {
   id: string;
   slug: string;
@@ -227,6 +237,7 @@ export const api = {
   mediaAppearances: () =>
     getJson<MediaAppearanceDto[]>('/media-appearances', []),
   materials: () => getJson<MaterialDto[]>('/materials', []),
+  siteMedia: () => getJson<SiteMediaDto[]>('/site-media', []),
   materialCategories: () =>
     getJson<MaterialCategoryDto[]>('/materials/categories', []),
   posts: () => getJson<PostDto[]>('/blog/published', []),

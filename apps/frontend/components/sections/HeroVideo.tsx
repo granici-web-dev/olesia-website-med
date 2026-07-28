@@ -4,7 +4,10 @@ import { useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import styles from './Hero.module.css';
 
-/* Client-controlled hero video (client-provided intro). No autoplay — the
+/* Client-controlled hero video (client-provided intro). The sources arrive as
+   props: the server component resolves them from the `site-media` module, so
+   the client can swap any locale's cut, or the poster, from the back office.
+   No autoplay — the
    visitor starts it themselves, with sound. A poster covers the load; a
    play/pause control overlays the frame (prominent when paused, on-hover while
    playing). Lives in the old photo slot (.photoFrame).
@@ -22,17 +25,18 @@ import styles from './Hero.module.css';
    ⚠ The cues are placed to clear the hero's crop (`object-fit: cover;
    object-position: center 22%` in a 4/5 frame shows only y≈104…1229 of 1600).
    Re-cutting the video or changing that CSS means re-checking the placement. */
-const VIDEO_BY_LOCALE: Record<string, string> = {
-  ro: '/assets/olesea-hero-ro.mp4',
-  en: '/assets/olesea-hero-en.mp4',
-  ru: '/assets/olesea-hero-ru.mp4',
-};
-
-export function HeroVideo() {
+export function HeroVideo({
+  sources,
+  poster,
+}: {
+  /** One encode per locale, keyed by locale code. */
+  sources: Record<string, string>;
+  poster: string;
+}) {
   const locale = useLocale();
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const src = VIDEO_BY_LOCALE[locale] ?? VIDEO_BY_LOCALE.ro;
+  const src = sources[locale] ?? sources.ro;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -60,7 +64,7 @@ export function HeroVideo() {
       <video
         ref={videoRef}
         className={styles.video}
-        poster="/assets/olesea-hero-poster.jpg"
+        poster={poster}
         playsInline
         preload="metadata"
         onPlay={() => setPlaying(true)}

@@ -76,7 +76,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Payments module** (§11.8+§11.11) — ⏸ **PARKED 2026-07-28** (Sergiu is clarifying with the client). Would have reversed the earlier "payments out of scope / manual confirm" decision; for now that earlier decision simply stands, and every paid surface keeps working manually. See Phase 11.
 - **Patient document upload** (§11.14) — patients upload analyses/investigations before the consult. New surface, special-category GDPR data, no patient accounts exist today.
 - **Security package** (§11.10) — reCAPTCHA on all forms (nothing exists), **admin 2FA/TOTP** (nothing exists), automated DB backups, WAF/rate limiting, dependency-update process.
-- **New back-office modules** (§11.12) — ~~FAQ~~, ~~testimonials~~, ~~media appearances~~, ~~PDF materials~~ (all ✅ 2026-07-28). Only **site media** (hero video + portraits) is left.
+- **New back-office modules** (§11.12) — ~~FAQ~~, ~~testimonials~~, ~~media appearances~~, ~~PDF materials~~, ~~site media~~ — **all ✅ 2026-07-28**. Every module the client asked to edit herself now exists.
 - ~~**RU fields in content models**~~ — ✅ **DONE 2026-07-27.** `*Ru` columns on `Service`, `Category`, `Post`, `Contact`, `AboutPage` (+ the About JSON blocks), shared DTOs, API DTOs/mappers, three-language back-office editors, and frontend consumption. RU is **nullable and never required** — the site falls back RU → RO (empty string counts as missing), so a half-translated page still saves. Migration `20260727190927_content_ru_fields`; the seed backfills RU only where it is still empty.
 
   ⚠️ Rows the client already edited (About stats/credentials) keep **no RU** — the seed deliberately never clobbers edited blocks. Those must be typed in the back office, or the Russian page shows Romanian there. (The About FAQ block is gone — see Phase 10, `faq` module.)
@@ -296,9 +296,9 @@ Ours today: `BookGroupBButton` → `LeadFormModal` → `POST /leads` → the doc
 
 ### 11.12 Back-office coverage vs what she expects to edit
 Existing back-office pages: `about, appointments, blog, contacts, dashboard, messages, patients, quick-questions, services, subscriptions, users`.
-**Missing for her list:** ~~FAQ~~ · ~~testimonials~~ · ~~media appearances~~ · ~~PDF materials (Biblioteca)~~ (all ✅ 2026-07-28, though the library has no files yet) · site media (hero video + portraits) — plus the already-planned data-driven catalog for prices/texts.
+**Missing for her list:** nothing — ~~FAQ~~ · ~~testimonials~~ · ~~media appearances~~ · ~~PDF materials (Biblioteca)~~ · ~~site media~~ all ✅ 2026-07-28 (the library still has no files: those are hers to send) — plus the already-planned data-driven catalog for prices/texts.
 Note: homepage testimonials are currently **hardcoded fakes** ([[testimonials-placeholder]]) — once a CRUD exists they must be replaced with real reviews before launch.
-**Localisation gap:** ✅ **CLOSED 2026-07-27** for every model that exists today — services, blog (posts + categories), contacts and About (title/content + all four JSON blocks) now carry `*Ru`, editable from a third language tab/column in the back office. The module that does not exist yet (site media) must be **born trilingual** — RO/EN required, RU optional with a RO fallback, same as the rest. The FAQ module (✅ 2026-07-28) was the first built to that rule.
+**Localisation gap:** ✅ **CLOSED 2026-07-27** for every model that exists today — services, blog (posts + categories), contacts and About (title/content + all four JSON blocks) now carry `*Ru`, editable from a third language tab/column in the back office. Any module built from here on must be **born trilingual** — RO/EN required, RU optional with a RO fallback, same as the rest. The FAQ module (✅ 2026-07-28) was the first built to that rule.
 
 ### 11.14 Patient document upload — new feature, special-category data
 Requested: patients upload analyses/investigations/documents **before** the consultation. Today the portal is staff-only (`admin`/`editor`); there is no patient login.
@@ -500,7 +500,13 @@ All of these are **not started**. Ordered by dependency, not by client priority.
 - [ ] ⛔ **Real PDFs — blocked on the client.** All 12 materials are seeded without a file. The catalog copy is also interim (titles/descriptions drafted from her topics, page counts and prices placeholders): she owns all of it from the back office now.
 - [ ] Email-gate persistence + newsletter — still blocked on her SMTP provider. The gate unlocks the download but stores nothing.
 - [ ] Paid materials still route to /contact; a real checkout waits on the payments module — ⏸ parked 2026-07-28 (Phase 11).
-- [ ] **Site media** module: hero video + poster + portraits editable (client expects this, answer v2 §3). Keep the "new filename on swap" cache rule.
+- [x] ~~**Site media** module~~ — ✅ **DONE 2026-07-28.** Migration `20260728170000_site_media`.
+  - **Slots, not a gallery.** Ten fixed keys (3 hero videos + poster + 6 page portraits) live in `packages/shared/src/lib/site-media.ts`, because each is wired into one specific place in one specific layout. Only the file behind a key is data; an unknown key is refused (`site_media_unknown_slot`) rather than stored where nothing renders it.
+  - **A row is an override.** With no row the site serves the asset committed under `public/assets/`, which is also the fallback if the API is unreachable — a homepage with no hero is a far worse failure than a slightly stale one. "Revino la varianta inițială" deletes the row and the original comes back.
+  - **The "new filename on swap" cache rule is now obsolete** for anything replaced this way: every upload lands on a fresh UUID URL, so no cache is holding the old bytes. The rule still applies to files swapped by hand in `public/assets/`.
+  - **Three video slots, on purpose** — the subtitles are burned into the picture, one encode per locale, so replacing one language leaves the others alone. The back-office page says this above the group.
+  - Videos are stored **untouched** (`storage.saveVideo`, MP4/WebM, 50 MB): re-encoding would quietly degrade a cut the client rendered deliberately. Photos still go through the image pipeline, which reports the stored dimensions.
+  - `Hero` became a server component so it can resolve the sources; `HeroVideo` takes them as props.
 - [x] ~~**RU fields across content models**~~ — ✅ **DONE 2026-07-27** for services/blog/contacts/about (migration `20260727190927_content_ru_fields`). New modules below inherit the convention: RO/EN required, `*Ru` nullable, readers fall back RU → RO (`loc()` in `apps/frontend/lib/api.ts` treats `''` as missing).
   - ⛔ Follow-up for the client: the About stats/credentials rows she already edited have empty RU — she fills them in the back office, we do not invent translations for her content. (The About FAQ block was dropped with the `faq` module; its replacement is fully trilingual from the seed.)
 

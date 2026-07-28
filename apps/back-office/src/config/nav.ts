@@ -13,6 +13,7 @@ import {
   Quote,
   Clapperboard,
   Library,
+  ImagePlay,
   Users,
   Stethoscope,
   type LucideIcon,
@@ -59,6 +60,7 @@ export const navGroups: NavGroup[] = [
       { to: paths.testimonials, label: ro.nav.testimonials, icon: Quote },
       { to: paths.media, label: ro.nav.media, icon: Clapperboard },
       { to: paths.library, label: ro.nav.library, icon: Library },
+      { to: paths.siteMedia, label: ro.nav.siteMedia, icon: ImagePlay },
     ],
   },
   {

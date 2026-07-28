@@ -8,6 +8,7 @@ import { calendlyUrlFor } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
+import { siteMediaAsset } from '@/lib/site-media';
 
 export const revalidate = 60;
 
@@ -197,6 +198,7 @@ export default async function PediatricsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const portrait = await siteMediaAsset('portrait_pediatrics');
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
@@ -418,7 +420,7 @@ export default async function PediatricsPage({
         <div className="mx-auto w-full max-w-[420px] md:max-w-none">
           <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
             <Image
-              src="/assets/olesea-pediatrics.webp"
+              src={portrait.url}
               alt={
                 ru
                   ? 'Dr. Olesea Jalba, врач-педиатр и специалист по питанию'

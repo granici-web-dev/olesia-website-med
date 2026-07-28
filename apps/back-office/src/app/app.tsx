@@ -22,6 +22,7 @@ import { FaqPage } from '@/pages/faq';
 import { TestimonialsPage } from '@/pages/testimonials';
 import { MediaPage } from '@/pages/media';
 import { LibraryPage } from '@/pages/library';
+import { SiteMediaPage } from '@/pages/site-media';
 import { UsersPage } from '@/pages/users';
 import { SecurityPage } from '@/pages/security';
 import { NotFoundPage } from '@/pages/not-found';
@@ -54,6 +55,7 @@ export function App() {
           <Route path={paths.testimonials} element={<TestimonialsPage />} />
           <Route path={paths.media} element={<MediaPage />} />
           <Route path={paths.library} element={<LibraryPage />} />
+          <Route path={paths.siteMedia} element={<SiteMediaPage />} />
           <Route
             path={paths.users}
             element={
