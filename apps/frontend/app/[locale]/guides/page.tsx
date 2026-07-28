@@ -137,7 +137,10 @@ export default async function LibraryPage({
               </div>
             </div>
 
-            {/* Featured material */}
+            {/* Featured material — skipped entirely when the library is empty,
+               which is what an unreachable API looks like. Dereferencing an
+               absent `featured` crashed the whole page. */}
+            {featured && (
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="eyebrow mb-5">{ru ? 'Рекомендуем' : en ? 'Featured' : 'Recomandat'}</p>
               <article className="flex flex-col border border-[var(--rule)] bg-paper">
@@ -191,6 +194,7 @@ export default async function LibraryPage({
                 </div>
               </article>
             </div>
+            )}
           </div>
         </div>
       </section>
