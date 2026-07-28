@@ -47,6 +47,12 @@ export interface CalendlyInvitee {
   questions_and_answers?: CalendlyQuestionAnswer[];
 }
 
+/** One page of a Calendly list response. */
+export interface CalendlyPage<T> {
+  collection: T[];
+  pagination?: { next_page: string | null };
+}
+
 /**
  * An event type as returned by the Calendly REST API — one bookable
  * consultation on her calendar. `uri` is the value a service must store: the
@@ -174,10 +180,10 @@ export class CalendlyService {
     const out: CalendlyScheduledEvent[] = [];
     let url: string | null = `${this.apiBase}/scheduled_events?${params}`;
     while (url) {
-      const page = await this.apiGet<{
-        collection: CalendlyScheduledEvent[];
-        pagination?: { next_page: string | null };
-      }>(url);
+      // Annotated rather than inferred: `url` is reassigned from `page` below,
+      // so letting TS infer `page` from `url` makes the type self-referential.
+      const page: CalendlyPage<CalendlyScheduledEvent> | null =
+        await this.apiGet<CalendlyPage<CalendlyScheduledEvent>>(url);
       if (!page) break;
       out.push(...page.collection);
       url = page.pagination?.next_page ?? null;

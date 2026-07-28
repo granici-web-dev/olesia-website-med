@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { AboutPageDto } from '@olesia/shared';
 
+import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { toAboutDto } from './about.mapper';
 import { UpdateAboutDto } from './dto/update-about.dto';
@@ -27,8 +28,11 @@ export class AboutService {
           contentEn: dto.contentEn,
           contentRu: dto.contentRu,
           images: dto.images,
-          stats: dto.stats,
-          credentials: dto.credentials,
+          // Prisma types a Json column as InputJsonValue, which a DTO class
+          // array does not structurally satisfy (no index signature). The
+          // shape is validated by class-validator on the way in.
+          stats: dto.stats as Prisma.InputJsonValue | undefined,
+          credentials: dto.credentials as Prisma.InputJsonValue | undefined,
         },
       }),
     );

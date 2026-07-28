@@ -1,0 +1,122 @@
+# Continuous integration — the checks that used to be run by hand.
+#
+# The point of this file is Dependabot. It opens grouped dependency PRs every
+# week (see dependabot.yml), and until now nothing verified them: the choice was
+# merging blind or checking out every branch locally. A green tick here means
+# the types still line up and all three apps still build on that branch.
+#
+# What it does NOT tell you: whether anything actually works. There are no tests
+# in this repo yet. Treat a green run as "not obviously broken", not as approval.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to the same branch makes the previous run pointless — cancel it
+# rather than queue behind it. Never cancel a run on main.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  verify:
+    name: Typecheck & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        # `--frozen-lockfile` is the whole point on a Dependabot PR: if the
+        # lockfile and package.json disagree, that is the bug, and the install
+        # should fail loudly instead of quietly resolving something else.
+        run: pnpm install --frozen-lockfile
+
+      # Everything else imports @olesia/shared, and the API also needs the
+      # generated Prisma client — neither is committed, so both come first.
+      - name: Build shared types
+        run: pnpm --filter @olesia/shared exec tsc -p tsconfig.lib.json
+
+      - name: Generate Prisma client
+        run: pnpm --filter api exec prisma generate
+
+      - name: Typecheck API
+        run: pnpm exec tsc -p apps/api/tsconfig.app.json --noEmit
+
+      # The frontend and back-office builds typecheck as they go; the API is
+      # bundled by webpack with SWC, which does not, hence the explicit step
+      # above.
+      - name: Build API
+        run: pnpm nx build api
+
+      - name: Build back office
+        run: pnpm nx build back-office
+
+      - name: Build frontend
+        run: pnpm nx build @olesia/frontend
+
+  # Migrations are the one thing a type error cannot catch and a broken one
+  # takes production down on deploy. Applying them to a throwaway Postgres
+  # proves the SQL is valid and that the schema they produce matches
+  # schema.prisma — i.e. that nobody hand-edited one without the other.
+  migrations:
+    name: Migrations apply cleanly
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: olesia_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/olesia_ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        run: pnpm --filter api exec prisma migrate deploy
+
+      - name: Schema matches the migrations
+        # Exit code 2 means "there is a difference", which here means the
+        # migrations do not add up to schema.prisma.
+        run: |
+          pnpm --filter api exec prisma migrate diff \
+            --from-config-datasource \
+            --to-schema prisma/schema.prisma \
+            --exit-code

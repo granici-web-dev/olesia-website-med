@@ -7,7 +7,15 @@
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "target": "es2021"
+    "target": "es2021",
+    // sharp ships `lib/index.d.ts` but its `exports` map has no `types`
+    // condition, so `moduleResolution: nodenext` cannot find it and the import
+    // silently becomes `any`. Point at the real declarations instead of
+    // loosening the compiler for the whole app. Drop this once sharp declares
+    // types in its exports map.
+    "paths": {
+      "sharp": ["../../node_modules/sharp/lib/index.d.ts"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": [

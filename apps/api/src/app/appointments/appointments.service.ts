@@ -3,7 +3,7 @@ import type { AppointmentDto, Paginated } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService, type UploadedImage } from '../storage/storage.service';
-import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
+import { paginate } from '../common/dto/pagination.dto';
 import { Prisma } from '../../generated/prisma/client';
 import {
   AppointmentStatus,
