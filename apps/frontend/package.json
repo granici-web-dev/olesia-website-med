@@ -24,7 +24,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "ai": "^6.0.0",
+    "ai": "^7.0.40",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
