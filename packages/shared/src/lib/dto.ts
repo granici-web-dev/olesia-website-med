@@ -2,6 +2,8 @@ import {
   AppointmentStatus,
   ContactMessageStatus,
   ContactType,
+  MediaEmbedProvider,
+  MediaKind,
   PatientEntryType,
   PaymentStatus,
   PostStatus,
@@ -272,6 +274,38 @@ export interface TestimonialDto {
   roleRu: string | null;
   /** Platform the review came from, e.g. "DoctorChat". */
   source: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
+// --- Media appearances (the /media page) ---
+
+/**
+ * A TV/radio/conference appearance. The recording is always embedded from its
+ * original publication — `embedRef` is a YouTube video id or a Facebook video
+ * permalink, depending on `embedProvider`. The thumbnail is ours and local, so
+ * the page paints without touching a third party before consent.
+ */
+export interface MediaAppearanceDto {
+  id: string;
+  kind: MediaKind;
+  outlet: string;
+  show: string | null;
+  /** ISO date, or null when the source never published one. */
+  date: string | null;
+  duration: string | null;
+  titleRo: string;
+  titleEn: string;
+  titleRu: string | null;
+  summaryRo: string;
+  summaryEn: string;
+  summaryRu: string | null;
+  url: string;
+  embedProvider: MediaEmbedProvider;
+  embedRef: string;
+  thumbUrl: string;
+  thumbWidth: number;
+  thumbHeight: number;
   sortOrder: number;
   active: boolean;
 }

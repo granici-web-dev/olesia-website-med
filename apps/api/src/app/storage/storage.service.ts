@@ -19,6 +19,13 @@ export interface UploadedImage {
   buffer: Buffer;
 }
 
+/** A stored image: its public URL plus the dimensions it ended up with. */
+export interface StoredImage {
+  url: string;
+  width: number;
+  height: number;
+}
+
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -44,7 +51,7 @@ const DOC_EXT: Record<string, string> = {
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
 
-  async saveImage(file: UploadedImage | undefined): Promise<{ url: string }> {
+  async saveImage(file: UploadedImage | undefined): Promise<StoredImage> {
     if (!file) {
       throw new BadRequestException('No file uploaded.');
     }
@@ -56,10 +63,23 @@ export class StorageService {
     if (file.size > MAX_BYTES) {
       throw new BadRequestException('Image exceeds the 5 MB limit.');
     }
+    return this.storeImageBuffer(file.buffer);
+  }
 
+  /**
+   * Process and store raw image bytes, returning the stored dimensions along
+   * with the URL — `next/image` needs them, and only the encoder knows what
+   * they ended up being after the resize.
+   *
+   * Public because a thumbnail can also arrive as bytes we fetched ourselves
+   * rather than as an upload (see the media-appearances module).
+   */
+  async storeImageBuffer(buffer: Buffer): Promise<StoredImage> {
     let webp: Buffer;
+    let width: number | undefined;
+    let height: number | undefined;
     try {
-      webp = await sharp(file.buffer)
+      const output = await sharp(buffer)
         // Bake in EXIF orientation, then drop metadata.
         .rotate()
         .resize({
@@ -69,7 +89,10 @@ export class StorageService {
           withoutEnlargement: true,
         })
         .webp({ quality: WEBP_QUALITY })
-        .toBuffer();
+        .toBuffer({ resolveWithObject: true });
+      webp = output.data;
+      width = output.info.width;
+      height = output.info.height;
     } catch (err) {
       this.logger.warn(`Image processing failed: ${String(err)}`);
       throw new BadRequestException('Could not process the image file.');
@@ -79,7 +102,11 @@ export class StorageService {
     await mkdir(STORAGE_DIR, { recursive: true });
     await writeFile(join(STORAGE_DIR, filename), webp);
 
-    return { url: `${PUBLIC_API_URL}${STORAGE_URL_PREFIX}/${filename}` };
+    return {
+      url: `${PUBLIC_API_URL}${STORAGE_URL_PREFIX}/${filename}`,
+      width: width ?? 0,
+      height: height ?? 0,
+    };
   }
 
   /**

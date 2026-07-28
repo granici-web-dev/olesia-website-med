@@ -96,3 +96,17 @@ export enum PatientEntryType {
   Prescription = 'prescription',
   Document = 'document',
 }
+
+/** What kind of appearance a /media entry is. */
+export enum MediaKind {
+  Tv = 'tv',
+  Radio = 'radio',
+  Conference = 'conference',
+  Press = 'press',
+}
+
+/** Where a media recording is embedded from. Never self-hosted. */
+export enum MediaEmbedProvider {
+  Youtube = 'youtube',
+  Facebook = 'facebook',
+}

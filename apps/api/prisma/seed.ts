@@ -8,6 +8,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
 import { FAQ_SECTIONS } from './seed-faq';
 import { TESTIMONIALS } from './seed-testimonials';
+import { MEDIA_APPEARANCES } from './seed-media';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL ?? '' }),
@@ -320,6 +321,24 @@ async function seedTestimonials() {
   console.log(`✓ seeded ${TESTIMONIALS.length} testimonials`);
 }
 
+/**
+ * Seed the /media appearances. All-or-nothing, like FAQ and testimonials.
+ */
+async function seedMedia() {
+  if ((await prisma.mediaAppearance.count()) > 0) {
+    console.log('• media appearances already present — skipped (edit in back office)');
+    return;
+  }
+  await prisma.mediaAppearance.createMany({
+    data: MEDIA_APPEARANCES.map((m, i) => ({
+      ...m,
+      date: m.date ? new Date(m.date) : null,
+      sortOrder: i + 1,
+    })),
+  });
+  console.log(`✓ seeded ${MEDIA_APPEARANCES.length} media appearances`);
+}
+
 async function main() {
   const email = (process.env.ADMIN_EMAIL ?? 'admin@olesia.md').toLowerCase();
   const password = process.env.ADMIN_PASSWORD ?? 'admin12345';
@@ -366,6 +385,7 @@ async function main() {
   await seedAbout();
   await seedFaq();
   await seedTestimonials();
+  await seedMedia();
 }
 
 main()

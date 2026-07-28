@@ -267,6 +267,65 @@ model Contact {
   updatedAt DateTime    @updatedAt
 }
 
+// --- Media appearances (the /media page) ---
+
+enum MediaKind {
+  tv
+  radio
+  conference
+  press
+}
+
+enum MediaEmbedProvider {
+  youtube
+  facebook
+}
+
+// Recordings are NEVER self-hosted: broadcast rights belong to the channel and
+// the files run 30–170 MB. Every item points at its original publication and is
+// embedded from there, click-to-load, so the third-party iframe only appears
+// after the visitor presses play. The thumbnail, by contrast, IS stored locally
+// — calling ytimg/fbcdn on first paint would re-introduce exactly the
+// pre-consent third-party request the click-to-load embed avoids.
+
+model MediaAppearance {
+  id       String    @id @default(uuid())
+  kind     MediaKind
+  /// Broadcaster, e.g. "Moldova 1".
+  outlet   String
+  /// Programme name, e.g. "Bună dimineața".
+  show     String?
+  /// Broadcast date. Null when the source never published one — the site then
+  /// simply omits it rather than guessing.
+  date     DateTime?
+  /// Runtime as published, "mm:ss".
+  duration String?
+
+  titleRo   String
+  titleEn   String
+  titleRu   String?
+  summaryRo String
+  summaryEn String
+  summaryRu String?
+
+  /// Canonical publication URL — always offered as an outbound link.
+  url           String
+  embedProvider MediaEmbedProvider
+  /// YouTube video id, or the canonical Facebook video permalink.
+  embedRef      String
+
+  thumbUrl    String
+  thumbWidth  Int
+  thumbHeight Int
+
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
 // --- Testimonials (parent reviews, homepage) ---
 //
 // Real reviews only. The site has already shipped invented ones twice, so the

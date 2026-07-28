@@ -85,6 +85,39 @@ export interface TestimonialDto {
   active: boolean;
 }
 
+export type MediaKind = 'tv' | 'radio' | 'conference' | 'press';
+export type MediaEmbedProvider = 'youtube' | 'facebook';
+
+/**
+ * A TV/radio/conference appearance shown on /media. The recording is always
+ * embedded from its original publication (`embedRef` is a YouTube video id or
+ * a Facebook permalink); the thumbnail is hosted by us, so the page paints
+ * without contacting a third party before the visitor consents.
+ */
+export interface MediaAppearanceDto {
+  id: string;
+  kind: MediaKind;
+  outlet: string;
+  show: string | null;
+  /** ISO date, or null when the broadcaster never published one. */
+  date: string | null;
+  duration: string | null;
+  titleRo: string;
+  titleEn: string;
+  titleRu: string | null;
+  summaryRo: string;
+  summaryEn: string;
+  summaryRu: string | null;
+  url: string;
+  embedProvider: MediaEmbedProvider;
+  embedRef: string;
+  thumbUrl: string;
+  thumbWidth: number;
+  thumbHeight: number;
+  sortOrder: number;
+  active: boolean;
+}
+
 /** One question on the /faq page. RU is nullable; readers fall back to RO. */
 export interface FaqItemDto {
   id: string;
@@ -152,6 +185,8 @@ export const api = {
   about: () => getJson<AboutPageDto | null>('/about', null),
   faq: () => getJson<FaqCategoryDto[]>('/faq', []),
   testimonials: () => getJson<TestimonialDto[]>('/testimonials', []),
+  mediaAppearances: () =>
+    getJson<MediaAppearanceDto[]>('/media-appearances', []),
   posts: () => getJson<PostDto[]>('/blog/published', []),
   post: (slug: string) =>
     getJson<PostDto | null>(`/blog/published/${slug}`, null),

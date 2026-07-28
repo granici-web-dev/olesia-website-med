@@ -44,6 +44,28 @@ const securityHeaders = [
   },
 ];
 
+/**
+ * Images uploaded through the back office (media thumbnails, article covers)
+ * are served by the API, and `next/image` refuses any host it was not told
+ * about. Derive it from the same variable the API client reads, because the
+ * origin differs per environment — localhost in dev, the deployed API in prod.
+ */
+const apiImagePatterns = (() => {
+  const raw = process.env.API_URL ?? 'http://localhost:3333/api';
+  try {
+    const { protocol, hostname, port } = new URL(raw);
+    return [
+      {
+        protocol: protocol.replace(':', '') as 'http' | 'https',
+        hostname,
+        ...(port ? { port } : {}),
+      },
+    ];
+  } catch {
+    return [];
+  }
+})();
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -51,6 +73,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.sanity.io',
       },
+      ...apiImagePatterns,
     ],
   },
   async headers() {

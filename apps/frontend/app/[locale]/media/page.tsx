@@ -3,14 +3,16 @@ import type { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Link } from '@/i18n/navigation';
 import { MediaGallery } from '@/components/sections/MediaGallery';
-import { MEDIA_APPEARANCES } from '@/lib/media-appearances';
+import { api } from '@/lib/api';
 import { btnDark, creamPill, creamUnderline } from '@/components/ui/cta';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Apariții media (brief §7.4 · client answers v2 §6) — the dedicated page the
-   client asked for. Today it holds the three TV appearances she sent; radio,
-   conferences, congresses and presentations follow with her full list, and the
-   data moves to the back-office `media-appearances` module in the backend pass.
+   client asked for. Content comes from the back-office `media-appearances`
+   module; radio, conferences and presentations follow with the client's full
+   list. There is deliberately no local fallback copy: it would drift from what
+   she edits, and an empty page for the length of an outage beats showing text
+   she has already corrected.
 
    Embeds are click-to-load (see MediaGallery) so no YouTube/Facebook cookie is
    set before the visitor presses play. Recordings are never self-hosted — the
@@ -52,7 +54,8 @@ export default async function MediaPage({
   const ru = locale === 'ru';
   const lang = (ru ? 'ru' : en ? 'en' : 'ro') as 'ro' | 'en' | 'ru';
 
-  const outlets = [...new Set(MEDIA_APPEARANCES.map((m) => m.outlet))];
+  const appearances = await api.mediaAppearances();
+  const outlets = [...new Set(appearances.map((m) => m.outlet))];
 
   return (
     <main className="bg-cream text-ink">
@@ -104,7 +107,7 @@ export default async function MediaPage({
                   {ru ? 'Материалов' : en ? 'Appearances' : 'Materiale'}
                 </dt>
                 <dd className="serif text-[2.4rem] leading-none lining-nums tabular-nums text-sage">
-                  {MEDIA_APPEARANCES.length}
+                  {appearances.length}
                 </dd>
               </div>
               <div>
@@ -148,7 +151,7 @@ export default async function MediaPage({
           </p>
         </header>
 
-        <MediaGallery locale={lang} items={MEDIA_APPEARANCES} />
+        <MediaGallery locale={lang} items={appearances} />
 
         <p className="mt-12 max-w-[70ch] text-sm leading-relaxed text-ink-soft text-pretty">
           {ru

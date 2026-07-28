@@ -20,6 +20,7 @@ import { ContactsPage } from '@/pages/contacts';
 import { AboutPage } from '@/pages/about';
 import { FaqPage } from '@/pages/faq';
 import { TestimonialsPage } from '@/pages/testimonials';
+import { MediaPage } from '@/pages/media';
 import { UsersPage } from '@/pages/users';
 import { SecurityPage } from '@/pages/security';
 import { NotFoundPage } from '@/pages/not-found';
@@ -50,6 +51,7 @@ export function App() {
           <Route path={paths.about} element={<AboutPage />} />
           <Route path={paths.faq} element={<FaqPage />} />
           <Route path={paths.testimonials} element={<TestimonialsPage />} />
+          <Route path={paths.media} element={<MediaPage />} />
           <Route
             path={paths.users}
             element={

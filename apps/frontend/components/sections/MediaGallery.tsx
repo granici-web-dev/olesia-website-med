@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import { Reveal } from '@/components/ui/Reveal';
 import { track } from '@/lib/analytics';
-import type { Bi, MediaAppearance } from '@/lib/media-appearances';
+import type { MediaAppearanceDto } from '@/lib/api';
 import styles from './MediaGallery.module.css';
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -25,12 +25,26 @@ import styles from './MediaGallery.module.css';
 
 type Locale = 'ro' | 'en' | 'ru';
 
-function embedSrc(item: MediaAppearance): string {
-  if (item.embed.provider === 'youtube') {
-    return `https://www.youtube-nocookie.com/embed/${item.embed.videoId}?autoplay=1&rel=0`;
+function embedSrc(item: MediaAppearanceDto): string {
+  if (item.embedProvider === 'youtube') {
+    return `https://www.youtube-nocookie.com/embed/${item.embedRef}?autoplay=1&rel=0`;
   }
-  const href = encodeURIComponent(item.embed.permalink);
+  const href = encodeURIComponent(item.embedRef);
   return `https://www.facebook.com/plugins/video.php?href=${href}&show_text=false&autoplay=true`;
+}
+
+/**
+ * "Aprilie 2023" / "April 2023" / "Апрель 2023" from one stored date.
+ * Romanian and Russian give a lowercase month, which reads wrong at the start
+ * of a line, so the first letter is raised.
+ */
+function monthYear(iso: string, locale: Locale): string {
+  const formatted = new Intl.DateTimeFormat(locale, {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(iso));
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 export function MediaGallery({
@@ -38,11 +52,13 @@ export function MediaGallery({
   items,
 }: {
   locale: Locale;
-  items: MediaAppearance[];
+  items: MediaAppearanceDto[];
 }) {
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  /** RU falls back to RO, an empty string counting as missing — as everywhere. */
+  const lc = (ro: string, enText: string, ruText: string | null) =>
+    ru ? (ruText?.trim() ? ruText : ro) : en ? enText : ro;
 
   const [playing, setPlaying] = useState<string | null>(null);
 
@@ -51,14 +67,14 @@ export function MediaGallery({
     watchOn: ru ? 'Открыть на' : en ? 'Watch on' : 'Vezi pe',
   };
 
-  const providerName = (item: MediaAppearance) =>
-    item.embed.provider === 'youtube' ? 'YouTube' : 'Facebook';
+  const providerName = (item: MediaAppearanceDto) =>
+    item.embedProvider === 'youtube' ? 'YouTube' : 'Facebook';
 
   return (
     <ul className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-x-10 md:gap-y-14">
       {items.map((item, i) => {
         const isPlaying = playing === item.id;
-        const title = lc(item.title);
+        const title = lc(item.titleRo, item.titleEn, item.titleRu);
 
         return (
           <Reveal as="li" key={item.id} delay={i * 90} className={styles.card}>
@@ -82,15 +98,15 @@ export function MediaGallery({
                     track('media_play', {
                       media_id: item.id,
                       media_outlet: item.outlet,
-                      media_provider: item.embed.provider,
+                      media_provider: item.embedProvider,
                     });
                   }}
                 >
                   <Image
-                    src={item.thumb}
+                    src={item.thumbUrl}
                     alt={title}
-                    width={item.thumbW}
-                    height={item.thumbH}
+                    width={item.thumbWidth}
+                    height={item.thumbHeight}
                     sizes="(max-width: 768px) 100vw, 46vw"
                     className={styles.posterImg}
                   />
@@ -121,7 +137,9 @@ export function MediaGallery({
                 {item.date && (
                   <>
                     <span aria-hidden="true"> · </span>
-                    <time dateTime={item.date.iso}>{lc(item.date.label)}</time>
+                    <time dateTime={item.date.slice(0, 10)}>
+                      {monthYear(item.date, locale)}
+                    </time>
                   </>
                 )}
               </p>
@@ -129,7 +147,7 @@ export function MediaGallery({
                 {title}
               </h3>
               <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
-                {lc(item.summary)}
+                {lc(item.summaryRo, item.summaryEn, item.summaryRu)}
               </p>
 
               <div className="mt-auto pt-6">

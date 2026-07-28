@@ -14,6 +14,7 @@ export const paths = {
   about: '/despre-noi',
   faq: '/intrebari-frecvente',
   testimonials: '/recenzii',
+  media: '/aparitii-media',
   users: '/utilizatori',
   security: '/securitate',
 } as const;

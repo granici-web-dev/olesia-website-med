@@ -11,6 +11,7 @@ import {
   BookOpenText,
   HelpCircle,
   Quote,
+  Clapperboard,
   Users,
   Stethoscope,
   type LucideIcon,
@@ -55,6 +56,7 @@ export const navGroups: NavGroup[] = [
       { to: paths.about, label: ro.nav.about, icon: BookOpenText },
       { to: paths.faq, label: ro.nav.faq, icon: HelpCircle },
       { to: paths.testimonials, label: ro.nav.testimonials, icon: Quote },
+      { to: paths.media, label: ro.nav.media, icon: Clapperboard },
     ],
   },
   {
