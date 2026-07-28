@@ -241,17 +241,6 @@ export interface AboutCredential {
   ru?: string;
 }
 
-/** A parent testimonial. */
-export interface AboutTestimonial {
-  quoteRo: string;
-  quoteEn: string;
-  quoteRu?: string;
-  author: string;
-  roleRo: string;
-  roleEn: string;
-  roleRu?: string;
-}
-
 export interface AboutPageDto {
   id: string;
   titleRo: string;
@@ -263,8 +252,28 @@ export interface AboutPageDto {
   images: string[] | null;
   stats: AboutStat[];
   credentials: AboutCredential[];
-  testimonials: AboutTestimonial[];
   updatedAt: string;
+}
+
+// --- Testimonials (parent reviews, homepage) ---
+
+/**
+ * A parent review. `author` is null for an unsigned one — the site shows a
+ * localized neutral label rather than inventing a name.
+ */
+export interface TestimonialDto {
+  id: string;
+  quoteRo: string;
+  quoteEn: string;
+  quoteRu: string | null;
+  author: string | null;
+  roleRo: string | null;
+  roleEn: string | null;
+  roleRu: string | null;
+  /** Platform the review came from, e.g. "DoctorChat". */
+  source: string | null;
+  sortOrder: number;
+  active: boolean;
 }
 
 // --- FAQ (the public /faq page) ---

@@ -52,15 +52,6 @@ export interface AboutCredential {
   en: string;
   ru?: string;
 }
-export interface AboutTestimonial {
-  quoteRo: string;
-  quoteEn: string;
-  quoteRu?: string;
-  author: string;
-  roleRo: string;
-  roleEn: string;
-  roleRu?: string;
-}
 export interface AboutPageDto {
   id: string;
   titleRo: string;
@@ -72,8 +63,26 @@ export interface AboutPageDto {
   images: string[] | null;
   stats: AboutStat[];
   credentials: AboutCredential[];
-  testimonials: AboutTestimonial[];
   updatedAt: string;
+}
+
+/**
+ * A parent review. `author` is null for an unsigned one — the site renders a
+ * localized neutral label instead, so no review is ever attributed to a name
+ * that was not given.
+ */
+export interface TestimonialDto {
+  id: string;
+  quoteRo: string;
+  quoteEn: string;
+  quoteRu: string | null;
+  author: string | null;
+  roleRo: string | null;
+  roleEn: string | null;
+  roleRu: string | null;
+  source: string | null;
+  sortOrder: number;
+  active: boolean;
 }
 
 /** One question on the /faq page. RU is nullable; readers fall back to RO. */
@@ -142,6 +151,7 @@ export const api = {
   contacts: () => getJson<ContactDto[]>('/contacts', []),
   about: () => getJson<AboutPageDto | null>('/about', null),
   faq: () => getJson<FaqCategoryDto[]>('/faq', []),
+  testimonials: () => getJson<TestimonialDto[]>('/testimonials', []),
   posts: () => getJson<PostDto[]>('/blog/published', []),
   post: (slug: string) =>
     getJson<PostDto | null>(`/blog/published/${slug}`, null),

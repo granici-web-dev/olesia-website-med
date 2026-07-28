@@ -91,32 +91,6 @@ I believe every family deserves clear support, without pressure and without myth
       ru: 'Интегративный подход и наблюдение',
     },
   ],
-  testimonials: [
-    {
-      quoteRo:
-        'Am plecat de la consultație cu un plan clar și fără anxietate. Bebelușul doarme mult mai bine.',
-      quoteEn:
-        'I left the consultation with a clear plan and no anxiety. Our baby sleeps much better now.',
-      quoteRu:
-        'После консультации у меня был чёткий план и никакой тревоги. Малыш стал спать намного лучше.',
-      author: 'Maria I.',
-      roleRo: 'mamă, Chișinău',
-      roleEn: 'mother, Chișinău',
-      roleRu: 'мама, Кишинёв',
-    },
-    {
-      quoteRo:
-        'Explică pe înțelesul tuturor, cu răbdare. Diversificarea a devenit simplă.',
-      quoteEn:
-        'Explains everything clearly and patiently. Weaning finally became simple.',
-      quoteRu:
-        'Объясняет понятно и терпеливо. Введение прикорма наконец стало простым.',
-      author: 'Andrei P.',
-      roleRo: 'tată',
-      roleEn: 'father',
-      roleRu: 'папа',
-    },
-  ],
   updatedAt: '2026-06-03T12:00:00+03:00',
 };
 

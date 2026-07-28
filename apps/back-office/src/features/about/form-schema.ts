@@ -20,16 +20,6 @@ const credentialSchema = z.object({
   ru: z.string().optional(),
 });
 
-const testimonialSchema = z.object({
-  quoteRo: z.string(),
-  quoteEn: z.string(),
-  quoteRu: z.string().optional(),
-  author: z.string(),
-  roleRo: z.string(),
-  roleEn: z.string(),
-  roleRu: z.string().optional(),
-});
-
 export const aboutFormSchema = z.object({
   titleRo: z.string().trim().min(1, a.missingTitle),
   titleEn: z.string(),
@@ -40,7 +30,6 @@ export const aboutFormSchema = z.object({
   images: z.array(z.string()),
   stats: z.array(statSchema),
   credentials: z.array(credentialSchema),
-  testimonials: z.array(testimonialSchema),
 });
 
 export type AboutFormValues = z.infer<typeof aboutFormSchema>;
@@ -56,6 +45,5 @@ export function fromAbout(p: AboutPage): AboutFormValues {
     images: p.images,
     stats: p.stats,
     credentials: p.credentials,
-    testimonials: p.testimonials,
   };
 }

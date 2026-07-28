@@ -1,81 +1,36 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { AboutTestimonial } from '@/lib/api';
+import type { TestimonialDto } from '@/lib/api';
 import { Reveal } from '@/components/ui/Reveal';
 import styles from './Testimonials.module.css';
 
 /**
- * The DTO already carries `quoteRu` / `roleRu`; only the author name is extra
- * here, because a signature is data the back office does not localise.
- */
-type Testimonial = AboutTestimonial & {
-  authorEn?: string;
-  authorRu?: string;
-};
-
-/**
- * REAL parent reviews (received from the client 2026-07-26, source `docs/testemonials.md`).
- * These replaced the placeholder set — no invented reviews are shown anywhere on the site.
+ * Parent reviews, edited in the back office (`testimonials` module).
  *
- * Handling rules for anything added here:
- * · Wording is the reviewer's. Only typos/spacing were normalised — never the meaning.
- * · Each review is authored in ONE language; the other two are faithful translations
- *   (review 1 was written in RU, review 2 in RO).
- * · Unsigned reviews get a neutral author label, not an invented name.
- * · `source` names the platform when the review came from one (review 2 mentions
- *   DoctorChat in its own text). ⛔ Ask the client whether DoctorChat requires a
- *   formal credit beyond this.
+ * ⚠️ There is deliberately **no local fallback array**. Two rounds of invented
+ * reviews reached production through exactly such an array — placeholders that
+ * outlived their purpose. If the API has nothing to say, this section renders
+ * nothing; an empty homepage band is a far smaller problem than a fabricated
+ * review under a doctor's name.
  *
- * Moves to the back-office `testimonials` module in the backend pass; until then the
- * API list (when non-empty) still wins over this array.
- */
-const LOCAL_TESTIMONIALS: Testimonial[] = [
-  {
-    quoteRo:
-      'Mulțumesc mult doamnei doctor pentru tratamentul competent și de calitate al copilului. Ne-am adresat sâmbătă, cu o tuse foarte puternică. Doctorul a fost foarte atent cu copilul și, după toate analizele, i-a explicat mamei pe înțeles schema de tratament. Acasă am urmat totul întocmai — deja în a treia zi tusea a început să cedeze (pneumonie pe dreapta). În a cincea zi copilul se simțea mult mai bine. Vă mulțumesc enorm pentru ajutor și pentru că la Chișinău am întâlnit un medic la fel de bun ca în Ucraina (Nikolaev). Pentru că atunci când copilul e bolnav e mereu panică, mai ales într-o altă țară.',
-    quoteEn:
-      'Thank you so much for the competent, high-quality care of our child. We came in on a Saturday with a very bad cough. The doctor was extremely attentive with the child and, after all the tests, explained the treatment plan to the mother in plain language. At home we followed it exactly — by the third day the cough began to ease (right-sided pneumonia). By the fifth day the child felt much better. Thank you enormously for your help, and for the fact that in Chișinău I met a doctor as good as the one back in Ukraine (Mykolaiv). Because when your child is ill there is always panic — especially in another country.',
-    quoteRu:
-      'Спасибо большое доктору за грамотное, квалифицированное и качественное лечение ребёнка. Обратились в субботу с очень сильным кашлем. Доктор был очень внимателен к ребёнку и после всех анализов доступно объяснил маме курс лечения. Дома всё делали по назначению врача — уже на третий день лечения кашель начал уходить (правосторонняя пневмония). На пятый день ребёнок чувствовал себя намного лучше. Спасибо вам огромное за помощь и за то, что в Кишинёве мне встретился такой же грамотный врач, как и в Украине (Николаев). Потому что, когда болеет ребёнок, всегда паника — особенно в другой стране.',
-    author: 'Părinte',
-    authorEn: 'A parent',
-    authorRu: 'Родитель',
-    roleRo: 'copil tratat de pneumonie',
-    roleEn: 'child treated for pneumonia',
-    roleRu: 'ребёнок лечился от пневмонии',
-  },
-  {
-    quoteRo:
-      'Prima mea experiență pe DoctorChat. E un instrument bun când ai nevoie de un sfat al medicului sau de o părere în plus. Dna Jalbă a fost atentă la detalii, a răspuns la toate întrebările care mă interesau și m-a ajutat să găsesc o soluție.',
-    quoteEn:
-      'My first experience on DoctorChat. It’s a good tool when you need a doctor’s advice or a second opinion. Dr. Jalbă paid attention to the details, answered every question I had, and helped me find a solution.',
-    quoteRu:
-      'Мой первый опыт на DoctorChat. Хороший инструмент, когда нужен совет врача или дополнительное мнение. Госпожа Жалбэ была внимательна к деталям, ответила на все интересовавшие меня вопросы и помогла найти решение.',
-    author: 'Zlobin Alexandru',
-    roleRo: 'prin DoctorChat',
-    roleEn: 'via DoctorChat',
-    roleRu: 'через DoctorChat',
-  },
-];
-
-/**
- * Parent reviews. Editable from the back office; falls back to the local set when empty.
- * Renders as a slider — 2 cards per view from `sm` up (1 on mobile) with a native
- * scroll-snap track navigated by arrows or swipe, so any further reviews stay reachable.
- * With only two reviews the arrows hide themselves (`canScroll` is false).
+ * Renders as a slider — 2 cards per view from `sm` up (1 on mobile) with a
+ * native scroll-snap track navigated by arrows or swipe, so further reviews
+ * stay reachable. With everything visible at once the arrows hide themselves.
  */
 export function Testimonials({
   locale,
   items,
 }: {
   locale: string;
-  items: AboutTestimonial[];
+  items: TestimonialDto[];
 }) {
   const t = (ro: string, en: string, ru: string) =>
     locale === 'ru' ? ru : locale === 'en' ? en : ro;
 
-  const list: Testimonial[] = items.length > 0 ? items : LOCAL_TESTIMONIALS;
+  /** RU falls back to RO, and an empty string counts as missing — see `loc()`. */
+  const lc = (ro: string, en: string, ru: string | null) =>
+    locale === 'ru' ? (ru?.trim() ? ru : ro) : locale === 'en' ? en : ro;
 
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [atStart, setAtStart] = useState(true);
@@ -95,7 +50,7 @@ export function Testimonials({
     sync();
     window.addEventListener('resize', sync);
     return () => window.removeEventListener('resize', sync);
-  }, [sync, list.length]);
+  }, [sync, items.length]);
 
   /** Advance the track by one viewport (~one row of cards), clamped to its bounds. */
   const page = (dir: 1 | -1) => {
@@ -106,12 +61,14 @@ export function Testimonials({
     el.scrollTo({ left: to, behavior: 'smooth' });
   };
 
-  if (list.length === 0) return null;
+  if (items.length === 0) return null;
 
   const labels = {
     title: t('Ce spun părinții', 'What parents say', 'Что говорят родители'),
     prev: t('Anterior', 'Previous', 'Назад'),
     next: t('Următor', 'Next', 'Далее'),
+    /** Stand-in for a review left unsigned. Never a name we made up. */
+    anonymous: t('Părinte', 'A parent', 'Родитель'),
   };
 
   return (
@@ -150,27 +107,28 @@ export function Testimonials({
           onScroll={sync}
           className={`${styles.track} flex snap-x snap-mandatory gap-6 overflow-x-auto pb-1`}
         >
-          {list.map((it, i) => (
-            <figure
-              key={i}
-              className="flex shrink-0 basis-full snap-start flex-col sm:basis-[calc(50%-0.75rem)]"
-            >
-              <blockquote className="serif-it text-[1.25rem] leading-snug text-ink text-pretty md:text-[1.3rem]">
-                “{t(it.quoteRo, it.quoteEn, it.quoteRu || it.quoteRo)}”
-              </blockquote>
-              <figcaption className="mt-5 text-sm">
-                <span className="font-semibold text-ink">
-                  {t(it.author, it.authorEn ?? it.author, it.authorRu ?? it.author)}
-                </span>
-                {(it.roleRo || it.roleEn) && (
-                  <span className="text-ink-soft">
-                    {' '}
-                    — {t(it.roleRo, it.roleEn, it.roleRu || it.roleRo)}
+          {items.map((it) => {
+            const role = lc(it.roleRo ?? '', it.roleEn ?? '', it.roleRu);
+            return (
+              <figure
+                key={it.id}
+                className="flex shrink-0 basis-full snap-start flex-col sm:basis-[calc(50%-0.75rem)]"
+              >
+                <blockquote className="serif-it text-[1.25rem] leading-snug text-ink text-pretty md:text-[1.3rem]">
+                  “{lc(it.quoteRo, it.quoteEn, it.quoteRu)}”
+                </blockquote>
+                <figcaption className="mt-5 text-sm">
+                  <span className="font-semibold text-ink">
+                    {it.author ?? labels.anonymous}
                   </span>
-                )}
-              </figcaption>
-            </figure>
-          ))}
+                  {role && <span className="text-ink-soft"> — {role}</span>}
+                  {it.source && (
+                    <span className="text-ink-soft"> · {it.source}</span>
+                  )}
+                </figcaption>
+              </figure>
+            );
+          })}
         </div>
       </Reveal>
     </section>

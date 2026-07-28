@@ -15,6 +15,7 @@ import { ContactsModule } from './contacts/contacts.module';
 import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { AboutModule } from './about/about.module';
 import { FaqModule } from './faq/faq.module';
+import { TestimonialsModule } from './testimonials/testimonials.module';
 import { BlogModule } from './blog/blog.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { QuickQuestionsModule } from './quick-questions/quick-questions.module';
@@ -49,6 +50,7 @@ import { CaptchaModule } from './common/captcha/captcha.module';
     ContactMessagesModule,
     AboutModule,
     FaqModule,
+    TestimonialsModule,
     BlogModule,
     SubscriptionsModule,
     QuickQuestionsModule,

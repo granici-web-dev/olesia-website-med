@@ -17,7 +17,6 @@ function toView(d: AboutPageDto): AboutPage {
     images: d.images ?? [],
     stats: d.stats ?? [],
     credentials: d.credentials ?? [],
-    testimonials: d.testimonials ?? [],
     updatedAt: d.updatedAt,
   };
 }

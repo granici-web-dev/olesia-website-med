@@ -41,32 +41,6 @@ export class AboutCredentialDto {
   ru?: string;
 }
 
-/** A parent testimonial. */
-export class AboutTestimonialDto {
-  @IsString()
-  quoteRo!: string;
-
-  @IsString()
-  quoteEn!: string;
-
-  @IsOptional()
-  @IsString()
-  quoteRu?: string;
-
-  @IsString()
-  author!: string;
-
-  @IsString()
-  roleRo!: string;
-
-  @IsString()
-  roleEn!: string;
-
-  @IsOptional()
-  @IsString()
-  roleRu?: string;
-}
-
 /** Partial update of the singleton About page. */
 export class UpdateAboutDto {
   @IsOptional()
@@ -109,10 +83,4 @@ export class UpdateAboutDto {
   @ValidateNested({ each: true })
   @Type(() => AboutCredentialDto)
   credentials?: AboutCredentialDto[];
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AboutTestimonialDto)
-  testimonials?: AboutTestimonialDto[];
 }

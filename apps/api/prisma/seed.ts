@@ -7,6 +7,7 @@ import * as argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
 import { FAQ_SECTIONS } from './seed-faq';
+import { TESTIMONIALS } from './seed-testimonials';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL ?? '' }),
@@ -230,44 +231,6 @@ I believe every family deserves clear support, without pressure and without myth
       ru: 'Интегративный подход и наблюдение',
     },
   ],
-  testimonials: [
-    {
-      quoteRo:
-        'Am plecat de la consultație cu un plan clar și fără anxietate. Bebelușul doarme mult mai bine.',
-      quoteEn:
-        'I left the consultation with a clear plan and no anxiety. Our baby sleeps much better now.',
-      quoteRu:
-        'После консультации у меня был чёткий план и никакой тревоги. Малыш стал спать намного лучше.',
-      author: 'Maria I.',
-      roleRo: 'mamă, Chișinău',
-      roleEn: 'mother, Chișinău',
-      roleRu: 'мама, Кишинёв',
-    },
-    {
-      quoteRo:
-        'Explică pe înțelesul tuturor, cu răbdare. Diversificarea a devenit simplă.',
-      quoteEn:
-        'Explains everything clearly and patiently. Weaning finally became simple.',
-      quoteRu:
-        'Объясняет понятно и терпеливо. Введение прикорма наконец стало простым.',
-      author: 'Andrei P.',
-      roleRo: 'tată',
-      roleEn: 'father',
-      roleRu: 'папа',
-    },
-    {
-      quoteRo:
-        'Răspuns rapid la întrebări și recomandări exact pe nevoile noastre.',
-      quoteEn:
-        'Quick answers to questions and advice tailored exactly to our needs.',
-      quoteRu:
-        'Быстрые ответы на вопросы и рекомендации точно под наши нужды.',
-      author: 'Elena R.',
-      roleRo: 'mamă',
-      roleEn: 'mother',
-      roleRu: 'мама',
-    },
-  ],
 };
 
 /**
@@ -300,8 +263,6 @@ async function seedAbout() {
     patch.contentRu = ABOUT.contentRu;
   if (len(existing.stats) === 0) patch.stats = ABOUT.stats;
   if (len(existing.credentials) === 0) patch.credentials = ABOUT.credentials;
-  if (len(existing.testimonials) === 0)
-    patch.testimonials = ABOUT.testimonials;
 
   if (Object.keys(patch).length > 0) {
     await prisma.aboutPage.update({ where: { id: existing.id }, data: patch });
@@ -342,6 +303,21 @@ async function seedFaq() {
   console.log(
     `✓ seeded ${FAQ_SECTIONS.length} faq sections (${questions} questions)`,
   );
+}
+
+/**
+ * Seed the parent reviews. All-or-nothing, like the FAQ: once a review exists
+ * the client owns the list, and a re-run must not re-add one she deleted.
+ */
+async function seedTestimonials() {
+  if ((await prisma.testimonial.count()) > 0) {
+    console.log('• testimonials already present — skipped (edit in back office)');
+    return;
+  }
+  await prisma.testimonial.createMany({
+    data: TESTIMONIALS.map((t, i) => ({ ...t, sortOrder: i + 1 })),
+  });
+  console.log(`✓ seeded ${TESTIMONIALS.length} testimonials`);
 }
 
 async function main() {
@@ -389,6 +365,7 @@ async function main() {
 
   await seedAbout();
   await seedFaq();
+  await seedTestimonials();
 }
 
 main()

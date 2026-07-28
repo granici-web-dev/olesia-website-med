@@ -267,6 +267,38 @@ model Contact {
   updatedAt DateTime    @updatedAt
 }
 
+// --- Testimonials (parent reviews, homepage) ---
+//
+// Real reviews only. The site has already shipped invented ones twice, so the
+// model is shaped to make fabrication awkward: `author` is nullable because an
+// unsigned review is a real case, and the site answers it with a localized
+// neutral label rather than a name someone made up. `source` records the
+// platform a review came from when it came from one.
+
+model Testimonial {
+  id      String  @id @default(uuid())
+  quoteRo String
+  quoteEn String
+  quoteRu String?
+  /// Null when the reviewer did not sign. Names are never translated, so this
+  /// is a single field — the neutral stand-in is UI copy, not data.
+  author  String?
+  /// Short context under the name ("mamă, Chișinău"). Optional: many reviews
+  /// arrive with nothing but the text.
+  roleRo  String?
+  roleEn  String?
+  roleRu  String?
+  /// Platform the review was left on, e.g. "DoctorChat" — attribution the
+  /// client may be required to display.
+  source    String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
 // --- FAQ (the public /faq page) ---
 //
 // Two levels, because the page is built that way: a category is a section with
@@ -350,10 +382,10 @@ model AboutPage {
   // existed simply lack them, and readers fall back to RO.
   stats        Json? // [{ value, labelRo, labelEn, labelRu? }]
   credentials  Json? // [{ ro, en, ru? }]
-  testimonials Json? // [{ quoteRo, quoteEn, quoteRu?, author, roleRo, roleEn, roleRu? }]
-  // NOTE: `faq` used to live here as a JSON block. It was dropped in favour of
-  // the FaqCategory/FaqItem models above — the block rendered nowhere and gave
-  // the doctor a second, invisible FAQ to edit.
+  // NOTE: `faq` and `testimonials` used to live here as JSON blocks. Both were
+  // dropped in favour of the models above — FAQ because the block rendered
+  // nowhere, testimonials because the block was still serving the fabricated
+  // placeholder reviews that the frontend had already been cleaned of.
   updatedAt DateTime @updatedAt
 }
 

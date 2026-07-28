@@ -13,6 +13,7 @@ export const paths = {
   contacts: '/contacte',
   about: '/despre-noi',
   faq: '/intrebari-frecvente',
+  testimonials: '/recenzii',
   users: '/utilizatori',
   security: '/securitate',
 } as const;

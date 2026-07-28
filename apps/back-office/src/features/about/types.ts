@@ -1,20 +1,19 @@
 import type {
   AboutStat,
   AboutCredential,
-  AboutTestimonial,
 } from '@olesia/shared';
 
 /**
  * "About us" — a singleton page with bilingual title + markdown content,
- * an image gallery, and structured blocks (stats, credentials, testimonials)
+ * an image gallery, and structured blocks (stats, credentials)
  * that drive the public page. Mirrors `AboutPageDto` in `packages/shared`.
- * FAQ lives in its own module — see `features/faq`.
+ * FAQ and testimonials live in their own modules — see `features/faq` and
+ * `features/testimonials`.
  */
 
 export type {
   AboutStat,
   AboutCredential,
-  AboutTestimonial,
 } from '@olesia/shared';
 
 export interface AboutPage {
@@ -29,7 +28,6 @@ export interface AboutPage {
   images: string[]; // URLs / data URLs
   stats: AboutStat[];
   credentials: AboutCredential[];
-  testimonials: AboutTestimonial[];
   updatedAt: string;
 }
 
@@ -44,5 +42,4 @@ export type AboutInput = Pick<
   | 'images'
   | 'stats'
   | 'credentials'
-  | 'testimonials'
 >;

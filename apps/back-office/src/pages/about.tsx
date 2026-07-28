@@ -26,7 +26,6 @@ import {
 import {
   StatsEditor,
   CredentialsEditor,
-  TestimonialsEditor,
 } from '@/features/about/block-editors';
 
 const a = ro.about;
@@ -69,7 +68,6 @@ export function AboutPage() {
       images: [],
       stats: [],
       credentials: [],
-      testimonials: [],
     },
   });
 
@@ -90,7 +88,6 @@ export function AboutPage() {
         images: values.images,
         stats: values.stats,
         credentials: values.credentials,
-        testimonials: values.testimonials,
       }),
     onSuccess: () => {
       toast.success(a.toast.saved);
@@ -181,7 +178,6 @@ export function AboutPage() {
 
       <StatsEditor form={form} />
       <CredentialsEditor form={form} />
-      <TestimonialsEditor form={form} />
     </div>
   );
 }

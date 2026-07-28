@@ -7,14 +7,17 @@ import { About } from '@/components/sections/About';
 import { api } from '@/lib/api';
 
 export default async function HomePage() {
-  const [locale, about] = await Promise.all([getLocale(), api.about()]);
+  const [locale, testimonials] = await Promise.all([
+    getLocale(),
+    api.testimonials(),
+  ]);
 
   return (
     <main>
       <Hero />
       <HowItWorks />
       <Services />
-      <Testimonials locale={locale} items={about?.testimonials ?? []} />
+      <Testimonials locale={locale} items={testimonials} />
       <About />
     </main>
   );

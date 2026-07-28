@@ -19,6 +19,7 @@ import { ServicesPage } from '@/pages/services';
 import { ContactsPage } from '@/pages/contacts';
 import { AboutPage } from '@/pages/about';
 import { FaqPage } from '@/pages/faq';
+import { TestimonialsPage } from '@/pages/testimonials';
 import { UsersPage } from '@/pages/users';
 import { SecurityPage } from '@/pages/security';
 import { NotFoundPage } from '@/pages/not-found';
@@ -48,6 +49,7 @@ export function App() {
           <Route path={paths.contacts} element={<ContactsPage />} />
           <Route path={paths.about} element={<AboutPage />} />
           <Route path={paths.faq} element={<FaqPage />} />
+          <Route path={paths.testimonials} element={<TestimonialsPage />} />
           <Route
             path={paths.users}
             element={

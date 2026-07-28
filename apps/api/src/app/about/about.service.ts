@@ -29,7 +29,6 @@ export class AboutService {
           images: dto.images,
           stats: dto.stats,
           credentials: dto.credentials,
-          testimonials: dto.testimonials,
         },
       }),
     );
