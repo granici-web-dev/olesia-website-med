@@ -48,6 +48,7 @@
       "eyebrow": "Services · Five formats",
       "title": "How we work<br></br><accent>together.</accent>",
       "headerSub": "Five ways to collaborate — from a one-off question to a monitoring subscription. Choose the pace that fits you.",
+      "audience": { "children": "children", "adults": "adults" },
       "items": {
         "pediatric": {
           "tag": "Pediatrics",

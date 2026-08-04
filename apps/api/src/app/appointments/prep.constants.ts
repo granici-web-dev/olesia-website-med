@@ -5,7 +5,9 @@
 export const PREP_CHECKLISTS: Record<string, string> = {
   pediatric:
     'Pregătiți: carnetul de vaccinări, lista simptomelor și a medicamentelor administrate, eventuale analize recente.',
-  nutrition:
+  nutrition_copii:
+    'Pregătiți: jurnalul alimentar pe 3 zile, analizele recente (dacă există) și lista suplimentelor administrate.',
+  nutrition_adulti:
     'Pregătiți: jurnalul alimentar pe 3 zile, analizele recente (dacă există) și lista suplimentelor administrate.',
   integrative:
     'Pregătiți: istoricul medical, analizele recente, jurnalul alimentar pe 3 zile și lista întrebărilor.',

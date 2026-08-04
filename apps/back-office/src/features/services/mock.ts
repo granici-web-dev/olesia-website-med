@@ -11,7 +11,8 @@ export const CODE_META: Record<
   { group: ServiceGroup; defaultDuration: number | null }
 > = {
   pediatric: { group: 'A_booking', defaultDuration: 30 },
-  nutrition: { group: 'A_booking', defaultDuration: 60 },
+  nutrition_copii: { group: 'A_booking', defaultDuration: 60 },
+  nutrition_adulti: { group: 'A_booking', defaultDuration: 60 },
   integrative: { group: 'A_booking', defaultDuration: 90 },
   monitoring: { group: 'B_portal', defaultDuration: null },
   quick_question: { group: 'B_portal', defaultDuration: null },
@@ -63,11 +64,11 @@ let store: Service[] = [
   },
   {
     id: 's2',
-    code: 'nutrition',
+    code: 'nutrition_copii',
     group: 'A_booking',
-    titleRo: 'Consultație nutrițională',
-    titleEn: 'Nutrition consultation',
-    titleRu: 'Консультация по питанию',
+    titleRo: 'Consultație nutrițională pentru copii',
+    titleEn: 'Nutrition consultation for children',
+    titleRu: 'Консультация по питанию для детей',
     descriptionRo:
       'Plan alimentar adaptat vârstei și nevoilor copilului, cu obiective clare.',
     descriptionEn:
@@ -79,10 +80,33 @@ let store: Service[] = [
     priceLabelRo: null,
     priceLabelEn: null,
     priceLabelRu: null,
-    calendlyEventTypeUri: 'https://api.calendly.com/event_types/NUTRITION',
+    calendlyEventTypeUri: null,
     calendlySchedulingUrl:
-      'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
+      'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-copii',
     sortOrder: 2,
+    active: true,
+  },
+  {
+    id: 's6',
+    code: 'nutrition_adulti',
+    group: 'A_booking',
+    titleRo: 'Consultație nutrițională pentru adulți',
+    titleEn: 'Nutrition consultation for adults',
+    titleRu: 'Консультация по питанию для взрослых',
+    descriptionRo:
+      'Plan alimentar personalizat, pe bază de dovezi, pentru adulți.',
+    descriptionEn: 'A personalized, evidence-based meal plan for adults.',
+    descriptionRu:
+      'Персональный план питания для взрослых на основе доказательной медицины.',
+    durationMin: 60,
+    price: 38,
+    priceLabelRo: null,
+    priceLabelEn: null,
+    priceLabelRu: null,
+    calendlyEventTypeUri: null,
+    calendlySchedulingUrl:
+      'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-adulti',
+    sortOrder: 3,
     active: true,
   },
   {
@@ -106,7 +130,7 @@ let store: Service[] = [
     calendlyEventTypeUri: 'https://api.calendly.com/event_types/INTEGRATIVE',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
-    sortOrder: 3,
+    sortOrder: 4,
     active: true,
   },
   {
@@ -129,7 +153,7 @@ let store: Service[] = [
     priceLabelRu: 'Цена по запросу',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
-    sortOrder: 4,
+    sortOrder: 5,
     active: true,
   },
   {
@@ -151,7 +175,7 @@ let store: Service[] = [
     priceLabelRu: '~1 ч · письменный ответ',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
-    sortOrder: 5,
+    sortOrder: 6,
     active: false,
   },
 ];

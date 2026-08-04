@@ -253,8 +253,10 @@ export function serviceTag(locale: string, s: ServiceDto): string {
   switch (s.code) {
     case 'pediatric':
       return l('Pediatrie', 'Pediatrics');
-    case 'nutrition':
-      return l('Nutriție', 'Nutrition');
+    case 'nutrition_copii':
+      return l('Nutriție · copii', 'Nutrition · children');
+    case 'nutrition_adulti':
+      return l('Nutriție · adulți', 'Nutrition · adults');
     case 'integrative':
       return l('Integrativ & monitorizare', 'Integrative & monitoring');
     case 'monitoring':

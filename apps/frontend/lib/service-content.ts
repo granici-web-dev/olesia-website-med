@@ -23,7 +23,13 @@ export const SERVICE_PRICE_META: Record<string, { price: Bi; duration: Bi }> = {
     price: { ro: '28 €', en: '28 €', ru: '28 €' },
     duration: { ro: '30 min · video', en: '30 min · video', ru: '30 мин · видео' },
   },
-  nutrition: {
+  // Same price and length for both audiences — the difference is who the plan
+  // is built for, and which calendar the booking lands in.
+  nutrition_copii: {
+    price: { ro: '38 €', en: '38 €', ru: '38 €' },
+    duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
+  },
+  nutrition_adulti: {
     price: { ro: '38 €', en: '38 €', ru: '38 €' },
     duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
   },
@@ -47,10 +53,15 @@ export const SERVICE_DESCRIPTIONS: Record<string, Bi> = {
     en: "A focused video visit for your child's health — symptoms, growth, development, or a second opinion.",
     ru: 'Видеоконсультация о здоровье ребёнка — симптомы, рост, развитие или второе мнение.',
   },
-  nutrition: {
-    ro: 'O analiză personalizată a alimentației, pe bază de dovezi — pentru copii sau adulți.',
-    en: 'A personalized, evidence-based look at feeding and nutrition — for children or adults.',
-    ru: 'Персональный анализ питания на основе доказательной медицины — для детей и взрослых.',
+  nutrition_copii: {
+    ro: 'O analiză personalizată a alimentației copilului, pe bază de dovezi — de la diversificare la vârsta școlară.',
+    en: 'A personalized, evidence-based look at your child’s nutrition — from first foods to school age.',
+    ru: 'Персональный анализ питания ребёнка на основе доказательной медицины — от прикорма до школьного возраста.',
+  },
+  nutrition_adulti: {
+    ro: 'O analiză personalizată a alimentației, pe bază de dovezi, pentru adulți — inclusiv în sarcină și alăptare.',
+    en: 'A personalized, evidence-based look at nutrition for adults — including pregnancy and breastfeeding.',
+    ru: 'Персональный анализ питания для взрослых на основе доказательной медицины — включая беременность и грудное вскармливание.',
   },
   integrative: {
     ro: 'O consultație amănunțită care îmbină pediatria și nutriția, cu un plan de urmat în timp.',
@@ -90,6 +101,13 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'Письменный план с рекомендациями в течение 24 часов',
     ],
   },
+  /**
+   * Audience-neutral list for the surfaces that summarise nutrition as one
+   * offering — the homepage tile and the /services row, both of which lead to
+   * the single /nutrition page and offer both booking links. The catalog
+   * itself is split; only these two summaries are not, because two tiles
+   * differing by one word read as a duplicate rather than a choice.
+   */
   nutrition: {
     ro: [
       'Apel video de 60 de minute',
@@ -99,7 +117,47 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
     ],
     en: [
       '60-minute video call',
-      'Analysis of current eating and feeding patterns',
+      'Analysis of current eating patterns',
+      'A personalized nutrition plan',
+      'Written recommendations after the call',
+    ],
+    ru: [
+      'Видеозвонок 60 минут',
+      'Анализ текущих привычек питания',
+      'Персональный план питания',
+      'Письменные рекомендации после консультации',
+    ],
+  },
+  nutrition_copii: {
+    ro: [
+      'Apel video de 60 de minute',
+      'Analiza obiceiurilor alimentare actuale ale copilului',
+      'Un plan alimentar personalizat, adaptat vârstei',
+      'Recomandări scrise după consultație',
+    ],
+    en: [
+      '60-minute video call',
+      'Analysis of the child’s current eating patterns',
+      'A personalized, age-appropriate nutrition plan',
+      'Written recommendations after the call',
+    ],
+    ru: [
+      'Видеозвонок 60 минут',
+      'Анализ текущих пищевых привычек ребёнка',
+      'Персональный план питания по возрасту',
+      'Письменные рекомендации после консультации',
+    ],
+  },
+  nutrition_adulti: {
+    ro: [
+      'Apel video de 60 de minute',
+      'Analiza obiceiurilor alimentare actuale',
+      'Un plan alimentar personalizat',
+      'Recomandări scrise după consultație',
+    ],
+    en: [
+      '60-minute video call',
+      'Analysis of current eating patterns',
       'A personalized nutrition plan',
       'Written recommendations after the call',
     ],

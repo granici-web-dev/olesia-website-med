@@ -16,7 +16,8 @@ export type PaymentStatus = 'pending' | 'confirmed';
 /** Group-A services only — the calendar-backed ones (incl. the free call). */
 export type AppointmentServiceCode =
   | 'pediatric'
-  | 'nutrition'
+  | 'nutrition_copii'
+  | 'nutrition_adulti'
   | 'integrative'
   | 'free_consult';
 

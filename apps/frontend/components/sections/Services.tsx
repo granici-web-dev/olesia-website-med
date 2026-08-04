@@ -24,6 +24,20 @@ const LEAD_SERVICE: Partial<Record<string, LeadService>> = {
   quick: 'quick_question',
 };
 
+/**
+ * Homepage keys whose booking splits across more than one catalog service.
+ * Nutrition is two services with two calendars but one story, so the tile
+ * stays single and offers both links — the same shape /nutrition already has.
+ * The label keys live under `home.services.audience`.
+ */
+const SPLIT_BOOKING: Partial<Record<string, { code: string; label: string }[]>> =
+  {
+    nutrition: [
+      { code: 'nutrition_copii', label: 'children' },
+      { code: 'nutrition_adulti', label: 'adults' },
+    ],
+  };
+
 /** Homepage item keys → service `code` used by the shared content maps. */
 const CONTENT_CODE: Record<string, string> = {
   subscription: 'monitoring',
@@ -64,6 +78,7 @@ export async function Services() {
       </div>
 
       {SERVICES.map(({ n, key }, i) => {
+        const split = SPLIT_BOOKING[key];
         const url = bookingUrl.get(key) ?? CALENDLY_FALLBACK_URLS[key];
         const leadService = LEAD_SERVICE[key];
         const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
@@ -100,7 +115,24 @@ export async function Services() {
             <div className={styles.serviceMeta}>
               <div className={styles.servicePrice}>{t(`items.${key}.price`)}</div>
               <div className={styles.serviceDuration}>{t(`items.${key}.duration`)}</div>
-              {url ? (
+              {split ? (
+                <div className="flex flex-col items-start gap-1">
+                  {split.map(({ code, label }) => {
+                    const splitUrl =
+                      bookingUrl.get(code) ?? CALENDLY_FALLBACK_URLS[code];
+                    return splitUrl ? (
+                      <CalendlyButton
+                        key={code}
+                        url={splitUrl}
+                        reason={`${t(`items.${key}.title`)} — ${t(`audience.${label}`)}`}
+                        label={`${t('book')} · ${t(`audience.${label}`)}`}
+                        className={serviceLink}
+                        withArrow={false}
+                      />
+                    ) : null;
+                  })}
+                </div>
+              ) : url ? (
                 <CalendlyButton
                   url={url}
                   reason={t(`items.${key}.title`)}

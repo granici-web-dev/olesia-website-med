@@ -30,7 +30,13 @@ export const revalidate = 60;
 type Bi = { ro: string; en: string; ru: string };
 
 interface ServiceContent {
-  /** Service `code` — matches the API and the group-B LeadService values. */
+  /**
+   * Service `code`, which doubles as this row's anchor (`/services#nutrition`).
+   * Mostly matches the API and the group-B LeadService values — except
+   * `nutrition`, which is one summary row covering both catalog services
+   * (`nutrition_copii` / `nutrition_adulti`) and links to the single
+   * /nutrition page where both booking options live.
+   */
   code: string;
   group: 'A_booking' | 'B_portal';
   num: string;

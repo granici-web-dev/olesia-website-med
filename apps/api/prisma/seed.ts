@@ -1,5 +1,5 @@
 /**
- * Seed: bootstrap admin (closed registration needs one) + the 5 services.
+ * Seed: bootstrap admin (closed registration needs one) + the service catalog.
  * Run: `pnpm exec tsx apps/api/prisma/seed.ts` with DATABASE_URL set.
  */
 import 'dotenv/config';
@@ -40,12 +40,17 @@ const SERVICES = [
     sortOrder: 1,
     active: true,
   },
+  // ⚠ Both nutrition rows carry `calendlyEventTypeUri: null`. The audience-
+  // specific event types exist on the test account as scheduling URLs, but
+  // their API URIs were never captured, and guessing is worse than nothing:
+  // a wrong URI files a child's booking under the adults' service silently.
+  // Capture the real ones together with the client's paid Calendly.
   {
-    code: 'nutrition',
+    code: 'nutrition_copii',
     group: 'A_booking',
-    titleRo: 'Consultație nutrițională',
-    titleEn: 'Nutrition consultation',
-    titleRu: 'Консультация по питанию',
+    titleRo: 'Consultație nutrițională pentru copii',
+    titleEn: 'Nutrition consultation for children',
+    titleRu: 'Консультация по питанию для детей',
     descriptionRo: 'Plan alimentar adaptat vârstei și nevoilor copilului.',
     descriptionEn: 'A meal plan tailored to the child’s age and needs.',
     descriptionRu: 'План питания с учётом возраста и потребностей ребёнка.',
@@ -54,11 +59,30 @@ const SERVICES = [
     priceLabelRo: null,
     priceLabelEn: null,
     priceLabelRu: null,
-    calendlyEventTypeUri:
-      'https://api.calendly.com/event_types/25950172-362c-43cf-aeea-323ac47d961c',
+    calendlyEventTypeUri: null,
     calendlySchedulingUrl:
-      'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
+      'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-copii',
     sortOrder: 2,
+    active: true,
+  },
+  {
+    code: 'nutrition_adulti',
+    group: 'A_booking',
+    titleRo: 'Consultație nutrițională pentru adulți',
+    titleEn: 'Nutrition consultation for adults',
+    titleRu: 'Консультация по питанию для взрослых',
+    descriptionRo: 'Plan alimentar personalizat, pe bază de dovezi, pentru adulți.',
+    descriptionEn: 'A personalized, evidence-based meal plan for adults.',
+    descriptionRu: 'Персональный план питания для взрослых на основе доказательной медицины.',
+    durationMin: 60,
+    price: 38,
+    priceLabelRo: null,
+    priceLabelEn: null,
+    priceLabelRu: null,
+    calendlyEventTypeUri: null,
+    calendlySchedulingUrl:
+      'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-adulti',
+    sortOrder: 3,
     active: true,
   },
   {
@@ -79,7 +103,7 @@ const SERVICES = [
       'https://api.calendly.com/event_types/02306705-7d03-4bfa-bdbd-b6548b519771',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
-    sortOrder: 3,
+    sortOrder: 4,
     active: true,
   },
   {
@@ -98,7 +122,7 @@ const SERVICES = [
     priceLabelRu: 'Цена по запросу',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
-    sortOrder: 4,
+    sortOrder: 5,
     active: true,
   },
   {
@@ -118,7 +142,7 @@ const SERVICES = [
     priceLabelRu: '~1 ч · письменный ответ',
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
-    sortOrder: 5,
+    sortOrder: 6,
     active: true,
   },
   {

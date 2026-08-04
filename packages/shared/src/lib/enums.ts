@@ -19,7 +19,13 @@ export enum Locale {
 /** Stable code identifying each service. */
 export enum ServiceCode {
   Pediatric = 'pediatric',
-  Nutrition = 'nutrition',
+  /**
+   * Nutrition is two catalog services, not one (brief §1). Same length and
+   * price, different audience — and, more to the point, different Calendly
+   * event types, which is how a booking is mapped back to a service.
+   */
+  NutritionCopii = 'nutrition_copii',
+  NutritionAdulti = 'nutrition_adulti',
   Integrative = 'integrative',
   Monitoring = 'monitoring',
   QuickQuestion = 'quick_question',

@@ -59,7 +59,8 @@ const STATUS_TABS: StatusFilter[] = [
 
 const SERVICE_OPTIONS: AppointmentServiceCode[] = [
   'pediatric',
-  'nutrition',
+  'nutrition_copii',
+  'nutrition_adulti',
   'integrative',
 ];
 

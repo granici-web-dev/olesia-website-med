@@ -17,7 +17,7 @@ import {
 
 export const revalidate = 60;
 
-/* Local fallback so /pricing always renders the five tariffs even when the API
+/* Local fallback so /pricing always renders the full tariff list even when the API
    is unreachable (e.g. the static client preview). Mirrors the seed; the live
    API takes over whenever it responds. Group-A Calendly URLs are the current
    test links (⚠ swap for the client's before launch). */
@@ -34,15 +34,28 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     sortOrder: 1, active: true,
   },
   {
-    id: 'nutrition', code: 'nutrition', group: 'A_booking',
-    titleRo: 'Consultație nutrițională', titleEn: 'Nutrition consultation',
-    titleRu: 'Консультация по питанию',
+    id: 'nutrition_copii', code: 'nutrition_copii', group: 'A_booking',
+    titleRo: 'Consultație nutrițională pentru copii',
+    titleEn: 'Nutrition consultation for children',
+    titleRu: 'Консультация по питанию для детей',
     descriptionRo: '', descriptionEn: '', descriptionRu: null,
     durationMin: 60, price: 38,
     priceLabelRo: null, priceLabelEn: null, priceLabelRu: null,
     calendlyEventTypeUri: null,
-    calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.nutrition,
+    calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.nutrition_copii,
     sortOrder: 2, active: true,
+  },
+  {
+    id: 'nutrition_adulti', code: 'nutrition_adulti', group: 'A_booking',
+    titleRo: 'Consultație nutrițională pentru adulți',
+    titleEn: 'Nutrition consultation for adults',
+    titleRu: 'Консультация по питанию для взрослых',
+    descriptionRo: '', descriptionEn: '', descriptionRu: null,
+    durationMin: 60, price: 38,
+    priceLabelRo: null, priceLabelEn: null, priceLabelRu: null,
+    calendlyEventTypeUri: null,
+    calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.nutrition_adulti,
+    sortOrder: 3, active: true,
   },
   {
     id: 'integrative', code: 'integrative', group: 'A_booking',
@@ -54,7 +67,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     priceLabelRo: null, priceLabelEn: null, priceLabelRu: null,
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: CALENDLY_FALLBACK_URLS.integrative,
-    sortOrder: 3, active: true,
+    sortOrder: 4, active: true,
   },
   {
     id: 'monitoring', code: 'monitoring', group: 'B_portal',
@@ -64,7 +77,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     durationMin: null, price: 0,
     priceLabelRo: 'Preț la cerere', priceLabelEn: 'Price on request',
     priceLabelRu: 'Цена по запросу',
-    calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 4, active: true,
+    calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 5, active: true,
   },
   {
     id: 'quick_question', code: 'quick_question', group: 'B_portal',
@@ -74,7 +87,7 @@ const FALLBACK_SERVICES: ServiceDto[] = [
     durationMin: null, price: 8,
     priceLabelRo: '~1 h · răspuns scris', priceLabelEn: '~1 h · written reply',
     priceLabelRu: '~1 ч · письменный ответ',
-    calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 5, active: true,
+    calendlyEventTypeUri: null, calendlySchedulingUrl: null, sortOrder: 6, active: true,
   },
 ];
 

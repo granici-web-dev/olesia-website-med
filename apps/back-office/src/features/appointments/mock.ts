@@ -63,7 +63,7 @@ let store: Appointment[] = [
   {
     id: 'a2',
     calendlyEventUri: 'https://api.calendly.com/scheduled_events/BBB222',
-    service: 'nutrition',
+    service: 'nutrition_copii',
     clientName: 'Andrei Popa',
     clientEmail: 'andrei.popa@outlook.com',
     reason: 'Plan alimentar pentru copil cu intoleranță la lactoză.',
@@ -121,7 +121,7 @@ let store: Appointment[] = [
   {
     id: 'a5',
     calendlyEventUri: 'https://api.calendly.com/scheduled_events/EEE555',
-    service: 'nutrition',
+    service: 'nutrition_adulti',
     clientName: 'Victor Ceban',
     clientEmail: 'victor.ceban@yahoo.com',
     reason: 'Recomandări diversificare, copil 6 luni.',
@@ -178,7 +178,7 @@ let store: Appointment[] = [
   {
     id: 'a8',
     calendlyEventUri: 'https://api.calendly.com/scheduled_events/HHH888',
-    service: 'nutrition',
+    service: 'nutrition_copii',
     clientName: 'Sergiu Bivol',
     clientEmail: 'sergiu.bivol@outlook.com',
     reason: 'Reechilibrare meniu pentru adolescent sportiv.',

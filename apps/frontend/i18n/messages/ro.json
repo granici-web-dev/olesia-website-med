@@ -48,6 +48,7 @@
       "eyebrow": "Servicii · Cinci formate",
       "title": "Cum lucrăm<br></br><accent>împreună.</accent>",
       "headerSub": "Cinci moduri de a colabora — de la o întrebare punctuală la un abonament cu monitorizare. Alege ritmul potrivit pentru tine.",
+      "audience": { "children": "copii", "adults": "adulți" },
       "items": {
         "pediatric": {
           "tag": "Pediatrie",

@@ -230,7 +230,8 @@ export const ro = {
 
     service: {
       pediatric: 'Consultație pediatrică',
-      nutrition: 'Consultație nutrițională',
+      nutrition_copii: 'Nutriție — copii',
+      nutrition_adulti: 'Nutriție — adulți',
       integrative: 'Consultație integrativă',
       free_consult: 'Consultație gratuită',
     },

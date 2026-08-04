@@ -19,7 +19,10 @@ enum Role {
 
 enum ServiceCode {
   pediatric
-  nutrition
+  // Nutrition is two services, split by audience (brief §1). Same length and
+  // price; different Calendly event types, which is what the webhook routes on.
+  nutrition_copii
+  nutrition_adulti
   integrative
   monitoring
   quick_question

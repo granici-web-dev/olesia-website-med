@@ -25,9 +25,9 @@ export const CALENDLY_FALLBACK_URLS: Record<string, string> = {
   // Calendly before launch. Keep in sync with apps/api/prisma/seed.ts +
   // apps/back-office/.../services/mock.ts.
   pediatric: 'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
-  nutrition: 'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
-  // Nutrition is one catalog service but books into two audience-specific
-  // Calendly events (children / adults). The /nutrition page offers both.
+  // Nutrition is two catalog services, each with its own Calendly event. The
+  // generic `nutrition` slug it used to share is gone: one link for two
+  // audiences is exactly the ambiguity the webhook cannot resolve.
   nutrition_copii:
     'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-copii',
   nutrition_adulti:

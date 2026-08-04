@@ -7,7 +7,8 @@
 
 export type ServiceCode =
   | 'pediatric'
-  | 'nutrition'
+  | 'nutrition_copii'
+  | 'nutrition_adulti'
   | 'integrative'
   | 'monitoring'
   | 'quick_question'
