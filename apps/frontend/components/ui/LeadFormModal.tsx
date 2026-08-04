@@ -100,7 +100,6 @@ export function LeadFormModal({
           phone: phone.trim() || undefined,
           message: text.trim() || undefined,
           product: deliverable!.code,
-          productTitle: deliverable!.title,
         });
       } else if (isQuick) {
         await submitQuickQuestionLead({

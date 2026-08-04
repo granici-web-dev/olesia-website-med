@@ -1,12 +1,15 @@
 import {
   IsArray,
   IsEmail,
+  IsEnum,
   IsIn,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+import { DeliverableProduct } from '../../../generated/prisma/enums';
 
 /** Non-medical contact subjects (Contact page triage dropdown). */
 export const CONTACT_SUBJECTS = [
@@ -62,6 +65,37 @@ export class QuickQuestionLeadDto {
   @IsArray()
   @IsString({ each: true })
   attachments?: string[];
+}
+
+/**
+ * Public order for a group-C deliverable (personalized menu or protocol).
+ *
+ * Only the product *code* is accepted. The label and the price are looked up
+ * server-side in `DELIVERABLE_CATALOG`, so a crafted request cannot order a
+ * "Meniu 30 zile" for 1 €, and the back office never displays a product name
+ * that came from the internet.
+ */
+export class DeliverableLeadDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  name!: string;
+
+  @IsEmail()
+  email!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  message?: string;
+
+  @IsEnum(DeliverableProduct)
+  product!: DeliverableProduct;
 }
 
 /**

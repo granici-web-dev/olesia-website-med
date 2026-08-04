@@ -89,6 +89,29 @@ export enum ContactMessageStatus {
   Replied = 'replied',
 }
 
+/**
+ * The group-C deliverable products (brief §2) — personalized menus and written
+ * protocols. Stable codes; prices and labels live in `DELIVERABLE_CATALOG`.
+ */
+export enum DeliverableProduct {
+  Menu7 = 'menu_7',
+  Menu14 = 'menu_14',
+  Menu30 = 'menu_30',
+  ProtocolPedNutri = 'protocol_pednutri',
+  ProtocolComplementary = 'protocol_complementary',
+}
+
+/** Lifecycle of a deliverable order, from the form to the delivered file. */
+export enum DeliverableOrderStatus {
+  /** Just ordered, nobody has looked at it yet. */
+  New = 'new',
+  /** The doctor is preparing the menu/protocol. */
+  InProgress = 'in_progress',
+  /** Sent to the client. */
+  Delivered = 'delivered',
+  Canceled = 'canceled',
+}
+
 /** Kind of a patient medical-record timeline entry (module_patients.md). */
 export enum PatientEntryType {
   Anamnesis = 'anamnesis',

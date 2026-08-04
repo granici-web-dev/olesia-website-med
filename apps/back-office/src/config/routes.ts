@@ -6,6 +6,7 @@ export const paths = {
   subscriptions: '/abonamente',
   quickQuestions: '/intrebari-rapide',
   messages: '/mesaje',
+  orders: '/comenzi',
   patients: '/pacienti',
   blog: '/blog',
   blogNew: '/blog/nou',

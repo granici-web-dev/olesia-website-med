@@ -18,6 +18,7 @@ export const ro = {
     appointments: 'Programări',
     subscriptions: 'Abonamente',
     quickQuestions: 'Întrebări rapide',
+    orders: 'Comenzi',
     messages: 'Mesaje',
     patients: 'Pacienți',
     blog: 'Blog',
@@ -930,6 +931,90 @@ export const ro = {
       attachmentMock:
         'Descărcarea atașamentelor va fi disponibilă după conectarea la API.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
+    },
+  },
+
+  orders: {
+    title: 'Comenzi',
+    subtitle: 'Meniuri personalizate și protocoale comandate de pe site.',
+    refresh: 'Reîmprospătează',
+
+    status: {
+      new: 'Nouă',
+      in_progress: 'În lucru',
+      delivered: 'Livrată',
+      canceled: 'Anulată',
+    },
+
+    payment: {
+      pending: 'Neachitată',
+      confirmed: 'Achitată',
+    },
+
+    tabs: {
+      all: 'Toate',
+      new: 'Noi',
+      in_progress: 'În lucru',
+      delivered: 'Livrate',
+      canceled: 'Anulate',
+    },
+
+    filters: {
+      searchPlaceholder: 'Caută după nume, email sau produs…',
+      reset: 'Resetează',
+    },
+
+    columns: {
+      client: 'Client',
+      product: 'Produs',
+      price: 'Preț',
+      ordered: 'Comandată',
+      status: 'Status',
+      payment: 'Plata',
+    },
+
+    empty: {
+      title: 'Nicio comandă',
+      body: 'Comenzile pentru meniuri personalizate și protocoale apar aici.',
+      filteredTitle: 'Niciun rezultat',
+      filteredBody: 'Nicio comandă nu corespunde filtrelor selectate.',
+    },
+
+    detail: {
+      title: 'Detalii comandă',
+      ordered: 'comandată la',
+      client: 'Client',
+      notes: 'Detalii de la client',
+      noNotes: 'Clientul nu a lăsat detalii suplimentare.',
+      status: 'Status',
+      delivered: 'Livrată la',
+      payment: 'Plata',
+      paymentHint:
+        'Plata se confirmă manual, după ce banii au intrat în cont.',
+      deliver: 'Livrare',
+      deliverHint:
+        'Trimiterea fișierelor din portal se activează după configurarea email-ului. Până atunci, poți trimite rezultatul din contul tău de email.',
+    },
+
+    actions: {
+      markPaid: 'Marchează ca achitată',
+      markUnpaid: 'Marchează ca neachitată',
+      sendByEmail: 'Trimite prin email',
+      delete: 'Șterge comanda',
+    },
+
+    confirm: {
+      deleteTitle: 'Ștergi această comandă?',
+      deleteBody:
+        'Comanda va fi ștearsă definitiv, împreună cu detaliile trimise de client. Această acțiune nu poate fi anulată.',
+      deleteCta: 'Șterge comanda',
+    },
+
+    toast: {
+      statusSaved: 'Statusul comenzii a fost actualizat.',
+      paymentSaved: 'Starea plății a fost actualizată.',
+      deleted: 'Comanda a fost ștearsă.',
+      error: 'Nu am putut salva modificarea. Încearcă din nou.',
     },
   },
 

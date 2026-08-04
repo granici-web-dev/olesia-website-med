@@ -1,5 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import type { QuickQuestionDto, SubscriptionDto } from '@olesia/shared';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import type { DeliverableOrderDto, QuickQuestionDto, SubscriptionDto } from '@olesia/shared';
+import { deliverableEntry } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -7,13 +13,16 @@ import { toSubscriptionDto } from '../subscriptions/subscriptions.mapper';
 import { toQuickQuestionDto } from '../quick-questions/quick-questions.mapper';
 import {
   ContactMessageStatus,
+  DeliverableOrderStatus,
   PaymentStatus,
   QuickQuestionStatus,
   ServiceCode,
   SubscriptionStatus,
 } from '../../generated/prisma/enums';
+import { toDeliverableOrderDto } from '../deliverable-orders/deliverable-orders.mapper';
 import {
   ContactMessageDto,
+  DeliverableLeadDto,
   MonitoringLeadDto,
   QuickQuestionLeadDto,
 } from './dto/create-lead.dto';
@@ -112,6 +121,49 @@ export class LeadsService {
 
     this.logger.log('Quick-question lead created (pending).');
     return toQuickQuestionDto(qq);
+  }
+
+  /**
+   * Group-C product order → a `new` DeliverableOrder the doctor works through
+   * in the back office ("Comenzi").
+   *
+   * The label and the price come from the shared catalog, never from the
+   * request: the form posts a product code and nothing else about the product.
+   * An unknown code is a 400 rather than an order nobody can price.
+   */
+  async createDeliverable(dto: DeliverableLeadDto): Promise<DeliverableOrderDto> {
+    const entry = deliverableEntry(dto.product);
+    if (!entry) throw new BadRequestException('unknown_deliverable_product');
+
+    const order = await this.prisma.deliverableOrder.create({
+      data: {
+        product: dto.product,
+        titleRo: entry.titleRo,
+        priceEur: entry.priceEur,
+        clientName: dto.name,
+        clientEmail: dto.email,
+        phone: dto.phone ?? null,
+        notes: dto.message ?? null,
+        status: DeliverableOrderStatus.new,
+        paymentStatus: PaymentStatus.pending,
+      },
+    });
+
+    await this.mail.sendLeadNotification({
+      subject: `Comandă nouă — ${entry.titleRo}`,
+      lines: [
+        'Comandă nouă pentru un produs personalizat.',
+        `Produs: ${entry.titleRo} (${entry.priceEur} €)`,
+        `Nume: ${dto.name}`,
+        `Email: ${dto.email}`,
+        `Telefon: ${dto.phone ?? '—'}`,
+        '',
+        `Detalii: ${dto.message ?? '—'}`,
+      ],
+    });
+
+    this.logger.log('Deliverable order created (pending).');
+    return toDeliverableOrderDto(order);
   }
 
   /**

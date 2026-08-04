@@ -28,9 +28,13 @@ export interface QuickQuestionLeadInput {
 
 /**
  * Group-C deliverable order (menus + protocols, brief §2). Unlike group-B this
- * is a one-off product, so the lead must carry WHICH product was chosen:
- * `product` is the stable code (e.g. `menu_7`) and `productTitle` the human
- * label — both stored so the back office shows the exact service ordered.
+ * is a one-off product, so the order has to carry WHICH product was chosen —
+ * `product`, the stable code (e.g. `menu_7`).
+ *
+ * Only the code goes over the wire. The label and the price are looked up
+ * server-side in the shared catalog: a public form must not be able to name its
+ * own price, and the back office must never show a product name that came from
+ * the internet.
  */
 export type DeliverableProduct =
   | 'menu_7'
@@ -45,7 +49,6 @@ export interface DeliverableLeadInput {
   phone?: string;
   message?: string;
   product: DeliverableProduct;
-  productTitle: string;
 }
 
 export type ContactSubject = 'appointment' | 'payment' | 'how_it_works' | 'other';

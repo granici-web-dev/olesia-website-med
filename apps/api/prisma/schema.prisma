@@ -75,6 +75,21 @@ enum ContactMessageStatus {
   replied
 }
 
+enum DeliverableProduct {
+  menu_7
+  menu_14
+  menu_30
+  protocol_pednutri
+  protocol_complementary
+}
+
+enum DeliverableOrderStatus {
+  new
+  in_progress
+  delivered
+  canceled
+}
+
 // --- Back-office users ---
 
 model User {
@@ -512,6 +527,45 @@ model ContactMessage {
   repliedAt DateTime?
   createdAt DateTime             @default(now())
   updatedAt DateTime             @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// --- Deliverable orders (group C: personalized menus + protocols, brief §2) ---
+//
+// One-off products rather than appointments or subscriptions: the visitor picks
+// a product on /pricing, sends a short form, and receives a written result. So
+// the order has to record WHICH product was ordered — that is the whole point
+// of the record, and it is why these do not fit `Subscription` or
+// `QuickQuestion`.
+//
+// `product` is an enum and `titleRo`/`priceEur` are stamped server-side from
+// `DELIVERABLE_CATALOG` in packages/shared. Nothing about what was bought, or
+// what it costs, is taken from the request body: a public form must not be able
+// to name its own price.
+
+model DeliverableOrder {
+  id      String             @id @default(uuid())
+  product DeliverableProduct
+  /// Romanian label and price at the moment of ordering, copied from the shared
+  /// catalog. Kept on the row so a later price change does not rewrite history.
+  titleRo String
+  priceEur Int
+
+  clientName  String
+  clientEmail String
+  phone       String?
+  /// Free-text detail from the order form (allergies, goals, age of the child).
+  notes       String?
+
+  status        DeliverableOrderStatus @default(new)
+  paymentStatus PaymentStatus          @default(pending)
+  /// Set once when the finished menu/protocol has been sent to the client.
+  deliveredAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])

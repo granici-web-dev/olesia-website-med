@@ -2,6 +2,8 @@ import {
   AppointmentStatus,
   ContactMessageStatus,
   ContactType,
+  DeliverableOrderStatus,
+  DeliverableProduct,
   MaterialAccess,
   MaterialFlag,
   MediaEmbedProvider,
@@ -221,6 +223,29 @@ export interface ContactMessageDto {
   /** Email reply text (set once answered from the portal). */
   reply: string | null;
   repliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Deliverable orders (group C) ---
+
+/**
+ * An order for a personalized menu or a written protocol. `titleRo` and
+ * `priceEur` are the catalog values stamped when the order was placed, not
+ * today's — a price change must not rewrite what someone already ordered.
+ */
+export interface DeliverableOrderDto {
+  id: string;
+  product: DeliverableProduct;
+  titleRo: string;
+  priceEur: number;
+  clientName: string;
+  clientEmail: string;
+  phone: string | null;
+  notes: string | null;
+  status: DeliverableOrderStatus;
+  paymentStatus: PaymentStatus;
+  deliveredAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

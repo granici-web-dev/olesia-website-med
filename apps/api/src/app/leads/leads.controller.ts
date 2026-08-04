@@ -7,6 +7,7 @@ import { CaptchaGuard, CaptchaProtected } from '../common/captcha/captcha.guard'
 import { LeadsService } from './leads.service';
 import {
   ContactMessageDto,
+  DeliverableLeadDto,
   MonitoringLeadDto,
   QuickQuestionLeadDto,
 } from './dto/create-lead.dto';
@@ -48,6 +49,14 @@ export class LeadsController {
   @Post('quick-question')
   quickQuestion(@Body() dto: QuickQuestionLeadDto) {
     return this.leads.createQuickQuestion(dto);
+  }
+
+  /** Group-C product order (personalized menu / written protocol). */
+  @Public()
+  @CaptchaProtected('lead_deliverable')
+  @Post('deliverable')
+  deliverable(@Body() dto: DeliverableLeadDto) {
+    return this.leads.createDeliverable(dto);
   }
 
   @Public()
