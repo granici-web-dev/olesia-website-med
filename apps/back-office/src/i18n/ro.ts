@@ -1434,7 +1434,7 @@ export const ro = {
     },
     credentials: {
       title: 'Calificări',
-      hint: 'Lista de diplome și competențe afișate sub statistici.',
+      hint: 'Lista de diplome și competențe afișate sub statistici. Doar text — nu încărca scanuri de diplome sau certificate și nu folosi logo-uri de instituții: unele certificate interzic explicit folosirea lor în scop promoțional.',
       add: 'Adaugă o calificare',
       empty: 'Nicio calificare adăugată.',
       ro: 'Text (RO)',

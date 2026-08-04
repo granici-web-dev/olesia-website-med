@@ -162,6 +162,20 @@ const CV: CvEntry[] = [
         ru: 'Постоянно участвую в конгрессах и профильных курсах — в Молдове и за рубежом. Из недавнего:',
       },
     ],
+    /**
+     * ⚠ The WHO line is the CLIENT'S OWN wording, copied verbatim from
+     * `docs/despre.md` — do not rephrase it, and do not "improve" it with the
+     * certificate.
+     *
+     * The certificate she sent (WHO Basic Emergency Care Provider, 2026) states
+     * that the recipient agrees not to use it *or their participation* for
+     * promotional, publicity or commercial purposes, and that it implies no WHO
+     * endorsement. So: **never publish the scan, the certificate number, or the
+     * WHO logo here or anywhere else on the site.** Whether the text mention
+     * itself stays is her call — asked in `docs/questions_v3.md` §4.2, together
+     * with the fact that her line says "cursuri" (plural, no year) while the
+     * evidence is one course in 2026.
+     */
     items: {
       ro: [
         'Programe dedicate dificultăților de hrănire la copii (2026)',
