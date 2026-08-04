@@ -1,5 +1,6 @@
 import {
   ShieldCheck,
+  Clock,
   LayoutDashboard,
   CalendarCheck,
   Repeat2,
@@ -69,6 +70,7 @@ export const navGroups: NavGroup[] = [
     label: ro.nav.sectionAdmin,
     items: [
       { to: paths.patients, label: ro.nav.patients, icon: Stethoscope },
+      { to: paths.workingHours, label: ro.nav.workingHours, icon: Clock },
       { to: paths.users, label: ro.nav.users, icon: Users, roles: ['admin'] },
       { to: paths.security, label: ro.nav.security, icon: ShieldCheck },
     ],

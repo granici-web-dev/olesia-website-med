@@ -19,6 +19,7 @@ export const paths = {
   library: '/biblioteca',
   siteMedia: '/imagini-video',
   users: '/utilizatori',
+  workingHours: '/program',
   security: '/securitate',
 } as const;
 

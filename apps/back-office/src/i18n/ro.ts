@@ -41,6 +41,7 @@ export const ro = {
     media: 'Apariții media',
     library: 'Biblioteca digitală',
     siteMedia: 'Imagini și video',
+    workingHours: 'Program de lucru',
     users: 'Utilizatori',
     security: 'Securitate',
   },
@@ -946,6 +947,58 @@ export const ro = {
       attachmentMock:
         'Descărcarea atașamentelor va fi disponibilă după conectarea la API.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
+    },
+  },
+
+  /** Practice schedule — drives the EXPRESS deadline (client answers v2 §11.5). */
+  workingHours: {
+    title: 'Program de lucru',
+    subtitle:
+      'Orele în care lucrezi. Termenul pentru „Întrebare EXPRESS” se calculează în aceste ore.',
+
+    placeholderWarning:
+      'Programul de mai jos este unul provizoriu, pus de noi ca să poată fi calculat un termen. Înlocuiește-l cu orele tale reale și salvează — avertismentul dispare.',
+    allClosedWarning:
+      'Toate zilele sunt marcate ca închise. Fără nicio zi lucrătoare, termenul EXPRESS nu poate fi calculat corect.',
+
+    scheduleTitle: 'Zilele săptămânii',
+    scheduleHint:
+      'Debifează o zi ca să o marchezi închisă. Orele se scriu în fusul orar de mai jos.',
+
+    weekdays: {
+      mon: 'Luni',
+      tue: 'Marți',
+      wed: 'Miercuri',
+      thu: 'Joi',
+      fri: 'Vineri',
+      sat: 'Sâmbătă',
+      sun: 'Duminică',
+    },
+
+    open: 'Deschis',
+    closed: 'Închis',
+    opensAt: 'ora de început',
+    closesAt: 'ora de sfârșit',
+    badOrder: 'Ora de sfârșit trebuie să fie după cea de început.',
+
+    slaLabel: 'Termen EXPRESS (minute de lucru)',
+    slaHint:
+      'Câte minute din programul de lucru ai la dispoziție pentru un răspuns. 60 = „~1 oră”. O întrebare primită sâmbătă seara are termen luni dimineața.',
+
+    timezoneLabel: 'Fus orar',
+    timezoneHint:
+      'Numele zonei, de ex. Europe/Chisinau. Orele de mai sus se citesc în acest fus.',
+
+    affectsNewOnly:
+      'Modificările se aplică întrebărilor primite de acum înainte. Termenele deja stabilite rămân neschimbate.',
+
+    actions: {
+      save: 'Salvează programul',
+    },
+
+    toast: {
+      saved: 'Programul de lucru a fost salvat.',
+      error: 'Nu am putut salva programul. Încearcă din nou.',
     },
   },
 

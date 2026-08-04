@@ -25,6 +25,7 @@ import { MediaPage } from '@/pages/media';
 import { LibraryPage } from '@/pages/library';
 import { SiteMediaPage } from '@/pages/site-media';
 import { UsersPage } from '@/pages/users';
+import { WorkingHoursPage } from '@/pages/working-hours';
 import { SecurityPage } from '@/pages/security';
 import { NotFoundPage } from '@/pages/not-found';
 
@@ -66,6 +67,7 @@ export function App() {
               </RequireRole>
             }
           />
+          <Route path={paths.workingHours} element={<WorkingHoursPage />} />
           <Route path={paths.security} element={<SecurityPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

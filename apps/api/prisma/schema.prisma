@@ -596,6 +596,43 @@ model DeliverableOrder {
   @@index([createdAt])
 }
 
+// --- Working hours (client answers v2 §11.5) ---
+//
+// The EXPRESS question promises an answer in ~1 hour "during working hours",
+// so the countdown has to know when those are. A question sent at 23:40 on a
+// Saturday is not late at 00:40 on Sunday.
+//
+// Editable in the back office rather than an env var, because a schedule is
+// something the doctor changes — holidays, a week off, moving the afternoon —
+// and every one of those would otherwise be a deploy.
+//
+// Singleton: one row, like AboutPage.
+
+model WorkingHours {
+  id String @id @default(uuid())
+
+  /// IANA zone. The arithmetic is done in this zone, so DST is handled by the
+  /// clock the patient and the doctor actually read.
+  timezone String @default("Europe/Chisinau")
+
+  /// Seven entries, Monday first:
+  /// `{ weekday: 1..7, closed: boolean, opensAt: "09:00", closesAt: "17:00" }`.
+  /// JSON rather than seven columns because it is read and written whole, and
+  /// a day is never queried on its own.
+  days Json
+
+  /// The EXPRESS promise, in working minutes. Data, not a constant: "~1 oră"
+  /// is the client's current wording and she may revise it.
+  expressSlaMinutes Int @default(60)
+
+  /// ⚠ True until the doctor confirms these are really her hours. The seeded
+  /// schedule is a placeholder — the client still owes us the real one — and
+  /// the back office says so loudly while this is set.
+  isPlaceholder Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}
+
 // --- Patient uploads (client answers v2 §11.14) ---
 //
 // Patients send analyses and investigations BEFORE the consultation. There are

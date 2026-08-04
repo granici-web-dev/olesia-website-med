@@ -1,10 +1,11 @@
 /**
  * Quick-question tickets — the "Întrebare EXPRESS" service (05, group B):
- * a written answer within 48h, with optional attachments.
+ * a written answer within ~1 working hour, with optional attachments.
  *
- * The spec (module_calendly.md §3.2.5, §11, §15) requires: ticket list, 48h
- * deadline / SLA, an answer, and manual payment confirmation. No explicit model
- * is given, so this is the inferred shape.
+ * The deadline is `dueAt`, computed by the API from the practice schedule at
+ * the moment the question arrived (§11.5) — it is NOT derivable from
+ * `createdAt` here, because the clock only runs during working hours. This UI
+ * displays what the server decided; it never recomputes it.
  * TODO(shared): move to `packages/shared` once it exists.
  */
 
@@ -32,6 +33,8 @@ export interface Ticket {
   answer: string | null;
   answeredAt: string | null;
   paymentStatus: PaymentStatus;
+  /** Server-computed SLA deadline, in working hours. ISO. */
+  dueAt: string;
   createdAt: string; // ISO
 }
 

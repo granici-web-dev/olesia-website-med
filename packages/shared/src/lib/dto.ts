@@ -253,6 +253,29 @@ export interface DeliverableOrderDto {
   updatedAt: string;
 }
 
+// --- Working hours (client answers v2 §11.5) ---
+
+/** One weekday of the practice schedule. `weekday` is 1 = Monday … 7 = Sunday. */
+export interface WorkingDayDto {
+  weekday: number;
+  closed: boolean;
+  /** "HH:MM" wall-clock in the schedule's own timezone. */
+  opensAt: string;
+  closesAt: string;
+}
+
+export interface WorkingHoursDto {
+  /** IANA zone the times are written in. */
+  timezone: string;
+  /** Always seven entries, Monday first. */
+  days: WorkingDayDto[];
+  /** The EXPRESS promise, in *working* minutes. */
+  expressSlaMinutes: number;
+  /** True while the schedule is still our placeholder, not the client's. */
+  isPlaceholder: boolean;
+  updatedAt: string;
+}
+
 // --- Patient uploads (client answers v2 §11.14) ---
 
 /** One file a patient sent through their upload link. */

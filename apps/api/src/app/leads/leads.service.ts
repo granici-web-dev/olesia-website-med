@@ -9,6 +9,7 @@ import { deliverableEntry } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
+import { WorkingHoursService } from '../working-hours/working-hours.service';
 import { toSubscriptionDto } from '../subscriptions/subscriptions.mapper';
 import { toQuickQuestionDto } from '../quick-questions/quick-questions.mapper';
 import {
@@ -27,7 +28,6 @@ import {
   QuickQuestionLeadDto,
 } from './dto/create-lead.dto';
 
-const QUICK_SLA_MS = 48 * 60 * 60 * 1000;
 const MONITORING_MONTHS = 3;
 
 /** Human-readable subject labels for the practice inbox (RO). */
@@ -50,6 +50,7 @@ export class LeadsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mail: MailService,
+    private readonly workingHours: WorkingHoursService,
   ) {}
 
   /** "Monitorizare 3 luni" → a pending Subscription the doctor follows up on. */
@@ -92,8 +93,17 @@ export class LeadsService {
     return toSubscriptionDto(sub);
   }
 
-  /** "Întrebare rapidă" → a pending QuickQuestion ticket (48h SLA). */
+  /**
+   * "Întrebare EXPRESS" → a pending QuickQuestion ticket.
+   *
+   * The deadline is ~1 hour of **working** time (answers v2 §5), not one hour
+   * on the wall clock: a question sent at 23:40 on a Saturday is due early on
+   * Monday. It is computed once, here, and stored — editing the schedule later
+   * must not retroactively make an already-answered ticket late.
+   */
   async createQuickQuestion(dto: QuickQuestionLeadDto): Promise<QuickQuestionDto> {
+    const dueAt = await this.workingHours.expressDueAt();
+
     const qq = await this.prisma.quickQuestion.create({
       data: {
         clientName: dto.name,
@@ -103,14 +113,14 @@ export class LeadsService {
         attachments: dto.attachments ?? [],
         status: QuickQuestionStatus.open,
         paymentStatus: PaymentStatus.pending,
-        dueAt: new Date(Date.now() + QUICK_SLA_MS),
+        dueAt,
       },
     });
 
     await this.mail.sendLeadNotification({
-      subject: 'Întrebare rapidă nouă',
+      subject: 'Întrebare EXPRESS nouă',
       lines: [
-        'Întrebare rapidă nouă (termen de răspuns 48h).',
+        `Întrebare EXPRESS nouă. Termen de răspuns: ${dueAt.toLocaleString('ro-RO')}.`,
         `Nume: ${dto.name}`,
         `Email: ${dto.email}`,
         `Telefon: ${dto.phone ?? '—'}`,

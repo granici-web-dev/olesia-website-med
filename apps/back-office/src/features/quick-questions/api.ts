@@ -30,6 +30,7 @@ function toView(d: QuickQuestionDto): Ticket {
     answer: d.answer,
     answeredAt: d.answeredAt,
     paymentStatus: d.paymentStatus as Ticket['paymentStatus'],
+    dueAt: d.dueAt,
     createdAt: d.createdAt,
   };
 }
