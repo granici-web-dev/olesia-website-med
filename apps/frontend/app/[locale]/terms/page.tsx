@@ -3,6 +3,8 @@ import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
+import { LegalDraftNotice } from '@/components/ui/LegalDraftNotice';
+import { LEGAL_ENTITY, LEGAL_UPDATED } from '@/lib/legal-entity';
 
 export const revalidate = 60;
 
@@ -26,11 +28,13 @@ export const revalidate = 60;
    resolution, prescription policy, and which language version prevails.
    ────────────────────────────────────────────────────────────────────────── */
 
+/** Identity and dates come from `lib/legal-entity.ts` — see /gdpr for why. */
 const META = {
-  provider: 'Dr. Olesea Jalba', // ⚠ confirm legal entity / provider name with client + lawyer
-  email: 'oleseajalba@gmail.com', // matches Footer; ⚠ confirm contact mailbox
-  updatedRo: '17 iunie 2026', // ⚠ bump on every revision
-  updatedEn: '17 June 2026',
+  provider: LEGAL_ENTITY.registeredName || LEGAL_ENTITY.displayName,
+  email: LEGAL_ENTITY.email,
+  updatedRo: LEGAL_UPDATED.ro,
+  updatedEn: LEGAL_UPDATED.en,
+  updatedRu: LEGAL_UPDATED.ru,
 };
 
 export async function generateMetadata({
@@ -162,6 +166,7 @@ export default async function TermsPage({
 
   return (
     <main className="bg-cream text-ink">
+      <LegalDraftNotice locale={locale} />
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
@@ -205,10 +210,26 @@ export default async function TermsPage({
                   {ru ? 'Поставщик услуг' : en ? 'Provider' : 'Furnizor'}
                 </dt>
                 <dd className="text-ink">{META.provider}</dd>
+                {LEGAL_ENTITY.idno && (
+                  <>
+                    <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
+                      IDNO
+                    </dt>
+                    <dd className="text-ink">{LEGAL_ENTITY.idno}</dd>
+                  </>
+                )}
+                {LEGAL_ENTITY.address && (
+                  <>
+                    <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
+                      {ru ? 'Адрес' : en ? 'Address' : 'Adresă'}
+                    </dt>
+                    <dd className="text-ink">{LEGAL_ENTITY.address}</dd>
+                  </>
+                )}
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                   {ru ? 'Обновлено' : en ? 'Updated' : 'Actualizat'}
                 </dt>
-                <dd className="text-ink">{en ? META.updatedEn : META.updatedRo}</dd>
+                <dd className="text-ink">{ru ? META.updatedRu : en ? META.updatedEn : META.updatedRo}</dd>
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                   {ru ? 'Контакты' : en ? 'Contact' : 'Contact'}
                 </dt>
