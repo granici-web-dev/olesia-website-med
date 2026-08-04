@@ -48,6 +48,22 @@ export interface CalendlyInvitee {
 }
 
 /**
+ * An event type as returned by the Calendly REST API — one bookable
+ * consultation on her calendar. `uri` is the value a service must store: the
+ * webhook identifies a booking by event type and by nothing else.
+ */
+export interface CalendlyEventType {
+  uri: string;
+  name: string;
+  slug?: string;
+  scheduling_url: string;
+  duration?: number;
+  active?: boolean;
+  /** 'solo' | 'group'; the consultations are all solo. */
+  pooling_type?: string | null;
+}
+
+/**
  * Calendly integration helpers (module_calendly.md §8): webhook signature
  * verification, payload extraction, and the REST API client used by the
  * backup-sync cron. The service-code mapping itself lives in the DB
@@ -162,6 +178,34 @@ export class CalendlyService {
         collection: CalendlyScheduledEvent[];
         pagination?: { next_page: string | null };
       }>(url);
+      if (!page) break;
+      out.push(...page.collection);
+      url = page.pagination?.next_page ?? null;
+    }
+    return out;
+  }
+
+  /**
+   * The organization's event types — what the doctor actually has on her
+   * calendar.
+   *
+   * This exists to kill the launch swap by hand. Both Calendly fields on a
+   * service used to be free text, and pasting them by hand has already gone
+   * wrong once: the mapping ended up with nutrition pointing at the pediatric
+   * event. Reading the list from her own account and picking from it removes
+   * the transcription step entirely.
+   */
+  async listEventTypes(): Promise<CalendlyEventType[]> {
+    if (!this.isApiConfigured()) return [];
+    const params = new URLSearchParams({
+      organization: this.orgUri,
+      count: '100',
+    });
+    const out: CalendlyEventType[] = [];
+    let url: string | null = `${this.apiBase}/event_types?${params}`;
+    while (url) {
+      const page: CalendlyPage<CalendlyEventType> | null =
+        await this.apiGet<CalendlyPage<CalendlyEventType>>(url);
       if (!page) break;
       out.push(...page.collection);
       url = page.pagination?.next_page ?? null;

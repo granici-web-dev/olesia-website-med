@@ -38,6 +38,7 @@ import {
   updateService,
 } from '@/features/services/data';
 import { servicesQueryKey } from '@/features/services/query-key';
+import { CalendlyEventPicker } from '@/features/services/calendly-event-picker';
 import type {
   Service,
   ServiceCode,
@@ -401,6 +402,28 @@ export function ServiceFormSheet({
                 {...form.register('sortOrder')}
               />
             </div>
+
+            {isA && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  {ro.services.calendlyPicker.label}
+                </p>
+                <CalendlyEventPicker
+                  value={form.watch('calendlyEventTypeUri')}
+                  onPick={(e) => {
+                    // Both fields describe the same event, so both are set
+                    // together — a URI mapped to one event and a link opening
+                    // another is the failure this picker exists to prevent.
+                    form.setValue('calendlyEventTypeUri', e.uri, {
+                      shouldDirty: true,
+                    });
+                    form.setValue('calendlySchedulingUrl', e.scheduling_url, {
+                      shouldDirty: true,
+                    });
+                  }}
+                />
+              </div>
+            )}
 
             {isA && (
               <TextField

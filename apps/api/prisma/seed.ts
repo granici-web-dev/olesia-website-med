@@ -34,17 +34,17 @@ const SERVICES = [
     priceLabelEn: null,
     priceLabelRu: null,
     calendlyEventTypeUri:
-      'https://api.calendly.com/event_types/615c76de-63dd-4870-b3c5-141aef15a844',
-    calendlySchedulingUrl:
-      'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
+      'https://api.calendly.com/event_types/2c590066-eeb1-4f68-a306-c53a0cb71073',
+    calendlySchedulingUrl: 'https://calendly.com/designer-nefele/30min',
     sortOrder: 1,
     active: true,
   },
-  // ⚠ Both nutrition rows carry `calendlyEventTypeUri: null`. The audience-
-  // specific event types exist on the test account as scheduling URLs, but
-  // their API URIs were never captured, and guessing is worse than nothing:
-  // a wrong URI files a child's booking under the adults' service silently.
-  // Capture the real ones together with the client's paid Calendly.
+  // Every URI and scheduling URL below was READ FROM THE CALENDLY API
+  // (`GET /appointments/calendly/event-types`), not typed by hand — hand-typing
+  // is how `pediatric` ended up pointing at the children's-nutrition event and
+  // `integrative` at the free call. Note the test account's slugs do not match
+  // their own event names (a clone artifact): the URI and the event name are
+  // authoritative, the slug means nothing.
   {
     code: 'nutrition_copii',
     group: 'A_booking',
@@ -59,7 +59,8 @@ const SERVICES = [
     priceLabelRo: null,
     priceLabelEn: null,
     priceLabelRu: null,
-    calendlyEventTypeUri: null,
+    calendlyEventTypeUri:
+      'https://api.calendly.com/event_types/615c76de-63dd-4870-b3c5-141aef15a844',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-copii',
     sortOrder: 2,
@@ -79,7 +80,8 @@ const SERVICES = [
     priceLabelRo: null,
     priceLabelEn: null,
     priceLabelRu: null,
-    calendlyEventTypeUri: null,
+    calendlyEventTypeUri:
+      'https://api.calendly.com/event_types/326c883f-ab35-41b3-917e-28b7a33c33a9',
     calendlySchedulingUrl:
       'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-adulti',
     sortOrder: 3,
@@ -100,9 +102,9 @@ const SERVICES = [
     priceLabelEn: null,
     priceLabelRu: null,
     calendlyEventTypeUri:
-      'https://api.calendly.com/event_types/02306705-7d03-4bfa-bdbd-b6548b519771',
+      'https://api.calendly.com/event_types/25950172-362c-43cf-aeea-323ac47d961c',
     calendlySchedulingUrl:
-      'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
+      'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
     sortOrder: 4,
     active: true,
   },

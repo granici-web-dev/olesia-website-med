@@ -53,6 +53,7 @@ import {
   ALL_CODES,
 } from '@/features/services/data';
 import { servicesQueryKey } from '@/features/services/query-key';
+import { CalendlyStatus } from '@/features/services/calendly-status';
 import type { Service, ServiceCode } from '@/features/services/types';
 
 const t = ro.services;
@@ -153,6 +154,9 @@ export function ServicesPage() {
           </>
         }
       />
+
+      {/* Booking readiness — the one thing that has to be right before launch. */}
+      {!isLoading && !isError && <CalendlyStatus services={services} />}
 
       <Card className="overflow-hidden py-0">
         {isError ? (

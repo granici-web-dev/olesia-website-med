@@ -19,6 +19,7 @@ import { Role } from '../../generated/prisma/enums';
 import { type UploadedImage } from '../storage/storage.service';
 import { AppointmentsService } from './appointments.service';
 import { CalendlySyncService } from './calendly-sync.service';
+import { CalendlyService } from './calendly.service';
 import { PrepService } from './prep.service';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { ListAppointmentsDto } from './dto/list-appointments.dto';
@@ -38,6 +39,7 @@ export class AppointmentsController {
     private readonly appointments: AppointmentsService,
     private readonly sync: CalendlySyncService,
     private readonly prep: PrepService,
+    private readonly calendly: CalendlyService,
   ) {}
 
   @Get()
@@ -49,6 +51,24 @@ export class AppointmentsController {
   @Post('sync')
   runSync() {
     return this.sync.runBackupSync();
+  }
+
+  /**
+   * The event types on the connected Calendly account, for mapping services to
+   * them without retyping a URI.
+   *
+   * `configured: false` is a normal answer, not an error: until the client
+   * hands over her paid account there is no token, and the back office needs
+   * to say that plainly rather than show an empty list that looks like
+   * "you have no event types".
+   */
+  @Get('calendly/event-types')
+  async eventTypes() {
+    const configured = this.calendly.isApiConfigured();
+    return {
+      configured,
+      eventTypes: configured ? await this.calendly.listEventTypes() : [],
+    };
   }
 
   /** Force the 24h prep dispatch now (otherwise runs hourly). */

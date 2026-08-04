@@ -359,6 +359,38 @@ export const ro = {
     newService: 'Serviciu nou',
     refresh: 'Reîmprospătează',
 
+    /** Is booking actually wired up? Shown above the service list. */
+    calendlyStatus: {
+      ok: 'Calendly este conectat și toate serviciile cu programare au un eveniment asociat.',
+      eventCount: (n: number) =>
+        n === 1
+          ? 'Un tip de eveniment în cont.'
+          : n === 0 || n % 100 >= 20
+            ? `${n} de tipuri de evenimente în cont.`
+            : `${n} tipuri de evenimente în cont.`,
+      notConnected:
+        'Contul Calendly nu este conectat. Rezervările de pe site nu vor funcționa până când nu primim contul plătit al clientei și îl configurăm.',
+      unmapped: (n: number) =>
+        n === 1
+          ? 'Un serviciu cu programare nu are încă un eveniment Calendly asociat — rezervarea lui nu va funcționa.'
+          : `${n} servicii cu programare nu au încă un eveniment Calendly asociat — rezervările lor nu vor funcționa.`,
+    },
+
+    /** Mapping a service to a real Calendly event (§8.3). */
+    calendlyPicker: {
+      label: 'Evenimentul din Calendly',
+      placeholder: 'Alege evenimentul…',
+      hint: 'Alegerea completează automat și URI-ul, și linkul de rezervare — cele două trebuie să indice același eveniment.',
+      loading: 'Se citesc evenimentele din Calendly…',
+      inactive: 'inactiv',
+      notConnected:
+        'Contul Calendly nu este încă conectat, așa că nu avem de unde citi evenimentele. Poți completa manual câmpurile de mai jos, sau conectăm contul și le alegi din listă.',
+      empty:
+        'Contul Calendly este conectat, dar nu are niciun tip de eveniment definit.',
+      failed:
+        'Nu am putut citi evenimentele din Calendly. Completează manual câmpurile de mai jos.',
+    },
+
     group: {
       A_booking: 'Cu programare',
       B_portal: 'Fără programare',
@@ -402,7 +434,8 @@ export const ro = {
       price: 'Preț (EUR)',
       duration: 'Durată (min)',
       calendly: 'Calendly event type (URI)',
-      calendlyHint: 'Doar grupul cu programare — sursa de adevăr pentru mapare.',
+      calendlyHint:
+        'Doar grupul cu programare — sursa de adevăr pentru mapare. Completat automat dacă alegi evenimentul mai sus.',
       calendlyUrl: 'Link Calendly de rezervare',
       calendlyUrlHint: 'Link public deschis în embed-ul de pe site (ex. calendly.com/cont/serviciu).',
       sortOrder: 'Ordine pe site',

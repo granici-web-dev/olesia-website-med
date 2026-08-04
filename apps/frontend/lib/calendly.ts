@@ -3,6 +3,10 @@
  * where the service isn't known yet: the header CTA and the free-consult
  * section. Per-service booking links live on `Service.calendlySchedulingUrl`.
  * Override per environment with NEXT_PUBLIC_CALENDLY_FREE_URL.
+ *
+ * Verified: on the test account this slug really is "Consultație gratis", and
+ * it is the one event type the free plan keeps active — which is why it is the
+ * only booking link on the site that currently opens.
  */
 export const FREE_CONSULT_CALENDLY_URL =
   process.env.NEXT_PUBLIC_CALENDLY_FREE_URL ??
@@ -18,13 +22,22 @@ export const FREE_CONSULT_CALENDLY_URL =
  * together with FREE_CONSULT_CALENDLY_URL.
  */
 export const CALENDLY_FALLBACK_URLS: Record<string, string> = {
-  // ⚠ PLACEHOLDER test events on the `designer-nefele` account — each slug is
-  // named to match its service so the mapping is self-documenting. The trial on
-  // this account has EXPIRED, so these currently render "This Calendly URL is not
-  // valid"; that's expected. Swap all of them for the client's real (paid)
-  // Calendly before launch. Keep in sync with apps/api/prisma/seed.ts +
-  // apps/back-office/.../services/mock.ts.
-  pediatric: 'https://calendly.com/designer-nefele/consulta-ie-pediatrica-clone',
+  // ⚠ PLACEHOLDER events on the `designer-nefele` TEST account. Swap for the
+  // client's paid account before launch, together with FREE_CONSULT_CALENDLY_URL.
+  // Keep in sync with apps/api/prisma/seed.ts.
+  //
+  // Every link below was verified against the account's own event list
+  // (`GET /appointments/calendly/event-types`) rather than assumed from its
+  // slug — two of these used to be wrong: `pediatric` pointed at a slug that
+  // does not exist on the account, and `integrative` at the free call. The
+  // account's slugs do NOT match their event names (a clone artifact), so the
+  // slug is not evidence of anything; the event name and duration are.
+  //
+  // Booking still fails today, and not because the links are wrong: the account
+  // is on the free plan, which allows exactly ONE active event type. Four of
+  // the five are `active: false`, and Calendly answers those with "This
+  // Calendly URL is not valid". The paid plan is what fixes it.
+  pediatric: 'https://calendly.com/designer-nefele/30min',
   // Nutrition is two catalog services, each with its own Calendly event. The
   // generic `nutrition` slug it used to share is gone: one link for two
   // audiences is exactly the ambiguity the webhook cannot resolve.
@@ -33,7 +46,7 @@ export const CALENDLY_FALLBACK_URLS: Record<string, string> = {
   nutrition_adulti:
     'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-adulti',
   integrative:
-    'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone',
+    'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
 };
 
 /** Calendly scheduling URL for a service `code`, preferring the API value. */
