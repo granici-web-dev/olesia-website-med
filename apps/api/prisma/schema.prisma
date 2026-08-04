@@ -93,6 +93,11 @@ enum DeliverableOrderStatus {
   canceled
 }
 
+enum UploadLinkTarget {
+  appointment
+  deliverable_order
+}
+
 // --- Back-office users ---
 
 model User {
@@ -175,6 +180,7 @@ model Appointment {
   planUploadedAt   DateTime?
   patient          Patient?          @relation(fields: [patientId], references: [id])
   patientId        String?
+  uploadLinks      UploadLink[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -581,11 +587,88 @@ model DeliverableOrder {
   /// Set once when the finished menu/protocol has been sent to the client.
   deliveredAt   DateTime?
 
+  uploadLinks UploadLink[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])
+}
+
+// --- Patient uploads (client answers v2 §11.14) ---
+//
+// Patients send analyses and investigations BEFORE the consultation. There are
+// no patient accounts and building them is a different project, so access is a
+// capability: one expiring link, scoped to one appointment or one order, that
+// grants upload and nothing else. No login, no reading of anyone else's data,
+// no access to the rest of the portal.
+//
+// The token is stored in the clear rather than hashed, deliberately: the doctor
+// has to be able to re-send the same link days later from the back office, and
+// what it can do — add files to one appointment until it expires — is a much
+// smaller capability than what already sits in this table's neighbours. The
+// files themselves live in PRIVATE storage and are never reachable by URL.
+//
+// One primitive for both surfaces, as §11.14 asks: an appointment needs it for
+// analyses, a group-C order needs it for the documents a protocol is built
+// from.
+
+model UploadLink {
+  id     String           @id @default(uuid())
+  /// The URL is the only credential. High-entropy, opaque, single-purpose.
+  token  String           @unique
+  target UploadLinkTarget
+
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  order         DeliverableOrder? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId       String?
+
+  /// Who the link was issued to — shown on the upload page so a patient can
+  /// tell at a glance that they opened the right one.
+  clientName  String
+  clientEmail String
+
+  expiresAt DateTime
+  /// Set the first time the patient ticks the consent box. Uploading medical
+  /// data is not implied by clicking a link, so nothing is stored before this.
+  consentAt DateTime?
+  /// Which consent wording they agreed to, so a later change to the text does
+  /// not silently rewrite what was consented to.
+  consentVersion String?
+  /// Set when the doctor withdraws the link early.
+  revokedAt DateTime?
+
+  documents UploadedDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([appointmentId])
+  @@index([orderId])
+  @@index([expiresAt])
+}
+
+model UploadedDocument {
+  id     String     @id @default(uuid())
+  link   UploadLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  linkId String
+
+  /// Opaque key in PRIVATE_STORAGE_DIR — never a public URL.
+  fileKey  String
+  /// The patient's own filename, kept for the doctor's download.
+  fileName String
+  mimeType String
+  sizeBytes Int
+
+  /// Free-text note the patient may add ("analize din 12 mai").
+  note String?
+
+  uploadedAt DateTime @default(now())
+
+  @@index([linkId])
+  @@index([uploadedAt])
 }
 
 // --- About (singleton) ---

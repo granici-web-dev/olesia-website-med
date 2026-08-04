@@ -8,6 +8,11 @@ export interface LeadMail {
   lines: string[];
 }
 
+/** An email addressed to a patient rather than to the practice. */
+export interface ClientMail extends LeadMail {
+  to: string;
+}
+
 /** PII-safe recipient for logs (first char + domain). */
 function maskEmail(email: string): string {
   const at = email.indexOf('@');
@@ -48,6 +53,36 @@ export class MailService {
       this.logger.warn(
         'SMTP not configured — lead emails are logged only (set SMTP_HOST/SMTP_USER/SMTP_PASS).',
       );
+    }
+  }
+
+  /**
+   * Send to a patient (best-effort). Same log-only degradation as the practice
+   * notifications: with no SMTP the message is not delivered, and the caller
+   * has to have a second way to get it there — which is why every upload link
+   * is also copyable from the back office rather than being email-only.
+   *
+   * Returns whether it actually went out, so the caller can say so honestly.
+   */
+  async sendToClient(mail: ClientMail): Promise<boolean> {
+    if (!this.transport) {
+      this.logger.log(
+        `[mail:log-only] client → ${maskEmail(mail.to)} · ${mail.subject}`,
+      );
+      return false;
+    }
+    try {
+      await this.transport.sendMail({
+        from: this.from,
+        to: mail.to,
+        subject: mail.subject,
+        text: mail.lines.join('\n'),
+      });
+      this.logger.log(`Client mail sent → ${maskEmail(mail.to)} · ${mail.subject}`);
+      return true;
+    } catch (err) {
+      this.logger.error(`Client email failed: ${String(err)}`);
+      return false;
     }
   }
 

@@ -16,6 +16,7 @@ import {
   ServiceCode,
   ServiceGroup,
   SubscriptionStatus,
+  UploadLinkTarget,
 } from './enums.js';
 
 /**
@@ -250,6 +251,55 @@ export interface DeliverableOrderDto {
   deliveredAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// --- Patient uploads (client answers v2 §11.14) ---
+
+/** One file a patient sent through their upload link. */
+export interface UploadedDocumentDto {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  note: string | null;
+  uploadedAt: string;
+}
+
+/**
+ * What the public upload page is allowed to know. Deliberately thin: the first
+ * name it greets the visitor with, when the link stops working, and the files
+ * they themselves sent. No appointment details, no medical data, nothing about
+ * anyone else — the link is a capability, not a login.
+ */
+export interface UploadSessionDto {
+  target: UploadLinkTarget;
+  /** First name only, so a shoulder-surfer learns nothing. */
+  greetingName: string;
+  expiresAt: string;
+  /** Null until the visitor accepts the consent text. */
+  consentAt: string | null;
+  documents: UploadedDocumentDto[];
+  /** Server-enforced limits, so the page can say them before a failed upload. */
+  maxFileBytes: number;
+  maxFiles: number;
+  acceptedTypes: string[];
+}
+
+/** Back-office view of a link: everything above, plus how to send it. */
+export interface UploadLinkDto {
+  id: string;
+  target: UploadLinkTarget;
+  appointmentId: string | null;
+  orderId: string | null;
+  clientName: string;
+  clientEmail: string;
+  /** The full URL to give the patient. */
+  url: string;
+  expiresAt: string;
+  consentAt: string | null;
+  revokedAt: string | null;
+  documents: UploadedDocumentDto[];
+  createdAt: string;
 }
 
 // --- About (singleton) ---

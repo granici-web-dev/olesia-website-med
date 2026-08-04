@@ -55,6 +55,7 @@ import {
 } from '@/features/appointments/data';
 import type { Appointment } from '@/features/appointments/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
+import { PatientUploadsPanel } from '@/features/uploads/patient-uploads-panel';
 import { ro } from '@/i18n/ro';
 import { appointmentsQueryKey } from '@/features/appointments/query-key';
 import { cn } from '@/lib/utils';
@@ -282,6 +283,16 @@ export function AppointmentDetailSheet({
                   )}
                 </Field>
               </dl>
+
+              <Separator className="my-4" />
+
+              {/* Analyses the patient sent ahead of the consultation (§11.14).
+                  Above the plan on purpose: these are what the plan is written
+                  from, so they belong before it in reading order. */}
+              <SectionTitle>{ro.patientUploads.title}</SectionTitle>
+              <div className="mt-2">
+                <PatientUploadsPanel appointmentId={a.id} />
+              </div>
 
               <Separator className="my-4" />
 

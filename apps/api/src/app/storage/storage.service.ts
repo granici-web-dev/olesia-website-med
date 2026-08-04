@@ -50,6 +50,31 @@ const DOC_EXT: Record<string, string> = {
 };
 
 /**
+ * Patient uploads (analyses, investigations). A wider allowlist than the
+ * doctor's own documents for one practical reason: people photograph their lab
+ * results with a phone far more often than they scan them to PDF. Refusing a
+ * JPEG here would send them to the WhatsApp channel this feature exists to
+ * replace.
+ *
+ * Images are stored as-is rather than run through `sharp`: our resize pipeline
+ * caps the long edge at 1600px and re-encodes to WebP, which is exactly the
+ * wrong thing to do to a photograph of small print in a lab table.
+ */
+const MAX_PATIENT_UPLOAD_BYTES = 15 * 1024 * 1024;
+const PATIENT_UPLOAD_EXT: Record<string, string> = {
+  ...DOC_EXT,
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+};
+
+/** MIME types a patient may send — surfaced to the upload page's `accept`. */
+export const PATIENT_UPLOAD_MIME = Object.keys(PATIENT_UPLOAD_EXT);
+export const PATIENT_UPLOAD_MAX_BYTES = MAX_PATIENT_UPLOAD_BYTES;
+
+/**
  * Local file storage (module_calendly.md §11). Converts uploads to WebP
  * (resized + compressed) and returns a public URL. The `storage` abstraction
  * keeps the swap to S3/Cloudinary later a one-file change.
@@ -188,6 +213,35 @@ export class StorageService {
     await mkdir(PRIVATE_STORAGE_DIR, { recursive: true });
     await writeFile(join(PRIVATE_STORAGE_DIR, key), file.buffer);
     return { key };
+  }
+
+  /**
+   * Store a file a PATIENT sent through an upload link. Same private directory
+   * as the doctor's own attachments — nothing here is ever served by URL — but
+   * a wider type allowlist and a smaller cap, because these arrive over mobile
+   * data from a phone camera.
+   *
+   * ⚠ No malware scanning: there is no scanner in this stack yet. The
+   * mitigations that do exist are that the file is never executed, never served
+   * from the public static route, and only ever streamed back to an
+   * authenticated staff download. Wire ClamAV (or the host's equivalent) in
+   * here when the API gets its production home — see docs, task #20.
+   */
+  async savePatientUpload(
+    file: UploadedImage | undefined,
+  ): Promise<{ key: string; ext: string }> {
+    if (!file) throw new BadRequestException('No file uploaded.');
+    const ext = PATIENT_UPLOAD_EXT[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException('unsupported_file_type');
+    }
+    if (file.size > MAX_PATIENT_UPLOAD_BYTES) {
+      throw new BadRequestException('file_too_large');
+    }
+    const key = `${randomUUID()}.${ext}`;
+    await mkdir(PRIVATE_STORAGE_DIR, { recursive: true });
+    await writeFile(join(PRIVATE_STORAGE_DIR, key), file.buffer);
+    return { key, ext };
   }
 
   /** Absolute path of a private document by its key (traversal-safe). */

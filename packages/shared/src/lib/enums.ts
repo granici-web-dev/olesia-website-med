@@ -118,6 +118,12 @@ export enum DeliverableOrderStatus {
   Canceled = 'canceled',
 }
 
+/** What a patient upload link is attached to (client answers v2 §11.14). */
+export enum UploadLinkTarget {
+  Appointment = 'appointment',
+  DeliverableOrder = 'deliverable_order',
+}
+
 /** Kind of a patient medical-record timeline entry (module_patients.md). */
 export enum PatientEntryType {
   Anamnesis = 'anamnesis',

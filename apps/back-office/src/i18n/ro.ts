@@ -949,6 +949,45 @@ export const ro = {
     },
   },
 
+  /** Patient document uploads (client answers v2 §11.14). */
+  patientUploads: {
+    title: 'Analize trimise de pacient',
+    noLink:
+      'Pacientul nu are încă un link de încărcare. Generează unul și trimite-i-l — poate încărca analize și documente fără cont.',
+    noDocuments: 'Pacientul nu a trimis încă niciun document.',
+
+    state: {
+      validUntil: 'Valabil până la',
+      expired: 'Link expirat',
+      revoked: 'Link închis',
+      consentGiven: 'acord dat',
+      consentPending: 'în așteptarea acordului',
+    },
+
+    actions: {
+      issue: 'Generează link',
+      renew: 'Reactivează linkul',
+      copy: 'Copiază',
+      email: 'Trimite pe email',
+      revoke: 'Închide linkul',
+      download: 'Descarcă documentul',
+      deleteDocument: 'Șterge documentul',
+    },
+
+    toast: {
+      issued: 'Linkul a fost generat.',
+      copied: 'Linkul a fost copiat.',
+      copyFailed: 'Nu am putut copia linkul. Selectează-l manual.',
+      sent: 'Linkul a fost trimis pe email.',
+      notSent:
+        'Emailul nu a putut fi trimis (serverul de email nu este configurat). Copiază linkul și trimite-l tu.',
+      revoked: 'Linkul a fost închis.',
+      documentDeleted: 'Documentul a fost șters definitiv.',
+      downloadFailed: 'Nu am putut descărca documentul.',
+      error: 'Ceva nu a mers. Încearcă din nou.',
+    },
+  },
+
   orders: {
     title: 'Comenzi',
     subtitle: 'Meniuri personalizate și protocoale comandate de pe site.',

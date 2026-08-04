@@ -542,6 +542,16 @@ export default async function GdprPage({
                 ? 'We keep your data only as long as needed for the purposes described here and for the periods required by law for medical records. After that, we delete or anonymise it.'
                 : 'Păstrăm datele doar atât timp cât este necesar pentru scopurile descrise aici și pentru termenele impuse de lege în cazul documentației medicale. După aceea, le ștergem sau le anonimizăm.'}
             </p>
+            {/* Documents a patient sends through the pre-consultation upload
+                link (§11.14). Stated separately because it is the one category
+                with an automatic deletion date rather than a legal maximum. */}
+            <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Анализы и документы, присланные по персональной ссылке перед консультацией, хранятся отдельно, недоступны публично и удаляются автоматически по истечении срока хранения. Сама ссылка перестаёт работать раньше — примерно через месяц. Вы можете удалить любой файл сами, пока ссылка активна, или попросить нас об этом в любой момент.'
+                : en
+                ? 'Analyses and documents sent through the personal pre-consultation link are stored separately, are never publicly reachable, and are deleted automatically once the retention period ends. The link itself stops working sooner — about a month after it is issued. You can delete any file yourself while the link is active, or ask us to at any time.'
+                : 'Analizele și documentele trimise prin linkul personal dinaintea consultației sunt stocate separat, nu sunt accesibile public și se șterg automat la finalul perioadei de păstrare. Linkul în sine expiră mai devreme — la aproximativ o lună de la emitere. Poți șterge singur orice fișier cât timp linkul este activ sau ne poți cere oricând acest lucru.'}
+            </p>
           </Section>
 
           {/* Drepturile tale */}
