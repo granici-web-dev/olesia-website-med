@@ -32,6 +32,7 @@ function postToView(d: PostDto): Post {
     contentEn: d.contentEn,
     contentRu: d.contentRu ?? '',
     coverImageUrl: d.coverImageUrl,
+    ageKeys: d.ageKeys,
     status: d.status as Post['status'],
     publishedAt: d.publishedAt,
     categoryIds: d.categories.map((c) => c.id),

@@ -215,7 +215,9 @@ model QuickQuestion {
   clientEmail   String
   phone         String? // lead contact phone (public intake)
   question      String
-  attachments   String[]
+  /// Same reason as `Post.ageKeys`: an absent default reads back as
+  /// `undefined` on any row that predates the column.
+  attachments   String[]            @default([])
   answer        String?
   status        QuickQuestionStatus @default(open)
   paymentStatus PaymentStatus       @default(pending)
@@ -255,6 +257,17 @@ model Post {
   contentEn     String
   contentRu     String?
   coverImageUrl String?
+
+  /// Keys from the shared child-age taxonomy ('0-6m', '6-12m', …) — the same
+  /// one the digital library uses, so one filter covers both surfaces. Empty
+  /// means the article is not age-specific, and the age filter always shows it.
+  ///
+  /// `@default([])` is load-bearing, not decoration: without it the column is
+  /// NULL for every row written before this field existed, Prisma reads that
+  /// back as `undefined`, and the key silently disappears from the API
+  /// response — leaving the public age filter iterating over nothing.
+  ageKeys       String[] @default([])
+
   status        PostStatus @default(draft)
   publishedAt   DateTime?
   author        User       @relation(fields: [authorId], references: [id])
@@ -339,7 +352,8 @@ model Material {
 
   /// Keys from the shared child-age taxonomy ('0-6m', '6-12m', …). Empty means
   /// the material is not age-specific, and the age filter always shows it.
-  ageKeys String[]
+  /// See `Post.ageKeys` for why the default is spelled out.
+  ageKeys String[] @default([])
 
   titleRo       String
   titleEn       String

@@ -31,6 +31,8 @@ export interface Post {
   contentEn: string; // markdown
   contentRu: string; // markdown
   coverImageUrl: string | null;
+  /** Child-age taxonomy keys (`@/config/ages`); empty = not age-specific. */
+  ageKeys: string[];
   status: PostStatus;
   publishedAt: string | null; // ISO
   categoryIds: string[];
@@ -53,6 +55,7 @@ export type PostInput = Pick<
   | 'contentEn'
   | 'contentRu'
   | 'coverImageUrl'
+  | 'ageKeys'
   | 'status'
   | 'publishedAt'
   | 'categoryIds'

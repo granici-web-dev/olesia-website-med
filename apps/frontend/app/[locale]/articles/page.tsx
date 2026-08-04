@@ -98,7 +98,7 @@ export default async function ArticlesPage({
         categoryLabel: p.categories[0]
           ? loc(locale, p.categories[0].nameRo, p.categories[0].nameEn, p.categories[0].nameRu)
           : '',
-        ageKeys: [],
+        ageKeys: p.ageKeys,
         title: loc(locale, p.titleRo, p.titleEn, p.titleRu),
         excerpt: loc(locale, p.excerptRo ?? '', p.excerptEn, p.excerptRu),
         meta: metaLine(

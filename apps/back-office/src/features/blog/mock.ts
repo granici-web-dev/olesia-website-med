@@ -118,6 +118,7 @@ let posts: Post[] = [
     contentEn: sampleEn,
     contentRu: sampleRu,
     coverImageUrl: 'https://picsum.photos/seed/olesia-food/640/400',
+    ageKeys: ['6-12m', '1-3y'],
     status: 'published',
     publishedAt: '2026-06-02T08:00:00+03:00',
     categoryIds: ['c1'],
@@ -141,6 +142,7 @@ let posts: Post[] = [
     contentRu:
       '## Спокойный сон\n\n**Предсказуемый** режим даёт ребёнку чувство безопасности. Несколько полезных шагов:\n\n1. приглушённый свет за час до сна;\n2. тёплая ванна;\n3. короткая сказка.\n\nПостоянство важнее идеальности.',
     coverImageUrl: 'https://picsum.photos/seed/olesia-sleep/640/400',
+    ageKeys: ['0-6m', '6-12m'],
     status: 'published',
     publishedAt: '2026-05-28T09:30:00+03:00',
     categoryIds: ['c2', 'c3'],
@@ -164,6 +166,7 @@ let posts: Post[] = [
     contentRu:
       '## Что говорит наука\n\nМногие страхи вокруг грудного вскармливания рождаются из *мифов*. Разбираем их по очереди в готовящейся статье.',
     coverImageUrl: null,
+    ageKeys: [],
     status: 'draft',
     publishedAt: null,
     categoryIds: ['c4'],

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
@@ -35,6 +36,7 @@ import {
 } from '@/features/blog/query-keys';
 import type { Post, PostInput, PostStatus } from '@/features/blog/types';
 import { paths } from '@/config/routes';
+import { AGE_KEYS } from '@/config/ages';
 
 const e = ro.blog.editor;
 
@@ -72,6 +74,7 @@ const schema = z.object({
   contentRu: z.string(),
   coverImageUrl: z.string().nullable(),
   categoryIds: z.array(z.string()),
+  ageKeys: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -89,6 +92,7 @@ const EMPTY: FormValues = {
   contentRu: '',
   coverImageUrl: null,
   categoryIds: [],
+  ageKeys: [],
 };
 
 function fromPost(p: Post): FormValues {
@@ -105,6 +109,7 @@ function fromPost(p: Post): FormValues {
     contentRu: p.contentRu,
     coverImageUrl: p.coverImageUrl,
     categoryIds: p.categoryIds,
+    ageKeys: [...p.ageKeys],
   };
 }
 
@@ -179,6 +184,7 @@ export function BlogEditorPage() {
         status,
         publishedAt,
         categoryIds: values.categoryIds,
+        ageKeys: values.ageKeys,
       };
       return isEdit ? updatePost(id as string, input) : createPost(input);
     },
@@ -346,6 +352,43 @@ export function BlogEditorPage() {
                   value={field.value}
                   onChange={field.onChange}
                 />
+              )}
+            />
+          </Card>
+
+          {/* Age tagging (brief §6/§8) — the same taxonomy as the digital
+              library, so a parent filtering by their child's age gets the
+              articles and the guides on the same terms. Leaving all of them
+              unticked is the normal case: the article then shows for everyone. */}
+          <Card className="gap-3 p-5">
+            <p className="text-sm font-semibold">{e.ages}</p>
+            <Controller
+              control={form.control}
+              name="ageKeys"
+              render={({ field }) => (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-x-5 gap-y-2.5">
+                    {AGE_KEYS.map((key) => (
+                      <label
+                        key={key}
+                        className="flex cursor-pointer items-center gap-2 text-sm"
+                      >
+                        <Checkbox
+                          checked={field.value.includes(key)}
+                          onCheckedChange={(on) =>
+                            field.onChange(
+                              on
+                                ? [...field.value, key]
+                                : field.value.filter((k) => k !== key),
+                            )
+                          }
+                        />
+                        {ro.ages[key]}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{e.agesHint}</p>
+                </div>
               )}
             />
           </Card>

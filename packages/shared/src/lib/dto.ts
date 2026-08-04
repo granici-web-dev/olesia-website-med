@@ -182,6 +182,8 @@ export interface PostDto {
   contentEn: string;
   contentRu: string | null;
   coverImageUrl: string | null;
+  /** Child-age taxonomy keys; empty means "not age-specific". */
+  ageKeys: string[];
   status: PostStatus;
   publishedAt: string | null;
   authorId: string;

@@ -45,6 +45,7 @@ export class BlogService {
         contentEn: dto.contentEn,
         contentRu: dto.contentRu ?? null,
         coverImageUrl: dto.coverImageUrl ?? null,
+        ageKeys: dto.ageKeys ?? [],
         status: dto.status,
         publishedAt: dto.publishedAt ? new Date(dto.publishedAt) : null,
         author: { connect: { id: authorId } },
@@ -71,6 +72,7 @@ export class BlogService {
         contentEn: dto.contentEn,
         contentRu: dto.contentRu,
         coverImageUrl: dto.coverImageUrl,
+        ageKeys: dto.ageKeys,
         status: dto.status,
         publishedAt:
           dto.publishedAt === undefined

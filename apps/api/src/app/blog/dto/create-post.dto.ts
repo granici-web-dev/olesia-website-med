@@ -53,6 +53,17 @@ export class CreatePostDto {
   @IsString()
   coverImageUrl?: string | null;
 
+  /**
+   * Child-age taxonomy keys, shared with the digital library. Optional and
+   * free-form on purpose: the taxonomy lives in the frontends, and an article
+   * tagged with a key this build does not know about is simply not matched by
+   * the filter — better than a 400 the editor cannot act on.
+   */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  ageKeys?: string[];
+
   @IsEnum(PostStatus)
   status!: PostStatus;
 

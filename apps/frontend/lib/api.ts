@@ -224,6 +224,8 @@ export interface PostDto {
   contentEn: string;
   contentRu: string | null;
   coverImageUrl: string | null;
+  /** Child-age taxonomy keys (`lib/age-taxonomy.ts`); empty = every age. */
+  ageKeys: string[];
   publishedAt: string | null;
   categories: PostCategory[];
 }

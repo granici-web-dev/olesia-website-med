@@ -25,6 +25,7 @@ export function toPostDto(p: Post & { categories: Category[] }): PostDto {
     contentEn: p.contentEn,
     contentRu: p.contentRu,
     coverImageUrl: p.coverImageUrl,
+    ageKeys: p.ageKeys,
     status: p.status as PostDto['status'],
     publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
     authorId: p.authorId,

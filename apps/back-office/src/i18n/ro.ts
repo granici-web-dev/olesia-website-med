@@ -10,6 +10,17 @@ export const ro = {
     tagline: 'Panou de administrare',
   },
 
+  /** Child-age taxonomy labels (`@/config/ages`) — used by both the library
+   *  and the blog, so they live at the top level rather than inside either. */
+  ages: {
+    '0-6m': '0–6 luni',
+    '6-12m': '6–12 luni',
+    '1-3y': '1–3 ani',
+    '3-6y': '3–6 ani',
+    '6-12y': '6–12 ani',
+    adolescent: 'Adolescent',
+  },
+
   nav: {
     sectionMain: 'Operațional',
     sectionContent: 'Conținut',
@@ -508,6 +519,9 @@ export const ro = {
       removeCover: 'Elimină',
       categories: 'Categorii',
       noCategories: 'Nicio categorie definită.',
+      ages: 'Vârste',
+      agesHint:
+        'Pentru ce vârste este util articolul. Dacă nu bifezi nimic, articolul apare la orice vârstă.',
       publishedAt: 'Data publicării',
       required: 'Câmp obligatoriu',
       missingTitle: 'Adaugă un titlu (RO) înainte de a salva.',
@@ -1614,14 +1628,6 @@ export const ro = {
       recommended: 'Recomandat',
       popular: 'Popular',
       new: 'Nou',
-    },
-    age: {
-      '0-6m': '0–6 luni',
-      '6-12m': '6–12 luni',
-      '1-3y': '1–3 ani',
-      '3-6y': '3–6 ani',
-      '6-12y': '6–12 ani',
-      adolescent: 'Adolescent',
     },
     empty: {
       title: 'Niciun material încă',

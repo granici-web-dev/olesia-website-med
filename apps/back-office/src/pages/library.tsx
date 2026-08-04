@@ -311,7 +311,7 @@ export function LibraryPage() {
                     {m.ageKeys.length === 0
                       ? t.allAges
                       : m.ageKeys
-                          .map((k) => t.age[k as AgeKey] ?? k)
+                          .map((k) => ro.ages[k as AgeKey] ?? k)
                           .join(', ')}
                   </span>
                 </p>

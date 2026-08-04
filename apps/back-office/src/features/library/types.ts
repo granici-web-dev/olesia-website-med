@@ -9,16 +9,11 @@ export type MaterialAccess = (typeof MATERIAL_ACCESS)[number];
 export const MATERIAL_FLAGS = ['recommended', 'popular', 'new'] as const;
 export type MaterialFlag = (typeof MATERIAL_FLAGS)[number];
 
-/** Shared child-age taxonomy; the same keys will tag blog posts. */
-export const AGE_KEYS = [
-  '0-6m',
-  '6-12m',
-  '1-3y',
-  '3-6y',
-  '6-12y',
-  'adolescent',
-] as const;
-export type AgeKey = (typeof AGE_KEYS)[number];
+/**
+ * The child-age taxonomy moved to `@/config/ages` once the blog started using
+ * it too. Re-exported here so existing imports keep working.
+ */
+export { AGE_KEYS, type AgeKey } from '@/config/ages';
 
 export interface MaterialCategory {
   id: string;
