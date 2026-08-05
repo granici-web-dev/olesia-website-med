@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Link } from '@/i18n/navigation';
 import { MediaGallery } from '@/components/sections/MediaGallery';
+import { PLACEHOLDER_MEDIA } from '@/lib/placeholder-media';
 import { api } from '@/lib/api';
 import { btnDark, creamPill, creamUnderline } from '@/components/ui/cta';
 
@@ -10,9 +11,9 @@ import { btnDark, creamPill, creamUnderline } from '@/components/ui/cta';
    Apariții media (brief §7.4 · client answers v2 §6) — the dedicated page the
    client asked for. Content comes from the back-office `media-appearances`
    module; radio, conferences and presentations follow with the client's full
-   list. There is deliberately no local fallback copy: it would drift from what
-   she edits, and an empty page for the length of an outage beats showing text
-   she has already corrected.
+   list. When the API answers it always wins; when it does not, the page falls
+   back to the committed copy in `lib/placeholder-media.ts` — see the reasoning
+   there, and delete it once the API is deployed.
 
    Embeds are click-to-load (see MediaGallery) so no YouTube/Facebook cookie is
    set before the visitor presses play. Recordings are never self-hosted — the
@@ -54,7 +55,8 @@ export default async function MediaPage({
   const ru = locale === 'ru';
   const lang = (ru ? 'ru' : en ? 'en' : 'ro') as 'ro' | 'en' | 'ru';
 
-  const appearances = await api.mediaAppearances();
+  const live = await api.mediaAppearances();
+  const appearances = live.length > 0 ? live : PLACEHOLDER_MEDIA;
   const outlets = [...new Set(appearances.map((m) => m.outlet))];
 
   return (
