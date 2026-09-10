@@ -3,7 +3,10 @@ import type { ContactDto } from '@olesia/shared';
 import { http } from '@/api/http';
 import type { Contact, ContactInput } from '@/features/contacts/types';
 
-/** Real `contacts` endpoints (module_calendly.md §9). GET is public. */
+/**
+ * Real `contacts` endpoints (module_calendly.md §9). The list is
+ * `/contacts/all`: the public `/contacts` serves only the active blocks.
+ */
 
 function toView(d: ContactDto): Contact {
   return {
@@ -19,7 +22,7 @@ function toView(d: ContactDto): Contact {
 }
 
 export async function fetchContacts(): Promise<Contact[]> {
-  const list = await http.get<ContactDto[]>('/contacts');
+  const list = await http.get<ContactDto[]>('/contacts/all');
   return list.map(toView).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 

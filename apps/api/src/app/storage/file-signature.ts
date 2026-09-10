@@ -16,7 +16,9 @@ export type FileSignature =
   | 'webp'
   | 'heif'
   | 'zip'
-  | 'ole';
+  | 'ole'
+  | 'mp4'
+  | 'webm';
 
 /** The extension each detected format is stored under. */
 export const SIGNATURE_EXT: Record<FileSignature, string> = {
@@ -27,6 +29,8 @@ export const SIGNATURE_EXT: Record<FileSignature, string> = {
   heif: 'heic',
   zip: 'docx',
   ole: 'doc',
+  mp4: 'mp4',
+  webm: 'webm',
 };
 
 function startsWith(buffer: Buffer, bytes: number[]): boolean {
@@ -52,6 +56,27 @@ const HEIF_BRANDS = new Set([
   'msf1',
 ]);
 
+/** The same `ftyp` box, with the brands an MP4 muxer writes instead. */
+const MP4_BRANDS = new Set([
+  'isom',
+  'iso2',
+  'iso4',
+  'iso5',
+  'iso6',
+  'mp41',
+  'mp42',
+  'avc1',
+  'mmp4',
+  'dash',
+]);
+
+/**
+ * How far into an EBML header the DocType is looked for. Matroska and WebM
+ * share the magic number and differ only in that string, and this is a route
+ * that stores what it detects under `.webm`.
+ */
+const EBML_DOCTYPE_WINDOW = 64;
+
 export function detectSignature(buffer: Buffer): FileSignature | null {
   // %PDF-
   if (startsWith(buffer, [0x25, 0x50, 0x44, 0x46, 0x2d])) return 'pdf';
@@ -67,12 +92,18 @@ export function detectSignature(buffer: Buffer): FileSignature | null {
   ) {
     return 'webp';
   }
+  if (buffer.length >= 12 && buffer.toString('latin1', 4, 8) === 'ftyp') {
+    const brand = buffer.toString('latin1', 8, 12);
+    if (HEIF_BRANDS.has(brand)) return 'heif';
+    if (MP4_BRANDS.has(brand)) return 'mp4';
+  }
+  // EBML (Matroska family). `webm` in the DocType is what separates a WebM
+  // from an MKV, which this route does not take.
   if (
-    buffer.length >= 12 &&
-    buffer.toString('latin1', 4, 8) === 'ftyp' &&
-    HEIF_BRANDS.has(buffer.toString('latin1', 8, 12))
+    startsWith(buffer, [0x1a, 0x45, 0xdf, 0xa3]) &&
+    buffer.toString('latin1', 0, EBML_DOCTYPE_WINDOW).includes('webm')
   ) {
-    return 'heif';
+    return 'webm';
   }
   // ZIP container — docx. The empty and spanned headers are accepted too: an
   // office file never uses them, but rejecting on them would be a lie about

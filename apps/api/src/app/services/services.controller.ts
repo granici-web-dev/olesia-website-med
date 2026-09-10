@@ -17,7 +17,13 @@ import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 
-/** Services / pricing (module_calendly.md §6). GET is public; writes admin/editor. */
+/**
+ * Services / pricing (module_calendly.md §6).
+ *
+ * Two shapes, not one: the public GETs serve the site the active catalog
+ * without the Calendly mapping, and `/services/all` serves the back office the
+ * whole row. The same split the digital library already uses.
+ */
 @ApiTags('services')
 @Controller('services')
 export class ServicesController {
@@ -25,14 +31,21 @@ export class ServicesController {
 
   @Public()
   @Get()
+  findPublished() {
+    return this.services.findPublished();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.admin, Role.editor)
+  @Get('all')
   findAll() {
     return this.services.findAll();
   }
 
   @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.services.findOne(id);
+  findPublishedOne(@Param('id') id: string) {
+    return this.services.findPublishedOne(id);
   }
 
   @ApiBearerAuth()

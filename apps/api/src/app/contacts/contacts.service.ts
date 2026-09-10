@@ -10,6 +10,21 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 export class ContactsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * The public block: only what the client currently wants reached. A phone
+   * number she switched off stayed on the endpoint (audit A4, F16), which is
+   * only harmless for as long as nothing reads it — and the footer is about to
+   * (`PLAN.md` A6).
+   */
+  async findPublished(): Promise<ContactDto[]> {
+    const list = await this.prisma.contact.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+    return list.map(toContactDto);
+  }
+
+  /** Back office: everything, including what is currently switched off. */
   async findAll(): Promise<ContactDto[]> {
     const list = await this.prisma.contact.findMany({
       orderBy: { sortOrder: 'asc' },

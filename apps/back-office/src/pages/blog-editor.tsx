@@ -21,12 +21,12 @@ import { MarkdownEditor } from '@/components/markdown/markdown-editor';
 import { CoverImageField } from '@/features/blog/cover-image-field';
 import { CategoryPicker } from '@/features/blog/category-picker';
 import { PostStatusBadge } from '@/features/blog/post-status-badge';
+import { SLUG_PATTERN, slugify } from '@olesia/shared';
 import {
   fetchPost,
   fetchCategories,
   createPost,
   updatePost,
-  slugify,
   formatDate,
 } from '@/features/blog/data';
 import {
@@ -62,7 +62,7 @@ const LANG_SUFFIX: Record<Lang, 'Ro' | 'En' | 'Ru'> = {
 };
 
 const schema = z.object({
-  slug: z.string().trim().min(1, e.required),
+  slug: z.string().trim().regex(SLUG_PATTERN, e.slugInvalid),
   titleRo: z.string().trim().min(1, e.missingTitle),
   titleEn: z.string(),
   titleRu: z.string(),
@@ -170,7 +170,7 @@ export function BlogEditorPage() {
           ? (post?.publishedAt ?? new Date().toISOString())
           : null;
       const input: PostInput = {
-        slug: values.slug.trim() || slugify(values.titleRo),
+        slug: values.slug.trim(),
         titleRo: values.titleRo.trim(),
         titleEn: values.titleEn.trim(),
         titleRu: values.titleRu.trim(),

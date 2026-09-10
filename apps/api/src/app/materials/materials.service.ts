@@ -4,9 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { MaterialCategoryDto, MaterialDto } from '@olesia/shared';
+import { slugify } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
-import { toMaterialCategoryDto, toMaterialDto } from './materials.mapper';
+import { writeOrTranslate } from '../common/prisma-errors';
+import {
+  toMaterialCategoryDto,
+  toMaterialDto,
+  toPublicMaterialDto,
+} from './materials.mapper';
 import {
   CreateMaterialCategoryDto,
   CreateMaterialDto,
@@ -14,25 +20,8 @@ import {
   UpdateMaterialDto,
 } from './dto/material.dto';
 
-/** Romanian diacritics → ASCII, so "Urgențe" slugs as `urgente`. */
-const DIACRITICS: Record<string, string> = {
-  ă: 'a',
-  â: 'a',
-  î: 'i',
-  ș: 's',
-  ş: 's',
-  ț: 't',
-  ţ: 't',
-};
-
-function slugify(value: string): string {
-  const ascii = value
-    .toLowerCase()
-    .replace(/[ăâîșşțţ]/g, (c) => DIACRITICS[c] ?? c)
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-  return ascii || 'categorie';
-}
+/** A category named in a script we cannot transliterate still needs a slug. */
+const CATEGORY_SLUG_FALLBACK = 'categorie';
 
 const withCategory = { category: { select: { slug: true } } };
 
@@ -47,7 +36,7 @@ export class MaterialsService {
       orderBy: { sortOrder: 'asc' },
       include: withCategory,
     });
-    return list.map(toMaterialDto);
+    return list.map(toPublicMaterialDto);
   }
 
   /** Back office: everything, including what is currently hidden. */
@@ -69,29 +58,32 @@ export class MaterialsService {
   async create(dto: CreateMaterialDto): Promise<MaterialDto> {
     await this.categoryOrThrow(dto.categoryId);
     await this.assertSlugFree(dto.slug);
-    const created = await this.prisma.material.create({
-      data: {
-        slug: dto.slug,
-        categoryId: dto.categoryId,
-        ageKeys: dto.ageKeys ?? [],
-        titleRo: dto.titleRo,
-        titleEn: dto.titleEn,
-        titleRu: dto.titleRu ?? null,
-        descriptionRo: dto.descriptionRo,
-        descriptionEn: dto.descriptionEn,
-        descriptionRu: dto.descriptionRu ?? null,
-        pageCount: dto.pageCount ?? null,
-        fileLang: dto.fileLang ?? null,
-        access: dto.access ?? 'free',
-        price: dto.price ?? null,
-        flags: dto.flags ?? [],
-        fileUrl: dto.fileUrl ?? null,
-        fileName: dto.fileName ?? null,
-        sortOrder: dto.sortOrder ?? (await this.nextSortOrder()),
-        active: dto.active ?? true,
-      },
-      include: withCategory,
-    });
+    const sortOrder = dto.sortOrder ?? (await this.nextSortOrder());
+    const created = await writeOrTranslate(() =>
+      this.prisma.material.create({
+        data: {
+          slug: dto.slug,
+          categoryId: dto.categoryId,
+          ageKeys: dto.ageKeys ?? [],
+          titleRo: dto.titleRo,
+          titleEn: dto.titleEn,
+          titleRu: dto.titleRu ?? null,
+          descriptionRo: dto.descriptionRo,
+          descriptionEn: dto.descriptionEn,
+          descriptionRu: dto.descriptionRu ?? null,
+          pageCount: dto.pageCount ?? null,
+          fileLang: dto.fileLang ?? null,
+          access: dto.access ?? 'free',
+          price: dto.price ?? null,
+          flags: dto.flags ?? [],
+          fileUrl: dto.fileUrl ?? null,
+          fileName: dto.fileName ?? null,
+          sortOrder,
+          active: dto.active ?? true,
+        },
+        include: withCategory,
+      }),
+    );
     return toMaterialDto(created);
   }
 
@@ -103,11 +95,13 @@ export class MaterialsService {
     }
     // Only the keys actually sent are written, so a PATCH that flips `active`
     // cannot blank the description or drop the age tags.
-    const updated = await this.prisma.material.update({
-      where: { id },
-      data: dto,
-      include: withCategory,
-    });
+    const updated = await writeOrTranslate(() =>
+      this.prisma.material.update({
+        where: { id },
+        data: dto,
+        include: withCategory,
+      }),
+    );
     return toMaterialDto(updated);
   }
 
@@ -119,15 +113,21 @@ export class MaterialsService {
   async createCategory(
     dto: CreateMaterialCategoryDto,
   ): Promise<MaterialCategoryDto> {
-    const created = await this.prisma.materialCategory.create({
-      data: {
-        slug: await this.uniqueCategorySlug(slugify(dto.nameRo)),
-        nameRo: dto.nameRo,
-        nameEn: dto.nameEn,
-        nameRu: dto.nameRu ?? null,
-        sortOrder: dto.sortOrder ?? (await this.nextCategoryOrder()),
-      },
-    });
+    const slug = await this.uniqueCategorySlug(
+      slugify(dto.nameRo, CATEGORY_SLUG_FALLBACK),
+    );
+    const sortOrder = dto.sortOrder ?? (await this.nextCategoryOrder());
+    const created = await writeOrTranslate(() =>
+      this.prisma.materialCategory.create({
+        data: {
+          slug,
+          nameRo: dto.nameRo,
+          nameEn: dto.nameEn,
+          nameRu: dto.nameRu ?? null,
+          sortOrder,
+        },
+      }),
+    );
     return toMaterialCategoryDto(created);
   }
 
@@ -139,7 +139,9 @@ export class MaterialsService {
     // As with the FAQ sections, the slug is not re-derived from a renamed
     // category: it is a public filter value in the URL.
     return toMaterialCategoryDto(
-      await this.prisma.materialCategory.update({ where: { id }, data: dto }),
+      await writeOrTranslate(() =>
+        this.prisma.materialCategory.update({ where: { id }, data: dto }),
+      ),
     );
   }
 

@@ -92,7 +92,7 @@ export default async function PricingPage({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const services = (await api.services()).filter((s) => s.active);
+  const services = await api.services();
 
   const t = {
     eyebrow: ru ? 'Цены' : en ? 'Pricing' : 'Tarife',

@@ -74,6 +74,54 @@ describe('detectSignature', () => {
     );
   });
 
+  /**
+   * Videos joined the sniffer on 2026-09-10 (audit A4, F3): the hero upload
+   * stored whatever arrived under the extension its own Content-Type asked
+   * for, on the public static route.
+   */
+  it('reads an MP4 by its ftyp brand', () => {
+    const mp4 = Buffer.concat([
+      bytes(0x00, 0x00, 0x00, 0x20),
+      ascii('ftypisom'),
+      ascii('isomiso2avc1mp41'),
+    ]);
+    expect(detectSignature(mp4)).toBe('mp4');
+  });
+
+  it('reads an MP4 whose brand is mp42', () => {
+    const mp4 = Buffer.concat([
+      bytes(0x00, 0x00, 0x00, 0x18),
+      ascii('ftypmp42'),
+      ascii('mp42isom'),
+    ]);
+    expect(detectSignature(mp4)).toBe('mp4');
+  });
+
+  it('does not confuse a HEIC with an MP4 — same box, different brand', () => {
+    const heic = Buffer.concat([
+      bytes(0x00, 0x00, 0x00, 0x18),
+      ascii('ftypheic'),
+      ascii('heicmif1'),
+    ]);
+    expect(detectSignature(heic)).toBe('heif');
+  });
+
+  // EBML magic, then the DocType element (0x4282) and its length.
+  const ebml = (docType: string) =>
+    Buffer.concat([
+      bytes(0x1a, 0x45, 0xdf, 0xa3, 0x01, 0x00, 0x00, 0x00, 0x1f),
+      bytes(0x42, 0x82, 0x80 + docType.length),
+      ascii(docType),
+    ]);
+
+  it('reads a WebM by its EBML header and DocType', () => {
+    expect(detectSignature(ebml('webm'))).toBe('webm');
+  });
+
+  it('refuses a Matroska file, which shares the EBML magic', () => {
+    expect(detectSignature(ebml('matroska'))).toBe(null);
+  });
+
   it('refuses an empty buffer instead of reading past its end', () => {
     expect(detectSignature(Buffer.alloc(0))).toBe(null);
   });

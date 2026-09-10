@@ -11,6 +11,7 @@ export function toCategoryDto(c: Category): CategoryDto {
   };
 }
 
+/** The back-office shape: everything, `authorId` and `status` included. */
 export function toPostDto(p: Post & { categories: Category[] }): PostDto {
   return {
     id: p.id,
@@ -33,4 +34,17 @@ export function toPostDto(p: Post & { categories: Category[] }): PostDto {
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };
+}
+
+/**
+ * The public shape. `authorId` is a `User` primary key (audit A4, F7) — the
+ * site renders the practice's single byline from its own copy and has never
+ * read it, so publishing an internal account id to anonymous readers bought
+ * nothing.
+ */
+export function toPublicPostDto(
+  p: Post & { categories: Category[] },
+): Omit<PostDto, 'authorId'> {
+  const { authorId: _authorId, ...post } = toPostDto(p);
+  return post;
 }

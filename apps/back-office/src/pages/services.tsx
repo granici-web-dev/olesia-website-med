@@ -40,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ApiError } from '@/api/http';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
@@ -104,7 +105,12 @@ export function ServicesPage() {
       setDeleting(null);
       invalidate();
     },
-    onError: () => toast.error(t.toast.error),
+    onError: (err) => {
+      const inUse =
+        (err instanceof ApiError && err.status === 409) ||
+        (err instanceof Error && err.message === 'service_in_use');
+      toast.error(inUse ? t.toast.inUse : t.toast.error);
+    },
   });
 
   const openCreate = () => {

@@ -82,16 +82,6 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  // Serve uploaded images from disk at /uploads/* (bypasses the /api prefix).
-  // CORP header lets the cross-origin frontend (:3000) load them; without it
-  // the browser blocks the response (ERR_BLOCKED_BY_ORB).
-  app.useStaticAssets(STORAGE_DIR, {
-    prefix: `${STORAGE_URL_PREFIX}/`,
-    setHeaders: (res) => {
-      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    },
-  });
-
   /**
    * Behind a reverse proxy (Vercel, nginx, the cloudflared tunnel) the socket
    * address is the proxy's. Without this the rate limiter would bucket every
@@ -104,7 +94,7 @@ async function bootstrap() {
    * JSON and uploaded files, not HTML, and a policy would only be a
    * maintenance burden. `crossOriginResourcePolicy` stays off because uploads
    * are deliberately served cross-origin to the frontend (see the static
-   * assets above, which set their own CORP header).
+   * assets below, which set their own CORP header).
    */
   app.use(
     helmet({
@@ -112,6 +102,23 @@ async function bootstrap() {
       crossOriginResourcePolicy: false,
     }),
   );
+
+  /**
+   * Uploaded files at /uploads/* (outside the /api prefix), registered AFTER
+   * helmet on purpose: Express runs middleware in registration order, and while
+   * this sat first every stored file was served with no `X-Content-Type-Options`
+   * and no `X-Frame-Options` at all (audit A4, F4) — the one route on this API
+   * that returns something a browser will happily render.
+   *
+   * The CORP header lets the cross-origin frontend (:3000) load them; without
+   * it the browser blocks the response (ERR_BLOCKED_BY_ORB).
+   */
+  app.useStaticAssets(STORAGE_DIR, {
+    prefix: `${STORAGE_URL_PREFIX}/`,
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  });
 
   // Refresh token travels in an httpOnly cookie.
   app.use(cookieParser());

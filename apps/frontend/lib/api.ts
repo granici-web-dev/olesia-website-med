@@ -7,6 +7,11 @@ const API_URL = process.env.API_URL ?? 'http://localhost:3333/api';
 
 export type ServiceGroup = 'A_booking' | 'B_portal';
 
+/**
+ * The public catalog shape. Narrower than the back office's `ServiceDto`: the
+ * endpoint filters on `active` and withholds `calendlyEventTypeUri`, which is
+ * the webhook's mapping key and never was any of the site's business.
+ */
 export interface ServiceDto {
   id: string;
   code: string;
@@ -22,10 +27,8 @@ export interface ServiceDto {
   priceLabelRo: string | null;
   priceLabelEn: string | null;
   priceLabelRu: string | null;
-  calendlyEventTypeUri: string | null;
   calendlySchedulingUrl: string | null;
   sortOrder: number;
-  active: boolean;
 }
 
 export interface ContactDto {

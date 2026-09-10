@@ -5,7 +5,10 @@ import type { Service, ServiceInput } from '@/features/services/types';
 
 /**
  * Real `services` endpoints (module_calendly.md §6).
- * GET /services is public; mutations require admin/editor.
+ *
+ * The list is `/services/all`, not `/services`: the public one filters to the
+ * active catalog and drops `calendlyEventTypeUri`, so reading it here would
+ * hide exactly the rows and the field this panel exists to edit.
  */
 
 function toView(d: ServiceDto): Service {
@@ -32,7 +35,7 @@ function toView(d: ServiceDto): Service {
 }
 
 export async function fetchServices(): Promise<Service[]> {
-  const list = await http.get<ServiceDto[]>('/services');
+  const list = await http.get<ServiceDto[]>('/services/all');
   return list.map(toView).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 

@@ -24,13 +24,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { slugify } from '@olesia/shared';
+import { ApiError } from '@/api/http';
 import {
   fetchCategories,
   createCategory,
   updateCategory,
   deleteCategory,
   postCountForCategory,
-  slugify,
 } from '@/features/blog/data';
 import { categoriesQueryKey, postsQueryKey } from '@/features/blog/query-keys';
 import type { Category } from '@/features/blog/types';
@@ -74,7 +75,7 @@ export function CategoriesManagerSheet({
   const saveMutation = useMutation({
     mutationFn: () => {
       const input = {
-        slug: slugify(nameRo),
+        slug,
         nameRo: nameRo.trim(),
         nameEn: nameEn.trim(),
         // Optional: an untranslated category shows its RO name on the site.
@@ -99,7 +100,12 @@ export function CategoriesManagerSheet({
       setDeleting(null);
       invalidate();
     },
-    onError: () => toast.error(c.toast.error),
+    onError: (err) => {
+      const inUse =
+        (err instanceof ApiError && err.status === 409) ||
+        (err instanceof Error && err.message === 'category_in_use');
+      toast.error(inUse ? c.toast.inUse : c.toast.error);
+    },
   });
 
   const startEdit = (cat: Category) => {
@@ -109,7 +115,11 @@ export function CategoriesManagerSheet({
     setNameRu(cat.nameRu ?? '');
   };
 
-  const canSave = nameRo.trim() !== '' && nameEn.trim() !== '';
+  // The slug is derived, never typed, so a name that folds to nothing (a
+  // Cyrillic paste) has no address to be reached at. Say so rather than let
+  // the server answer 400 on a field the sheet does not show.
+  const slug = slugify(nameRo);
+  const canSave = nameRo.trim() !== '' && nameEn.trim() !== '' && slug !== '';
 
   return (
     <Sheet
@@ -246,11 +256,16 @@ export function CategoriesManagerSheet({
                 {ro.common.cancel}
               </Button>
             )}
-            {nameRo.trim() && (
-              <Badge variant="muted" className="ml-auto font-mono">
-                /{slugify(nameRo)}
-              </Badge>
-            )}
+            {nameRo.trim() &&
+              (slug ? (
+                <Badge variant="muted" className="ml-auto font-mono">
+                  /{slug}
+                </Badge>
+              ) : (
+                <p className="ml-auto text-xs text-destructive">
+                  {c.slugEmpty}
+                </p>
+              ))}
           </div>
         </form>
       </SheetContent>

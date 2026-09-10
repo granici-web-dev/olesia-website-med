@@ -9,9 +9,12 @@ import {
   IsString,
   IsUUID,
   Matches,
+  MaxLength,
   Min,
 } from 'class-validator';
+import { SLUG_PATTERN } from '@olesia/shared';
 
+import { IsUploadedFileUrl } from '../../common/uploaded-file-url';
 import {
   MaterialAccess,
   MaterialFlag,
@@ -29,7 +32,8 @@ export const AGE_KEYS = [
 
 export class CreateMaterialDto {
   /** URL slug. Lowercase words joined by single hyphens. */
-  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'slug_invalid' })
+  @Matches(SLUG_PATTERN, { message: 'slug_invalid' })
+  @MaxLength(120)
   slug!: string;
 
   @IsUUID()
@@ -42,23 +46,29 @@ export class CreateMaterialDto {
   ageKeys?: string[];
 
   @IsString()
+  @MaxLength(200)
   titleRo!: string;
 
   @IsString()
+  @MaxLength(200)
   titleEn!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   titleRu?: string | null;
 
   @IsString()
+  @MaxLength(2000)
   descriptionRo!: string;
 
   @IsString()
+  @MaxLength(2000)
   descriptionEn!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   descriptionRu?: string | null;
 
   @IsOptional()
@@ -68,6 +78,7 @@ export class CreateMaterialDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(32)
   fileLang?: string | null;
 
   @IsOptional()
@@ -86,11 +97,12 @@ export class CreateMaterialDto {
   flags?: MaterialFlag[];
 
   @IsOptional()
-  @IsString()
+  @IsUploadedFileUrl()
   fileUrl?: string | null;
 
   @IsOptional()
   @IsString()
+  @MaxLength(255)
   fileName?: string | null;
 
   @IsOptional()
@@ -107,13 +119,16 @@ export class UpdateMaterialDto extends PartialType(CreateMaterialDto) {}
 
 export class CreateMaterialCategoryDto {
   @IsString()
+  @MaxLength(200)
   nameRo!: string;
 
   @IsString()
+  @MaxLength(200)
   nameEn!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   nameRu?: string | null;
 
   @IsOptional()

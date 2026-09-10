@@ -4,6 +4,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
   MinLength,
 } from 'class-validator';
@@ -16,18 +17,22 @@ export class CreateContactDto {
 
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   labelRo!: string;
 
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   labelEn!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   labelRu?: string | null;
 
   @IsString()
   @MinLength(1)
+  @MaxLength(500)
   value!: string;
 
   @IsInt()

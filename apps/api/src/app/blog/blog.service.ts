@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { CategoryDto, Paginated, PostDto } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
+import { writeOrTranslate } from '../common/prisma-errors';
 import { toPostDto, toCategoryDto } from './blog.mapper';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import type { PostStatus } from '../../generated/prisma/enums';
 
 @Injectable()
 export class BlogService {
@@ -32,60 +38,59 @@ export class BlogService {
   }
 
   async createPost(dto: CreatePostDto, authorId: string): Promise<PostDto> {
-    const post = await this.prisma.post.create({
-      data: {
-        slug: dto.slug,
-        titleRo: dto.titleRo,
-        titleEn: dto.titleEn,
-        titleRu: dto.titleRu ?? null,
-        excerptRo: dto.excerptRo ?? null,
-        excerptEn: dto.excerptEn ?? null,
-        excerptRu: dto.excerptRu ?? null,
-        contentRo: dto.contentRo,
-        contentEn: dto.contentEn,
-        contentRu: dto.contentRu ?? null,
-        coverImageUrl: dto.coverImageUrl ?? null,
-        ageKeys: dto.ageKeys ?? [],
-        status: dto.status,
-        publishedAt: dto.publishedAt ? new Date(dto.publishedAt) : null,
-        author: { connect: { id: authorId } },
-        categories: { connect: dto.categoryIds.map((id) => ({ id })) },
-      },
-      include: { categories: true },
-    });
+    const post = await writeOrTranslate(() =>
+      this.prisma.post.create({
+        data: {
+          slug: dto.slug,
+          titleRo: dto.titleRo,
+          titleEn: dto.titleEn,
+          titleRu: dto.titleRu ?? null,
+          excerptRo: dto.excerptRo ?? null,
+          excerptEn: dto.excerptEn ?? null,
+          excerptRu: dto.excerptRu ?? null,
+          contentRo: dto.contentRo,
+          contentEn: dto.contentEn,
+          contentRu: dto.contentRu ?? null,
+          coverImageUrl: dto.coverImageUrl ?? null,
+          ageKeys: dto.ageKeys ?? [],
+          status: dto.status,
+          publishedAt: publicationDate(dto.status, dto.publishedAt),
+          author: { connect: { id: authorId } },
+          categories: { connect: dto.categoryIds.map((id) => ({ id })) },
+        },
+        include: { categories: true },
+      }),
+    );
     return toPostDto(post);
   }
 
   async updatePost(id: string, dto: UpdatePostDto): Promise<PostDto> {
-    await this.getPostOrThrow(id);
-    const post = await this.prisma.post.update({
-      where: { id },
-      data: {
-        slug: dto.slug,
-        titleRo: dto.titleRo,
-        titleEn: dto.titleEn,
-        titleRu: dto.titleRu,
-        excerptRo: dto.excerptRo,
-        excerptEn: dto.excerptEn,
-        excerptRu: dto.excerptRu,
-        contentRo: dto.contentRo,
-        contentEn: dto.contentEn,
-        contentRu: dto.contentRu,
-        coverImageUrl: dto.coverImageUrl,
-        ageKeys: dto.ageKeys,
-        status: dto.status,
-        publishedAt:
-          dto.publishedAt === undefined
-            ? undefined
-            : dto.publishedAt
-              ? new Date(dto.publishedAt)
-              : null,
-        categories: dto.categoryIds
-          ? { set: dto.categoryIds.map((cid) => ({ id: cid })) }
-          : undefined,
-      },
-      include: { categories: true },
-    });
+    const existing = await this.getPostOrThrow(id);
+    const post = await writeOrTranslate(() =>
+      this.prisma.post.update({
+        where: { id },
+        data: {
+          slug: dto.slug,
+          titleRo: dto.titleRo,
+          titleEn: dto.titleEn,
+          titleRu: dto.titleRu,
+          excerptRo: dto.excerptRo,
+          excerptEn: dto.excerptEn,
+          excerptRu: dto.excerptRu,
+          contentRo: dto.contentRo,
+          contentEn: dto.contentEn,
+          contentRu: dto.contentRu,
+          coverImageUrl: dto.coverImageUrl,
+          ageKeys: dto.ageKeys,
+          status: dto.status,
+          publishedAt: publicationDateOnUpdate(existing, dto),
+          categories: dto.categoryIds
+            ? { set: dto.categoryIds.map((cid) => ({ id: cid })) }
+            : undefined,
+        },
+        include: { categories: true },
+      }),
+    );
     return toPostDto(post);
   }
 
@@ -113,7 +118,9 @@ export class BlogService {
   }
 
   async createCategory(dto: CreateCategoryDto): Promise<CategoryDto> {
-    return toCategoryDto(await this.prisma.category.create({ data: dto }));
+    return toCategoryDto(
+      await writeOrTranslate(() => this.prisma.category.create({ data: dto })),
+    );
   }
 
   async updateCategory(
@@ -122,12 +129,25 @@ export class BlogService {
   ): Promise<CategoryDto> {
     await this.getCategoryOrThrow(id);
     return toCategoryDto(
-      await this.prisma.category.update({ where: { id }, data: dto }),
+      await writeOrTranslate(() =>
+        this.prisma.category.update({ where: { id }, data: dto }),
+      ),
     );
   }
 
+  /**
+   * Refused while articles are still filed under it. Post↔Category is an
+   * implicit many-to-many, so deleting the row used to succeed and silently
+   * drop the join rows with it (audit A4, F8): the articles stayed, their
+   * category did not, and nothing said so. Same answer as the material
+   * categories, which have had this guard from the start.
+   */
   async removeCategory(id: string): Promise<void> {
     await this.getCategoryOrThrow(id);
+    const inUse = await this.prisma.post.count({
+      where: { categories: { some: { id } } },
+    });
+    if (inUse > 0) throw new ConflictException('category_in_use');
     await this.prisma.category.delete({ where: { id } });
   }
 
@@ -136,4 +156,39 @@ export class BlogService {
     if (!category) throw new NotFoundException('category_not_found');
     return category;
   }
+}
+
+/**
+ * A published post has a date, always.
+ *
+ * The back office sends one, but nothing enforced it and nothing supplied it
+ * (audit A4, F2): a post published through any other caller landed with
+ * `publishedAt: null`, which the public list then sorted to the very top and
+ * the date-aware filter now hides outright. "Published just now" is the only
+ * honest reading of a publish with no date on it.
+ */
+function publicationDate(
+  status: PostStatus,
+  requested: string | null | undefined,
+): Date | null {
+  if (requested) return new Date(requested);
+  return status === 'published' ? new Date() : null;
+}
+
+/**
+ * The same rule for a PATCH, where every field may be absent: an untouched
+ * date stays untouched, and only a post that ends up published without one
+ * gets today's.
+ */
+function publicationDateOnUpdate(
+  existing: { status: PostStatus; publishedAt: Date | null },
+  dto: UpdatePostDto,
+): Date | null | undefined {
+  if (dto.publishedAt) return new Date(dto.publishedAt);
+  const status = dto.status ?? existing.status;
+  const cleared = dto.publishedAt === null;
+  if (status === 'published' && (cleared || !existing.publishedAt)) {
+    return new Date();
+  }
+  return cleared ? null : undefined;
 }

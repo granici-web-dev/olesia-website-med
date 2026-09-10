@@ -25,6 +25,13 @@ export class ContactsController {
 
   @Public()
   @Get()
+  findPublished() {
+    return this.contacts.findPublished();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.admin, Role.editor)
+  @Get('all')
   findAll() {
     return this.contacts.findAll();
   }

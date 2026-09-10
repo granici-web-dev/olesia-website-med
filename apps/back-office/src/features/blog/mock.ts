@@ -15,18 +15,6 @@ export async function uploadImage(file: File): Promise<string> {
   });
 }
 
-/** URL-safe slug, with Romanian diacritics folded to ASCII. */
-export function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/ă|â/g, 'a')
-    .replace(/î/g, 'i')
-    .replace(/ș|ş/g, 's')
-    .replace(/ț|ţ/g, 't')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
 const dateFmt = new Intl.DateTimeFormat('ro-RO', {
   day: '2-digit',
   month: 'short',

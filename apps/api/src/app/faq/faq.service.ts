@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { FaqCategoryDto, FaqItemDto } from '@olesia/shared';
+import { slugify } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { toFaqCategoryDto, toFaqItemDto } from './faq.mapper';
@@ -9,27 +10,11 @@ import {
 } from './dto/faq-category.dto';
 import { CreateFaqItemDto, UpdateFaqItemDto } from './dto/faq-item.dto';
 
-/** Romanian diacritics → ASCII, so "Confidențialitate" anchors as `#confidentialitate`. */
-const DIACRITICS: Record<string, string> = {
-  ă: 'a',
-  â: 'a',
-  î: 'i',
-  ș: 's',
-  ş: 's',
-  ț: 't',
-  ţ: 't',
-};
-
-function slugify(title: string): string {
-  const ascii = title
-    .toLowerCase()
-    .replace(/[ăâîșşțţ]/g, (c) => DIACRITICS[c] ?? c)
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-  // A title made entirely of characters we cannot transliterate (e.g. Cyrillic
-  // pasted into the Romanian field) would collapse to an empty anchor.
-  return ascii || 'sectiune';
-}
+/**
+ * A title made entirely of characters we cannot transliterate (e.g. Cyrillic
+ * pasted into the Romanian field) would collapse to an empty anchor.
+ */
+const SECTION_SLUG_FALLBACK = 'sectiune';
 
 @Injectable()
 export class FaqService {
@@ -61,7 +46,9 @@ export class FaqService {
   async createCategory(dto: CreateFaqCategoryDto): Promise<FaqCategoryDto> {
     const created = await this.prisma.faqCategory.create({
       data: {
-        slug: await this.uniqueSlug(slugify(dto.titleRo)),
+        slug: await this.uniqueSlug(
+          slugify(dto.titleRo, SECTION_SLUG_FALLBACK),
+        ),
         titleRo: dto.titleRo,
         titleEn: dto.titleEn,
         titleRu: dto.titleRu ?? null,

@@ -477,7 +477,7 @@ export const ro = {
 
     delete: {
       title: 'Ștergi serviciul?',
-      body: 'Serviciul va fi eliminat definitiv și nu va mai apărea pe site.',
+      body: 'Serviciul va fi eliminat definitiv și nu va mai apărea pe site. Dacă are deja programări sau abonamente, dezactivați-l în loc să îl ștergeți.',
       cta: 'Șterge serviciul',
     },
 
@@ -485,6 +485,8 @@ export const ro = {
       created: 'Serviciul a fost adăugat.',
       updated: 'Serviciul a fost actualizat.',
       deleted: 'Serviciul a fost șters.',
+      inUse:
+        'Serviciul are programări sau abonamente. Dezactivați-l în loc să îl ștergeți.',
       activated: 'Serviciul este afișat pe site.',
       deactivated: 'Serviciul a fost ascuns de pe site.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
@@ -567,7 +569,10 @@ export const ro = {
       settings: 'Setări',
       status: 'Status',
       slug: 'Slug (URL)',
-      slugHint: 'Generat din titlul RO. Poate fi editat.',
+      slugHint:
+        'Generat din titlul RO. Poate fi editat: litere mici, cifre și liniuțe.',
+      slugInvalid:
+        'Doar litere mici, cifre și liniuțe. Un titlu scris cu chirilice nu produce un slug — scrieți-l aici cu litere latine.',
       cover: 'Imagine de copertă',
       coverHint: 'JPG sau PNG, până la 5 MB.',
       uploadCover: 'Încarcă imagine',
@@ -595,12 +600,16 @@ export const ro = {
       empty: 'Nicio categorie încă.',
       deleteTitle: 'Ștergi categoria?',
       deleteBody:
-        'Categoria va fi eliminată și scoasă de pe articolele asociate.',
+        'Categoria poate fi ștearsă doar dacă niciun articol nu mai este pus sub ea.',
       deleteCta: 'Șterge',
+      slugEmpty:
+        'Numele RO nu produce o adresă (slug). Scrieți-l cu litere latine.',
       toast: {
         created: 'Categoria a fost adăugată.',
         updated: 'Categoria a fost actualizată.',
         deleted: 'Categoria a fost ștearsă.',
+        inUse:
+          'Categoria are articole. Mutați-le sub altă categorie înainte de a o șterge.',
         error: 'Acțiunea a eșuat. Încearcă din nou.',
       },
     },

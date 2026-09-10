@@ -48,20 +48,16 @@ const WEBP_QUALITY = 80;
 /** Videos (site media): stored as-is, no transcoding — see `saveVideo`. */
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 export const VIDEO_MAX_BYTES = MAX_VIDEO_BYTES;
-const VIDEO_EXT: Record<string, string> = {
-  'video/mp4': 'mp4',
-  'video/webm': 'webm',
-};
+const VIDEO_MIME = ['video/mp4', 'video/webm'];
 
 /** Documents (written plans): larger cap, office/PDF types, stored as-is. */
 const MAX_DOC_BYTES = 20 * 1024 * 1024;
 export const DOCUMENT_MAX_BYTES = MAX_DOC_BYTES;
-const DOC_EXT: Record<string, string> = {
-  'application/pdf': 'pdf',
-  'application/msword': 'doc',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-    'docx',
-};
+const DOCUMENT_MIME = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
 
 /**
  * Patient uploads (analyses, investigations). A wider allowlist than the
@@ -76,12 +72,28 @@ const DOC_EXT: Record<string, string> = {
  */
 const MAX_PATIENT_UPLOAD_BYTES = 15 * 1024 * 1024;
 
+/** MIME types a patient may send — surfaced to the upload page's `accept`. */
+export const PATIENT_UPLOAD_MIME = [
+  ...DOCUMENT_MIME,
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+];
+export const PATIENT_UPLOAD_MAX_BYTES = MAX_PATIENT_UPLOAD_BYTES;
+
 /**
- * What a patient may send, as the signature each declared type has to actually
- * have. The declared MIME picks the row; the file's own first bytes have to
- * agree with it, and the extension on disk comes from the bytes.
+ * The signature every declared type has to actually have.
+ *
+ * The declared MIME picks the row; the file's own first bytes have to agree
+ * with it, and the extension on disk comes from the bytes. Only the patient
+ * route did this until 2026-09-10 (audit A4, F3) — the doctor's own documents
+ * and the hero videos were stored under an extension taken from a header the
+ * uploader wrote, which is how an HTML page becomes `something.pdf` on a
+ * public static route.
  */
-const PATIENT_UPLOAD_SIGNATURE: Record<string, FileSignature> = {
+const SIGNATURE_BY_MIME: Record<string, FileSignature> = {
   'application/pdf': 'pdf',
   'application/msword': 'ole',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -91,11 +103,9 @@ const PATIENT_UPLOAD_SIGNATURE: Record<string, FileSignature> = {
   'image/webp': 'webp',
   'image/heic': 'heif',
   'image/heif': 'heif',
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
 };
-
-/** MIME types a patient may send — surfaced to the upload page's `accept`. */
-export const PATIENT_UPLOAD_MIME = Object.keys(PATIENT_UPLOAD_SIGNATURE);
-export const PATIENT_UPLOAD_MAX_BYTES = MAX_PATIENT_UPLOAD_BYTES;
 
 /**
  * Local file storage (module_calendly.md §11). Converts uploads to WebP
@@ -174,13 +184,10 @@ export class StorageService {
     if (!file) {
       throw new BadRequestException('No file uploaded.');
     }
-    const ext = DOC_EXT[file.mimetype];
-    if (!ext) {
-      throw new BadRequestException('Unsupported document type (use PDF/DOC/DOCX).');
-    }
     if (file.size > MAX_DOC_BYTES) {
       throw new BadRequestException('Document exceeds the 20 MB limit.');
     }
+    const ext = this.verifiedExtension(file, DOCUMENT_MIME);
 
     const filename = `${randomUUID()}.${ext}`;
     await mkdir(STORAGE_DIR, { recursive: true });
@@ -201,13 +208,10 @@ export class StorageService {
     if (!file) {
       throw new BadRequestException('No file uploaded.');
     }
-    const ext = VIDEO_EXT[file.mimetype];
-    if (!ext) {
-      throw new BadRequestException('Unsupported video type (use MP4/WebM).');
-    }
     if (file.size > MAX_VIDEO_BYTES) {
       throw new BadRequestException('Video exceeds the 50 MB limit.');
     }
+    const ext = this.verifiedExtension(file, VIDEO_MIME);
 
     const filename = `${randomUUID()}.${ext}`;
     await mkdir(STORAGE_DIR, { recursive: true });
@@ -225,13 +229,10 @@ export class StorageService {
     file: UploadedImage | undefined,
   ): Promise<{ key: string }> {
     if (!file) throw new BadRequestException('No file uploaded.');
-    const ext = DOC_EXT[file.mimetype];
-    if (!ext) {
-      throw new BadRequestException('Unsupported document type (use PDF/DOC/DOCX).');
-    }
     if (file.size > MAX_DOC_BYTES) {
       throw new BadRequestException('Document exceeds the 20 MB limit.');
     }
+    const ext = this.verifiedExtension(file, DOCUMENT_MIME);
     const key = `${randomUUID()}.${ext}`;
     await mkdir(PRIVATE_STORAGE_DIR, { recursive: true });
     await writeFile(join(PRIVATE_STORAGE_DIR, key), file.buffer);
@@ -258,21 +259,10 @@ export class StorageService {
     file: UploadedImage | undefined,
   ): Promise<{ key: string; ext: string }> {
     if (!file) throw new BadRequestException('No file uploaded.');
-    const declared = PATIENT_UPLOAD_SIGNATURE[file.mimetype];
-    if (!declared) {
-      throw new BadRequestException('unsupported_file_type');
-    }
     if (file.size > MAX_PATIENT_UPLOAD_BYTES) {
       throw new BadRequestException('file_too_large');
     }
-    // Same answer for "type we do not take" and "bytes that are not what the
-    // header claims": the sender learns nothing from the difference, and the
-    // page has one thing to say either way.
-    const actual = detectSignature(file.buffer);
-    if (actual !== declared) {
-      throw new BadRequestException('unsupported_file_type');
-    }
-    const ext = SIGNATURE_EXT[actual];
+    const ext = this.verifiedExtension(file, PATIENT_UPLOAD_MIME);
     const key = `${randomUUID()}.${ext}`;
     await mkdir(PRIVATE_STORAGE_DIR, { recursive: true });
     await writeFile(join(PRIVATE_STORAGE_DIR, key), file.buffer);
@@ -333,15 +323,24 @@ export class StorageService {
   }
 
   /**
-   * Permanently delete a public file given its stored URL (or bare filename).
-   * Best-effort/idempotent — used when erasing a person's uploaded attachments.
+   * The extension a file is stored under, once its own first bytes have agreed
+   * with the type it declared.
+   *
+   * Same answer for "type we do not take" and "bytes that are not what the
+   * header claims": on the patient route the sender must learn nothing from
+   * the difference, and everywhere else the two mean the same thing to the
+   * person who picked the wrong file.
    */
-  async deletePublicFile(urlOrName: string): Promise<void> {
-    if (!urlOrName) return;
-    try {
-      await rm(join(STORAGE_DIR, basename(urlOrName)), { force: true });
-    } catch (err) {
-      this.logger.warn(`Public file delete failed: ${String(err)}`);
+  private verifiedExtension(
+    file: UploadedImage,
+    allowedMime: readonly string[],
+  ): string {
+    const declared = allowedMime.includes(file.mimetype)
+      ? SIGNATURE_BY_MIME[file.mimetype]
+      : undefined;
+    if (!declared || detectSignature(file.buffer) !== declared) {
+      throw new BadRequestException('unsupported_file_type');
     }
+    return SIGNATURE_EXT[declared];
   }
 }

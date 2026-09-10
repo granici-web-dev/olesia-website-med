@@ -15,6 +15,7 @@ import type {
 } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { writeOrTranslate } from '../common/prisma-errors';
 import { StorageService, type UploadedImage } from '../storage/storage.service';
 import { paginate } from '../common/dto/pagination.dto';
 import { normalizePatientEmail } from '../common/patient-email';
@@ -29,9 +30,6 @@ import {
 } from './dto/patient.dto';
 import { CreateEntryDto, UpdateEntryDto } from './dto/entry.dto';
 import { FromLeadDto } from './dto/from-lead.dto';
-
-/** Postgres unique violation, as Prisma reports it. */
-const UNIQUE_VIOLATION = 'P2002';
 
 @Injectable()
 export class PatientsService {
@@ -127,7 +125,7 @@ export class PatientsService {
     // `toData` widens shared fields to optional (it also serves updates); on
     // create, re-assert the required identity fields from the DTO.
     return toPatientDto(
-      await this.writeOrConflict(() =>
+      await writeOrTranslate(() =>
         this.prisma.patient.create({
           data: { ...this.toData(dto), fullName: dto.fullName, email },
         }),
@@ -139,7 +137,7 @@ export class PatientsService {
     await this.getOrThrow(id);
     const email = dto.email ? this.requireEmail(dto.email) : undefined;
     return toPatientDto(
-      await this.writeOrConflict(() =>
+      await writeOrTranslate(() =>
         this.prisma.patient.update({
           where: { id },
           data: { ...this.toData(dto), ...(email ? { email } : {}) },
@@ -418,7 +416,7 @@ export class PatientsService {
       });
     }
 
-    const patient = await this.writeOrConflict(() =>
+    const patient = await writeOrTranslate(() =>
       this.prisma.$transaction(async (tx) => {
         const created = await tx.patient.create({
           data: { fullName: lead.name, email },
@@ -465,25 +463,6 @@ export class PatientsService {
     const email = normalizePatientEmail(raw);
     if (!email) throw new BadRequestException('email_required');
     return email;
-  }
-
-  /**
-   * Turn the unique-index violation into the 409 the caller already handles.
-   * The pre-flight lookups elsewhere give a friendlier message in the common
-   * case; this covers the one where two requests race past them (F18).
-   */
-  private async writeOrConflict<T>(write: () => Promise<T>): Promise<T> {
-    try {
-      return await write();
-    } catch (err) {
-      if (
-        err instanceof Prisma.PrismaClientKnownRequestError &&
-        err.code === UNIQUE_VIOLATION
-      ) {
-        throw new ConflictException('email_taken');
-      }
-      throw err;
-    }
   }
 
   /**
