@@ -56,7 +56,7 @@ export function formatAmount(amount: number, currency: string): string {
 }
 
 /* ------------------------------- mock data ------------------------------ */
-/* Used only when `VITE_API_MOCKS !== 'false'`; the real API is in `api.ts`.
+/* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`.
    Invented payers, as everywhere in the mocks. */
 
 const HOUR = 60 * 60 * 1000;

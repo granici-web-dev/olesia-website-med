@@ -4,8 +4,8 @@ interface ImportMetaEnv {
   /** Base URL of the NestJS API. Defaults to `/api` (same-origin proxy). */
   readonly VITE_API_URL?: string;
   /**
-   * When not exactly `"false"`, the app uses the in-memory mock data layer.
-   * Set `VITE_API_MOCKS=false` once the backend endpoints are live.
+   * Set to exactly `"true"` to run against the in-memory mock data layer.
+   * Anything else — including unset — talks to the real API.
    */
   readonly VITE_API_MOCKS?: string;
 }

@@ -3,7 +3,7 @@ import type {
   WorkingHoursInput,
 } from '@/features/working-hours/types';
 
-/* Used only when `VITE_API_MOCKS !== 'false'`; the real API is in `api.ts`. */
+/* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`. */
 
 let store: WorkingHours = {
   timezone: 'Europe/Chisinau',

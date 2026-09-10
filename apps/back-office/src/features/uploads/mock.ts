@@ -1,6 +1,6 @@
 import type { UploadLink } from '@/features/uploads/types';
 
-/* Used only when `VITE_API_MOCKS !== 'false'`; the real API is in `api.ts`.
+/* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`.
    Invented people, as everywhere in the mocks. */
 
 const DAY = 24 * 60 * 60 * 1000;

@@ -39,7 +39,7 @@ export function formatPrice(eur: number): string {
 }
 
 /* ------------------------------- mock data ------------------------------ */
-/* Used only when `VITE_API_MOCKS !== 'false'`; the real API is in `api.ts`.
+/* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`.
    Invented names, as everywhere in the mocks — this store never reaches the
    public site, unlike testimonials, where placeholder people did. */
 

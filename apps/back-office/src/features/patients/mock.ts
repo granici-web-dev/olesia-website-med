@@ -72,7 +72,7 @@ export const paymentBadgeVariant: Record<string, BadgeVariant> = {
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory store shaped like the `patients` REST API
  * (module_patients.md). TODO(api): served by `./api` once the backend is
- * reachable; flip with VITE_API_MOCKS=false.
+ * reachable; opt in with VITE_API_MOCKS=true.
  * ------------------------------------------------------------------ */
 
 const now = () => new Date().toISOString();

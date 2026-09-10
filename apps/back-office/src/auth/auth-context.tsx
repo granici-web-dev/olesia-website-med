@@ -46,7 +46,7 @@ function readStoredUser(): User | null {
 }
 
 /**
- * Auth provider. Real mode (default once `VITE_API_MOCKS=false`) talks to the
+ * Auth provider. Real mode (the default) talks to the
  * NestJS `auth` module: access token in memory, refresh token in an httpOnly
  * cookie (module_calendly.md §4). Mock mode keeps a demo admin session in
  * localStorage so the app runs without a backend.
