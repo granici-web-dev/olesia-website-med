@@ -1,0 +1,20 @@
+# Caddy, with the back office baked in.
+#
+# The admin panel is static files; giving it its own tiny web server would mean
+# a third image and a third thing to keep running. Caddy is already here for
+# TLS, so it serves them.
+
+# --- builder ---
+FROM node:22-slim AS builder
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+WORKDIR /app
+
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm nx build back-office
+
+# --- runtime ---
+FROM caddy:2-alpine AS runtime
+COPY docker/Caddyfile /etc/caddy/Caddyfile
+COPY --from=builder /app/apps/back-office/dist /srv/admin
+EXPOSE 80 443

@@ -1,0 +1,11 @@
+# The backup sidecar: Postgres client tools, plus what the scripts need that
+# the base image does not ship.
+#
+#   tzdata — the nightly run is scheduled in Europe/Chisinau, and alpine has no
+#            zone database, so without this every hour is UTC.
+#   rclone — the optional off-site copy. Installed whether or not RCLONE_REMOTE
+#            is set, because an image that cannot run the step is an image that
+#            silently stops being a backup the day someone configures it.
+
+FROM postgres:16-alpine
+RUN apk add --no-cache rclone tzdata

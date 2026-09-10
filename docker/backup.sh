@@ -62,7 +62,17 @@ find "$BACKUP_DIR" -name '*.part' -mtime +1 -delete
 
 echo "backup ok: $(basename "$DB_FILE")$([ -f "$FILES_FILE" ] && echo " + $(basename "$FILES_FILE")")"
 
-# ⚠ Off-site copy is NOT done here. A backup on the same disk as the database
-# survives a bad migration, not a dead server or a deleted account. Once the
-# host is chosen, sync $BACKUP_DIR to object storage in an EU region — the
-# files are special-category medical data (§11.14) and cannot leave the EU.
+# --- off-site copy ---------------------------------------------------------
+# A backup on the same disk as the database survives a bad migration, not a
+# dead server or a deleted account. RCLONE_REMOTE is the destination in rclone's
+# own syntax ("olesia-offsite:backups"), configured through RCLONE_CONFIG_*
+# environment variables or a mounted rclone.conf.
+#
+# ⚠ The destination must be in the EU: these archives hold special-category
+# medical data (§11.14).
+if [ -n "${RCLONE_REMOTE:-}" ]; then
+  rclone sync "$BACKUP_DIR" "$RCLONE_REMOTE" --config "${RCLONE_CONFIG:-/config/rclone/rclone.conf}"
+  echo "off-site sync ok: $RCLONE_REMOTE"
+else
+  echo "off-site sync skipped: RCLONE_REMOTE not set"
+fi

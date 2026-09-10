@@ -1,22 +1,63 @@
-# Production stack: API + Postgres + nightly backups.
+# Production stack: Caddy + API + Postgres + nightly backups.
 #
 # Differences from `docker-compose.yml` (which is for local work) that are not
 # cosmetic:
 #
-#  * **Postgres publishes no port.** Locally it is on 5432 so tooling can reach
-#    it; on a public host that is a database open to the internet.
+#  * **Its own project name.** Both files sit in this directory, and without
+#    `name` Compose derives the project from the directory for both — so the
+#    production stack would adopt the development Postgres, mount its data
+#    volume, and `down -v` would delete the developer's database.
+#  * **Only Caddy publishes a port.** Postgres and the API are reachable on the
+#    compose network and nowhere else.
 #  * **Nothing has a default password.** Every secret comes from the host
 #    environment and the stack refuses to start without it — `${VAR:?message}`
 #    fails loudly rather than booting with `olesia/olesia`.
-#  * **A backup service.** Automated backups are a client requirement
-#    (answers v2 §10) and, with patient documents in play, the difference
-#    between an incident and a catastrophe.
+#  * **A backup service**, and a `restore` service behind a profile. Automated
+#    backups are a client requirement (answers v2 §10) and, with patient
+#    documents in play, the difference between an incident and a catastrophe.
 #
-# Run:  docker compose -f docker-compose.prod.yml up -d
-# TLS:  terminate it in front of this stack (Caddy/nginx/the platform's own
-#       router). The API speaks plain HTTP and must not be exposed directly.
+# Run:      docker compose -f docker-compose.prod.yml up -d
+# Seed:     set -a; . ./.env; set +a
+#           docker compose -f docker-compose.prod.yml run --rm \
+#             -e SEED_PROFILE=prod -e ADMIN_EMAIL -e ADMIN_PASSWORD api node seed.js
+# Restore:  docker compose -f docker-compose.prod.yml --profile restore up -d restore
+# See `docs/deployment.md` for the day-of-deploy runbook.
+
+name: olesia-prod
+
+# Every service gets the same cap. The default json-file driver grows without
+# limit, and the first thing a full disk breaks is Postgres.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
 
 services:
+  caddy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.caddy
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      CADDY_API_HOST: ${CADDY_API_HOST:?set CADDY_API_HOST}
+      CADDY_ADMIN_HOST: ${CADDY_ADMIN_HOST:?set CADDY_ADMIN_HOST}
+      # An empty ACME_EMAIL becomes the literal `internal`, which makes Caddy
+      # issue its own certificate instead of asking Let's Encrypt — correct for
+      # a local acceptance run, wrong for the server.
+      CADDY_TLS: ${ACME_EMAIL:-internal}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      # Certificates and ACME account keys. Losing this volume means asking
+      # Let's Encrypt for everything again, against their rate limits.
+      - caddy_data:/data
+      - caddy_config:/config
+    logging: *logging
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -27,11 +68,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test:
-        ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
       interval: 10s
       timeout: 5s
       retries: 10
+    logging: *logging
 
   api:
     build:
@@ -44,7 +85,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
       PORT: '3333'
-      # Exact origins, no wildcards: the API serves patient data.
+      # Exact origins, no wildcards: the API serves patient data. The back
+      # office reaches /api on its own host, so this is the public site plus
+      # the admin host.
       CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS}
       # Public origins. PUBLIC_API_URL builds file URLs; PUBLIC_SITE_URL builds
       # the patient upload link, so it must be the SITE, not the API.
@@ -60,8 +103,8 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET}
       JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
       JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-7d}
-      # `Secure` on the refresh cookie. Only ever set this to false behind a
-      # proxy that terminates TLS somewhere the cookie never travels in clear.
+      # `Secure` on the refresh cookie. Caddy terminates TLS in front, and the
+      # hop to the API never leaves the compose network, so this stays true.
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
 
       # Booking. Until the client's paid account exists these stay empty and
@@ -69,6 +112,13 @@ services:
       CALENDLY_API_TOKEN: ${CALENDLY_API_TOKEN:-}
       CALENDLY_ORG_URI: ${CALENDLY_ORG_URI:-}
       CALENDLY_WEBHOOK_SIGNING_KEY: ${CALENDLY_WEBHOOK_SIGNING_KEY:-}
+
+      # Online payment. All empty means payment is off, which is correct until
+      # the acquirer contract exists; the API says so once at startup.
+      MAIB_BASE_URL: ${MAIB_BASE_URL:-}
+      MAIB_CLIENT_ID: ${MAIB_CLIENT_ID:-}
+      MAIB_CLIENT_SECRET: ${MAIB_CLIENT_SECRET:-}
+      MAIB_SIGNATURE_KEY: ${MAIB_SIGNATURE_KEY:-}
 
       # Email. Empty means log-only: leads are still saved, the "send link"
       # button reports that nothing was sent.
@@ -81,17 +131,13 @@ services:
 
       # Spam protection. Empty disables verification — set it before launch.
       RECAPTCHA_SECRET: ${RECAPTCHA_SECRET:-}
+      RECAPTCHA_MIN_SCORE: ${RECAPTCHA_MIN_SCORE:-0.5}
 
       # Patient uploads (§11.14). ⚠ MEDICAL_UPLOAD_RETENTION_DAYS is still a
       # placeholder pending the client's legal answer.
       UPLOAD_LINK_TTL_DAYS: ${UPLOAD_LINK_TTL_DAYS:-30}
       MEDICAL_UPLOAD_RETENTION_DAYS: ${MEDICAL_UPLOAD_RETENTION_DAYS:-180}
       UPLOAD_MAX_FILES: ${UPLOAD_MAX_FILES:-15}
-    # Bound to loopback: the reverse proxy in front reaches it, the internet
-    # does not. Drop the `127.0.0.1:` prefix only if the platform provides its
-    # own private network.
-    ports:
-      - '127.0.0.1:3333:3333'
     volumes:
       - uploads:/app/uploads
       - private_uploads:/app/private-uploads
@@ -106,24 +152,35 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
+      # Migrations run before the server listens, and 26 of them against a cold
+      # Postgres take longer than one interval.
+      start_period: 40s
+    logging: *logging
 
   # Nightly dump of the database AND the uploaded files. Both, because a dump
   # alone restores appointments referencing analyses nobody can open.
   backup:
-    image: postgres:16-alpine
+    build:
+      context: docker
+      dockerfile: Dockerfile.backup
+    image: olesia-prod-backup
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
+    environment: &backup_env
       PGHOST: postgres
       PGUSER: ${POSTGRES_USER}
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGDATABASE: ${POSTGRES_DB}
+      TZ: ${BACKUP_TZ:-Europe/Chisinau}
       BACKUP_DIR: /backups
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      BACKUP_HOUR: ${BACKUP_HOUR:-03}
       UPLOADS_DIR: /app/uploads
       PRIVATE_UPLOADS_DIR: /app/private-uploads
+      # Empty means the off-site step is skipped and says so in the log.
+      RCLONE_REMOTE: ${RCLONE_REMOTE:-}
     volumes:
       - ./docker/backup.sh:/usr/local/bin/backup.sh:ro
       - ./docker/restore.sh:/usr/local/bin/restore.sh:ro
@@ -131,18 +188,49 @@ services:
       # Read-only: this container copies files, it never writes to them.
       - uploads:/app/uploads:ro
       - private_uploads:/app/private-uploads:ro
-    # A plain sleep loop rather than a cron daemon: one job, no scheduler to
-    # misconfigure, and the container's own logs show every run.
+    # Sleep until the next BACKUP_HOUR in TZ rather than for a fixed day: with
+    # `sleep 86400` the backup time drifted to whenever the container last
+    # restarted, which on a server that reboots is any hour at all.
     entrypoint: ['/bin/sh', '-c']
     command:
       - |
         while true; do
+          now=$$((10#$$(date +%H) * 3600 + 10#$$(date +%M) * 60 + 10#$$(date +%S)))
+          delay=$$((10#$$BACKUP_HOUR * 3600 - now))
+          [ "$$delay" -le 0 ] && delay=$$((delay + 86400))
+          echo "next backup in $$delay seconds ($$BACKUP_HOUR:00 $$TZ)"
+          sleep "$$delay"
           sh /usr/local/bin/backup.sh || echo "BACKUP FAILED"
-          sleep 86400
         done
+    logging: *logging
+
+  # Restoring is the one operation that must write to the upload volumes, and
+  # it is also the one operation nobody should be able to trigger by accident.
+  # Its own service, behind a profile, idle until someone starts it by name.
+  restore:
+    build:
+      context: docker
+      dockerfile: Dockerfile.backup
+    image: olesia-prod-backup
+    profiles: [restore]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment: *backup_env
+    volumes:
+      - ./docker/backup.sh:/usr/local/bin/backup.sh:ro
+      - ./docker/restore.sh:/usr/local/bin/restore.sh:ro
+      - backups:/backups
+      - uploads:/app/uploads
+      - private_uploads:/app/private-uploads
+    entrypoint: ['/bin/sh', '-c']
+    command: ['sleep infinity']
+    logging: *logging
 
 volumes:
   pgdata:
   uploads:
   private_uploads:
   backups:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,49 @@
+# TLS, and the single origin the back office needs.
+#
+# Two hostnames, both from the environment so the same image serves the real
+# domain and a laptop. CADDY_TLS is the switch, and compose fills it from
+# ACME_EMAIL: an address means a certificate from Let's Encrypt, and an empty
+# ACME_EMAIL becomes the literal `internal`, so Caddy issues its own. That is
+# what makes an acceptance run on `localhost` possible without a public CA.
+# The substitution happens in compose rather than here because Caddy's own
+# `{$VAR:default}` only defaults when the variable is unset, and compose always
+# sets it.
+#
+# The admin host answers /api itself rather than sending the browser to the API
+# host: the refresh cookie is host-only and SameSite=Lax, and a cross-origin
+# back office would need CORS plus SameSite=None on a cookie that carries a
+# session into patient data.
+
+{
+	admin off
+}
+
+{$CADDY_API_HOST} {
+	tls {$CADDY_TLS}
+	encode zstd gzip
+	reverse_proxy api:3333
+}
+
+{$CADDY_ADMIN_HOST} {
+	tls {$CADDY_TLS}
+	encode zstd gzip
+
+	# The two paths the API owns on this host. /health sits outside the API's
+	# global /api prefix, so it needs naming separately.
+	handle /api/* {
+		reverse_proxy api:3333
+	}
+
+	handle /health {
+		reverse_proxy api:3333
+	}
+
+	handle {
+		root * /srv/admin
+		# A single-page app: every path that is not a file on disk is a route
+		# the router resolves in the browser, so reloading /pacienti has to
+		# serve index.html rather than 404.
+		try_files {path} /index.html
+		file_server
+	}
+}

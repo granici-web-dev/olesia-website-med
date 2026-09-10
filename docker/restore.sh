@@ -43,7 +43,11 @@ if [ -n "$FILES_ARCHIVE" ]; then
     echo "no such files archive: $FILES_ARCHIVE" >&2
     exit 2
   fi
-  # The archive stores absolute paths, so it unpacks over the live directories.
+  # tar strips the leading slash when it writes, so the archive holds
+  # `app/uploads/...`; unpacking at / lands them back on /app/uploads because
+  # that is where the volumes are mounted. This only works from the `restore`
+  # service in docker-compose.prod.yml — the `backup` service mounts both
+  # upload volumes read-only, and tar fails there rather than half-restoring.
   echo "restoring files from $FILES_ARCHIVE"
   tar -xzf "$FILES_ARCHIVE" -C /
 fi

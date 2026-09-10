@@ -119,6 +119,14 @@ export class MaibService {
   /** In-flight mint, so concurrent callers share one round-trip. */
   private minting: Promise<string> | null = null;
 
+  constructor() {
+    if (!this.isConfigured()) {
+      this.logger.warn(
+        'maib not configured — online payment is off (set MAIB_BASE_URL/MAIB_CLIENT_ID/MAIB_CLIENT_SECRET).',
+      );
+    }
+  }
+
   isConfigured(): boolean {
     return Boolean(this.baseUrl && this.clientId && this.clientSecret);
   }
