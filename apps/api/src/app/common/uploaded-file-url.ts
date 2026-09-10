@@ -1,10 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { IsUrl, Matches, MaxLength } from 'class-validator';
 
-import {
-  PUBLIC_API_URL,
-  STORAGE_URL_PREFIX,
-} from '../storage/storage.constants';
+import { STORAGE_URL_PREFIX } from '../storage/storage.constants';
 
 /**
  * A URL field that may only name a file this API stored.
@@ -12,9 +9,14 @@ import {
  * `fileUrl` and `coverImageUrl` were free-text (audit A4, F14): the back office
  * fills them from the upload endpoint's response, but nothing stopped a request
  * from putting `javascript:` or somebody else's domain in a field the public
- * site renders as an anchor and an `<img>`. The upload endpoints build their
- * URLs from `PUBLIC_API_URL` + `/uploads/`, so that prefix is the whole
- * allowlist, and the single trailing segment is the stored `<uuid>.<ext>`.
+ * site renders as an anchor and an `<img>`.
+ *
+ * The rule is the **path**, not the host: `/uploads/` followed by exactly one
+ * segment, which is the stored `<uuid>.<ext>`. Pinning the host to
+ * `PUBLIC_API_URL` was the first attempt and it was wrong — that value is a
+ * cloudflared tunnel today and a real domain tomorrow, so every row written
+ * under the previous host became unsaveable the moment it changed. A stored URL
+ * outlives the origin it was minted at; the shape of the path does not.
  */
 
 function escapeForRegExp(value: string): string {
@@ -22,12 +24,12 @@ function escapeForRegExp(value: string): string {
 }
 
 const STORED_FILE_URL = new RegExp(
-  `^${escapeForRegExp(`${PUBLIC_API_URL}${STORAGE_URL_PREFIX}/`)}[^/]+$`,
+  `^https?://[^/]+${escapeForRegExp(STORAGE_URL_PREFIX)}/[^/?#]+$`,
 );
 
 export function IsUploadedFileUrl() {
   return applyDecorators(
-    // `require_tld: false` because PUBLIC_API_URL is `http://localhost:3333`
+    // `require_tld: false` because the API answers on `http://localhost:3333`
     // in development, and validator.js otherwise refuses a hostless host.
     IsUrl({
       protocols: ['http', 'https'],
