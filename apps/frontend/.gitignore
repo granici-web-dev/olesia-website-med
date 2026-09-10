@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the example, which is documentation and has to be in the repo.
+# CLAUDE.md and AGENTS.md both point readers at it; the broad pattern above had
+# been quietly excluding it since the app was scaffolded.
+!.env.local.example
 
 # vercel
 .vercel
