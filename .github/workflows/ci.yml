@@ -56,9 +56,13 @@ jobs:
       - name: Typecheck API
         run: pnpm exec tsc -p apps/api/tsconfig.app.json --noEmit
 
-      # The frontend and back-office builds typecheck as they go; the API is
-      # bundled by webpack with SWC, which does not, hence the explicit step
-      # above.
+      - name: Typecheck back office
+        run: pnpm exec tsc -p apps/back-office/tsconfig.app.json --noEmit
+
+      # Only the frontend build typechecks as it goes: `next build` runs tsc.
+      # The API is bundled by webpack with SWC and the back office by Vite,
+      # and neither typechecks, hence the two explicit steps above. An unused
+      # import sat on main for weeks before the back-office step existed.
       - name: Build API
         run: pnpm nx build api
 

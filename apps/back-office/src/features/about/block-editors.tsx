@@ -9,7 +9,6 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { ro } from '@/i18n/ro';
 
 import type { AboutFormValues } from './form-schema';
@@ -133,22 +132,6 @@ function Field({
         {label}
       </Label>
       <Input id={id} {...props} />
-    </div>
-  );
-}
-
-/** A labelled multi-line field. */
-function AreaField({
-  label,
-  ...props
-}: { label: string } & React.ComponentProps<typeof Textarea>) {
-  const id = React.useId();
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id} className="text-xs text-muted-foreground">
-        {label}
-      </Label>
-      <Textarea id={id} rows={2} className="resize-y" {...props} />
     </div>
   );
 }
