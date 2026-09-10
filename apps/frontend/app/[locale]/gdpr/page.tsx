@@ -22,8 +22,9 @@ export const revalidate = 60;
    especially health data (special category) and children's data — and confirm
    the placeholders in META below (operator legal entity, data-contact mailbox,
    retention periods, full processor list, cross-border transfer safeguards,
-   whether EU GDPR applies for diaspora users). Framework: Legea 133/2011 today,
-   Legea 195/2024 (GDPR-aligned) from 23 Aug 2026; supervisory authority CNPDCP.
+   whether EU GDPR applies for diaspora users). Framework: Legea 195/2024
+   (GDPR-aligned), in force since 23 Aug 2026 and repealing Legea 133/2011;
+   supervisory authority CNPDCP.
    ────────────────────────────────────────────────────────────────────────── */
 
 /**
