@@ -16,14 +16,17 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Monorepo | Nx + pnpm workspaces | `nx 22.7.5`, `pnpm@9.15.9` |
 | API framework | NestJS on Express | `@nestjs/* ^11`, `express ^5.2.1` |
 | Database | PostgreSQL via Prisma with the pg driver adapter | `prisma ^7.8.0`, `@prisma/adapter-pg ^7.8.0` |
-| API auth | JWT access + refresh, passport-jwt, argon2 hashing | `@nestjs/jwt ^11.0.2`, `argon2 ^0.44.0` |
+| API auth | JWT access + refresh (sessions in `RefreshSession`), passport-jwt, argon2 hashing | `@nestjs/jwt ^11.0.2`, `argon2 ^0.44.0` |
 | API validation | class-validator + class-transformer DTOs | `^0.15.1` / `^0.5.1` |
 | API docs | Swagger at `/api/docs` | `@nestjs/swagger ^11.4.4` |
 | API hardening | helmet, @nestjs/throttler | `^8.3.0`, `^6.5.0` |
 | Scheduled work | @nestjs/schedule | `^6.1.3` |
 | Mail | nodemailer | `^8.0.11` |
 | Images | sharp, in the API's storage pipeline | `^0.35.0` |
-| Public site | Next.js App Router, React 19 | `next 16.2.7`, `react ^19` |
+| Uploads | multer, pinned across the tree by a pnpm override | `2.3.0` |
+| Second factor | otplib (TOTP + recovery codes), `TotpModule` under `auth` | `^13.4.1` |
+| Payments | maib e-Commerce Checkout, hand-written client | — |
+| Public site | Next.js App Router, React 19 | `next 16.3.4`, `react ^19` |
 | Public site i18n | next-intl, locales `ro` (default) / `en` / `ru` | — |
 | Public site styling | Tailwind v4 + CSS Modules, brand tokens as CSS variables | `tailwindcss ^4` |
 | Back office | React 19 + Vite, react-router-dom | `vite ^8`, `react-router-dom 6.30.3` (exact) |
@@ -32,9 +35,9 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Back office forms | react-hook-form + zod | `^7.78.0`, `zod ^4.4.3` |
 | Shared types | `packages/shared` — DTOs and enums, built with `tsc` | workspace |
 | Formatter | Prettier, single option: `singleQuote` | `~3.6.2` |
-| Test runner (API) | Jest with `@swc/jest` | `jest ~30.3.0` |
+| Test runner (API) | Jest with `@swc/jest`, 108 tests in 11 suites | `jest ~30.3.0` |
 | Test runner (back office) | Vitest, wired but unused | `vitest ~4.1.0` |
-| CI | GitHub Actions: typecheck, three builds, migration check | — |
+| CI | GitHub Actions: two typechecks, three builds, migration check. **Does not run the tests.** | — |
 | Deploy (site) | Vercel | — |
 | Deploy (API) | Docker Compose + Postgres, nightly backups | `docker-compose.prod.yml` |
 | Dependency updates | Dependabot, grouped | — |
@@ -48,10 +51,10 @@ NestJS API (`services`, `blog`, `about`, `contacts`, `faq`, `testimonials`,
 
 Third-party CMSes, Sanity included, were rejected deliberately on **2026-06-10**: the same
 admin surface has to own appointments, payments, patient files and the `admin` / `editor`
-roles, and an off-the-shelf CMS does not give that. The legacy Sanity integration has been
-deleted (`apps/frontend/lib/sanity/` is gone; two stale mentions remain in
-`next.config.ts` remote patterns and `apps/frontend/api/CLAUDE.md`). The legacy Cal.com
-directory is gone as well, booking having moved to Calendly.
+roles, and an off-the-shelf CMS does not give that. The legacy Sanity integration is fully
+gone as of 2026-09-10 — the `lib/sanity/` directory, the `cdn.sanity.io` remote pattern in
+`next.config.ts`, and the `apps/frontend/api/` directory whose only file described it. The
+legacy Cal.com directory went earlier, booking having moved to Calendly.
 
 This is a settled decision, not an absence to be filled later. New editable content gets a
 module here, not an external service.
@@ -77,9 +80,13 @@ for all three applications at once (`next`, `@nestjs/*`, `react-router-dom`, `sh
 while `apps/frontend` also has its own manifest. Ownership of a given dependency is
 therefore ambiguous by inspection. Stated as fact, not as a recommendation.
 
-**i18n is asymmetric.** The public site is `ro` / `en` / `ru`, with dynamic content from
-the API stored `*_ro` / `*_en` only and falling back to `ro` for `ru`. The back office is
-Romanian-only, with every string in one dictionary (`src/i18n/ro.ts`).
+**i18n is asymmetric.** The public site is `ro` / `en` / `ru`. API content is trilingual
+too — RO and EN required, `*Ru` nullable (added 2026-07-27, migration
+`20260727190927_content_ru_fields`), with readers falling back RU → RO through `loc()`,
+which treats an empty string as missing. An empty RU field is the client's to fill; we do
+not translate her content for her. The back office is Romanian-only, with every string in
+one dictionary (`src/i18n/ro.ts`). Page copy on the site is *not* in the JSON — see
+`AGENTS.md` R3.
 
 **`apps/frontend/origin/` is a read-only reference design.** HTML and JSX prototypes that
 define the visual intent. Never edited; implementations live in `components/` and `app/`.
@@ -93,8 +100,6 @@ define the visual intent. Never edited; implementations live in `components/` an
 - **No state library in the back office** beyond TanStack Query for server state. Zustand
   is listed for the public site and used in exactly one file.
 - **No Edge runtime** on the site; the API is a long-running Node process.
-- **No third-party payment SDK.** The maib client is hand-written; maib ships PHP and .NET
-  SDKs only.
 
 ## Dead or near-dead dependencies
 
@@ -105,12 +110,40 @@ Kept honest so nobody treats them as load-bearing.
 - **`agentation`** — dev-tools components only.
 - **`zustand`** — named as the UI state library in `CLAUDE.md`, present in one file.
 
-## Work in progress, not yet part of the committed stack
+## Payments — maib e-Commerce Checkout
 
-**maib e-Commerce Checkout.** `apps/api/src/app/payments/`, the migration
-`20260910120000_payments`, the shared payment DTOs and the back-office `Plăți` feature are
-written and verified against the bank's sandbox but not committed, and nothing calls
-`PaymentsService.start()` yet. `docs/payments-maib-checkout.md` is the reference: it
-records the bank's API, four places where the sandbox disagrees with the documentation,
-and what is still blocked on the client and on the acquirer. Treat that document as the
-source of truth for anything payments-related.
+**Part of the stack since 2026-09-10** (merge `4fb7161`), which reverses the earlier
+"payments out of scope — manual" position in `module_calendly.md`.
+
+`apps/api/src/app/payments/` holds a hand-written maib client (`maib.service.ts`), the
+checkout and status controllers, the callback receiver with HMAC signature verification,
+a scheduled reconciliation sweep, and refunds. `Payment` and `PaymentRefund` are their own
+tables (migrations `20260910120000_payments`, `20260910140000_payment_refund_guards`); the
+`paymentStatus` field on an appointment, order, subscription or question is a **mirror**
+of the payment row, written by `markTargetPaid()`, not a field anyone edits. The DTOs live
+in `packages/shared`, the back office renders them on the `Plăți` page, and 39 unit tests
+cover the state mapping and the signature.
+
+**No third-party payment SDK**, because maib publishes PHP and .NET only.
+
+**The flow is not connected.** Nothing calls `PaymentsService.start()`, the site has no
+pre-checkout step and no return pages, and the bank's back-channel callback has never been
+delivered — that needs a public HTTPS host, which does not exist yet. Treat
+`docs/payments-maib-checkout.md` as the source of truth: it records the bank's API, four
+places where the sandbox disagrees with the documentation, and what is still blocked on
+the client and on the acquirer.
+
+## Environment
+
+The API's variables are documented in `docs/deployment.md`; the site's in
+`apps/frontend/.env.local.example`. Two groups are worth naming here because they change
+how the system behaves rather than where it points:
+
+- `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` — at least 32 characters and different from
+  each other. `main.ts` checks both at boot and exits rather than starting on a weak or
+  shared secret. `COOKIE_SECURE` defaults to `true`, so the refresh cookie is `Secure`
+  unless someone explicitly says otherwise.
+- `MAIB_BASE_URL`, `MAIB_CLIENT_ID`, `MAIB_CLIENT_SECRET`, `MAIB_SIGNATURE_KEY` — all
+  blank means online payment is simply off, which is the correct state until the acquirer
+  contract exists. `MaibService.isConfigured()` tests the first three; a missing signature
+  key makes every callback rejected and logged, deliberately.

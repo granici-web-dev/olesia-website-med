@@ -19,9 +19,11 @@ procedure. Where the two disagree, see "Known divergences" at the end.
 - **Design properly the first time, in small pieces.** Features land as vertical slices
   with a `docs/shape-<slug>.md` written first (`AGENTS.md` R1). Carve-outs: typos, i18n
   copy, dependency bumps.
-- **The compiler is the safety net.** With almost no test suite, TypeScript strictness and
-  the CI build are what catch regressions. That is a deliberate trade, and it is why the
-  escape hatches below are effectively banned.
+- **The compiler is the safety net.** 108 unit tests cover the arithmetic that would be
+  expensive to get wrong — money, dates, signatures, upload rules — and nothing else; CI
+  does not run them. TypeScript strictness, the three typecheck steps and the migration
+  check are what actually catch regressions. That is a deliberate trade (`TESTING.md`
+  argues it), and it is why the escape hatches below are effectively banned.
 
 ## Abstractions
 
@@ -61,18 +63,29 @@ procedure. Where the two disagree, see "Known divergences" at the end.
 - **Validate at boundaries, nowhere else.** `class-validator` DTOs on every HTTP entry
   point in the API (31 files); `zod` on the two front ends for forms (12 files). Internal
   calls trust the type system: no defensive `if (!arg) return` in helpers.
-- **Throw, do not catch.** 17 `try/catch` blocks across 158 hand-written API files, all at
-  real boundaries: third-party calls, JSON parsing of untrusted bodies, filesystem. Inside
-  business code, throw `NotFoundException` / `BadRequestException` and let Nest's built-in
-  exception filter answer. There are no custom `@Catch` filters, and none are wanted.
+- **Throw, do not catch.** `try/catch` appears only at real boundaries: third-party calls,
+  JSON parsing of untrusted bodies, filesystem. Inside business code, throw
+  `NotFoundException` / `BadRequestException` and let Nest's built-in exception filter
+  answer.
+- **One `@Catch` filter exists, and it is the shape of the exception that justifies it.**
+  `uploads/file-too-large.filter.ts`. Multer aborts an oversized upload inside the
+  interceptor chain, *before* the handler runs, so the route has no opportunity to map it —
+  Nest renders English prose where the public upload page keys its three languages off the
+  API's machine codes. The filter answers with the same `file_too_large` the storage
+  service throws when a file gets past the parser, so a patient reads one wording either
+  way. A second filter needs the same argument: the exception cannot be caught where it
+  matters. Anything a handler *can* raise stays a thrown exception.
 - **A swallowed error must say why it is swallowed.** The few `catch {}` blocks that
   continue carry a comment explaining the fallback (best-effort logout, bank unavailable
   and the sweep will retry).
-- **No escape hatches.** Zero `any`, zero `@ts-ignore` in hand-written code. Three
-  `as unknown as` casts exist in committed code, in two places: the JSON `days` column in
-  `working-hours.service.ts`, and the raw text response in
-  `apps/back-office/src/api/http.ts`. Both are points where a value leaves the type system
-  entirely. A fourth needs a reason in a comment.
+- **No escape hatches.** Zero `any`, zero `@ts-ignore` in hand-written code. Five
+  `as unknown as` casts exist, each at a point where a value genuinely leaves the type
+  system: the JSON `days` column in `working-hours.service.ts` (twice), the raw callback
+  body stored as `Prisma.InputJsonValue` in `payments.service.ts`, the raw text response in
+  `apps/back-office/src/api/http.ts`, and the payment DTO widened into the view layer's
+  unions in `apps/back-office/src/features/payments/api.ts`. A sixth needs a reason in a
+  comment; a cast used to silence a type error rather than to cross a boundary does not go
+  in at all.
 
 ## Truthfulness of content
 
@@ -135,7 +148,7 @@ the code here.
   non-standard types `content` and `i18n` are in regular use. Scopes lapsed over the last
   ~25 commits as work moved into `api` and `back-office`; restoring them is welcome, not
   required. Subject ≤ 72 chars, body explains why.
-- **The TODOs in the tree are litter, not a backlog.** 22 lines, almost all
+- **The TODOs in the tree are litter, not a backlog.** 22 lines, 16 of them
   `TODO(api)` / `TODO(shared)` markers in the back office's `mock.ts` and `types.ts` files,
   left over from spring and long since done. They should be deleted, not worked through.
   A new TODO needs a plan next to it or it does not go in.
@@ -145,13 +158,26 @@ the code here.
 ## Known divergences from AGENTS.md
 
 Recorded because pretending they do not exist is how the next agent gets it wrong.
+Four were listed here on 2026-09-10; all four were closed the same day, by amending
+whichever side was wrong.
 
-- **R3 says every user-facing string goes through `next-intl`.** In practice 38 files use
-  inline `locale === 'ru' ? … : en ? … : ro` ternaries against 7 that use `next-intl`.
-  The ternaries are the dominant pattern; all three branches must be kept in sync by hand.
-- **§3's file-naming table still lists Sanity query files.** Sanity was dropped in favour
-  of the custom NestJS content API. There are no `*.query.ts` files.
-- **§7 shows scoped commits.** The most recent ~25 commits have no scope. See above.
-- **R1 requires a `docs/shape-<slug>.md` before non-trivial work.** There is not a single
-  shape file in `docs/`. The work to date was done without them; the first one will come
-  out of `/rigorous shape`.
+- ~~**R3 vs. the inline locale ternaries.**~~ Closed: **the practice was right and the rule
+  was wrong.** R3 now describes what the code does — page copy is an inline ternary with
+  all three locale branches mandatory, and `i18n/messages/*.json` carries only the shared
+  frame that seven components read through `next-intl`. Migrating either way was considered
+  and rejected: a page moved into JSON loses the ability to read three languages side by
+  side, and a nav string moved out of it gets duplicated across every layout.
+- ~~**R1's shape files, of which there were none.**~~ Closed: **the rule stands and the
+  practice changes.** R1 keeps the requirement and now names the mechanism it was missing —
+  `/rigorous shape`, saved to `docs/shape-<slug>.md`, approved before `/rigorous craft`.
+  The work to date was done without one; the first shape file comes out of `PLAN.md` step 8.
+- ~~**§3's file-naming table listed Sanity query files.**~~ Closed: the row is gone, along
+  with the last `cdn.sanity.io` reference in `next.config.ts` and the stale
+  `apps/frontend/api/CLAUDE.md`.
+- ~~**§7 showed commit scopes the last ~25 commits did not use.**~~ Closed: §7 now
+  describes the actual convention — `type(optional-scope): subject`, the subject a finished
+  sentence about the outcome, with the type list the repository really uses. The scope is
+  encouraged, not required, which is what was true all along.
+
+**What remains a real divergence:** none. When one appears, write it here rather than
+letting the two files disagree quietly.
