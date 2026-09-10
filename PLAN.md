@@ -576,7 +576,7 @@ HTTPS (callback банка проверить нельзя без него).
 |---|---|---|---|---|
 | A1 | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap | правда контента, см. 10a | 10a | `[x]` `3bb74a0` |
 | A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
-| A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[>]` аудит 2026-09-10, 25 находок, harden в работе |
+| A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[x]` `085a3d2`, `c0dd5f6` |
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[ ]` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[ ]` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[ ]` |
@@ -759,6 +759,25 @@ A2 закрыт: `harden` `2396497`, 20 файлов, миграция
 входе, `fromLead` при совпадении отвечает 409 и связывание идёт явным вызовом;
 поле `attachments` у EXPRESS убирается; дедупликация повторных отправок в A8,
 `nodemailer` в A12.
+
+A3 закрыт двумя коммитами: `085a3d2` (пациенты и стирание: `normalizePatientEmail`
+как единственный вход, citext с нормализацией существующих строк, `fromLead`
+отвечает 409 и связывание идёт явным вызовом, стирание через `erasureTargets` по
+восьми таблицам с отчётом, автор записей, DTO документа, аудит-лог без PII) и
+`c0dd5f6` (уведомления и приём: `PatientNotificationsService` поверх `MailService`
+с шаблонами RO/EN/RU и колонкой `locale` у лидов, бэк-офис показывает «Email
+netrimis» с копированием, `prepSentAt` только при реальной отправке, пять
+переменных обязательны в production, `maskEmail` в одном модуле, таймзона
+практики в письмах, таймаут капчи, honeypot на всех четырёх формах, `attachments`
+удалён, IANA-валидация таймзоны). 183 теста (+36). Проверено живьём: стирание
+пациента с записью без `patientId`, заказом группы C, сообщением и платежом даёт
+ноль строк с PII при сохранённых суммах. Два принятых отклонения:
+`Payment.payerEmail` анонимизируется сентинелом, не null (колонка NOT NULL,
+платежи переделывает A8); `calendlyEventUri` не обнуляется, это не PII и именно
+он не даёт повторному вебхуку пересоздать стёртую запись. Побочная находка:
+honeypot с `MaxLength(0)` отвечал ботам 400 по одному полю вместо тихого успеха,
+исправлено. Колонка «Ultima interacțiune» в списке пациентов удалена вместе с
+мёртвой веткой, заполнить по-настоящему это отдельный craft.
 
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
