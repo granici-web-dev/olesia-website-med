@@ -433,15 +433,37 @@ Railway, 5–15 €/мес) по `docker-compose.prod.yml` и `docs/deployment.m
 root, без ротации логов, без `start_period`, бэкап привязан к времени рестарта,
 а не к часу.
 
-**8e-2** `[ ]` `/rigorous shape` пакета: Caddy в compose с автоматическим TLS,
+**8e-2** `[x]` `/rigorous shape` пакета: Caddy в compose с автоматическим TLS,
 бэк-офис как статика за Caddy на одном origin с `/api`, prod-safe seed (только
 услуги, рабочие часы, админ из env с `mustChangePassword`, без демо-контента,
 отказ стартовать без `ADMIN_PASSWORD`), `.env.prod.example` со всеми 28
 переменными API и командами генерации секретов, runbook на день деплоя.
 
-**8e-3** `[ ]` `/rigorous craft` по утверждённому shape, с повторным сухим
+**8e-3** `[x]` `/rigorous craft` по утверждённому shape, с повторным сухим
 прогоном как приёмкой: `curl https://localhost/api/health` через Caddy с
 самоподписанным сертификатом, бэк-офис открывается и логинится.
+
+Готово: shape `docs/shape-deploy-package.md` (`2daa361`), коммиты `ec88d50` (образ
+API стартует: API-only зависимости в `apps/api/package.json`, `nx prune`, runtime
+под `node`, seed в `apps/api/src/seed/` с профилем `SEED_PROFILE=prod|dev` и 6
+тестами) и `8229713` (стек одной командой: `Dockerfile.caddy` с запечённым
+бэк-офисом, `Caddyfile` на два хоста, `Dockerfile.backup` с rclone и tzdata,
+`name: olesia-prod`, профиль `restore`, бэкап в 03:00 Europe/Chisinau, ротация
+логов, `.env.prod.example`, `docs/deployment.md` с runbook на 348 строк). Приёмка
+26 пунктов пройдена, включая restore файлов через профиль и целостность
+dev-проекта. Решение 1 shape пересмотрено с доказательством: Nx бандлит только
+не-buildable библиотеки, поэтому `@olesia/shared` попадает в образ как
+`workspace_modules` через `nx prune`, а не в бандл. Отклонения, все приняты:
+внешние зависимости webpack выводятся из `apps/api/package.json`; `dotenv`,
+`tslib`, `packageManager`, `pnpm.overrides` в манифесте API нужны сборке образа;
+приёмка шла с `CADDY_API_HOST=api.localhost`, два одинаковых хоста Caddy не парсит.
+
+Не закрыто с записью: образ API 1 ГБ (arm64) против ориентира 600, ~160 МБ это
+CLI Prisma только ради `migrate deploy` на старте, рычаг в `deployment.md` «Still
+open»; ACME и настоящие сертификаты не проверены до хостинга; `pnpm` предупреждает
+про `pnpm.overrides` в `apps/api/package.json` при каждом install, безвредно и
+задокументировано; два Nx-заглушечных спека в `apps/api/src/app/` можно удалить
+при случае.
 
 **8e-4** `[ ]` Инструкция клиенту на регистрацию хостинга, на русском и румынском:
 провайдер, тариф, регион, какой доступ выдать нам. Рекомендация: Hetzner Cloud,
