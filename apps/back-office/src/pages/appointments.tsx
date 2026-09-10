@@ -117,6 +117,12 @@ export function AppointmentsPage() {
     [appointments, selectedId],
   );
 
+  const rescheduledFrom = React.useMemo(
+    () =>
+      appointments.find((a) => a.id === selected?.rescheduledFromId) ?? null,
+    [appointments, selected?.rescheduledFromId],
+  );
+
   const filtersActive = status !== 'all' || service !== 'all' || search !== '';
 
   const resetFilters = () => {
@@ -306,6 +312,8 @@ export function AppointmentsPage() {
 
       <AppointmentDetailSheet
         appointment={selected}
+        rescheduledFrom={rescheduledFrom}
+        onOpenAppointment={setSelectedId}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />

@@ -133,6 +133,12 @@ export interface AppointmentDto {
    */
   planFileName: string | null;
   planUploadedAt: string | null;
+  /**
+   * The canceled appointment this one was rescheduled from, when Calendly said
+   * so. A reschedule is a new event with a new URI, so it is a new row; this
+   * is the only thing tying the two halves together.
+   */
+  rescheduledFromId: string | null;
   createdAt: string;
   updatedAt: string;
 }

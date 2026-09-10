@@ -193,30 +193,36 @@ model Service {
 // --- Appointments (group A, Calendly) ---
 
 model Appointment {
-  id               String            @id @default(uuid())
-  service          Service           @relation(fields: [serviceId], references: [id])
-  serviceId        String
-  calendlyEventUri String            @unique // idempotency key
-  clientName       String
-  clientEmail      String
-  reason           String?
-  startTime        DateTime
-  endTime          DateTime
-  videoUrl         String?
-  status           AppointmentStatus @default(scheduled)
-  paymentStatus    PaymentStatus     @default(pending)
-  cancelUrl        String?
-  rescheduleUrl    String?
-  prepSentAt       DateTime?
-  planText         String? // written treatment plan typed by the specialist
-  planFileKey      String? // PRIVATE storage key of an optional attachment (rx/doc)
-  planFileName     String? // original filename of the attachment, for download
-  planUploadedAt   DateTime?
-  patient          Patient?          @relation(fields: [patientId], references: [id])
-  patientId        String?
-  uploadLinks      UploadLink[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id                 String            @id @default(uuid())
+  service            Service           @relation(fields: [serviceId], references: [id])
+  serviceId          String
+  calendlyEventUri   String            @unique // idempotency key
+  calendlyInviteeUri String?           @unique // invitee URI, how a reschedule names the row it replaces
+  clientName         String
+  clientEmail        String
+  reason             String?
+  startTime          DateTime
+  endTime            DateTime
+  videoUrl           String?
+  status             AppointmentStatus @default(scheduled)
+  paymentStatus      PaymentStatus     @default(pending)
+  cancelUrl          String?
+  rescheduleUrl      String?
+  prepSentAt         DateTime?
+  planText           String? // written treatment plan typed by the specialist
+  planFileKey        String? // PRIVATE storage key of an optional attachment (rx/doc)
+  planFileName       String? // original filename of the attachment, for download
+  planUploadedAt     DateTime?
+  patient            Patient?          @relation(fields: [patientId], references: [id])
+  patientId          String?
+  // A rescheduled booking is a new Calendly event, so it is a new row; this
+  // points at the canceled one it grew out of.
+  rescheduledFrom    Appointment?      @relation("AppointmentReschedule", fields: [rescheduledFromId], references: [id])
+  rescheduledFromId  String?           @unique
+  rescheduledTo      Appointment?      @relation("AppointmentReschedule")
+  uploadLinks        UploadLink[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   @@index([serviceId])
   @@index([status])

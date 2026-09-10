@@ -6,6 +6,7 @@ import {
   Download,
   ExternalLink,
   FileText,
+  History,
   Loader2,
   Mail,
   Paperclip,
@@ -87,10 +88,15 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export function AppointmentDetailSheet({
   appointment,
+  rescheduledFrom,
+  onOpenAppointment,
   open,
   onOpenChange,
 }: {
   appointment: Appointment | null;
+  /** The canceled booking this one grew out of, when it is in the loaded list. */
+  rescheduledFrom: Appointment | null;
+  onOpenAppointment: (id: string) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -257,7 +263,7 @@ export function AppointmentDetailSheet({
                   {durationMinutes(a.startTime, a.endTime)} min
                 </Field>
                 <Field label={t.detail.video}>
-                  {a.videoUrl ? (
+                  {a.videoUrl?.startsWith('https://') ? (
                     <a
                       href={a.videoUrl}
                       target="_blank"
@@ -282,6 +288,19 @@ export function AppointmentDetailSheet({
                     </span>
                   )}
                 </Field>
+                {rescheduledFrom ? (
+                  <Field label={t.detail.rescheduledFrom}>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAppointment(rescheduledFrom.id)}
+                      className="inline-flex cursor-pointer items-center gap-1.5 text-foreground underline-offset-4 hover:text-primary hover:underline"
+                      title={t.detail.openPrevious}
+                    >
+                      <History className="size-3.5 text-muted-foreground" />
+                      {formatDateTime(rescheduledFrom.startTime)}
+                    </button>
+                  </Field>
+                ) : null}
               </dl>
 
               <Separator className="my-4" />

@@ -44,6 +44,8 @@ export interface Appointment {
   /** Filename of the optional plan attachment, or null. Downloaded via auth. */
   planFileName: string | null;
   planUploadedAt: string | null;
+  /** The canceled appointment this one was rescheduled from, if any. */
+  rescheduledFromId: string | null;
 }
 
 /** Status used by the segmented filter; `all` is the no-op selection. */

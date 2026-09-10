@@ -32,11 +32,19 @@ import { SavePlanDto } from './dto/save-plan.dto';
 /**
  * Appointments — video consultations (module_calendly.md §8). Rows are created
  * by the Calendly webhook; the back office reads them and performs the manual
- * actions (confirm payment, upload plan, mark no-show). Staff-only.
+ * actions (confirm payment, upload plan, mark no-show).
+ *
+ * `admin` only, including the list: an appointment carries the reason the
+ * parent typed into the booking form, which is a medical complaint, plus the
+ * email and the cancel/reschedule URLs, which are working credentials for
+ * someone else's booking. Matches `patients` and `uploads`, and holds until
+ * the client answers who besides her gets an account (`PLAN.md`, "Роли в
+ * бэк-офисе"); if a content editor is ever meant to see this list, it needs a
+ * narrower DTO, not a wider role.
  */
 @ApiTags('appointments')
 @ApiBearerAuth()
-@Roles(Role.admin, Role.editor)
+@Roles(Role.admin)
 @Controller('appointments')
 export class AppointmentsController {
   constructor(

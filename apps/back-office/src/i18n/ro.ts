@@ -317,6 +317,8 @@ export const ro = {
       calendlyRef: 'Referință Calendly',
       cancelLink: 'Anulează în Calendly',
       rescheduleLink: 'Reprogramează',
+      rescheduledFrom: 'Reprogramată din',
+      openPrevious: 'Deschide programarea anulată',
     },
 
     actions: {

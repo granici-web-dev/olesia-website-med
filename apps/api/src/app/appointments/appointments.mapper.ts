@@ -22,6 +22,7 @@ export function toAppointmentDto(a: Appointment): AppointmentDto {
     // Expose only the filename — never the private storage key.
     planFileName: a.planFileName,
     planUploadedAt: a.planUploadedAt ? a.planUploadedAt.toISOString() : null,
+    rescheduledFromId: a.rescheduledFromId,
     createdAt: a.createdAt.toISOString(),
     updatedAt: a.updatedAt.toISOString(),
   };

@@ -58,6 +58,7 @@ function toView(
     planText: d.planText,
     planFileName: d.planFileName,
     planUploadedAt: d.planUploadedAt,
+    rescheduledFromId: d.rescheduledFromId,
   };
 }
 

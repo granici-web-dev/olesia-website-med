@@ -55,6 +55,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
   {
     id: 'a2',
@@ -74,6 +75,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
   {
     id: 'a3',
@@ -93,6 +95,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
   {
     id: 'a4',
@@ -113,6 +116,7 @@ let store: Appointment[] = [
       'Continuați diversificarea treptată. Reevaluare neuromotorie peste 4 săptămâni. Vitamina D 400 UI/zi.',
     planFileName: 'plan-cristina-moraru.pdf',
     planUploadedAt: '2026-06-09T13:20:00+03:00',
+    rescheduledFromId: null,
   },
   {
     id: 'a5',
@@ -132,6 +136,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
   {
     id: 'a6',
@@ -151,6 +156,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
   {
     id: 'a7',
@@ -170,6 +176,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
   {
     id: 'a8',
@@ -189,6 +196,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
   {
     id: 'a9',
@@ -209,6 +217,7 @@ let store: Appointment[] = [
       'Apetit în limite normale pentru vârstă. Menținere ritm mese. Control creștere peste 3 luni.',
     planFileName: null,
     planUploadedAt: '2026-06-06T17:10:00+03:00',
+    rescheduledFromId: null,
   },
   {
     id: 'a10',
@@ -228,6 +237,7 @@ let store: Appointment[] = [
     planText: null,
     planFileName: null,
     planUploadedAt: null,
+    rescheduledFromId: null,
   },
 ];
 

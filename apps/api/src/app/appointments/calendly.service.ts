@@ -1,6 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 
+/** Calendly's own recommended tolerance for the signature timestamp. */
+const SIGNATURE_TOLERANCE_SECONDS = 180;
+
 /** A single custom question/answer pair from the booking form. */
 export interface CalendlyQuestionAnswer {
   question: string;
@@ -10,19 +13,26 @@ export interface CalendlyQuestionAnswer {
 
 /** Minimal shape of the Calendly v2 `invitee.*` webhook payload we consume. */
 export interface CalendlyWebhookBody {
-  event: string; // 'invitee.created' | 'invitee.canceled' | ...
+  event: string; // 'invitee.created' | 'invitee.canceled' | 'invitee_no_show.created'
   payload?: {
+    /** The invitee's own URI — what a reschedule names its predecessor by. */
+    uri?: string;
     name?: string;
     email?: string;
     cancel_url?: string;
     reschedule_url?: string;
+    /** True on both halves of a reschedule: the cancel and the new booking. */
+    rescheduled?: boolean;
+    /** On the new booking, the invitee URI of the one it replaces. */
+    old_invitee?: string | null;
+    new_invitee?: string | null;
     questions_and_answers?: CalendlyQuestionAnswer[];
     scheduled_event?: {
       uri?: string;
       start_time?: string;
       end_time?: string;
       event_type?: string;
-      location?: { type?: string; join_url?: string; location?: string };
+      location?: { type?: string; join_url?: string | null; location?: string };
     };
   };
 }
@@ -34,11 +44,12 @@ export interface CalendlyScheduledEvent {
   start_time: string;
   end_time: string;
   event_type: string;
-  location?: { type?: string; join_url?: string; location?: string };
+  location?: { type?: string; join_url?: string | null; location?: string };
 }
 
 /** An invitee as returned by the Calendly REST API. */
 export interface CalendlyInvitee {
+  uri?: string;
   name?: string;
   email?: string;
   status?: string;
@@ -46,6 +57,11 @@ export interface CalendlyInvitee {
   reschedule_url?: string;
   questions_and_answers?: CalendlyQuestionAnswer[];
 }
+
+/** The outcome of one Calendly API call: parsed body, or the status it failed with. */
+export type CalendlyApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; status: number | null };
 
 /** One page of a Calendly list response. */
 export interface CalendlyPage<T> {
@@ -92,6 +108,15 @@ export class CalendlyService {
   /**
    * Verify the `Calendly-Webhook-Signature: t=<ts>,v1=<hmac>` header against
    * the raw request bytes. HMAC-SHA256 over `"<ts>.<rawBody>"`, hex-encoded.
+   *
+   * `t` is Unix seconds and deliveries older than `SIGNATURE_TOLERANCE_SECONDS`
+   * are refused, which is Calendly's own recommendation: without it a captured
+   * delivery stays valid forever, and replaying an old `invitee.created` walks
+   * a consultation's start time backwards through `applyBooking`.
+   *
+   * The rejection reason is logged (never the body) because the failure this
+   * catches in practice is not an attack but a wrong signing key after an
+   * account swap, which otherwise looks like "bookings stopped arriving".
    */
   verifySignature(
     rawBody: Buffer | undefined,
@@ -117,6 +142,14 @@ export class CalendlyService {
     }
     if (!t || !v1) return false;
 
+    const ageSeconds = Math.abs(Date.now() / 1000 - Number(t));
+    if (!Number.isFinite(ageSeconds) || ageSeconds > SIGNATURE_TOLERANCE_SECONDS) {
+      this.logger.warn(
+        `Calendly webhook signature outside the tolerance window (t=${t}, age=${Math.round(ageSeconds)}s) — rejected.`,
+      );
+      return false;
+    }
+
     const expected = createHmac('sha256', this.signingKey)
       .update(`${t}.${rawBody.toString('utf8')}`)
       .digest('hex');
@@ -137,40 +170,50 @@ export class CalendlyService {
     return joined || null;
   }
 
-  /** Best-effort video-meeting link from the scheduled event location. */
+  /**
+   * The video-meeting link, and only that. `location.location` is deliberately
+   * ignored: for the "ask invitee" location types it is free text the person
+   * booking typed, and it used to end up in `videoUrl`, which the back office
+   * renders as the "join the call" link.
+   */
   extractVideoUrl(
-    location: { join_url?: string; location?: string } | undefined,
+    location: { join_url?: string | null; location?: string } | undefined,
   ): string | null {
-    if (!location) return null;
-    return location.join_url ?? location.location ?? null;
+    const joinUrl = location?.join_url;
+    return joinUrl?.startsWith('https://') ? joinUrl : null;
   }
 
-  /** Authenticated GET against the Calendly API; returns parsed JSON or null. */
-  private async apiGet<T>(url: string): Promise<T | null> {
+  /**
+   * Authenticated GET against the Calendly API. The failed case is a value
+   * rather than `null`, because the caller reconciles bookings: a page that
+   * failed and a page that was empty must not look the same to it.
+   */
+  private async apiGet<T>(url: string): Promise<CalendlyApiResult<T>> {
     try {
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${this.apiToken}` },
       });
       if (!res.ok) {
-        this.logger.warn(`Calendly API ${res.status} for ${url}`);
-        return null;
+        this.logger.error(`Calendly API ${res.status} for ${url}`);
+        return { ok: false, status: res.status };
       }
-      return (await res.json()) as T;
+      return { ok: true, data: (await res.json()) as T };
     } catch (err) {
-      this.logger.warn(`Calendly API request failed: ${String(err)}`);
-      return null;
+      this.logger.error(`Calendly API request failed: ${String(err)}`);
+      return { ok: false, status: null };
     }
   }
 
   /**
    * List organization scheduled events overlapping [minStart, maxStart],
-   * following pagination. Empty when the API is not configured.
+   * following pagination. `partial` says a page failed, so the caller knows
+   * the reconciliation it just ran covered less than it asked for.
    */
   async listScheduledEvents(
     minStart: Date,
     maxStart: Date,
-  ): Promise<CalendlyScheduledEvent[]> {
-    if (!this.isApiConfigured()) return [];
+  ): Promise<{ events: CalendlyScheduledEvent[]; partial: boolean }> {
+    if (!this.isApiConfigured()) return { events: [], partial: false };
     const params = new URLSearchParams({
       organization: this.orgUri,
       min_start_time: minStart.toISOString(),
@@ -182,13 +225,13 @@ export class CalendlyService {
     while (url) {
       // Annotated rather than inferred: `url` is reassigned from `page` below,
       // so letting TS infer `page` from `url` makes the type self-referential.
-      const page: CalendlyPage<CalendlyScheduledEvent> | null =
+      const page: CalendlyApiResult<CalendlyPage<CalendlyScheduledEvent>> =
         await this.apiGet<CalendlyPage<CalendlyScheduledEvent>>(url);
-      if (!page) break;
-      out.push(...page.collection);
-      url = page.pagination?.next_page ?? null;
+      if (!page.ok) return { events: out, partial: true };
+      out.push(...page.data.collection);
+      url = page.data.pagination?.next_page ?? null;
     }
-    return out;
+    return { events: out, partial: false };
   }
 
   /**
@@ -210,11 +253,11 @@ export class CalendlyService {
     const out: CalendlyEventType[] = [];
     let url: string | null = `${this.apiBase}/event_types?${params}`;
     while (url) {
-      const page: CalendlyPage<CalendlyEventType> | null =
+      const page: CalendlyApiResult<CalendlyPage<CalendlyEventType>> =
         await this.apiGet<CalendlyPage<CalendlyEventType>>(url);
-      if (!page) break;
-      out.push(...page.collection);
-      url = page.pagination?.next_page ?? null;
+      if (!page.ok) break;
+      out.push(...page.data.collection);
+      url = page.data.pagination?.next_page ?? null;
     }
     return out;
   }
@@ -225,6 +268,6 @@ export class CalendlyService {
     const page = await this.apiGet<{ collection: CalendlyInvitee[] }>(
       `${eventUri}/invitees?count=100`,
     );
-    return page?.collection ?? [];
+    return page.ok ? page.data.collection : [];
   }
 }

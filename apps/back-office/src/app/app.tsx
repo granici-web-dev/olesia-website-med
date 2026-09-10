@@ -39,7 +39,14 @@ export function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
-          <Route path={paths.appointments} element={<AppointmentsPage />} />
+          <Route
+            path={paths.appointments}
+            element={
+              <RequireRole roles={['admin']}>
+                <AppointmentsPage />
+              </RequireRole>
+            }
+          />
           <Route path={paths.subscriptions} element={<SubscriptionsPage />} />
           <Route
             path={paths.quickQuestions}

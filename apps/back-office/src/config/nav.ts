@@ -46,7 +46,12 @@ export const navGroups: NavGroup[] = [
     label: ro.nav.sectionMain,
     items: [
       { to: paths.dashboard, label: ro.nav.dashboard, icon: LayoutDashboard, end: true },
-      { to: paths.appointments, label: ro.nav.appointments, icon: CalendarCheck },
+      {
+        to: paths.appointments,
+        label: ro.nav.appointments,
+        icon: CalendarCheck,
+        roles: ['admin'],
+      },
       { to: paths.subscriptions, label: ro.nav.subscriptions, icon: Repeat2 },
       { to: paths.quickQuestions, label: ro.nav.quickQuestions, icon: MessagesSquare },
       { to: paths.orders, label: ro.nav.orders, icon: PackageOpen },

@@ -7,11 +7,19 @@ import { NotificationsService } from './notifications.service';
 import { prepChecklist } from './prep.constants';
 
 const PREP_WINDOW_HOURS = 24;
+const PREP_BATCH = 50;
 
 /**
  * Preparation scheduler (module_calendly.md §8.6): 24h before a scheduled
  * consultation, send the client the service-specific prep checklist and stamp
- * `prepSentAt`. The stamp makes it idempotent across ticks.
+ * `prepSentAt`.
+ *
+ * The stamp is claimed *before* the message goes out, by a conditional update
+ * that only one caller can win, and released again if the send fails. Sending
+ * first and stamping after would double-send the moment a transport exists:
+ * a message that went out and then failed to stamp is one the next tick sends
+ * again, and two instances running the same cron would both take the same
+ * rows.
  */
 @Injectable()
 export class PrepService {
@@ -39,23 +47,40 @@ export class PrepService {
         startTime: { gte: now, lte: until },
       },
       include: { service: true },
+      orderBy: { startTime: 'asc' },
+      take: PREP_BATCH,
     });
 
     let dispatched = 0;
     for (const appt of due) {
-      await this.notifications.sendPrepInstructions({
-        to: appt.clientEmail,
-        clientName: appt.clientName,
-        serviceTitle: appt.service.titleRo,
-        startTime: appt.startTime,
-        videoUrl: appt.videoUrl,
-        checklist: prepChecklist(appt.service.code),
-      });
-      await this.prisma.appointment.update({
-        where: { id: appt.id },
+      const claimed = await this.prisma.appointment.updateMany({
+        where: { id: appt.id, prepSentAt: null },
         data: { prepSentAt: new Date() },
       });
-      dispatched++;
+      if (claimed.count === 0) continue;
+
+      try {
+        await this.notifications.sendPrepInstructions({
+          to: appt.clientEmail,
+          clientName: appt.clientName,
+          serviceTitle: appt.service.titleRo,
+          startTime: appt.startTime,
+          videoUrl: appt.videoUrl,
+          checklist: prepChecklist(appt.service.code),
+        });
+        dispatched++;
+      } catch (err) {
+        // Hand the row back so the next tick retries it, and keep going: one
+        // undeliverable address must not cost every other patient their
+        // instructions.
+        await this.prisma.appointment.update({
+          where: { id: appt.id },
+          data: { prepSentAt: null },
+        });
+        this.logger.error(
+          `Prep dispatch failed for appointment ${appt.id}: ${String(err)}`,
+        );
+      }
     }
     if (dispatched > 0) {
       this.logger.log(`Prep dispatched for ${dispatched} appointment(s).`);
