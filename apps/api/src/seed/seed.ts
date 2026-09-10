@@ -1,11 +1,27 @@
 /**
  * Seed: bootstrap admin (closed registration needs one) + the service catalog.
- * Run: `pnpm exec tsx apps/api/prisma/seed.ts` with DATABASE_URL set.
+ *
+ * Two profiles, chosen by `SEED_PROFILE` (see `profile.ts`). `prod` writes only
+ * what a live practice cannot open without — the administrator, the catalog,
+ * the contact channels, the real media appearances and reviews, and a
+ * provisional schedule. `dev` adds the interim About, FAQ and library copy,
+ * which is drafted content the client has not approved and must never reach a
+ * production database.
+ *
+ * Run in development: `pnpm exec tsx apps/api/src/seed/seed.ts`.
+ * Run in the production image: `node seed.js`, with DATABASE_URL, ADMIN_EMAIL
+ * and ADMIN_PASSWORD set.
  */
 import 'dotenv/config';
 import * as argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../src/generated/prisma/client';
+import { PrismaClient } from '../generated/prisma/client';
+import { PLACEHOLDER_DAYS } from '../app/working-hours/business-hours';
+import {
+  resolveSeedProfile,
+  SeedConfigError,
+  type SeedAdmin,
+} from './profile';
 import { FAQ_SECTIONS } from './seed-faq';
 import { TESTIMONIALS } from './seed-testimonials';
 import { MEDIA_APPEARANCES } from './seed-media';
@@ -411,22 +427,44 @@ async function seedMaterials() {
   );
 }
 
-async function main() {
-  const email = (process.env.ADMIN_EMAIL ?? 'admin@olesia.md').toLowerCase();
-  const password = process.env.ADMIN_PASSWORD ?? 'admin12345';
+/**
+ * The schedule row. The service creates one lazily on first read, but a
+ * production database that has never been read has no working hours at all,
+ * and the EXPRESS deadline is quoted to patients before anyone opens the back
+ * office.
+ */
+async function seedWorkingHours() {
+  if ((await prisma.workingHours.count()) > 0) {
+    console.log('• working hours already present — skipped (edit in back office)');
+    return;
+  }
+  await prisma.workingHours.create({
+    data: { days: PLACEHOLDER_DAYS as unknown as object, isPlaceholder: true },
+  });
+  console.log('✓ working hours seeded Mon–Fri 09:00–17:00 (provisional)');
+}
 
-  const admin = await prisma.user.upsert({
-    where: { email },
+const DEV_ADMIN: SeedAdmin = {
+  email: 'admin@olesia.md',
+  password: 'admin12345',
+};
+
+async function seedAdmin(admin: SeedAdmin, mustChangePassword: boolean) {
+  const created = await prisma.user.upsert({
+    where: { email: admin.email },
     update: {},
     create: {
-      email,
+      email: admin.email,
       name: 'Administrator',
       role: 'admin',
-      passwordHash: await argon2.hash(password),
+      passwordHash: await argon2.hash(admin.password),
+      mustChangePassword,
     },
   });
-  console.log(`✓ admin ready: ${admin.email}`);
+  console.log(`✓ admin ready: ${created.email}`);
+}
 
+async function seedServices() {
   for (const s of SERVICES) {
     const existing = await prisma.service.findUnique({ where: { code: s.code } });
     if (!existing) {
@@ -446,25 +484,44 @@ async function main() {
     }
   }
   console.log(`✓ seeded ${SERVICES.length} services`);
+}
 
-  if ((await prisma.contact.count()) === 0) {
-    await prisma.contact.createMany({ data: [...CONTACTS] });
-    console.log(`✓ seeded ${CONTACTS.length} contact channel(s)`);
-  } else {
+async function seedContacts() {
+  if ((await prisma.contact.count()) > 0) {
     console.log('• contacts already present — skipped (edit in back office)');
+    return;
+  }
+  await prisma.contact.createMany({ data: [...CONTACTS] });
+  console.log(`✓ seeded ${CONTACTS.length} contact channel(s)`);
+}
+
+async function main() {
+  const { profile, admin } = resolveSeedProfile(process.env);
+  console.log(`seeding with profile: ${profile}`);
+
+  await seedAdmin(admin ?? DEV_ADMIN, profile === 'prod');
+  await seedServices();
+  await seedContacts();
+  await seedTestimonials();
+  await seedMedia();
+  await seedWorkingHours();
+
+  if (profile === 'prod') {
+    console.log('• about, faq and library skipped — drafted copy, not client-approved');
+    return;
   }
 
   await seedAbout();
   await seedFaq();
-  await seedTestimonials();
-  await seedMedia();
   await seedMaterials();
 }
 
 main()
   .then(() => prisma.$disconnect())
   .catch(async (err) => {
-    console.error(err);
+    // A wrong SEED_PROFILE or a missing password is the operator's to fix, and
+    // a stack trace buries the one line that says how.
+    console.error(err instanceof SeedConfigError ? err.message : err);
     await prisma.$disconnect();
     process.exit(1);
   });

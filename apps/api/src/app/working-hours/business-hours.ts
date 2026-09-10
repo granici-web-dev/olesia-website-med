@@ -26,6 +26,21 @@ export interface Schedule {
   expressSlaMinutes: number;
 }
 
+/**
+ * ⚠ PLACEHOLDER schedule. The client still owes us her `program de lucru`
+ * (§11.5), and the alternative to a default is an EXPRESS deadline that cannot
+ * be computed at all. Mon–Fri 09:00–17:00 is the ordinary case; `isPlaceholder`
+ * on the row keeps it visibly provisional until she confirms.
+ */
+export const PLACEHOLDER_DAYS: WorkingDay[] = [1, 2, 3, 4, 5, 6, 7].map(
+  (weekday) => ({
+    weekday,
+    closed: weekday > 5,
+    opensAt: '09:00',
+    closesAt: '17:00',
+  }),
+);
+
 const MINUTE = 60_000;
 /** Give up after this many days of finding nothing open — see `addWorkingMinutes`. */
 const MAX_LOOKAHEAD_DAYS = 60;

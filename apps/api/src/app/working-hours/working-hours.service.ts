@@ -7,21 +7,9 @@ import {
   addWorkingMinutes,
   isOpenAt,
   type Schedule,
+  PLACEHOLDER_DAYS,
   type WorkingDay,
 } from './business-hours';
-
-/**
- * ⚠ PLACEHOLDER schedule. The client still owes us her `program de lucru`
- * (§11.5), and the alternative to a default is an EXPRESS deadline that cannot
- * be computed at all. Mon–Fri 09:00–17:00 is the ordinary case; `isPlaceholder`
- * keeps it visibly provisional in the back office until she confirms.
- */
-const PLACEHOLDER_DAYS: WorkingDay[] = [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
-  weekday,
-  closed: weekday > 5,
-  opensAt: '09:00',
-  closesAt: '17:00',
-}));
 
 /**
  * The practice schedule, and the EXPRESS deadline computed from it.
