@@ -410,10 +410,28 @@ Railway, 5–15 €/мес) по `docker-compose.prod.yml` и `docs/deployment.m
 
 Подшаги, по порядку:
 
-**8e-1** `[ ]` Сухой прогон `docker-compose.prod.yml` на ноутбуке с полным набором
+**8e-1** `[x]` Сухой прогон `docker-compose.prod.yml` на ноутбуке с полным набором
 переменных: стартует ли API после миграций, проходит ли healthcheck, отрабатывает
 ли `backup.sh`, восстанавливается ли `restore.sh`. Только наблюдение и список
 поломок.
+
+Выполнен 2026-09-10 под отдельным именем проекта `-p olesia-prod-dryrun`, репо не
+тронуто. Три блокера: (1) образ API не стартует, `Cannot find module
+'@olesia/shared'`, runtime-стадия `Dockerfile.api` не копирует `packages/`, симлинк
+висит, контейнер в тихом crash-loop под `restart: unless-stopped`; (2) оба compose
+резолвятся в проект `olesia-website-med` с общим префиксом томов, `down -v`
+прод-стека из каталога репо уничтожает dev-базу и обе директории загрузок;
+(3) `restore.sh` не может вернуть файлы: в сервисе `backup` тома загрузок
+смонтированы `:ro`, `tar` падает с `Read-only file system`. Запись в
+`docs/deployment.md` о проверенном restore от 2026-08-04 относилась к dev-Postgres,
+не к прод-стеку. Что работает: миграции на старте (все 26), healthcheck, `/health`,
+логин, cookie, rate limit, helmet, бэкап базы, restore базы. Seed не запускается
+нигде (ни в CMD, ни в `prisma.config.ts`), без `ADMIN_PASSWORD` даёт `admin12345`,
+`mustChangePassword` не выставляет, засевает демо about/FAQ/материалы, а
+`WorkingHours` не засевает вовсе. В compose нет `MAIB_*` и `RECAPTCHA_MIN_SCORE`:
+платежи в проде молча выключены. Гигиена: образ 2,38 ГБ с dev-`node_modules`,
+root, без ротации логов, без `start_period`, бэкап привязан к времени рестарта,
+а не к часу.
 
 **8e-2** `[ ]` `/rigorous shape` пакета: Caddy в compose с автоматическим TLS,
 бэк-офис как статика за Caddy на одном origin с `/api`, prod-safe seed (только
