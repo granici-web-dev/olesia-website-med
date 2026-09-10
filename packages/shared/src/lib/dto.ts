@@ -9,7 +9,10 @@ import {
   MediaEmbedProvider,
   MediaKind,
   PatientEntryType,
+  PaymentState,
   PaymentStatus,
+  PaymentTargetType,
+  RefundState,
   PostStatus,
   QuickQuestionStatus,
   Role,
@@ -586,4 +589,52 @@ export interface PatientInteractionDto {
   occurredAt: string;
   status: string;
   paymentStatus: PaymentStatus;
+}
+
+// --- Payments (maib e-Commerce Checkout) ---
+
+/** One refund against a payment. */
+export interface PaymentRefundDto {
+  id: string;
+  refundId: string;
+  state: RefundState;
+  amount: number;
+  currency: string;
+  kind: string | null;
+  reason: string;
+  executedAt: string | null;
+  createdAt: string;
+}
+
+/**
+ * One payment as the back office sees it. Deliberately omits `rawCallback`:
+ * it is the audit copy of the bank's payload, kept server-side for disputes,
+ * and it has no business travelling to a browser.
+ */
+export interface PaymentDto {
+  id: string;
+  checkoutId: string;
+  paymentId: string | null;
+  orderId: string;
+  state: PaymentState;
+  amount: number;
+  currency: string;
+  refundedAmount: number;
+  method: string | null;
+  targetType: PaymentTargetType;
+  targetId: string | null;
+  payerName: string | null;
+  payerEmail: string;
+  payerPhone: string | null;
+  patientId: string | null;
+  rrn: string | null;
+  approvalCode: string | null;
+  cardMask: string | null;
+  threeDsResult: string | null;
+  terminalId: string | null;
+  expiresAt: string | null;
+  paidAt: string | null;
+  failedAt: string | null;
+  createdAt: string;
+  refunds: PaymentRefundDto[];
 }

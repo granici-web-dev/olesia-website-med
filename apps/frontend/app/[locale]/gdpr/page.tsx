@@ -73,6 +73,7 @@ const TOC: TocItem[] = [
   { id: 'date', ro: 'Ce date colectăm', en: 'What we collect', ru: 'Какие данные мы собираем' },
   { id: 'temei', ro: 'Temeiul prelucrării', en: 'Why & legal basis', ru: 'Цели и правовое основание' },
   { id: 'transfer', ro: 'Cui transmitem datele', en: 'Who we share with', ru: 'Кому мы передаём данные' },
+  { id: 'plati', ro: 'Plăți online', en: 'Online payments', ru: 'Онлайн-оплата' },
   { id: 'pastrare', ro: 'Cât timp păstrăm', en: 'How long we keep it', ru: 'Сколько мы храним данные' },
   { id: 'drepturi', ro: 'Drepturile tale', en: 'Your rights', ru: 'Ваши права' },
   { id: 'copii', ro: 'Datele copiilor', en: 'Children’s data', ru: 'Данные детей' },
@@ -196,9 +197,9 @@ const DATA: { term: Bi; desc: Bi }[] = [
   {
     term: { ro: 'Date de plată', en: 'Payment data', ru: 'Платёжные данные' },
     desc: {
-      ro: 'nume și detaliile transferului bancar. Nu colectăm date de card — nu există plată online.',
-      en: 'name and bank-transfer details. We don’t collect card data — there is no online payment.',
-      ru: 'имя и реквизиты банковского перевода. Мы не собираем данные карт — онлайн-оплаты нет.',
+      ro: 'suma, moneda, referința comenzii, starea plății și, de la bancă, ultimele cifre ale cardului împreună cu codurile de tranzacție. Datele complete ale cardului nu ajung la noi: le introduci direct pe pagina securizată a băncii.',
+      en: 'the amount, currency, order reference, payment status and — from the bank — the last digits of the card together with the transaction codes. Your full card details never reach us: you enter them directly on the bank’s secure page.',
+      ru: 'сумма, валюта, номер заказа, статус платежа и — от банка — последние цифры карты вместе с кодами транзакции. Полные данные карты к нам не попадают: вы вводите их прямо на защищённой странице банка.',
     },
   },
   {
@@ -228,6 +229,11 @@ const BASIS: Bi[] = [
     ru: 'Для исполнения юридических обязанностей — хранение медицинской документации, требуемое законом.',
   },
   {
+    ro: 'Pentru plăți — procesarea plății este necesară pentru executarea contractului, iar păstrarea documentelor de plată este o obligație legală contabilă și fiscală.',
+    en: 'For payments — processing the payment is necessary to perform the contract, and keeping the payment records is a legal accounting and tax obligation.',
+    ru: 'Для оплаты — обработка платежа необходима для исполнения договора, а хранение платёжных документов является требованием бухгалтерского и налогового законодательства.',
+  },
+  {
     ro: 'Pe baza consimțământului — pentru newsletter sau ghiduri, dacă te abonezi.',
     en: 'Based on consent — for newsletter or guides, if you subscribe.',
     ru: 'На основании согласия — для рассылки или гайдов, если вы подпишетесь.',
@@ -251,9 +257,14 @@ const SHARE: Bi[] = [
     ru: 'Поставщик электронной почты — для подтверждений и переписки.',
   },
   {
-    ro: 'Banca — pentru plata prin transfer.',
-    en: 'The bank — for payment by transfer.',
-    ru: 'Банк — для оплаты переводом.',
+    ro: 'BC „MAIB” S.A. — pentru plățile online cu cardul și prin MIA. Datele cardului le primește direct banca, în calitate de operator propriu, conform legislației bancare și regulilor sistemelor de plată.',
+    en: 'BC “MAIB” S.A. — for online payments by card and through MIA. Card details go straight to the bank, which acts as its own controller under banking law and payment-scheme rules.',
+    ru: 'BC «MAIB» S.A. — для онлайн-оплаты картой и через MIA. Данные карты банк получает напрямую и обрабатывает как самостоятельный оператор в соответствии с банковским законодательством и правилами платёжных систем.',
+  },
+  {
+    ro: 'Banca — pentru plățile efectuate prin transfer bancar.',
+    en: 'The bank — for payments made by bank transfer.',
+    ru: 'Банк — для платежей, совершённых банковским переводом.',
   },
 ];
 
@@ -556,6 +567,36 @@ export default async function GdprPage({
             </p>
           </Section>
 
+          {/* Plăți online — a section of its own because card payments are the
+              one thing a visitor is most likely to worry about, and because
+              the acquirer review looks for exactly this. */}
+          <Section
+            id="plati"
+            title={ru ? 'Онлайн-оплата' : en ? 'Online payments' : 'Plăți online'}
+          >
+            <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Онлайн-оплата проходит через BC «MAIB» S.A. Когда вы нажимаете «Оплатить», мы передаём банку сумму, валюту, номер заказа и ваши контактные данные, после чего вы переходите на защищённую страницу банка. Номер карты, срок действия и CVV вы вводите там — на наш сайт и на наши серверы они не попадают ни в каком виде.'
+                : en
+                ? 'Online payments are handled by BC “MAIB” S.A. When you press Pay, we pass the bank the amount, the currency, the order reference and your contact details, and you are taken to the bank’s secure page. You enter the card number, expiry date and CVV there — they never reach our website or our servers in any form.'
+                : 'Plățile online sunt procesate de BC „MAIB” S.A. Când apeși „Plătește”, transmitem băncii suma, moneda, referința comenzii și datele tale de contact, iar tu ești condus la pagina securizată a băncii. Numărul cardului, data expirării și codul CVV le introduci acolo — ele nu ajung pe site-ul nostru și nici pe serverele noastre, sub nicio formă.'}
+            </p>
+            <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Обратно от банка мы получаем только результат: прошёл платёж или нет, сумму, последние цифры карты и служебные коды операции. Этого достаточно, чтобы подтвердить оплату, найти платёж по вашему обращению и при необходимости вернуть деньги.'
+                : en
+                ? 'What comes back to us from the bank is only the outcome: whether the payment went through, the amount, the last digits of the card and the technical codes of the operation. That is enough to confirm the payment, to find it if you contact us, and to refund it if needed.'
+                : 'Înapoi, de la bancă, primim doar rezultatul: dacă plata a trecut sau nu, suma, ultimele cifre ale cardului și codurile tehnice ale operațiunii. Atât ne trebuie ca să confirmăm plata, să o găsim dacă ne scrii și să o rambursăm la nevoie.'}
+            </p>
+            <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Мы не связываем оплату с содержанием консультации: платёжные документы хранятся отдельно от медицинских данных, и в бухгалтерских документах не указывается, о чём именно была консультация.'
+                : en
+                ? 'We do not tie a payment to what was discussed: payment records are kept separately from medical data, and the accounting documents never say what the consultation was about.'
+                : 'Nu legăm plata de conținutul consultației: documentele de plată sunt păstrate separat de datele medicale, iar documentele contabile nu spun despre ce a fost consultația.'}
+            </p>
+          </Section>
+
           {/* Cât timp păstrăm */}
           <Section
             id="pastrare"
@@ -577,6 +618,17 @@ export default async function GdprPage({
                 : en
                 ? 'Analyses and documents sent through the personal pre-consultation link are stored separately, are never publicly reachable, and are deleted automatically once the retention period ends. The link itself stops working sooner — about a month after it is issued. You can delete any file yourself while the link is active, or ask us to at any time.'
                 : 'Analizele și documentele trimise prin linkul personal dinaintea consultației sunt stocate separat, nu sunt accesibile public și se șterg automat la finalul perioadei de păstrare. Linkul în sine expiră mai devreme — la aproximativ o lună de la emitere. Poți șterge singur orice fișier cât timp linkul este activ sau ne poți cere oricând acest lucru.'}
+            </p>
+            {/* Payment records answer to accounting law, not to the medical
+                rule above, and they survive a deletion request for that
+                reason. Worth stating plainly rather than surprising someone
+                who asked to be erased. */}
+            <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Документы об оплате мы храним столько, сколько требует бухгалтерское и налоговое законодательство. Этот срок действует и в том случае, если вы попросите удалить остальные ваши данные: закон обязывает нас сохранить сам факт и сумму оплаты, но не сведения о вашем здоровье.'
+                : en
+                ? 'Payment records are kept for as long as accounting and tax law requires. That period applies even if you ask us to delete the rest of your data: the law obliges us to keep the fact and the amount of the payment, but not anything about your health.'
+                : 'Documentele de plată le păstrăm atât timp cât cer legislația contabilă și cea fiscală. Termenul se aplică inclusiv dacă ne ceri ștergerea celorlalte date: legea ne obligă să păstrăm faptul și suma plății, dar nu și informații despre sănătatea ta.'}
             </p>
           </Section>
 

@@ -11,6 +11,7 @@ import { AppointmentsPage } from '@/pages/appointments';
 import { SubscriptionsPage } from '@/pages/subscriptions';
 import { QuickQuestionsPage } from '@/pages/quick-questions';
 import { OrdersPage } from '@/pages/orders';
+import { PaymentsPage } from '@/pages/payments';
 import { MessagesPage } from '@/pages/messages';
 import { PatientsPage } from '@/pages/patients';
 import { PatientDetailPage } from '@/pages/patient-detail';
@@ -45,6 +46,7 @@ export function App() {
             element={<QuickQuestionsPage />}
           />
           <Route path={paths.orders} element={<OrdersPage />} />
+          <Route path={paths.payments} element={<PaymentsPage />} />
           <Route path={paths.messages} element={<MessagesPage />} />
           <Route path={paths.patients} element={<PatientsPage />} />
           <Route path="/pacienti/:id" element={<PatientDetailPage />} />

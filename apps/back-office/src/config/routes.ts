@@ -7,6 +7,7 @@ export const paths = {
   quickQuestions: '/intrebari-rapide',
   messages: '/mesaje',
   orders: '/comenzi',
+  payments: '/plati',
   patients: '/pacienti',
   blog: '/blog',
   blogNew: '/blog/nou',

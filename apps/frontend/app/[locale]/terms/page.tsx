@@ -350,8 +350,9 @@ export default async function TermsPage({
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru ? (
                 <>
-                  Оплатить можно только банковским переводом — онлайн-оплаты нет —
-                  и сделать это нужно до консультации, после того как запись подтверждена.
+                  Оплатить можно на сайте картой или через MIA — платёж проходит на
+                  защищённой странице BC «MAIB» S.A. — либо банковским переводом. Оплата
+                  вносится до консультации, после того как запись подтверждена.
                   Цены указаны для каждой услуги и на странице{' '}
                   <Link href="/pricing" className={inlineLink}>
                     Тарифы
@@ -360,8 +361,9 @@ export default async function TermsPage({
                 </>
               ) : en ? (
                 <>
-                  Payment is made exclusively by bank transfer — there is no online payment —
-                  and is due before the consultation, once the booking is confirmed. Prices
+                  You can pay on the site by card or through MIA — the payment takes place
+                  on the secure page of BC “MAIB” S.A. — or by bank transfer. Payment is due
+                  before the consultation, once the booking is confirmed. Prices
                   are shown for each service and on the{' '}
                   <Link href="/pricing" className={inlineLink}>
                     Pricing
@@ -370,8 +372,9 @@ export default async function TermsPage({
                 </>
               ) : (
                 <>
-                  Plata se face exclusiv prin transfer bancar — nu există plată online — și se
-                  achită înainte de consultație, după confirmarea programării. Prețurile sunt
+                  Poți plăti pe site cu cardul sau prin MIA — plata are loc pe pagina
+                  securizată a BC „MAIB” S.A. — ori prin transfer bancar. Plata se achită
+                  înainte de consultație, după confirmarea programării. Prețurile sunt
                   afișate la fiecare serviciu și pe pagina{' '}
                   <Link href="/pricing" className={inlineLink}>
                     Tarife
