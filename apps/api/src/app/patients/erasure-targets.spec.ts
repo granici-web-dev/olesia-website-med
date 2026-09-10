@@ -74,21 +74,30 @@ describe('erasureTargets', () => {
     ).toBe(false);
   });
 
-  it('reaches a group-C order, which has no patient relation to match on', () => {
+  it('reaches a group-C order by its address and by the dossier alike', () => {
     const where = plan.deliverableOrder.where as Clause;
     expect(
       matches(where, {
         id: 'order-1',
+        patientId: null,
         clientEmail: EMAIL,
         notes: 'alergie la ou, copil 3 ani',
       }),
     ).toBe(true);
-    expect(matches(where, { id: 'order-2', clientEmail: 'x@y.md' })).toBe(false);
+    // The arm this model did not have until A5 (F12): an order linked to the
+    // dossier whose client has since changed the address on it.
+    expect(
+      matches(where, { id: 'order-2', patientId: PATIENT_ID, clientEmail: 'nou@y.md' }),
+    ).toBe(true);
+    expect(
+      matches(where, { id: 'order-3', patientId: null, clientEmail: 'x@y.md' }),
+    ).toBe(false);
     expect(plan.deliverableOrder.data).toEqual({
       clientName: ANON_NAME,
       clientEmail: ANON_EMAIL,
       phone: null,
       notes: null,
+      patientId: null,
     });
   });
 

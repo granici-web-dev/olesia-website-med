@@ -2,12 +2,10 @@ import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarRange,
-  CheckCircle2,
   Loader2,
   Mail,
   Phone,
   PhoneOff,
-  RotateCcw,
   Video,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -40,18 +38,21 @@ import {
 } from '@/features/subscriptions/status-badges';
 import { QuotaBar } from '@/features/subscriptions/quota-bar';
 import {
-  setPaymentStatus,
   cancelSubscription,
   logVideoCall,
   formatDate,
   daysRemaining,
   quotaRemaining,
 } from '@/features/subscriptions/data';
+import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
 import { subscriptionsQueryKey } from '@/features/subscriptions/query-key';
 import type { Subscription } from '@/features/subscriptions/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 
 const t = ro.subscriptions;
+
+/** Monitoring is quoted in EUR, like everything else in the catalog. */
+const SUBSCRIPTION_CURRENCY = 'EUR';
 
 function periodSubLabel(sub: Subscription): string {
   if (sub.status !== 'active') return t.status[sub.status];
@@ -89,25 +90,6 @@ export function SubscriptionDetailSheet({
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: subscriptionsQueryKey });
 
-  const payMutation = useMutation({
-    mutationFn: ({
-      id,
-      status,
-    }: {
-      id: string;
-      status: Subscription['paymentStatus'];
-    }) => setPaymentStatus(id, status),
-    onSuccess: (_data, vars) => {
-      toast.success(
-        vars.status === 'confirmed'
-          ? t.toast.paymentConfirmed
-          : t.toast.paymentReverted,
-      );
-      invalidate();
-    },
-    onError: () => toast.error(t.toast.error),
-  });
-
   const callMutation = useMutation({
     mutationFn: logVideoCall,
     onSuccess: () => {
@@ -131,10 +113,7 @@ export function SubscriptionDetailSheet({
     onError: () => toast.error(t.toast.error),
   });
 
-  const busy =
-    payMutation.isPending ||
-    callMutation.isPending ||
-    cancelMutation.isPending;
+  const busy = callMutation.isPending || cancelMutation.isPending;
 
   const s = subscription;
   const remaining = s ? quotaRemaining(s) : 0;
@@ -232,57 +211,22 @@ export function SubscriptionDetailSheet({
                   className="w-full"
                 />
               </div>
+
+              <Separator className="my-4" />
+
+              <ManualPaymentPanel
+                targetType="subscription"
+                targetId={s.id}
+                currency={SUBSCRIPTION_CURRENCY}
+                suggestedAmount={s.price || undefined}
+                onRecorded={invalidate}
+              />
             </div>
 
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
               {s.paymentStatus === 'confirmed' && (
-                <>
-                  <AddAsPatientButton source="subscription" sourceId={s.id} />
-                  <ConfirmAction
-                    trigger={
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        disabled={busy}
-                      >
-                        {payMutation.isPending ? (
-                          <Loader2 className="animate-spin" />
-                        ) : (
-                          <RotateCcw />
-                        )}
-                        {t.actions.revertPayment}
-                      </Button>
-                    }
-                    title={t.confirm.paymentRevertTitle}
-                    body={t.confirm.paymentRevertBody}
-                    cta={t.confirm.paymentRevertCta}
-                    onConfirm={() =>
-                      payMutation.mutate({ id: s.id, status: 'pending' })
-                    }
-                  />
-                </>
-              )}
-
-              {s.paymentStatus === 'pending' && s.status !== 'canceled' && (
-                <ConfirmAction
-                  trigger={
-                    <Button className="w-full" disabled={busy}>
-                      {payMutation.isPending ? (
-                        <Loader2 className="animate-spin" />
-                      ) : (
-                        <CheckCircle2 />
-                      )}
-                      {t.actions.confirmPayment}
-                    </Button>
-                  }
-                  title={t.confirm.paymentTitle}
-                  body={t.confirm.paymentBody}
-                  cta={t.confirm.paymentCta}
-                  onConfirm={() =>
-                    payMutation.mutate({ id: s.id, status: 'confirmed' })
-                  }
-                />
+                <AddAsPatientButton source="subscription" sourceId={s.id} />
               )}
 
               {s.status === 'active' && (

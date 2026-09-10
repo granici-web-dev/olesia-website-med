@@ -11,6 +11,7 @@ import { writeOrTranslate } from '../common/prisma-errors';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
 import { toUserDto } from './users.mapper';
 import { generateStarterPassword } from './starter-password';
+import { type AccountState, refuseAccountChange } from './last-admin';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -56,12 +57,40 @@ export class UsersService {
     return toUserDto(user);
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<UserDto> {
+  /**
+   * Change an account, unless doing so would leave nobody able to change
+   * accounts.
+   *
+   * The check and the write share one transaction, and the read takes
+   * `FOR UPDATE` over every account row (audit A5, F1). Without the lock two
+   * admins demoting each other at the same moment both read the other as the
+   * surviving admin, both pass, and both writes land — the same shape as the
+   * refund race in `payments.service.ts`, and the same answer.
+   */
+  async update(
+    id: string,
+    dto: UpdateUserDto,
+    actorId: string,
+  ): Promise<UserDto> {
     await this.getOrThrow(id);
+
     const user = await writeOrTranslate(() =>
-      this.prisma.user.update({
-        where: { id },
-        data: { name: dto.name, role: dto.role, isActive: dto.isActive },
+      this.prisma.$transaction(async (tx) => {
+        const accounts = await tx.$queryRaw<AccountState[]>`
+          SELECT "id", "role", "isActive" FROM "User" FOR UPDATE`;
+
+        const refusal = refuseAccountChange(
+          actorId,
+          id,
+          { role: dto.role, isActive: dto.isActive },
+          accounts,
+        );
+        if (refusal) throw new ConflictException(refusal);
+
+        return tx.user.update({
+          where: { id },
+          data: { name: dto.name, role: dto.role, isActive: dto.isActive },
+        });
       }),
     );
     return toUserDto(user);

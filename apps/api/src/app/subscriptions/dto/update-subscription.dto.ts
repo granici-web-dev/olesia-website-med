@@ -1,16 +1,13 @@
 import { IsEnum, IsOptional } from 'class-validator';
 
-import {
-  PaymentStatus,
-  SubscriptionStatus,
-} from '../../../generated/prisma/enums';
+import { SubscriptionStatus } from '../../../generated/prisma/enums';
 
+/**
+ * `paymentStatus` is deliberately absent — it mirrors the `Payment` ledger.
+ * See `UpdateAppointmentDto` (audit A5, F3).
+ */
 export class UpdateSubscriptionDto {
   @IsOptional()
   @IsEnum(SubscriptionStatus)
   status?: SubscriptionStatus;
-
-  @IsOptional()
-  @IsEnum(PaymentStatus)
-  paymentStatus?: PaymentStatus;
 }

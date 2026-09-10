@@ -6,7 +6,8 @@
  * Calendly booking made before the dossier existed, the public monitoring
  * lead, the EXPRESS ticket, the upload link and, underneath it, the medical
  * files the patient had sent. It missed `DeliverableOrder` and
- * `ContactMessage` outright, because neither has a patient relation at all.
+ * `ContactMessage` outright, because neither had a patient relation at all;
+ * `DeliverableOrder` grew one in A5 (F12) and is matched on both arms now.
  * And it left the `Payment` row whole while the foreign key quietly nulled
  * its `patientId`, so a dossier recreated later under the same address
  * re-adopted the history that was supposed to be gone (F9).
@@ -186,14 +187,17 @@ export function erasureTargets(patientId: string, email: string): ErasurePlan {
 
     deliverableOrder: {
       action: 'anonymize',
-      // No patient relation exists on this model, which is exactly why
-      // erasure never saw a group-C order before (F1).
-      where: { clientEmail: email },
+      // Both arms, like the three above it. There was no patient relation on
+      // this model at all until audit A5 (F12), which is why erasure never saw
+      // a group-C order before A3 (F1) and then saw it only by address — so an
+      // order whose client later changed their email was left whole.
+      where: { OR: [byPatient, { clientEmail: email }] },
       data: {
         clientName: ANON_NAME,
         clientEmail: ANON_EMAIL,
         phone: null,
         notes: null,
+        patientId: null,
       },
     },
 

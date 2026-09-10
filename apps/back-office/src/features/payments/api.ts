@@ -1,11 +1,16 @@
 import type { Paginated, PaymentDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
-import type { Payment } from '@/features/payments/types';
+import type {
+  ManualPaymentInput,
+  Payment,
+  PaymentTargetType,
+} from '@/features/payments/types';
 
 /**
- * Real `payments` endpoints. Rows are written by the checkout flow and the
- * bank's callback — the back office only reads them and issues refunds.
+ * Real `payments` endpoints. Most rows are written by the checkout flow and the
+ * bank's callback; the back office reads them, issues refunds, and records the
+ * money that arrived outside the bank.
  */
 
 function asList<T>(r: T[] | Paginated<T>): T[] {
@@ -42,6 +47,29 @@ export async function fetchPatientPayments(
 /** Re-ask the bank about one payment, for when a callback went missing. */
 export async function syncPayment(id: string): Promise<Payment> {
   return toView(await http.post<PaymentDto>(`/payments/${id}/sync`, {}));
+}
+
+/** Every payment recorded against one purchase. */
+export async function fetchTargetPayments(
+  targetType: PaymentTargetType,
+  targetId: string,
+): Promise<Payment[]> {
+  const r = await http.get<PaymentDto[]>(
+    `/payments/target/${targetType}/${targetId}`,
+  );
+  return r.map(toView);
+}
+
+/** Cash at the practice, a transfer, a card machine that is not ours. */
+export async function recordManualPayment(
+  input: ManualPaymentInput,
+): Promise<Payment> {
+  return toView(await http.post<PaymentDto>('/payments/manual', input));
+}
+
+/** Undo a manual payment recorded in error. Bank payments are refunded. */
+export async function voidPayment(id: string): Promise<Payment> {
+  return toView(await http.post<PaymentDto>(`/payments/${id}/void`, {}));
 }
 
 export async function refundPayment(input: {

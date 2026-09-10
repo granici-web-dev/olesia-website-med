@@ -164,8 +164,6 @@ export const ro = {
     confirmed: 'Confirmată',
     free: 'Gratuit',
     change: 'Schimbă statusul plății',
-    confirmedToast: 'Plata a fost confirmată.',
-    revertedToast: 'Plata a fost marcată drept neplătită.',
     error: 'Acțiunea a eșuat. Încearcă din nou.',
   },
 
@@ -322,8 +320,6 @@ export const ro = {
     },
 
     actions: {
-      confirmPayment: 'Confirmă plata',
-      revertPayment: 'Marchează drept neplătită',
       markNoShow: 'Marchează neprezentare',
       markCompleted: 'Marchează finalizată',
       processing: 'Se procesează…',
@@ -351,14 +347,6 @@ export const ro = {
     },
 
     confirm: {
-      paymentTitle: 'Confirmi încasarea plății?',
-      paymentBody:
-        'Marchezi manual plata ca încasată pentru această programare. Poți reveni asupra acțiunii ulterior.',
-      paymentCta: 'Confirmă plata',
-      paymentRevertTitle: 'Marchezi plata drept neplătită?',
-      paymentRevertBody:
-        'Statusul plății revine la „În așteptare”. Poți confirma din nou oricând.',
-      paymentRevertCta: 'Marchează drept neplătită',
       noShowTitle: 'Marchezi neprezentarea?',
       noShowBody:
         'Clientul nu s-a prezentat la consultație. Statusul programării devine „Neprezentare”.',
@@ -366,8 +354,6 @@ export const ro = {
     },
 
     toast: {
-      paymentConfirmed: 'Plata a fost confirmată.',
-      paymentReverted: 'Plata a fost marcată drept neplătită.',
       noShowMarked: 'Programarea a fost marcată ca neprezentare.',
       planUploaded: 'Planul de tratament a fost salvat.',
       completed: 'Programarea a fost finalizată.',
@@ -686,21 +672,11 @@ export const ro = {
     },
 
     actions: {
-      confirmPayment: 'Confirmă plata',
-      revertPayment: 'Marchează drept neplătită',
       logCall: 'Înregistrează apel video',
       cancel: 'Anulează abonamentul',
     },
 
     confirm: {
-      paymentTitle: 'Confirmi încasarea plății?',
-      paymentBody:
-        'Marchezi manual plata ca încasată pentru acest abonament. Poți reveni asupra acțiunii ulterior.',
-      paymentCta: 'Confirmă plata',
-      paymentRevertTitle: 'Marchezi plata drept neplătită?',
-      paymentRevertBody:
-        'Statusul plății revine la „În așteptare”. Poți confirma din nou oricând.',
-      paymentRevertCta: 'Marchează drept neplătită',
       cancelTitle: 'Anulezi abonamentul?',
       cancelBody:
         'Abonamentul va fi marcat ca anulat și nu va mai consuma cotă de apeluri.',
@@ -708,8 +684,6 @@ export const ro = {
     },
 
     toast: {
-      paymentConfirmed: 'Plata a fost confirmată.',
-      paymentReverted: 'Plata a fost marcată drept neplătită.',
       callLogged: 'Apel video înregistrat.',
       canceled: 'Abonamentul a fost anulat.',
       noQuota: 'Nu mai sunt apeluri disponibile.',
@@ -833,6 +807,7 @@ export const ro = {
         appointment: 'Programare',
         subscription: 'Abonament',
         quick_question: 'Întrebare EXPRESS',
+        deliverable_order: 'Comandă',
       },
     },
 
@@ -1222,6 +1197,39 @@ export const ro = {
       empty: 'Nicio plată înregistrată pentru acest pacient.',
       total: 'Total achitat:',
     },
+
+    /**
+     * The manual-payment panel, shown on a consultation, a subscription and an
+     * order. It replaced a switch that marked the purchase paid and recorded
+     * nothing else — not the sum, not the date, not who pressed it.
+     */
+    manual: {
+      title: 'Plăți',
+      hint: 'Plățile online apar aici singure. Banii primiți altfel — numerar, transfer — se înregistrează cu butonul de mai jos.',
+      record: 'Înregistrează plata manuală',
+      formTitle: 'Plată primită în afara băncii',
+      amount: 'Sumă',
+      amountHint: 'Suma încasată, în',
+      amountError: 'Suma trebuie să fie mai mare decât zero.',
+      note: 'Notă',
+      notePlaceholder: 'Cum au venit banii — „numerar la cabinet", „transfer 12.09".',
+      submit: 'Înregistrează',
+      cancel: 'Renunță',
+      manualBadge: 'Manuală',
+      recordedBy: 'Înregistrată manual',
+      empty: 'Nicio plată înregistrată pentru această comandă.',
+      loadError: 'Nu am putut încărca plățile.',
+      voidAction: 'Anulează înregistrarea',
+      voidTitle: 'Anulezi înregistrarea plății?',
+      voidBody:
+        'Înregistrarea rămâne în registru, marcată drept anulată, iar statusul plății se recalculează. Banii nu se întorc la client — pentru asta se face rambursare.',
+      voidCta: 'Anulează înregistrarea',
+      onlyAdmin: 'Doar un administrator poate înregistra sau anula o plată.',
+      toast: {
+        recorded: 'Plata a fost înregistrată.',
+        voided: 'Înregistrarea plății a fost anulată.',
+      },
+    },
   },
 
   orders: {
@@ -1278,17 +1286,12 @@ export const ro = {
       noNotes: 'Clientul nu a lăsat detalii suplimentare.',
       status: 'Status',
       delivered: 'Livrată la',
-      payment: 'Plata',
-      paymentHint:
-        'Plata se confirmă manual, după ce banii au intrat în cont.',
       deliver: 'Livrare',
       deliverHint:
         'Trimiterea fișierelor din portal se activează după configurarea email-ului. Până atunci, poți trimite rezultatul din contul tău de email.',
     },
 
     actions: {
-      markPaid: 'Marchează ca achitată',
-      markUnpaid: 'Marchează ca neachitată',
       sendByEmail: 'Trimite prin email',
       delete: 'Șterge comanda',
     },
@@ -1302,7 +1305,6 @@ export const ro = {
 
     toast: {
       statusSaved: 'Statusul comenzii a fost actualizat.',
-      paymentSaved: 'Starea plății a fost actualizată.',
       deleted: 'Comanda a fost ștearsă.',
       error: 'Nu am putut salva modificarea. Încearcă din nou.',
     },

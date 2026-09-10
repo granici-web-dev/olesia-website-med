@@ -11,7 +11,7 @@ export function toSubscriptionDto(s: Subscription): SubscriptionDto {
     notes: s.notes,
     status: s.status as SubscriptionDto['status'],
     paymentStatus: s.paymentStatus as SubscriptionDto['paymentStatus'],
-    videoQuotaPerMonth: s.videoQuotaPerMonth,
+    videoQuotaTotal: s.videoQuotaTotal,
     videoQuotaUsed: s.videoQuotaUsed,
     startsAt: s.startsAt.toISOString(),
     endsAt: s.endsAt.toISOString(),

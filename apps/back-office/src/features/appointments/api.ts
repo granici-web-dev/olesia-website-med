@@ -78,18 +78,6 @@ export async function fetchAppointments(): Promise<Appointment[]> {
     .sort((a, b) => b.startTime.localeCompare(a.startTime));
 }
 
-/** Manually set the payment status (both directions — payment is offline). */
-export async function setPaymentStatus(
-  id: string,
-  paymentStatus: Appointment['paymentStatus'],
-): Promise<Appointment> {
-  const [d, codes] = await Promise.all([
-    http.patch<AppointmentDto>(`/appointments/${id}`, { paymentStatus }),
-    serviceCodeMap(),
-  ]);
-  return toView(d, codes);
-}
-
 export async function markNoShow(id: string): Promise<Appointment> {
   const [d, codes] = await Promise.all([
     http.patch<AppointmentDto>(`/appointments/${id}`, { status: 'no_show' }),

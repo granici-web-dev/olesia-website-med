@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Param,
+  ParseEnumPipe,
   Post,
   Query,
 } from '@nestjs/common';
@@ -11,9 +13,10 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/jwt.types';
-import { Role, PaymentState } from '../../generated/prisma/enums';
+import { Role, PaymentState, PaymentTargetType } from '../../generated/prisma/enums';
 import { PaymentsService } from './payments.service';
 import { RefundPaymentDto } from './dto/refund-payment.dto';
+import { RecordManualPaymentDto } from './dto/manual-payment.dto';
 import { ListPaymentsQueryDto } from './dto/list-payments-query.dto';
 
 /** Payments ledger — admin/editor. */
@@ -35,6 +38,37 @@ export class PaymentsController {
     return this.payments.historyForPatient(patientId);
   }
 
+  /** Every payment recorded against one purchase. */
+  @Get('target/:targetType/:targetId')
+  targetHistory(
+    @Param('targetType', new ParseEnumPipe(PaymentTargetType))
+    targetType: PaymentTargetType,
+    @Param('targetId') targetId: string,
+  ) {
+    return this.payments.historyForTarget(targetType, targetId);
+  }
+
+  /**
+   * Money that arrived outside the bank. Admin only: this is the one way to
+   * mark a purchase paid without a bank saying so, and it replaces the three
+   * PATCH endpoints that used to set `paymentStatus` by hand (audit A5, F3).
+   */
+  @Roles(Role.admin)
+  @Post('manual')
+  recordManual(
+    @Body() dto: RecordManualPaymentDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.payments.recordManual({ ...dto, authorId: user.id });
+  }
+
+  /** Undo a manual payment recorded in error. Bank payments are refunded. */
+  @Roles(Role.admin)
+  @Post(':id/void')
+  voidManual(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.payments.voidManual(id, user.id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.payments.findOne(id);
@@ -44,6 +78,8 @@ export class PaymentsController {
   @Post(':id/sync')
   async sync(@Param('id') id: string) {
     const p = await this.payments.findOne(id);
+    // A manual payment has no checkout session; there is nobody to ask.
+    if (!p.checkoutId) throw new BadRequestException('not_a_bank_payment');
     await this.payments.syncFromBank(p.checkoutId);
     return this.payments.findOne(id);
   }

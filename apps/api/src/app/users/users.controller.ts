@@ -41,9 +41,17 @@ export class UsersController {
     return this.users.create(dto);
   }
 
+  /**
+   * The actor is passed down because two of the three refusals are about who
+   * is asking: an admin may not demote or deactivate herself (audit A5, F1).
+   */
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.users.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser() actor: AuthUser,
+  ) {
+    return this.users.update(id, dto, actor.id);
   }
 
   @Post(':id/reset-password')

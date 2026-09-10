@@ -1,12 +1,14 @@
 import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
 
 import { http } from '@/api/http';
-import type { Order, OrderPayment, OrderStatus } from '@/features/orders/types';
+import type { Order, OrderStatus } from '@/features/orders/types';
 
 /**
  * Real `deliverable-orders` endpoints. Rows are created by the public
  * `/leads/deliverable` endpoint; here we list them, move them through the
- * workflow, record a manual payment, and delete the ones that came to nothing.
+ * workflow, and delete the ones that came to nothing. Payment is not one of
+ * them: `paymentStatus` mirrors the payments ledger, and money that arrived
+ * outside the bank is recorded through `/payments/manual`.
  */
 
 function toView(d: DeliverableOrderDto): Order {
@@ -44,17 +46,6 @@ export async function setOrderStatus(input: {
   return toView(
     await http.patch<DeliverableOrderDto>(`/deliverable-orders/${input.id}`, {
       status: input.status,
-    }),
-  );
-}
-
-export async function setOrderPayment(input: {
-  id: string;
-  paymentStatus: OrderPayment;
-}): Promise<Order> {
-  return toView(
-    await http.patch<DeliverableOrderDto>(`/deliverable-orders/${input.id}`, {
-      paymentStatus: input.paymentStatus,
     }),
   );
 }

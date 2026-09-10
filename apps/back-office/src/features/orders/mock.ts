@@ -120,18 +120,6 @@ export async function setOrderStatus(input: {
   return clone(found);
 }
 
-export async function setOrderPayment(input: {
-  id: string;
-  paymentStatus: OrderPayment;
-}): Promise<Order> {
-  store = store.map((o) =>
-    o.id === input.id ? { ...o, paymentStatus: input.paymentStatus } : o,
-  );
-  const found = store.find((o) => o.id === input.id);
-  if (!found) throw new Error('not_found');
-  return clone(found);
-}
-
 export async function deleteOrder(id: string): Promise<void> {
   store = store.filter((o) => o.id !== id);
 }

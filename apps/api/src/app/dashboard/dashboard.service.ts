@@ -76,7 +76,7 @@ export class DashboardService {
       }),
       this.prisma.subscription.aggregate({
         where: { status: SubscriptionStatus.active },
-        _sum: { videoQuotaUsed: true, videoQuotaPerMonth: true },
+        _sum: { videoQuotaUsed: true, videoQuotaTotal: true },
       }),
       this.prisma.quickQuestion.count({
         where: { status: QuickQuestionStatus.open },
@@ -130,7 +130,7 @@ export class DashboardService {
       subscriptions: {
         active: activeSubs,
         quotaUsed: quotaAgg._sum.videoQuotaUsed ?? 0,
-        quotaTotal: quotaAgg._sum.videoQuotaPerMonth ?? 0,
+        quotaTotal: quotaAgg._sum.videoQuotaTotal ?? 0,
       },
       quickQuestions: {
         open,

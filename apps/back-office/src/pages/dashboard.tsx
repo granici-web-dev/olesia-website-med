@@ -172,7 +172,6 @@ function UpcomingRow({
         </p>
       </div>
       <UpcomingPaymentCell
-        id={item.id}
         status={item.paymentStatus}
         serviceCode={item.serviceCode}
       />

@@ -143,6 +143,31 @@ export function describeCallbackMismatch(
   return null;
 }
 
+/**
+ * What a purchase's `paymentStatus` should read, given every payment recorded
+ * against it.
+ *
+ * `confirmed` the moment one of them is `paid`, `pending` otherwise. A refund
+ * therefore reads as unpaid, which is the honest answer: the money went back.
+ * A purchase can carry more than one payment — a manual record and a bank one,
+ * or a retry after a failure — so voiding any single row must not be allowed
+ * to conclude anything on its own (audit A5, F3).
+ */
+export function mirrorStatusFor(
+  payments: { state: PaymentState }[],
+): PaymentStatus {
+  return payments.some((p) => p.state === PaymentState.paid)
+    ? PaymentStatus.confirmed
+    : PaymentStatus.pending;
+}
+
+/**
+ * `method` on a payment the bank never saw. The bank's own values are `Card`,
+ * `MiaQr` and so on, so this cannot collide with one, and it is what
+ * `voidManual` checks before it agrees to cancel a row.
+ */
+const MANUAL_METHOD = 'manual';
+
 /** States after which nothing more will happen on its own. */
 const TERMINAL: PaymentState[] = [
   PaymentState.paid,
@@ -347,12 +372,123 @@ export class PaymentsService {
       where: {
         state: { notIn: TERMINAL },
         createdAt: { lt: new Date(Date.now() - 30 * 60 * 1000) },
+        // A manual payment has no session at the bank, so there is nothing to
+        // reconcile it against. It is also never non-terminal, which makes
+        // this belt and braces rather than a filter that does work.
+        checkoutId: { not: null },
       },
       select: { checkoutId: true },
       take: 100,
     });
-    for (const s of stale) await this.syncFromBank(s.checkoutId);
+    for (const s of stale) await this.syncFromBank(s.checkoutId!);
     return stale.length;
+  }
+
+  /* -------------------------- manual payments -------------------------- */
+
+  /**
+   * Record money that arrived outside the bank: cash at the practice, a
+   * transfer, a card machine that is not ours.
+   *
+   * It is a `Payment` row like any other, and that is the point (audit A5,
+   * F3). `paymentStatus` on an appointment, subscription, order or question is
+   * documented as a mirror of this ledger, but three PATCH endpoints and three
+   * back-office switches wrote it by hand — so "confirmed" meant either "the
+   * bank told us" or "somebody clicked", with nothing recording which, how
+   * much, or who. A row with `method: 'manual'` says all three.
+   *
+   * The payer is read off the purchase rather than taken from the request: the
+   * name and address on the order are the record of who bought it, and letting
+   * the caller supply a different one would put a second version of the truth
+   * in the ledger.
+   */
+  async recordManual(input: {
+    targetType: PaymentTargetType;
+    targetId: string;
+    amount: number;
+    currency: string;
+    note?: string;
+    authorId: string;
+  }) {
+    const payer = await this.payerForTarget(input.targetType, input.targetId);
+
+    // `MANUAL-` rather than the target type the checkout flow uses, so the
+    // reference says at a glance that no bank was involved.
+    const orderId = `MANUAL-${randomBytes(9).toString('base64url')}`;
+    const paidAt = new Date();
+
+    const created = await this.prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.create({
+        data: {
+          checkoutId: null,
+          orderId,
+          state: PaymentState.paid,
+          amount: new Prisma.Decimal(input.amount),
+          currency: input.currency,
+          method: MANUAL_METHOD,
+          targetType: input.targetType,
+          targetId: input.targetId,
+          payerName: payer.name,
+          payerEmail: payer.email.toLowerCase(),
+          patientId: await this.findPatientId(payer.email, tx),
+          note: input.note,
+          authorId: input.authorId,
+          paidAt,
+        },
+      });
+      await this.markTargetPaid(payment, tx);
+      return payment;
+    });
+
+    this.logger.log(
+      `audit payment.manual paymentId=${created.id} target=${input.targetType}:${input.targetId} userId=${input.authorId}`,
+    );
+    return this.findOne(created.id);
+  }
+
+  /**
+   * Undo a manual payment that was recorded in error.
+   *
+   * Only a manual one: a bank payment is undone by refunding it, which moves
+   * real money, and a "void" that silently disagreed with maib would be the
+   * worst kind of wrong. The row is cancelled rather than deleted — it is
+   * evidence that somebody recorded a payment and somebody took it back.
+   *
+   * The mirror is then recomputed from the ledger rather than assumed: a
+   * purchase can have been paid twice, once manually and once through the
+   * bank, and voiding one of those must not mark it unpaid.
+   */
+  async voidManual(paymentRowId: string, authorId: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentRowId },
+    });
+    if (!payment) throw new NotFoundException('payment_not_found');
+    if (payment.method !== MANUAL_METHOD) {
+      throw new BadRequestException('not_a_manual_payment');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: paymentRowId },
+        data: { state: PaymentState.cancelled },
+      });
+      await this.recomputeTargetMirror(payment, tx);
+    });
+
+    this.logger.log(
+      `audit payment.void paymentId=${paymentRowId} userId=${authorId}`,
+    );
+    return this.findOne(paymentRowId);
+  }
+
+  /** Every payment recorded against one purchase, newest first. */
+  async historyForTarget(targetType: PaymentTargetType, targetId: string) {
+    const rows = await this.prisma.payment.findMany({
+      where: { targetType, targetId },
+      orderBy: { createdAt: 'desc' },
+      include: { refunds: true },
+    });
+    return rows.map(toPaymentDto);
   }
 
   /* ----------------------------- refunds ----------------------------- */
@@ -379,12 +515,20 @@ export class PaymentsService {
       // FOR UPDATE, not findUnique: every concurrent refund of this payment
       // queues on this row before it can read the balance.
       const [locked] = await tx.$queryRaw<
-        { id: string; paymentId: string | null; checkoutId: string; currency: string }[]
+        {
+          id: string;
+          paymentId: string | null;
+          checkoutId: string | null;
+          currency: string;
+        }[]
       >`SELECT "id", "paymentId", "checkoutId", "currency"
           FROM "Payment" WHERE "id" = ${paymentRowId} FOR UPDATE`;
 
       if (!locked) throw new NotFoundException('payment_not_found');
+      // Also what refuses a manual payment: it never had a bank payment id,
+      // and money the bank never took is not money the bank can send back.
       if (!locked.paymentId) throw new BadRequestException('payment_not_executed');
+      if (!locked.checkoutId) throw new BadRequestException('payment_not_executed');
 
       const payment = await tx.payment.findUniqueOrThrow({
         where: { id: paymentRowId },
@@ -504,7 +648,10 @@ export class PaymentsService {
 
     // The redirect is user-controllable, so a return page hitting this while
     // the callback is still in flight must get the bank's answer, not ours.
-    if (!TERMINAL.includes(p.state)) await this.syncFromBank(p.checkoutId);
+    // A manual payment has no session to ask about.
+    if (p.checkoutId && !TERMINAL.includes(p.state)) {
+      await this.syncFromBank(p.checkoutId);
+    }
 
     const fresh = await this.prisma.payment.findUnique({
       where: { orderId },
@@ -549,6 +696,90 @@ export class PaymentsService {
       select: { id: true },
     });
     return patient?.id;
+  }
+
+  /**
+   * The name and address on the purchase a manual payment is being recorded
+   * against. Also proves the purchase exists before a `Payment` points at it.
+   */
+  private async payerForTarget(
+    targetType: PaymentTargetType,
+    targetId: string,
+  ): Promise<{ name: string; email: string }> {
+    const found = await this.loadPayer(targetType, targetId);
+    if (!found) throw new NotFoundException('payment_target_not_found');
+    return found;
+  }
+
+  private async loadPayer(
+    targetType: PaymentTargetType,
+    targetId: string,
+  ): Promise<{ name: string; email: string } | null> {
+    const select = { clientName: true, clientEmail: true } as const;
+    const row =
+      targetType === PaymentTargetType.appointment
+        ? await this.prisma.appointment.findUnique({ where: { id: targetId }, select })
+        : targetType === PaymentTargetType.subscription
+          ? await this.prisma.subscription.findUnique({ where: { id: targetId }, select })
+          : targetType === PaymentTargetType.quick_question
+            ? await this.prisma.quickQuestion.findUnique({ where: { id: targetId }, select })
+            : targetType === PaymentTargetType.deliverable_order
+              ? await this.prisma.deliverableOrder.findUnique({ where: { id: targetId }, select })
+              // A paid material has no order row to read a payer off; the
+              // checkout collects one, and there is nothing to record manually.
+              : null;
+    return row ? { name: row.clientName, email: row.clientEmail } : null;
+  }
+
+  /**
+   * Set the purchase's mirror from what the ledger now holds: confirmed if any
+   * payment against it is `paid`, pending otherwise.
+   *
+   * Used when a payment stops being paid. `markTargetPaid` handles the other
+   * direction and stays a one-way write, because that is the path the bank's
+   * callback takes and it must stay cheap and idempotent.
+   */
+  private async recomputeTargetMirror(
+    payment: { targetType: PaymentTargetType; targetId: string | null },
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
+    const { targetType, targetId } = payment;
+    if (!targetId) return;
+
+    const recorded = await tx.payment.findMany({
+      where: { targetType, targetId },
+      select: { state: true },
+    });
+    const data = { paymentStatus: mirrorStatusFor(recorded) };
+
+    try {
+      switch (targetType) {
+        case PaymentTargetType.appointment:
+          await tx.appointment.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.quick_question:
+          await tx.quickQuestion.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.deliverable_order:
+          await tx.deliverableOrder.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.subscription:
+          await tx.subscription.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.material:
+          break;
+      }
+    } catch (e) {
+      // Same reasoning as markTargetPaid: the purchase can be gone, and the
+      // payment record is the source of truth either way.
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+        this.logger.warn(
+          `voided ${targetType} ${targetId} no longer exists; payment cancelled anyway`,
+        );
+        return;
+      }
+      throw e;
+    }
   }
 
   /**

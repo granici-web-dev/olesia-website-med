@@ -310,7 +310,6 @@ export function PatientDetailPage() {
                 <Timeline
                   entries={entries}
                   interactions={interactions}
-                  patientId={id}
                   onEdit={openEditEntry}
                   onDelete={setPendingDelete}
                   onDownload={handleDownload}
@@ -415,7 +414,6 @@ export function PatientDetailPage() {
                     <InteractionItem
                       key={`${it.source}-${it.sourceId}-${i}`}
                       interaction={it}
-                      patientId={id}
                     />
                   ))}
                 </div>

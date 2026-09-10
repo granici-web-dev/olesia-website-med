@@ -10,16 +10,19 @@ import type { Subscription } from '@/features/subscriptions/types';
 
 /**
  * Real `subscriptions` endpoints (module_calendly.md §3.2.4) — the
- * "Monitorizare 3 luni" package (service 04). The DTO carries a monthly quota
- * and a service id; the UI uses a cycle total and a price, so we derive both.
+ * "Monitorizare 3 luni" package (service 04). The DTO carries the quota and a
+ * service id; the price comes from the catalog.
+ *
+ * The quota used to be multiplied by three here, because the API stored it per
+ * month and nothing ever reset it — so the screen and the enforcement
+ * disagreed by a factor of three. The API stores the total now (audit A5, F10)
+ * and this passes it through.
  */
 
 // Monitoring is being restructured into 4 subscription types × 1/2/3/6 months;
 // catalog price is 0 ("on request") until the client provides the matrix.
 const MONITORING_PRICE =
   SERVICE_CATALOG.find((s) => s.code === ServiceCode.Monitoring)?.price ?? 0;
-
-const CYCLE_MONTHS = 3;
 
 function toView(d: SubscriptionDto): Subscription {
   return {
@@ -35,7 +38,7 @@ function toView(d: SubscriptionDto): Subscription {
     paymentStatus: d.paymentStatus as Subscription['paymentStatus'],
     startDate: d.startsAt,
     endDate: d.endsAt,
-    videoQuotaTotal: d.videoQuotaPerMonth * CYCLE_MONTHS,
+    videoQuotaTotal: d.videoQuotaTotal,
     videoQuotaUsed: d.videoQuotaUsed,
     price: MONITORING_PRICE,
     createdAt: d.createdAt,
@@ -51,18 +54,6 @@ export async function fetchSubscriptions(): Promise<Subscription[]> {
     '/subscriptions?pageSize=200',
   );
   return asList(r).map(toView);
-}
-
-/** Manually set the payment status (both directions — payment is offline). */
-export async function setPaymentStatus(
-  id: string,
-  paymentStatus: Subscription['paymentStatus'],
-): Promise<Subscription> {
-  return toView(
-    await http.patch<SubscriptionDto>(`/subscriptions/${id}`, {
-      paymentStatus,
-    }),
-  );
 }
 
 export async function logVideoCall(id: string): Promise<Subscription> {

@@ -191,13 +191,13 @@ export class AppointmentsService {
     return paginate(items.map(toAppointmentDto), total, query);
   }
 
-  /** Manual edits: confirm payment, mark no-show/completed. */
+  /** Manual edits: mark no-show/completed. Payment is the ledger's business. */
   async update(id: string, dto: UpdateAppointmentDto): Promise<AppointmentDto> {
     await this.getOrThrow(id);
     return toAppointmentDto(
       await this.prisma.appointment.update({
         where: { id },
-        data: { status: dto.status, paymentStatus: dto.paymentStatus },
+        data: { status: dto.status },
       }),
     );
   }

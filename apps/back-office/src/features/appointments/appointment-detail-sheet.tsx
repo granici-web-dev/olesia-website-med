@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarClock,
-  CheckCircle2,
   Download,
   ExternalLink,
   FileText,
@@ -11,7 +10,6 @@ import {
   Mail,
   Paperclip,
   Pencil,
-  RotateCcw,
   UserX,
   Video,
   X,
@@ -45,7 +43,6 @@ import {
   PaymentBadge,
 } from '@/features/appointments/status-badges';
 import {
-  setPaymentStatus,
   downloadPlanFile,
   markNoShow,
   uploadPlan,
@@ -58,10 +55,14 @@ import type { Appointment } from '@/features/appointments/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 import { PatientUploadsPanel } from '@/features/uploads/patient-uploads-panel';
 import { ro } from '@/i18n/ro';
+import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
 import { appointmentsQueryKey } from '@/features/appointments/query-key';
 import { cn } from '@/lib/utils';
 
 const t = ro.appointments;
+
+/** The catalog quotes consultations in EUR, like the rest of the services. */
+const APPOINTMENT_CURRENCY = 'EUR';
 
 function Field({
   label,
@@ -118,25 +119,6 @@ export function AppointmentDetailSheet({
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: appointmentsQueryKey });
 
-  const payMutation = useMutation({
-    mutationFn: ({
-      id,
-      status,
-    }: {
-      id: string;
-      status: Appointment['paymentStatus'];
-    }) => setPaymentStatus(id, status),
-    onSuccess: (_data, vars) => {
-      toast.success(
-        vars.status === 'confirmed'
-          ? t.toast.paymentConfirmed
-          : t.toast.paymentReverted,
-      );
-      invalidate();
-    },
-    onError: () => toast.error(t.toast.error),
-  });
-
   const noShowMutation = useMutation({
     mutationFn: markNoShow,
     onSuccess: () => {
@@ -157,10 +139,7 @@ export function AppointmentDetailSheet({
     onError: () => toast.error(t.toast.error),
   });
 
-  const busy =
-    payMutation.isPending ||
-    noShowMutation.isPending ||
-    planMutation.isPending;
+  const busy = noShowMutation.isPending || planMutation.isPending;
 
   const a = appointment;
   const canEditPlan =
@@ -464,6 +443,19 @@ export function AppointmentDetailSheet({
                 </div>
               )}
 
+              {/* A free consultation has nothing to pay, so it has no ledger. */}
+              {!isFreeAppointment(a) && (
+                <>
+                  <Separator className="my-4" />
+                  <ManualPaymentPanel
+                    targetType="appointment"
+                    targetId={a.id}
+                    currency={APPOINTMENT_CURRENCY}
+                    onRecorded={invalidate}
+                  />
+                </>
+              )}
+
               <Separator className="my-4" />
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -491,56 +483,7 @@ export function AppointmentDetailSheet({
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
               {a.paymentStatus === 'confirmed' && (
-                <>
-                  <AddAsPatientButton source="appointment" sourceId={a.id} />
-                  {!isFreeAppointment(a) && (
-                    <ConfirmAction
-                      trigger={
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          disabled={busy}
-                        >
-                          {payMutation.isPending ? (
-                            <Loader2 className="animate-spin" />
-                          ) : (
-                            <RotateCcw />
-                          )}
-                          {t.actions.revertPayment}
-                        </Button>
-                      }
-                      title={t.confirm.paymentRevertTitle}
-                      body={t.confirm.paymentRevertBody}
-                      cta={t.confirm.paymentRevertCta}
-                      onConfirm={() =>
-                        payMutation.mutate({ id: a.id, status: 'pending' })
-                      }
-                    />
-                  )}
-                </>
-              )}
-
-              {a.paymentStatus === 'pending' &&
-                a.status !== 'canceled' &&
-                !isFreeAppointment(a) && (
-                <ConfirmAction
-                  trigger={
-                    <Button className="w-full" disabled={busy}>
-                      {payMutation.isPending ? (
-                        <Loader2 className="animate-spin" />
-                      ) : (
-                        <CheckCircle2 />
-                      )}
-                      {t.actions.confirmPayment}
-                    </Button>
-                  }
-                  title={t.confirm.paymentTitle}
-                  body={t.confirm.paymentBody}
-                  cta={t.confirm.paymentCta}
-                  onConfirm={() =>
-                    payMutation.mutate({ id: a.id, status: 'confirmed' })
-                  }
-                />
+                <AddAsPatientButton source="appointment" sourceId={a.id} />
               )}
 
               {a.status === 'scheduled' && (

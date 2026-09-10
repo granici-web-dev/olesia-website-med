@@ -155,7 +155,8 @@ export interface SubscriptionDto {
   notes: string | null;
   status: SubscriptionStatus;
   paymentStatus: PaymentStatus;
-  videoQuotaPerMonth: number;
+  /** Video calls for the whole subscription period; it does not reset. */
+  videoQuotaTotal: number;
   videoQuotaUsed: number;
   startsAt: string;
   endsAt: string;
@@ -657,7 +658,11 @@ export interface PatientLeadConflictDto {
 
 /** A linked lead interaction shown on the patient timeline. */
 export interface PatientInteractionDto {
-  source: 'appointment' | 'subscription' | 'quick_question';
+  source:
+    | 'appointment'
+    | 'subscription'
+    | 'quick_question'
+    | 'deliverable_order';
   sourceId: string;
   label: string;
   occurredAt: string;
@@ -688,7 +693,8 @@ export interface PaymentRefundDto {
  */
 export interface PaymentDto {
   id: string;
-  checkoutId: string;
+  /** Null on a manual payment: there was no checkout session behind it. */
+  checkoutId: string | null;
   paymentId: string | null;
   orderId: string;
   state: PaymentState;
@@ -710,6 +716,8 @@ export interface PaymentDto {
   expiresAt: string | null;
   paidAt: string | null;
   failedAt: string | null;
+  /** The operator's words on a manual payment; null on everything else. */
+  note: string | null;
   createdAt: string;
   refunds: PaymentRefundDto[];
 }

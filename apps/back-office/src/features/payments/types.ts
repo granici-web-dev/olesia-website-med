@@ -1,10 +1,15 @@
 /**
- * Online payments taken through maib e-Commerce Checkout.
+ * Payments: what maib e-Commerce Checkout took, plus what arrived outside it.
  *
- * Nothing here is editable. A payment is what the bank says happened, and the
- * only thing the back office can change about it is to send money back. Even
- * the amount is history: it is what was charged, not what the price list says
- * today.
+ * Nothing here is editable. A payment is what happened, and the only things the
+ * back office can change about one are to send the money back (a bank payment)
+ * or to cancel a record entered in error (a manual one). Even the amount is
+ * history: it is what was charged, not what the price list says today.
+ *
+ * A manual payment is a row with `method: 'manual'`, no `checkoutId`, and the
+ * operator's `note`. It exists because `paymentStatus` on a purchase mirrors
+ * this ledger — it used to be a switch the back office flipped, which recorded
+ * neither the amount, nor when, nor who.
  *
  * Shapes mirror `PaymentDto` in `packages/shared`. The states are spelled out
  * as a local union rather than reused from the shared enum for the same reason
@@ -45,9 +50,19 @@ export interface PaymentRefund {
   createdAt: string;
 }
 
+/** What the back office sends to record money that arrived outside the bank. */
+export interface ManualPaymentInput {
+  targetType: PaymentTargetType;
+  targetId: string;
+  amount: number;
+  currency: string;
+  note?: string;
+}
+
 export interface Payment {
   id: string;
-  checkoutId: string;
+  /** Null on a manual payment: there was no checkout session behind it. */
+  checkoutId: string | null;
   paymentId: string | null;
   /** Our own order reference, the one shown to the client and the bank. */
   orderId: string;
@@ -71,6 +86,8 @@ export interface Payment {
   expiresAt: string | null;
   paidAt: string | null;
   failedAt: string | null;
+  /** The operator's words on a manual payment; null on everything else. */
+  note: string | null;
   createdAt: string; // ISO
   refunds: PaymentRefund[];
 }

@@ -50,6 +50,7 @@ export function toPaymentDto(
     expiresAt: p.expiresAt?.toISOString() ?? null,
     paidAt: p.paidAt?.toISOString() ?? null,
     failedAt: p.failedAt?.toISOString() ?? null,
+    note: p.note,
     createdAt: p.createdAt.toISOString(),
     refunds: (p.refunds ?? []).map(toPaymentRefundDto),
   };

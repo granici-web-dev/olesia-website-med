@@ -36,13 +36,16 @@ import {
   deleteOrder,
   formatDateTime,
   formatPrice,
-  setOrderPayment,
   setOrderStatus,
 } from '@/features/orders/data';
+import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
 import { ordersQueryKey } from '@/features/orders/query-key';
 import type { Order, OrderStatus } from '@/features/orders/types';
 
 const t = ro.orders;
+
+/** The catalog quotes group-C deliverables in EUR, and the row stores EUR. */
+const ORDER_CURRENCY = 'EUR';
 
 const STATUS_OPTIONS: OrderStatus[] = [
   'new',
@@ -86,15 +89,6 @@ export function OrderDetailSheet({
     mutationFn: setOrderStatus,
     onSuccess: () => {
       toast.success(t.toast.statusSaved);
-      invalidate();
-    },
-    onError: () => toast.error(t.toast.error),
-  });
-
-  const paymentMutation = useMutation({
-    mutationFn: setOrderPayment,
-    onSuccess: () => {
-      toast.success(t.toast.paymentSaved);
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -208,32 +202,13 @@ export function OrderDetailSheet({
                 )}
               </div>
 
-              {/* Payment is confirmed by hand — there is no gateway yet. */}
-              <div className="space-y-2">
-                <SectionTitle>{t.detail.payment}</SectionTitle>
-                <p className="text-sm text-muted-foreground text-pretty">
-                  {t.detail.paymentHint}
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  disabled={paymentMutation.isPending}
-                  onClick={() =>
-                    paymentMutation.mutate({
-                      id: o.id,
-                      paymentStatus:
-                        o.paymentStatus === 'confirmed' ? 'pending' : 'confirmed',
-                    })
-                  }
-                >
-                  {paymentMutation.isPending && (
-                    <Loader2 className="animate-spin" />
-                  )}
-                  {o.paymentStatus === 'confirmed'
-                    ? t.actions.markUnpaid
-                    : t.actions.markPaid}
-                </Button>
-              </div>
+              <ManualPaymentPanel
+                targetType="deliverable_order"
+                targetId={o.id}
+                currency={ORDER_CURRENCY}
+                suggestedAmount={o.priceEur}
+                onRecorded={invalidate}
+              />
 
               <Separator />
 

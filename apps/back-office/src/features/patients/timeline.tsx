@@ -13,7 +13,6 @@ import {
   PaymentBadge,
   entryTypeIcon,
 } from '@/features/patients/badges';
-import { InteractionPaymentCell } from '@/features/patients/interaction-payment-cell';
 import { formatDate, formatDateTime } from '@/features/patients/mock';
 import type {
   PatientEntryDto,
@@ -111,13 +110,18 @@ export function EntryCard({
 
 /* -------------------------- interaction item -------------------------- */
 
+/**
+ * One thing the person bought, in the dossier's timeline.
+ *
+ * The payment badge is read-only. It used to be a switcher that wrote
+ * `paymentStatus` directly, which mirrors the payments ledger — a payment is
+ * recorded where the purchase lives, with a sum and a note, not from a summary
+ * of it.
+ */
 export function InteractionItem({
   interaction,
-  patientId,
 }: {
   interaction: PatientInteractionDto;
-  /** When set, the payment status is editable (manual, offline payments). */
-  patientId?: string;
 }) {
   return (
     <div className="rounded-lg border bg-card p-4">
@@ -133,14 +137,7 @@ export function InteractionItem({
           </div>
           <p className="font-medium text-balance">{interaction.label}</p>
         </div>
-        {patientId ? (
-          <InteractionPaymentCell
-            interaction={interaction}
-            patientId={patientId}
-          />
-        ) : (
-          <PaymentBadge status={interaction.paymentStatus} />
-        )}
+        <PaymentBadge status={interaction.paymentStatus} />
       </div>
     </div>
   );
@@ -156,7 +153,6 @@ type TimelineRow =
 export function Timeline({
   entries,
   interactions,
-  patientId,
   onEdit,
   onDelete,
   onDownload,
@@ -164,7 +160,6 @@ export function Timeline({
 }: {
   entries: PatientEntryDto[];
   interactions: PatientInteractionDto[];
-  patientId: string;
   onEdit: (entry: PatientEntryDto) => void;
   onDelete: (entry: PatientEntryDto) => void;
   onDownload: (entry: PatientEntryDto) => void;
@@ -217,10 +212,7 @@ export function Timeline({
                 downloading={downloadingId === row.entry.id}
               />
             ) : (
-              <InteractionItem
-                interaction={row.interaction}
-                patientId={patientId}
-              />
+              <InteractionItem interaction={row.interaction} />
             )}
           </li>
         );

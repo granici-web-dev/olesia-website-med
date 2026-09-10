@@ -254,8 +254,13 @@ model Subscription {
   locale             Locale             @default(ro)
   status             SubscriptionStatus @default(active)
   paymentStatus      PaymentStatus      @default(pending)
-  videoQuotaPerMonth Int                @default(2)
-  videoQuotaUsed     Int                @default(0)
+  /// Video calls included for the whole subscription, not per month, and it
+  /// never resets: nothing has ever decremented `videoQuotaUsed` on a calendar
+  /// boundary, so the old name `videoQuotaPerMonth` described a monthly
+  /// allowance that did not exist (audit A5, F10). The number the back office
+  /// showed was this one multiplied by a hardcoded 3.
+  videoQuotaTotal Int                   @default(6)
+  videoQuotaUsed  Int                   @default(0)
   startsAt           DateTime
   endsAt             DateTime
   patient            Patient?           @relation(fields: [patientId], references: [id])
@@ -639,6 +644,15 @@ model DeliverableOrder {
   /// Set once when the finished menu/protocol has been sent to the client.
   deliveredAt   DateTime?
 
+  /// The dossier this order belongs to, once somebody links it. Optional
+  /// because an order arrives from the public form long before a medical
+  /// record exists, and `SetNull` because erasing the patient must not delete
+  /// the accounting trail of what was sold. Added by audit A5 (F12): this was
+  /// the one lead kind with no patient relation at all, so a group-C order
+  /// never appeared in the dossier and could not be linked to one.
+  patient   Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  patientId String?
+
   uploadLinks UploadLink[]
 
   createdAt DateTime @default(now())
@@ -646,6 +660,7 @@ model DeliverableOrder {
 
   @@index([status])
   @@index([createdAt])
+  @@index([patientId])
 }
 
 // --- Working hours (client answers v2 §11.5) ---
@@ -849,11 +864,12 @@ model Patient {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  entries        PatientEntry[]
-  appointments   Appointment[]
-  subscriptions  Subscription[]
-  quickQuestions QuickQuestion[]
-  payments       Payment[]
+  entries           PatientEntry[]
+  appointments      Appointment[]
+  subscriptions     Subscription[]
+  quickQuestions    QuickQuestion[]
+  deliverableOrders DeliverableOrder[]
+  payments          Payment[]
 }
 
 model PatientEntry {
@@ -881,8 +897,11 @@ model PatientEntry {
 model Payment {
   id String @id @default(uuid())
 
-  /// maib session id — also the idempotency key for the callback.
-  checkoutId String  @unique
+  /// maib session id — also the idempotency key for the callback. Null on a
+  /// payment that never went through the bank: a manual payment recorded in
+  /// the back office is a `Payment` row like any other, and it has no checkout
+  /// session behind it (audit A5, F3).
+  checkoutId String? @unique
   /// maib payment id (`payId`). Absent until the payer actually pays.
   paymentId  String? @unique
   /// Our own order reference, sent as `orderInfo.id` and echoed back.
@@ -923,6 +942,14 @@ model Payment {
 
   /// Verbatim last callback payload — the audit trail for a disputed charge.
   rawCallback Json?
+
+  /// Why a manual payment was recorded, in the operator's own words: "cash la
+  /// cabinet", "transfer bancar 12.09". A payment the bank never saw has no
+  /// references of its own, so this is the only evidence of what happened
+  /// (audit A5, F3). Null on everything that came through the checkout.
+  note String?
+  /// Who recorded or voided a manual payment. Same shape as PaymentRefund.
+  authorId String?
 
   expiresAt DateTime?
   paidAt    DateTime?

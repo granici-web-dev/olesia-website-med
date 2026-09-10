@@ -23,6 +23,7 @@ import { PatientEntryType } from '../../generated/prisma/enums';
 import { Prisma } from '../../generated/prisma/client';
 import { toPatientDto, toPatientEntryDto } from './patients.mapper';
 import { CALENDLY_MANUAL_STEP, erasureTargets } from './erasure-targets';
+import { toInteractions } from './interactions';
 import {
   CreatePatientDto,
   ListPatientsDto,
@@ -299,7 +300,7 @@ export class PatientsService {
     interactions: PatientInteractionDto[];
   }> {
     await this.getOrThrow(id);
-    const [entries, appts, subs, qqs] = await Promise.all([
+    const [entries, appts, subs, qqs, orders] = await Promise.all([
       this.prisma.patientEntry.findMany({
         where: { patientId: id },
         orderBy: { occurredAt: 'desc' },
@@ -307,34 +308,15 @@ export class PatientsService {
       this.prisma.appointment.findMany({ where: { patientId: id } }),
       this.prisma.subscription.findMany({ where: { patientId: id } }),
       this.prisma.quickQuestion.findMany({ where: { patientId: id } }),
+      this.prisma.deliverableOrder.findMany({ where: { patientId: id } }),
     ]);
 
-    const interactions: PatientInteractionDto[] = [
-      ...appts.map((a) => ({
-        source: 'appointment' as const,
-        sourceId: a.id,
-        label: a.reason ?? 'Consultație',
-        occurredAt: a.startTime.toISOString(),
-        status: a.status,
-        paymentStatus: a.paymentStatus as PatientInteractionDto['paymentStatus'],
-      })),
-      ...subs.map((s) => ({
-        source: 'subscription' as const,
-        sourceId: s.id,
-        label: 'Monitorizare',
-        occurredAt: s.startsAt.toISOString(),
-        status: s.status,
-        paymentStatus: s.paymentStatus as PatientInteractionDto['paymentStatus'],
-      })),
-      ...qqs.map((q) => ({
-        source: 'quick_question' as const,
-        sourceId: q.id,
-        label: 'Întrebare rapidă',
-        occurredAt: q.createdAt.toISOString(),
-        status: q.status,
-        paymentStatus: q.paymentStatus as PatientInteractionDto['paymentStatus'],
-      })),
-    ].sort((x, y) => y.occurredAt.localeCompare(x.occurredAt));
+    const interactions = toInteractions({
+      appointments: appts,
+      subscriptions: subs,
+      quickQuestions: qqs,
+      deliverableOrders: orders,
+    });
 
     return { entries: entries.map(toPatientEntryDto), interactions };
   }
@@ -479,19 +461,20 @@ export class PatientsService {
   }
 
   private async loadLead(dto: FromLeadDto): Promise<{ name: string; email: string }> {
-    if (dto.source === 'appointment') {
-      const a = await this.prisma.appointment.findUnique({ where: { id: dto.sourceId } });
-      if (!a) throw new NotFoundException('lead_not_found');
-      return { name: a.clientName, email: a.clientEmail };
-    }
-    if (dto.source === 'subscription') {
-      const s = await this.prisma.subscription.findUnique({ where: { id: dto.sourceId } });
-      if (!s) throw new NotFoundException('lead_not_found');
-      return { name: s.clientName, email: s.clientEmail };
-    }
-    const q = await this.prisma.quickQuestion.findUnique({ where: { id: dto.sourceId } });
-    if (!q) throw new NotFoundException('lead_not_found');
-    return { name: q.clientName, email: q.clientEmail };
+    const select = { clientName: true, clientEmail: true } as const;
+    const id = dto.sourceId;
+
+    const row =
+      dto.source === 'appointment'
+        ? await this.prisma.appointment.findUnique({ where: { id }, select })
+        : dto.source === 'subscription'
+          ? await this.prisma.subscription.findUnique({ where: { id }, select })
+          : dto.source === 'quick_question'
+            ? await this.prisma.quickQuestion.findUnique({ where: { id }, select })
+            : await this.prisma.deliverableOrder.findUnique({ where: { id }, select });
+
+    if (!row) throw new NotFoundException('lead_not_found');
+    return { name: row.clientName, email: row.clientEmail };
   }
 
   private async attachLead(
@@ -499,12 +482,17 @@ export class PatientsService {
     patientId: string,
     tx: Prisma.TransactionClient | PrismaService,
   ): Promise<void> {
+    const where = { id: dto.sourceId };
+    const data = { patientId };
+
     if (dto.source === 'appointment') {
-      await tx.appointment.update({ where: { id: dto.sourceId }, data: { patientId } });
+      await tx.appointment.update({ where, data });
     } else if (dto.source === 'subscription') {
-      await tx.subscription.update({ where: { id: dto.sourceId }, data: { patientId } });
+      await tx.subscription.update({ where, data });
+    } else if (dto.source === 'quick_question') {
+      await tx.quickQuestion.update({ where, data });
     } else {
-      await tx.quickQuestion.update({ where: { id: dto.sourceId }, data: { patientId } });
+      await tx.deliverableOrder.update({ where, data });
     }
   }
 

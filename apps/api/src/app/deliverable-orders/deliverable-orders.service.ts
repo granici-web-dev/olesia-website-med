@@ -1,14 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { writeOrTranslate } from '../common/prisma-errors';
 import { StorageService } from '../storage/storage.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
-import {
-  DeliverableOrderStatus,
-  PaymentStatus,
-} from '../../generated/prisma/enums';
+import { DeliverableOrderStatus } from '../../generated/prisma/enums';
 import { toDeliverableOrderDto } from './deliverable-orders.mapper';
 import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
 
@@ -19,6 +16,8 @@ import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
  */
 @Injectable()
 export class DeliverableOrdersService {
+  private readonly logger = new Logger(DeliverableOrdersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
@@ -39,10 +38,12 @@ export class DeliverableOrdersService {
   }
 
   /**
-   * Patch the workflow and payment state. `deliveredAt` is stamped the first
-   * time an order is marked delivered and cleared if it is moved back — the
-   * date has to mean "this is when the client got it", not "when the row was
-   * last touched".
+   * Patch the workflow state. `deliveredAt` is stamped the first time an order
+   * is marked delivered and cleared if it is moved back — the date has to mean
+   * "this is when the client got it", not "when the row was last touched".
+   *
+   * Payment is not here any more: it mirrors the `Payment` ledger, and money
+   * that arrived outside the bank is `POST /payments/manual` (audit A5, F3).
    */
   async update(
     id: string,
@@ -52,7 +53,6 @@ export class DeliverableOrdersService {
 
     const data: {
       status?: DeliverableOrderStatus;
-      paymentStatus?: PaymentStatus;
       deliveredAt?: Date | null;
     } = {};
 
@@ -63,10 +63,6 @@ export class DeliverableOrdersService {
       } else {
         data.deliveredAt = null;
       }
-    }
-
-    if (dto.paymentStatus && dto.paymentStatus !== existing.paymentStatus) {
-      data.paymentStatus = dto.paymentStatus;
     }
 
     if (Object.keys(data).length === 0) {
@@ -80,7 +76,7 @@ export class DeliverableOrdersService {
     );
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, userId: string): Promise<void> {
     await this.getOrThrow(id);
 
     // The order's upload link and its documents go with it (schema cascade),
@@ -98,6 +94,14 @@ export class DeliverableOrdersService {
 
     await Promise.all(
       documents.map((d) => this.storage.deletePrivateDocument(d.fileKey)),
+    );
+
+    // Identifiers only, same shape as the patients module's audit line: this
+    // destroys medical documents, and a data-protection question about them
+    // cannot be answered from a log that never recorded the deletion
+    // (audit A5, F11).
+    this.logger.log(
+      `audit order.delete orderId=${id} documents=${documents.length} userId=${userId}`,
     );
   }
 

@@ -15,7 +15,4 @@ export const fetchOrders = USE_MOCKS ? mock.fetchOrders : remote.fetchOrders;
 export const setOrderStatus = USE_MOCKS
   ? mock.setOrderStatus
   : remote.setOrderStatus;
-export const setOrderPayment = USE_MOCKS
-  ? mock.setOrderPayment
-  : remote.setOrderPayment;
 export const deleteOrder = USE_MOCKS ? mock.deleteOrder : remote.deleteOrder;

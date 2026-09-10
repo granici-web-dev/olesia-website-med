@@ -2,6 +2,7 @@ import type { VariantProps } from 'class-variance-authority';
 
 import type { badgeVariants } from '@/components/ui/badge';
 import type {
+  ManualPaymentInput,
   Payment,
   PaymentState,
   PaymentTargetType,
@@ -87,6 +88,7 @@ let store: Payment[] = [
     expiresAt: iso(2 * HOUR),
     paidAt: iso(2 * HOUR),
     failedAt: null,
+    note: null,
     createdAt: iso(2 * HOUR),
     refunds: [],
   },
@@ -114,6 +116,7 @@ let store: Payment[] = [
     expiresAt: iso(30 * HOUR),
     paidAt: iso(30 * HOUR),
     failedAt: null,
+    note: null,
     createdAt: iso(30 * HOUR),
     refunds: [
       {
@@ -153,6 +156,7 @@ let store: Payment[] = [
     expiresAt: iso(-20 * 60 * 1000),
     paidAt: null,
     failedAt: null,
+    note: null,
     createdAt: iso(10 * 60 * 1000),
     refunds: [],
   },
@@ -180,6 +184,7 @@ let store: Payment[] = [
     expiresAt: iso(50 * HOUR),
     paidAt: null,
     failedAt: iso(50 * HOUR),
+    note: null,
     createdAt: iso(50 * HOUR),
     refunds: [],
   },
@@ -207,6 +212,7 @@ let store: Payment[] = [
     expiresAt: iso(70 * HOUR),
     paidAt: null,
     failedAt: null,
+    note: null,
     createdAt: iso(71 * HOUR),
     refunds: [],
   },
@@ -230,6 +236,63 @@ export async function syncPayment(id: string): Promise<Payment> {
   const p = store.find((x) => x.id === id);
   if (!p) throw new Error('not_found');
   return clone(p);
+}
+
+export async function fetchTargetPayments(
+  targetType: PaymentTargetType,
+  targetId: string,
+): Promise<Payment[]> {
+  await delay();
+  return clone(
+    store.filter((p) => p.targetType === targetType && p.targetId === targetId),
+  );
+}
+
+export async function recordManualPayment(
+  input: ManualPaymentInput,
+): Promise<Payment> {
+  await delay();
+  const now = new Date().toISOString();
+  const created: Payment = {
+    id: `m${Date.now()}`,
+    checkoutId: null,
+    paymentId: null,
+    orderId: `MANUAL-${Math.random().toString(36).slice(2, 10)}`,
+    state: 'paid',
+    amount: input.amount,
+    currency: input.currency,
+    refundedAmount: 0,
+    method: 'manual',
+    targetType: input.targetType,
+    targetId: input.targetId,
+    payerName: null,
+    payerEmail: 'client@example.md',
+    payerPhone: null,
+    patientId: null,
+    rrn: null,
+    approvalCode: null,
+    cardMask: null,
+    threeDsResult: null,
+    terminalId: null,
+    expiresAt: null,
+    paidAt: now,
+    failedAt: null,
+    note: input.note ?? null,
+    createdAt: now,
+    refunds: [],
+  };
+  store = [created, ...store];
+  return clone(created);
+}
+
+export async function voidPayment(id: string): Promise<Payment> {
+  await delay();
+  const p = store.find((x) => x.id === id);
+  if (!p) throw new Error('not_found');
+  if (p.method !== 'manual') throw new Error('not_a_manual_payment');
+  const next: Payment = { ...p, state: 'cancelled' };
+  store = store.map((x) => (x.id === next.id ? next : x));
+  return clone(next);
 }
 
 export async function refundPayment(input: {

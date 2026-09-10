@@ -11,6 +11,8 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { AuthUser } from '../auth/jwt.types';
 import { Role } from '../../generated/prisma/enums';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { DeliverableOrdersService } from './deliverable-orders.service';
@@ -34,9 +36,18 @@ export class DeliverableOrdersController {
     return this.orders.update(id, dto);
   }
 
+  /**
+   * Admin only (audit A5, F11). Deleting an order takes its upload link and,
+   * underneath that, the medical documents the client sent for it — analyses
+   * and investigations, cascaded out of the database and off the disk. That is
+   * a great deal more than "tidy away a lead that came to nothing", which is
+   * how an editor would read the button, and every other route that reaches a
+   * patient's documents is already admin-only.
+   */
+  @Roles(Role.admin)
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string) {
-    return this.orders.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() actor: AuthUser) {
+    return this.orders.remove(id, actor.id);
   }
 }

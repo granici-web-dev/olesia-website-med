@@ -261,14 +261,6 @@ export async function fetchAppointments(): Promise<Appointment[]> {
     .sort((a, b) => b.startTime.localeCompare(a.startTime));
 }
 
-export async function setPaymentStatus(
-  id: string,
-  paymentStatus: PaymentStatus,
-): Promise<Appointment> {
-  await delay(450);
-  return mutate(id, { paymentStatus });
-}
-
 export async function markNoShow(id: string): Promise<Appointment> {
   await delay(450);
   return mutate(id, { status: 'no_show' });

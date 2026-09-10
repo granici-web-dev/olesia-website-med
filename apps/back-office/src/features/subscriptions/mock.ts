@@ -170,14 +170,6 @@ export async function fetchSubscriptions(): Promise<Subscription[]> {
     );
 }
 
-export async function setPaymentStatus(
-  id: string,
-  paymentStatus: PaymentStatus,
-): Promise<Subscription> {
-  await delay(450);
-  return mutate(id, { paymentStatus });
-}
-
 export async function logVideoCall(id: string): Promise<Subscription> {
   await delay(450);
   const sub = store.find((s) => s.id === id);
