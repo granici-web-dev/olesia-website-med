@@ -16,37 +16,8 @@ export interface Bi {
   ru: string;
 }
 
-/** Price (large) + duration/qualifier (small) per service, mirroring the
- *  homepage Services section so /pricing renders them the same way. */
-export const SERVICE_PRICE_META: Record<string, { price: Bi; duration: Bi }> = {
-  pediatric: {
-    price: { ro: '28 €', en: '28 €', ru: '28 €' },
-    duration: { ro: '30 min · video', en: '30 min · video', ru: '30 мин · видео' },
-  },
-  // Same price and length for both audiences — the difference is who the plan
-  // is built for, and which calendar the booking lands in.
-  nutrition_copii: {
-    price: { ro: '38 €', en: '38 €', ru: '38 €' },
-    duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
-  },
-  nutrition_adulti: {
-    price: { ro: '38 €', en: '38 €', ru: '38 €' },
-    duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
-  },
-  integrative: {
-    price: { ro: '58 €', en: '58 €', ru: '58 €' },
-    duration: { ro: '90 min · video', en: '90 min · video', ru: '90 мин · видео' },
-  },
-  monitoring: {
-    price: { ro: 'la cerere', en: 'on request', ru: 'по запросу' },
-    duration: { ro: '1–6 luni', en: '1–6 months', ru: '1–6 месяцев' },
-  },
-  quick_question: {
-    price: { ro: '8 €', en: '8 €', ru: '8 €' },
-    duration: { ro: '~1h · scris', en: '~1h · written', ru: '~1ч · письменно' },
-  },
-};
-
+/** One-paragraph description per service, shared by the homepage, /services
+ *  and /pricing so the wording cannot drift between them. */
 export const SERVICE_DESCRIPTIONS: Record<string, Bi> = {
   pediatric: {
     ro: 'O consultație video dedicată sănătății copilului — simptome, creștere, dezvoltare sau o a doua opinie.',

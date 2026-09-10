@@ -3,16 +3,17 @@
 Testing posture for `olesia-website-med`, as observed on **2026-09-10** and corrected by
 the maintainer.
 
-**The honest headline: 108 tests cover the arithmetic that would be expensive to get
-wrong, and CI still does not run them.** The suite grew from 3 files to 11 over the
-hardening passes of 2026-09-10. What follows describes what is covered, what deliberately
-is not, and the defaults for adding to it.
+**124 tests cover the arithmetic that would be expensive to get wrong, and CI runs them
+on every PR.** The suite grew from 3 files to 12 over 2026-09-10, and the last gap —
+tests that ran only on a laptop — closed with the price work the same day. What follows
+describes what is covered, what deliberately is not, and the defaults for adding to it.
 
 ---
 
 ## What exists today
 
-108 tests in 11 suites, all in the API, all unit tests over pure functions:
+124 tests in 12 suites, all unit tests over pure functions. Eleven suites are the API's,
+under Jest; one is the public site's, under Vitest:
 
 | Suite | Tests | What it pins |
 | --- | ---: | --- |
@@ -26,13 +27,17 @@ is not, and the defaults for adding to it.
 | `auth/totp-lockout.spec.ts` | 4 | The lockout that brakes code guessing: doubling from one minute to a ceiling of fifteen, and clearing itself. |
 | `users/starter-password.spec.ts` | 2 | |
 | `app.controller.spec.ts`, `app.service.spec.ts` | 2 | Nx scaffolding. They assert nothing about this project — delete them the next time this list is edited. |
+| `frontend/lib/service-price.spec.ts` | 16 | Every price and duration string the public site renders, in all three locales: the client's `priceLabel` beating a compiled-in one, the RU → RO fallback, `price: 0` reading as "on request", and the merged nutrition tile saying "from" once its two services diverge. |
 
 `business-hours.spec.ts` is still the model to copy: a pure function, a declared fixture,
 no database, no mocks, no Nest test module, and a header comment saying why the file exists
 at all.
 
-The **front ends have no tests**. Vitest is installed and referenced from
-`vite.config.mts` through the Nx plugin, but there is no test configuration and no specs.
+**The public site runs Vitest**, configured in `apps/frontend/vitest.config.mts` — a
+test-only config, since Next builds the app with its own toolchain and there is no
+`vite.config` there. It covers `lib/` helpers and nothing else; components stay out by
+the policy below. **The back office still has no tests**: Vitest is referenced from its
+`vite.config.mts` but no config and no specs exist.
 
 ## Jest configuration
 
@@ -50,13 +55,15 @@ should not be "cleaned up":
 
 1. Build the shared types, generate the Prisma client.
 2. `tsc --noEmit` on the API **and on the back office**.
-3. Build all three applications.
-4. Apply every migration to a clean Postgres and assert the schema matches them.
+3. **Both suites** — `pnpm nx test api` and `pnpm nx test @olesia/frontend`.
+4. Build all three applications.
+5. Apply every migration to a clean Postgres and assert the schema matches them.
 
-It does **not** run Jest or Vitest. The suite is fast (about a second) and there is no
-good reason left for that; adding it is a small CI change.
+Step 3 was added on 2026-09-10. Until then the tests ran only where someone remembered
+to run them, which is a strange arrangement for the tests that cover the money, the
+dates and the webhook signatures. Both suites together take about a second.
 
-**Step 4 is the most valuable check in the project and should be treated as such.** It is
+**Step 5 is the most valuable check in the project and should be treated as such.** It is
 the only integration test here: it proves the 26 committed migrations apply in order to an
 empty database and leave a schema that matches `schema.prisma`. Given that five migrations
 are hand-corrected, that check earns its keep every time it runs.
@@ -74,9 +81,8 @@ Closed by **`7c0234d`**, which deleted the dead helper and added
 was worth more than any new test file: it restored the compiler as a real gate on the
 largest of the three applications.
 
-**What is still open:** the site itself. `next build` typechecks as it builds, so errors
-there do fail CI — but there is no test runner, and no plan to add one for presentational
-components.
+**What is still open:** the back office has a runner in name only. `tsc` gates it, and
+nothing else does.
 
 ## Defaults for new tests
 

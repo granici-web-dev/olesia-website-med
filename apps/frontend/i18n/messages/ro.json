@@ -53,37 +53,27 @@
         "pediatric": {
           "tag": "Pediatrie",
           "title": "Consultație pediatrică",
-          "description": "Evaluare clinică completă pe video, anamneză detaliată, recomandări scrise pe care le primești în 24h. Pentru copii de la naștere până la adolescență — creștere, dezvoltare, profilaxie, întrebări la zi.",
-          "price": "28 €",
-          "duration": "30 min · video"
+          "description": "Evaluare clinică completă pe video, anamneză detaliată, recomandări scrise pe care le primești în 24h. Pentru copii de la naștere până la adolescență — creștere, dezvoltare, profilaxie, întrebări la zi."
         },
         "nutrition": {
           "tag": "Nutriție",
           "title": "Consultație nutrițională",
-          "description": "Plan alimentar personalizat pentru copii sau adulți. Anamneză, analiza obiceiurilor existente, analize recente, obiective realiste. Include un follow-up programat la 4 săptămâni.",
-          "price": "38 €",
-          "duration": "60 min · video"
+          "description": "Plan alimentar personalizat pentru copii sau adulți. Anamneză, analiza obiceiurilor existente, analize recente, obiective realiste. Include un follow-up programat la 4 săptămâni."
         },
         "integrative": {
           "tag": "Integrativ",
           "title": "Consultație integrativă & monitorizare",
-          "description": "Pediatrie și nutriție într-o singură întâlnire — pentru cazuri complexe sau pentru începutul unei urmăriri pe termen lung. Plan scris, recomandări structurate, prima programare de follow-up inclusă.",
-          "price": "58 €",
-          "duration": "90 min · video"
+          "description": "Pediatrie și nutriție într-o singură întâlnire — pentru cazuri complexe sau pentru începutul unei urmăriri pe termen lung. Plan scris, recomandări structurate, prima programare de follow-up inclusă."
         },
         "subscription": {
           "tag": "Abonament",
           "title": "Monitorizare și abonamente",
-          "description": "4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex), pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului și comunicare directă cu medicul. Durata și prețul le stabilim individual.",
-          "price": "la cerere",
-          "duration": "1–6 luni"
+          "description": "4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex), pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului și comunicare directă cu medicul. Durata și prețul le stabilim individual."
         },
         "quick": {
           "tag": "EXPRESS",
           "title": "Întrebare EXPRESS",
-          "description": "Pentru întrebări punctuale care nu necesită o consultație completă. Trimiți întrebarea + context prin formular și primești un răspuns scris, documentat, în ~1 oră în timpul programului de lucru.",
-          "price": "8 €",
-          "duration": "~1h · scris"
+          "description": "Pentru întrebări punctuale care nu necesită o consultație completă. Trimiți întrebarea + context prin formular și primești un răspuns scris, documentat, în ~1 oră în timpul programului de lucru."
         }
       },
       "book": "Rezervă"

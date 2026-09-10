@@ -139,9 +139,13 @@ const SERVICES = [
       'Письменный ответ на конкретный вопрос примерно за 1 час в рабочее время.',
     durationMin: null,
     price: 8,
-    priceLabelRo: '~1 h · răspuns scris',
-    priceLabelEn: '~1 h · written reply',
-    priceLabelRu: '~1 ч · письменный ответ',
+    // Left null on purpose: a price label replaces the number on the public
+    // page, and these three said "~1 h" — the SLA, not the price, which made
+    // /pricing show a duration where 8 € belongs. The "~1 hour during working
+    // hours" promise lives in the description and on the EXPRESS page.
+    priceLabelRo: null,
+    priceLabelEn: null,
+    priceLabelRu: null,
     calendlyEventTypeUri: null,
     calendlySchedulingUrl: null,
     sortOrder: 6,

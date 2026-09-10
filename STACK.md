@@ -36,8 +36,9 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Shared types | `packages/shared` — DTOs and enums, built with `tsc` | workspace |
 | Formatter | Prettier, single option: `singleQuote` | `~3.6.2` |
 | Test runner (API) | Jest with `@swc/jest`, 108 tests in 11 suites | `jest ~30.3.0` |
+| Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only | `vitest ~4.1.0` |
 | Test runner (back office) | Vitest, wired but unused | `vitest ~4.1.0` |
-| CI | GitHub Actions: two typechecks, three builds, migration check. **Does not run the tests.** | — |
+| CI | GitHub Actions: two typechecks, **both test suites**, three builds, migration check | — |
 | Deploy (site) | Vercel | — |
 | Deploy (API) | Docker Compose + Postgres, nightly backups | `docker-compose.prod.yml` |
 | Dependency updates | Dependabot, grouped | — |

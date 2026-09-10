@@ -5,8 +5,9 @@
 # merging blind or checking out every branch locally. A green tick here means
 # the types still line up and all three apps still build on that branch.
 #
-# What it does NOT tell you: whether anything actually works. There are no tests
-# in this repo yet. Treat a green run as "not obviously broken", not as approval.
+# It also runs both unit suites and applies every migration to a clean Postgres.
+# What it still does NOT tell you: whether a page renders correctly, or whether
+# an integration with Calendly or the bank actually works end to end.
 
 name: CI
 
@@ -58,6 +59,16 @@ jobs:
 
       - name: Typecheck back office
         run: pnpm exec tsc -p apps/back-office/tsconfig.app.json --noEmit
+
+      # Both suites are unit tests over pure functions and finish in about a
+      # second between them. They ran only on a developer's laptop until
+      # 2026-09-10, which is a strange thing to say about the tests that cover
+      # the money, the dates and the webhook signatures.
+      - name: Test API
+        run: pnpm nx test api
+
+      - name: Test frontend
+        run: pnpm nx test @olesia/frontend
 
       # Only the frontend build typechecks as it goes: `next build` runs tsc.
       # The API is bundled by webpack with SWC and the back office by Vite,

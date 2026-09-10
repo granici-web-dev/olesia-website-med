@@ -53,37 +53,27 @@
         "pediatric": {
           "tag": "Pediatrics",
           "title": "Pediatric consultation",
-          "description": "Full clinical evaluation on video, detailed history, written recommendations delivered within 24h. For children from birth to adolescence — growth, development, prevention, day-to-day questions.",
-          "price": "28 €",
-          "duration": "30 min · video"
+          "description": "Full clinical evaluation on video, detailed history, written recommendations delivered within 24h. For children from birth to adolescence — growth, development, prevention, day-to-day questions."
         },
         "nutrition": {
           "tag": "Nutrition",
           "title": "Nutrition consultation",
-          "description": "Personalized meal plan for children or adults. History, analysis of existing habits, recent lab work, realistic goals. Includes a scheduled follow-up at 4 weeks.",
-          "price": "38 €",
-          "duration": "60 min · video"
+          "description": "Personalized meal plan for children or adults. History, analysis of existing habits, recent lab work, realistic goals. Includes a scheduled follow-up at 4 weeks."
         },
         "integrative": {
           "tag": "Integrative",
           "title": "Integrative consultation & monitoring",
-          "description": "Pediatrics and nutrition in a single meeting — for complex cases or the start of a long-term follow-up. Written plan, structured recommendations, first follow-up appointment included.",
-          "price": "58 €",
-          "duration": "90 min · video"
+          "description": "Pediatrics and nutrition in a single meeting — for complex cases or the start of a long-term follow-up. Written plan, structured recommendations, first follow-up appointment included."
         },
         "subscription": {
           "tag": "Subscription",
           "title": "Monitoring & subscriptions",
-          "description": "4 subscription types (Pediatrics, Child nutrition, Adult nutrition, Complex), over 1, 2, 3, or 6 months: periodic monitoring, plan adjustments, and direct communication with the doctor. Duration and price are set individually.",
-          "price": "on request",
-          "duration": "1–6 months"
+          "description": "4 subscription types (Pediatrics, Child nutrition, Adult nutrition, Complex), over 1, 2, 3, or 6 months: periodic monitoring, plan adjustments, and direct communication with the doctor. Duration and price are set individually."
         },
         "quick": {
           "tag": "Express",
           "title": "Express question",
-          "description": "For specific questions that don't require a full consultation. You send the question + context through a form and receive a written, documented answer within ~1 hour during working hours.",
-          "price": "8 €",
-          "duration": "~1h · written"
+          "description": "For specific questions that don't require a full consultation. You send the question + context through a form and receive a written, documented answer within ~1 hour during working hours."
         }
       },
       "book": "Book"

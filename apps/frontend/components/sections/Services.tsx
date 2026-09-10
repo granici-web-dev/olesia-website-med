@@ -7,6 +7,10 @@ import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import type { LeadService } from '@/lib/leads';
 import { SERVICE_INCLUDED } from '@/lib/service-content';
+import {
+  formatPriceRange,
+  formatServiceDuration,
+} from '@/lib/service-price';
 import { serviceLink } from '@/components/ui/cta';
 import styles from './Services.module.css';
 
@@ -44,6 +48,16 @@ const CONTENT_CODE: Record<string, string> = {
   quick: 'quick_question',
 };
 
+/**
+ * The catalog services behind a tile. Nutrition is one tile over two services,
+ * so a tile owns a list rather than a code — see `SPLIT_BOOKING`.
+ */
+function codesFor(key: string): string[] {
+  const split = SPLIT_BOOKING[key];
+  if (split) return split.map((s) => s.code);
+  return [CONTENT_CODE[key] ?? key];
+}
+
 export async function Services() {
   const t = await getTranslations('home.services');
   const lc = await getLocale();
@@ -56,6 +70,7 @@ export async function Services() {
   // URL. Group-B services (subscription/quick) have no calendar and route to
   // the contact page instead. Keyed by service `code`.
   const services = await api.services();
+  const byCode = new Map(services.map((s) => [s.code, s]));
   const bookingUrl = new Map(
     services
       .filter((s) => s.group === 'A_booking' && s.calendlySchedulingUrl)
@@ -83,6 +98,14 @@ export async function Services() {
         const leadService = LEAD_SERVICE[key];
         const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
         const includedItems = included ? (ru ? included.ru : en ? included.en : included.ro) : null;
+        const tileServices = codesFor(key)
+          .map((code) => byCode.get(code))
+          .filter((s) => s !== undefined);
+        const priceText = formatPriceRange(lc, tileServices);
+        const durationText = formatServiceDuration(
+          lc,
+          tileServices[0]?.durationMin ?? null,
+        );
         return (
           <Reveal key={n} as="div" className={styles.serviceRow} delay={i * 70}>
             <div className={styles.serviceNum}>{n}</div>
@@ -113,8 +136,10 @@ export async function Services() {
               )}
             </div>
             <div className={styles.serviceMeta}>
-              <div className={styles.servicePrice}>{t(`items.${key}.price`)}</div>
-              <div className={styles.serviceDuration}>{t(`items.${key}.duration`)}</div>
+              {priceText && <div className={styles.servicePrice}>{priceText}</div>}
+              {durationText && (
+                <div className={styles.serviceDuration}>{durationText}</div>
+              )}
               {split ? (
                 <div className="flex flex-col items-start gap-1">
                   {split.map(({ code, label }) => {

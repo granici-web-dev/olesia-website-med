@@ -12,8 +12,15 @@ export interface ServiceCatalogEntry {
 
 /**
  * Canonical catalog of the consultation services. Source of truth for DB
- * seeding and a safe fallback for the public site. Calendly maps a booking to a
- * service by `event_type` URI only — never by the editable `a1` answer.
+ * seeding, and read by the back office for the monitoring price.
+ *
+ * **Not a fallback for the public site**, which it was called until 2026-09-10
+ * and never was. The site reads prices from `GET /services` and renders nothing
+ * when that is unavailable, deliberately — a price the client edited in the
+ * back office must be the only price a visitor can see.
+ *
+ * Calendly maps a booking to a service by `event_type` URI only — never by the
+ * editable `a1` answer.
  */
 export const SERVICE_CATALOG: readonly ServiceCatalogEntry[] = [
   { code: ServiceCode.Pediatric, group: ServiceGroup.Booking, durationMin: 30, price: 28 },

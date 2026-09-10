@@ -117,10 +117,14 @@ the code here.
 - **Reach for the module before reaching for a hardcoded value.** When new editable content
   appears, the default is a table plus a back-office page, not a constant someone has to
   ship a release to change.
-- ⚠️ **Known debt: prices are still hardcoded on the front end.** `/pricing` and the home
-  page read `SERVICE_PRICE_META` and the i18n JSON rather than the API, so editing a price
-  in the back office does not change the site. This is the clearest violation of the rule
-  above and the first thing to fix when prices next move.
+- **A missing value is rendered as missing, never as a remembered one.** Prices moved
+  from four front-end constants to the API on 2026-09-10
+  (`docs/shape-prices-from-api.md`). The constants included a 55-line `ServiceDto[]`
+  mirror of the seed that `/pricing` served whenever the API was unreachable — a
+  complete, authoritative-looking tariff table compiled into the bundle. It is gone, and
+  nothing replaced it: `formatServicePrice` returns `null` when there is nothing to say
+  and every caller renders nothing. ISR already keeps the last good page for the case
+  that matters; inventing a number covers only the case where we would be lying.
 
 ## Sensitive data
 
