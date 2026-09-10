@@ -14,7 +14,9 @@ import type { Request, Response } from 'express';
 import type { AuthTokens, UserDto } from '@olesia/shared';
 
 import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Role } from '../../generated/prisma/enums';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { ttlToMs } from './token-ttl';
@@ -48,6 +50,13 @@ function setRefreshCookie(res: Response, token: string): void {
     maxAge: ttlToMs(process.env.JWT_REFRESH_TTL ?? '7d'),
   });
 }
+
+/**
+ * Everyone who can log in may manage their own account. Spelled out on each
+ * route because RolesGuard is deny-by-default (audit A5, F13): "any signed-in
+ * user" is a decision, and it has to be written down like every other one.
+ */
+const SELF_SERVICE = [Role.admin, Role.editor] as const;
 
 @ApiTags('auth')
 @Controller('auth')
@@ -124,6 +133,7 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 8 } })
   @ApiBearerAuth()
   @HttpCode(200)
+  @Roles(...SELF_SERVICE)
   @Post('change-password')
   async changePassword(
     @CurrentUser() user: AuthUser,
@@ -142,6 +152,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @Roles(...SELF_SERVICE)
   @Get('me')
   me(@CurrentUser() user: AuthUser): Promise<UserDto> {
     return this.users.findOneDto(user.id);
@@ -160,6 +171,7 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiBearerAuth()
   @HttpCode(200)
+  @Roles(...SELF_SERVICE)
   @Post('2fa/setup')
   setupTotp(
     @CurrentUser() user: AuthUser,
@@ -172,6 +184,7 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiBearerAuth()
   @HttpCode(200)
+  @Roles(...SELF_SERVICE)
   @Post('2fa/enable')
   async enableTotp(
     @CurrentUser() user: AuthUser,
@@ -184,6 +197,7 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiBearerAuth()
   @HttpCode(200)
+  @Roles(...SELF_SERVICE)
   @Post('2fa/disable')
   async disableTotp(
     @CurrentUser() user: AuthUser,

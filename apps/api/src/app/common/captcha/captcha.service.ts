@@ -23,11 +23,54 @@ import { Injectable, Logger } from '@nestjs/common';
  */
 const VERIFY_TIMEOUT_MS = 3_000;
 
+/** Google's own suggestion, and what an unreadable RECAPTCHA_MIN_SCORE becomes. */
+export const DEFAULT_MIN_SCORE = 0.5;
+
+/**
+ * Read RECAPTCHA_MIN_SCORE, or say why it could not be.
+ *
+ * `Number('abc')` is `NaN`, and every comparison against `NaN` is false — so a
+ * typo in this variable did not tighten the filter or loosen it, it switched
+ * the score check off entirely and let every bot through silently (audit A5,
+ * F19). `Number('')` is 0, which is the same thing spelled differently. Both
+ * now fall back to the default and say so; `main.ts` refuses to start on one
+ * in production, where "silently off" is the expensive answer.
+ */
+export function readMinScore(raw: string | undefined): {
+  score: number;
+  problem: string | null;
+} {
+  if (raw === undefined) return { score: DEFAULT_MIN_SCORE, problem: null };
+
+  const complaint = {
+    score: DEFAULT_MIN_SCORE,
+    problem: `RECAPTCHA_MIN_SCORE is "${raw}", which is not a number between 0 and 1. Using ${DEFAULT_MIN_SCORE}. Remove the variable to accept the default deliberately.`,
+  };
+
+  // Blank is its own trap and the quietest one: `Number('')` is 0, a threshold
+  // no score can fall below, so `RECAPTCHA_MIN_SCORE=` reads as "accept
+  // everything" while looking like "not configured".
+  if (raw.trim() === '') return complaint;
+
+  const score = Number(raw);
+  if (!Number.isFinite(score) || score < 0 || score > 1) return complaint;
+
+  return { score, problem: null };
+}
+
 @Injectable()
 export class CaptchaService {
   private readonly logger = new Logger(CaptchaService.name);
   private readonly secret = process.env.RECAPTCHA_SECRET ?? '';
-  private readonly minScore = Number(process.env.RECAPTCHA_MIN_SCORE ?? '0.5');
+  private readonly minScore: number;
+
+  constructor() {
+    // Read once, at construction, rather than on every request: the complaint
+    // about a bad value belongs in the startup log, where somebody reads it.
+    const { score, problem } = readMinScore(process.env.RECAPTCHA_MIN_SCORE);
+    if (problem) this.logger.error(problem);
+    this.minScore = score;
+  }
 
   /** True when the client's keys are configured and tokens must be checked. */
   get enabled(): boolean {
@@ -72,7 +115,9 @@ export class CaptchaService {
         return false;
       }
 
-      const score = data.score ?? 1;
+      // A success with no score is v2, a proxy, or something we do not
+      // understand — not a clean pass. It used to default to 1.
+      const score = data.score ?? 0;
       if (score < this.minScore) {
         this.logger.warn(`captcha score ${score} < ${this.minScore} (action=${action})`);
         return false;

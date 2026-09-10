@@ -3,6 +3,7 @@ import type { FaqCategoryDto, FaqItemDto } from '@olesia/shared';
 import { slugify } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { writeOrTranslate } from '../common/prisma-errors';
 import { toFaqCategoryDto, toFaqItemDto } from './faq.mapper';
 import {
   CreateFaqCategoryDto,
@@ -16,6 +17,25 @@ import { CreateFaqItemDto, UpdateFaqItemDto } from './dto/faq-item.dto';
  */
 const SECTION_SLUG_FALLBACK = 'sectiune';
 
+/**
+ * The anchor is `/faq#<slug>` and the slug is derived from a 200-character
+ * heading, so without this a section could carry a 200-character URL fragment
+ * (audit A5, F6). Cut before the uniqueness check, not after: truncating a
+ * slug that was already proved unique can collide with an existing one.
+ */
+const MAX_SLUG_LENGTH = 120;
+
+/**
+ * `sortOrder` is client-editable and is not unique, so ties were resolved by
+ * whatever order Postgres felt like returning — two sections both at 0 could
+ * swap places between two loads of the same page (audit A5, F16). Creation
+ * order is the tie-break the client would expect, and it is stable.
+ */
+const FAQ_ORDER = [
+  { sortOrder: 'asc' },
+  { createdAt: 'asc' },
+] as const satisfies { sortOrder?: 'asc'; createdAt?: 'asc' }[];
+
 @Injectable()
 export class FaqService {
   constructor(private readonly prisma: PrismaService) {}
@@ -24,9 +44,9 @@ export class FaqService {
   async findPublished(): Promise<FaqCategoryDto[]> {
     const categories = await this.prisma.faqCategory.findMany({
       where: { active: true },
-      orderBy: { sortOrder: 'asc' },
+      orderBy: FAQ_ORDER,
       include: {
-        items: { where: { active: true }, orderBy: { sortOrder: 'asc' } },
+        items: { where: { active: true }, orderBy: FAQ_ORDER },
       },
     });
     // A section whose questions are all hidden would render as a bare heading
@@ -37,26 +57,34 @@ export class FaqService {
   /** Back office: everything, including what is currently hidden. */
   async findAll(): Promise<FaqCategoryDto[]> {
     const categories = await this.prisma.faqCategory.findMany({
-      orderBy: { sortOrder: 'asc' },
-      include: { items: { orderBy: { sortOrder: 'asc' } } },
+      orderBy: FAQ_ORDER,
+      include: { items: { orderBy: FAQ_ORDER } },
     });
     return categories.map(toFaqCategoryDto);
   }
 
   async createCategory(dto: CreateFaqCategoryDto): Promise<FaqCategoryDto> {
-    const created = await this.prisma.faqCategory.create({
-      data: {
-        slug: await this.uniqueSlug(
-          slugify(dto.titleRo, SECTION_SLUG_FALLBACK),
-        ),
-        titleRo: dto.titleRo,
-        titleEn: dto.titleEn,
-        titleRu: dto.titleRu ?? null,
-        sortOrder: dto.sortOrder ?? (await this.nextCategoryOrder()),
-        active: dto.active ?? true,
-      },
-      include: { items: true },
-    });
+    const slug = await this.uniqueSlug(
+      slugify(dto.titleRo, SECTION_SLUG_FALLBACK).slice(0, MAX_SLUG_LENGTH),
+    );
+    const sortOrder = dto.sortOrder ?? (await this.nextCategoryOrder());
+
+    // `uniqueSlug` reads and this writes, so two sections created with the
+    // same heading at the same moment both pass the check and the second one
+    // reaches Postgres' unique index. That used to be a 500 (audit A5, F9).
+    const created = await writeOrTranslate(() =>
+      this.prisma.faqCategory.create({
+        data: {
+          slug,
+          titleRo: dto.titleRo,
+          titleEn: dto.titleEn,
+          titleRu: dto.titleRu ?? null,
+          sortOrder,
+          active: dto.active ?? true,
+        },
+        include: { items: true },
+      }),
+    );
     return toFaqCategoryDto(created);
   }
 
@@ -67,57 +95,61 @@ export class FaqService {
     await this.categoryOrThrow(id);
     // `slug` is intentionally not derived again from a renamed title: the
     // anchor is a public URL and outlives the wording of the heading.
-    const updated = await this.prisma.faqCategory.update({
-      where: { id },
-      data: {
-        titleRo: dto.titleRo,
-        titleEn: dto.titleEn,
-        titleRu: dto.titleRu,
-        sortOrder: dto.sortOrder,
-        active: dto.active,
-      },
-      include: { items: { orderBy: { sortOrder: 'asc' } } },
-    });
+    const updated = await writeOrTranslate(() =>
+      this.prisma.faqCategory.update({
+        where: { id },
+        data: {
+          titleRo: dto.titleRo,
+          titleEn: dto.titleEn,
+          titleRu: dto.titleRu,
+          sortOrder: dto.sortOrder,
+          active: dto.active,
+        },
+        include: { items: { orderBy: FAQ_ORDER } },
+      }),
+    );
     return toFaqCategoryDto(updated);
   }
 
   /** Deleting a section takes its questions with it (cascade in the schema). */
   async removeCategory(id: string): Promise<void> {
     await this.categoryOrThrow(id);
-    await this.prisma.faqCategory.delete({ where: { id } });
+    await writeOrTranslate(() => this.prisma.faqCategory.delete({ where: { id } }));
   }
 
   async createItem(dto: CreateFaqItemDto): Promise<FaqItemDto> {
     await this.categoryOrThrow(dto.categoryId);
-    const created = await this.prisma.faqItem.create({
-      data: {
-        categoryId: dto.categoryId,
-        questionRo: dto.questionRo,
-        questionEn: dto.questionEn,
-        questionRu: dto.questionRu ?? null,
-        answerRo: dto.answerRo,
-        answerEn: dto.answerEn,
-        answerRu: dto.answerRu ?? null,
-        sortOrder: dto.sortOrder ?? (await this.nextItemOrder(dto.categoryId)),
-        active: dto.active ?? true,
-      },
-    });
+    const sortOrder = dto.sortOrder ?? (await this.nextItemOrder(dto.categoryId));
+    const created = await writeOrTranslate(() =>
+      this.prisma.faqItem.create({
+        data: {
+          categoryId: dto.categoryId,
+          questionRo: dto.questionRo,
+          questionEn: dto.questionEn,
+          questionRu: dto.questionRu ?? null,
+          answerRo: dto.answerRo,
+          answerEn: dto.answerEn,
+          answerRu: dto.answerRu ?? null,
+          sortOrder,
+          active: dto.active ?? true,
+        },
+      }),
+    );
     return toFaqItemDto(created);
   }
 
   async updateItem(id: string, dto: UpdateFaqItemDto): Promise<FaqItemDto> {
     await this.itemOrThrow(id);
     if (dto.categoryId) await this.categoryOrThrow(dto.categoryId);
-    const updated = await this.prisma.faqItem.update({
-      where: { id },
-      data: dto,
-    });
+    const updated = await writeOrTranslate(() =>
+      this.prisma.faqItem.update({ where: { id }, data: dto }),
+    );
     return toFaqItemDto(updated);
   }
 
   async removeItem(id: string): Promise<void> {
     await this.itemOrThrow(id);
-    await this.prisma.faqItem.delete({ where: { id } });
+    await writeOrTranslate(() => this.prisma.faqItem.delete({ where: { id } }));
   }
 
   private async categoryOrThrow(id: string) {

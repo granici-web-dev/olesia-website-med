@@ -7,6 +7,7 @@ import * as argon2 from 'argon2';
 import type { Paginated, UserDto } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { writeOrTranslate } from '../common/prisma-errors';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
 import { toUserDto } from './users.mapper';
 import { generateStarterPassword } from './starter-password';
@@ -39,24 +40,30 @@ export class UsersService {
       throw new ConflictException('email_taken');
     }
     const passwordHash = await argon2.hash(dto.password);
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        name: dto.name,
-        role: dto.role,
-        passwordHash,
-        mustChangePassword: true,
-      },
-    });
+    // The lookup above answers the ordinary case; this covers the request that
+    // races past it, which used to reach the client as a 500 (audit A5, F9).
+    const user = await writeOrTranslate(() =>
+      this.prisma.user.create({
+        data: {
+          email,
+          name: dto.name,
+          role: dto.role,
+          passwordHash,
+          mustChangePassword: true,
+        },
+      }),
+    );
     return toUserDto(user);
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<UserDto> {
     await this.getOrThrow(id);
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: { name: dto.name, role: dto.role, isActive: dto.isActive },
-    });
+    const user = await writeOrTranslate(() =>
+      this.prisma.user.update({
+        where: { id },
+        data: { name: dto.name, role: dto.role, isActive: dto.isActive },
+      }),
+    );
     return toUserDto(user);
   }
 

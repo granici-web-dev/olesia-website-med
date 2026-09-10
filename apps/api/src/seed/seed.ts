@@ -30,6 +30,9 @@ import {
   MATERIALS,
 } from './seed-materials';
 
+/** Both singletons live under this fixed primary key. See the schema. */
+const SINGLETON_ID = 'singleton';
+
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL ?? '' }),
 });
@@ -289,9 +292,11 @@ I believe every family deserves clear support, without pressure and without myth
  * still empty, so re-running never clobbers content the client has edited.
  */
 async function seedAbout() {
-  const existing = await prisma.aboutPage.findFirst();
+  const existing = await prisma.aboutPage.findUnique({
+    where: { id: SINGLETON_ID },
+  });
   if (!existing) {
-    await prisma.aboutPage.create({ data: ABOUT });
+    await prisma.aboutPage.create({ data: { id: SINGLETON_ID, ...ABOUT } });
     console.log('✓ about page created');
     return;
   }
@@ -316,7 +321,7 @@ async function seedAbout() {
   if (len(existing.credentials) === 0) patch.credentials = ABOUT.credentials;
 
   if (Object.keys(patch).length > 0) {
-    await prisma.aboutPage.update({ where: { id: existing.id }, data: patch });
+    await prisma.aboutPage.update({ where: { id: SINGLETON_ID }, data: patch });
     console.log(`✓ about page backfilled (${Object.keys(patch).join(', ')})`);
   } else {
     console.log('• about page already populated — left untouched');
@@ -439,7 +444,11 @@ async function seedWorkingHours() {
     return;
   }
   await prisma.workingHours.create({
-    data: { days: PLACEHOLDER_DAYS as unknown as object, isPlaceholder: true },
+    data: {
+      id: SINGLETON_ID,
+      days: PLACEHOLDER_DAYS as unknown as object,
+      isPlaceholder: true,
+    },
   });
   console.log('✓ working hours seeded Mon–Fri 09:00–17:00 (provisional)');
 }

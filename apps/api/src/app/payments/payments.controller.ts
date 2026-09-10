@@ -55,6 +55,6 @@ export class PaymentsController {
     @Body() dto: RefundPaymentDto,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.payments.refund(id, dto.amount, dto.reason, user?.id);
+    return this.payments.refund(id, dto.amount, dto.reason, user.id);
   }
 }

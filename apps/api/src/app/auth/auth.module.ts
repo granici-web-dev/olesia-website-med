@@ -1,26 +1,19 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { APP_GUARD } from '@nestjs/core';
 
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TotpModule } from './totp.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [PassportModule, JwtModule.register({}), UsersModule, TotpModule],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    // Global guards: every route requires a valid access token unless @Public(),
-    // and @Roles(...) is enforced on top.
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
-    { provide: APP_GUARD, useClass: RolesGuard },
-  ],
+  // JwtAuthGuard and RolesGuard live under this module but are registered
+  // globally in AppModule, where the order of all three guards is decided in
+  // one place (audit A5, F15).
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

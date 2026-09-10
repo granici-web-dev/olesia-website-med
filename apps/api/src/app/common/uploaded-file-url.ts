@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { IsUrl, Matches, MaxLength } from 'class-validator';
+import { IsUrl, Matches, MaxLength, type ValidationOptions } from 'class-validator';
 
 import { STORAGE_URL_PREFIX } from '../storage/storage.constants';
 
@@ -27,16 +27,24 @@ const STORED_FILE_URL = new RegExp(
   `^https?://[^/]+${escapeForRegExp(STORAGE_URL_PREFIX)}/[^/?#]+$`,
 );
 
-export function IsUploadedFileUrl() {
+/**
+ * `options` exists for `{ each: true }`: `AboutPage.images` is an array of the
+ * same kind of URL and was validated as plain strings (audit A5, F7), so the
+ * page accepted `javascript:` in a field the site renders as an `<img>` src.
+ */
+export function IsUploadedFileUrl(options?: ValidationOptions) {
   return applyDecorators(
     // `require_tld: false` because the API answers on `http://localhost:3333`
     // in development, and validator.js otherwise refuses a hostless host.
-    IsUrl({
-      protocols: ['http', 'https'],
-      require_protocol: true,
-      require_tld: false,
-    }),
-    MaxLength(1000),
-    Matches(STORED_FILE_URL, { message: 'file_url_not_ours' }),
+    IsUrl(
+      {
+        protocols: ['http', 'https'],
+        require_protocol: true,
+        require_tld: false,
+      },
+      options,
+    ),
+    MaxLength(1000, options),
+    Matches(STORED_FILE_URL, { ...options, message: 'file_url_not_ours' }),
   );
 }

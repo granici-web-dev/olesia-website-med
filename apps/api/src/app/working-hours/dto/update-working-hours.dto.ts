@@ -67,7 +67,8 @@ export class UpdateWorkingHoursDto {
   @Max(60 * 24 * 7)
   expressSlaMinutes?: number;
 
-  @IsOptional()
-  @IsBoolean()
-  isPlaceholder?: boolean;
+  // `isPlaceholder` is deliberately absent: it is derived from saving a real
+  // schedule, never sent (audit A5, F5). With the global ValidationPipe's
+  // `forbidNonWhitelisted`, a request that still sends it gets a 400 saying so
+  // rather than being quietly ignored.
 }

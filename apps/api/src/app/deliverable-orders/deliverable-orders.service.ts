@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { writeOrTranslate } from '../common/prisma-errors';
 import { StorageService } from '../storage/storage.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
 import {
@@ -73,7 +74,9 @@ export class DeliverableOrdersService {
     }
 
     return toDeliverableOrderDto(
-      await this.prisma.deliverableOrder.update({ where: { id }, data }),
+      await writeOrTranslate(() =>
+        this.prisma.deliverableOrder.update({ where: { id }, data }),
+      ),
     );
   }
 
@@ -89,7 +92,9 @@ export class DeliverableOrdersService {
       select: { fileKey: true },
     });
 
-    await this.prisma.deliverableOrder.delete({ where: { id } });
+    await writeOrTranslate(() =>
+      this.prisma.deliverableOrder.delete({ where: { id } }),
+    );
 
     await Promise.all(
       documents.map((d) => this.storage.deletePrivateDocument(d.fileKey)),

@@ -2,12 +2,21 @@ import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
 import type { Paginated } from '@olesia/shared';
 
-/** Standard `?page=&pageSize=` query for list endpoints. */
+/**
+ * Standard `?page=&pageSize=` query for list endpoints.
+ *
+ * `page` is bounded as well as `pageSize` (audit A5, F17): it becomes an SQL
+ * OFFSET, and Postgres walks and discards every skipped row, so an unbounded
+ * page number is a way to make the database do arbitrary work for a response
+ * that is always empty. Ten thousand pages is far past the end of any list
+ * here and well short of a problem.
+ */
 export class PaginationQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(10_000)
   page = 1;
 
   @IsOptional()

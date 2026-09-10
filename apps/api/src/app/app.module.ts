@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -74,11 +74,25 @@ import { CaptchaModule } from './common/captcha/captcha.module';
     LeadsModule,
     PaymentsModule,
   ],
-  controllers: [AppController],
+  /**
+   * All three global guards, in one place and in this order (audit A5, F15).
+   *
+   * Nest runs APP_GUARD providers in registration order, and registration
+   * order across modules is import order — so with the throttler declared here
+   * and the two auth guards declared in AuthModule, the sequence was an
+   * accident of where `AuthModule` happened to sit in the imports above.
+   * Spelling all three out here makes it a decision:
+   *
+   * 1. Throttler — a flood is refused before it costs a token verification.
+   * 2. JwtAuthGuard — establishes who is asking.
+   * 3. RolesGuard — decides whether they may, which needs step 2 to have run.
+   *
+   * The per-route limit still overrides the default through `@Throttle`.
+   */
   providers: [
-    AppService,
-    // Applies the default limit everywhere; per-route @Throttle overrides it.
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

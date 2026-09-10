@@ -11,6 +11,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser = require('cookie-parser');
 import { AppModule } from './app/app.module';
+import { readMinScore } from './app/common/captcha/captcha.service';
 import {
   STORAGE_DIR,
   STORAGE_URL_PREFIX,
@@ -63,13 +64,26 @@ function requireProductionEnv(): void {
   if (process.env.NODE_ENV !== 'production') return;
 
   const missing = REQUIRED_IN_PRODUCTION.filter((name) => !process.env[name]);
-  if (missing.length === 0) return;
+  if (missing.length > 0) {
+    Logger.error(
+      `Missing required production environment: ${missing.join(', ')}. ` +
+        'Each of these has no safe default — see docs/deployment.md. Set them and start again.',
+    );
+    process.exit(1);
+  }
 
-  Logger.error(
-    `Missing required production environment: ${missing.join(', ')}. ` +
-      'Each of these has no safe default — see docs/deployment.md. Set them and start again.',
-  );
-  process.exit(1);
+  /**
+   * Set but unreadable is the same class of problem as unset, and worse to
+   * diagnose: a typo here used to disable the score check without a word
+   * (audit A5, F19). In development the service falls back to 0.5 and logs it;
+   * in production a spam filter that quietly stopped filtering is not a
+   * degradation anyone would notice.
+   */
+  const { problem } = readMinScore(process.env.RECAPTCHA_MIN_SCORE);
+  if (problem) {
+    Logger.error(`${problem} Fix it and start again.`);
+    process.exit(1);
+  }
 }
 
 async function bootstrap() {

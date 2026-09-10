@@ -661,7 +661,12 @@ model DeliverableOrder {
 // Singleton: one row, like AboutPage.
 
 model WorkingHours {
-  id String @id @default(uuid())
+  /// Always the literal "singleton". A `@default(uuid())` here meant nothing
+  /// in the database enforced "one row", and the create-on-first-read path
+  /// raced itself: two concurrent public GETs both found nothing and both
+  /// inserted, after which the service read whichever `findFirst` returned
+  /// (audit A5, F4). A fixed primary key makes the second writer an upsert.
+  id String @id
 
   /// IANA zone. The arithmetic is done in this zone, so DST is handled by the
   /// clock the patient and the doctor actually read.
@@ -771,7 +776,8 @@ model UploadedDocument {
 // --- About (singleton) ---
 
 model AboutPage {
-  id        String   @id @default(uuid())
+  /// Always the literal "singleton" — same reason as WorkingHours.id.
+  id        String   @id
   titleRo   String
   titleEn   String
   titleRu   String?
