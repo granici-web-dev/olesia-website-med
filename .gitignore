@@ -49,11 +49,10 @@ private-uploads/
 .vercel
 # Local tooling & scratch artifacts
 .codex/
-plan-sheet-*.png
-# Playwright review captures (local visual QA, not source)
+# Playwright review captures and every other local screenshot. One directory,
+# so they stay out of the repository root and out of git in one rule.
 .playwright-mcp/
-/*-mobile*.png
-/*-desktop*.png
+/screenshots/
 # Extracted Russian text for Textovod proofreading (scratch, regenerated)
 /ru-proofread.txt
 
