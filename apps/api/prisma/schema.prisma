@@ -879,8 +879,9 @@ model PaymentRefund {
   payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   paymentId String
 
-  /// maib refund id.
-  refundId String      @unique
+  /// maib refund id. Null until the bank answers: the row is written first, so
+  /// a refund that is in flight still counts against the remaining balance.
+  refundId String?     @unique
   state    RefundState @default(created)
   amount   Decimal     @db.Decimal(12, 2)
   currency String

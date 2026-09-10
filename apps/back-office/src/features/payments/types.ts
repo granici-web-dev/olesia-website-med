@@ -33,7 +33,8 @@ export type RefundState = 'created' | 'accepted' | 'failed';
 
 export interface PaymentRefund {
   id: string;
-  refundId: string;
+  /** Null while the refund is reserved in our ledger but not yet acknowledged. */
+  refundId: string | null;
   state: RefundState;
   amount: number;
   currency: string;

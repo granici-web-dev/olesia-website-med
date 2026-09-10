@@ -9,6 +9,7 @@ import {
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { Public } from '../common/decorators/public.decorator';
 import { AppointmentsService } from './appointments.service';
@@ -19,6 +20,7 @@ import { CalendlyService, type CalendlyWebhookBody } from './calendly.service';
  * request is authenticated by HMAC signature over the raw body. We ack fast
  * (200) and keep processing light — heavy work is deferred to later phases.
  */
+@SkipThrottle()
 @Controller('webhooks/calendly')
 export class CalendlyWebhookController {
   constructor(

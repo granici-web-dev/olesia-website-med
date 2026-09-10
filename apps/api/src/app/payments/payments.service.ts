@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import {
   BadRequestException,
   Injectable,
@@ -77,6 +78,71 @@ export function toPaymentState(
   }
 }
 
+/**
+ * States that mean money has already moved. Once a payment reaches one of
+ * these, nothing may quietly walk it back to "not paid yet" or to a plain
+ * `paid` that hides a refund.
+ */
+const MONEY_HAS_MOVED: PaymentState[] = [
+  PaymentState.paid,
+  PaymentState.refunded,
+  PaymentState.partially_refunded,
+];
+
+/** States a payment must never regress into once money has moved. */
+const REGRESSIONS: PaymentState[] = [
+  PaymentState.paid,
+  PaymentState.pending,
+  PaymentState.created,
+];
+
+/**
+ * Decide the state to persist, given what we hold and what the bank just said.
+ *
+ * Both the callback and the reconcile sweep write through here. A duplicate
+ * delivery of the original success notification arrives long after a refund
+ * has been accepted and reports `Executed` in perfectly good faith; taken at
+ * face value it would flip a refunded payment back to paid and tell the back
+ * office the money is still ours.
+ */
+export function resolvePaymentState(
+  current: PaymentState,
+  incoming: PaymentState,
+): PaymentState {
+  if (MONEY_HAS_MOVED.includes(current) && REGRESSIONS.includes(incoming)) {
+    return current;
+  }
+  return incoming;
+}
+
+/**
+ * Compare what the bank says it charged against what we opened the session
+ * with. Returns a human-readable description of the first disagreement, or
+ * null when everything lines up.
+ *
+ * The signature proves the payload came from maib; it says nothing about the
+ * payload being the one we expected. A partial capture, a currency the profile
+ * was enabled for later, or a plain bank-side mistake would otherwise be
+ * recorded as a clean payment and mark the purchase confirmed.
+ */
+export function describeCallbackMismatch(
+  payment: { amount: Prisma.Decimal; currency: string; orderId: string },
+  body: Pick<MaibCallbackBody, 'paymentAmount' | 'paymentCurrency' | 'orderId'>,
+): string | null {
+  if (!new Prisma.Decimal(body.paymentAmount).equals(payment.amount)) {
+    return `amount ${body.paymentAmount} != recorded ${payment.amount.toString()}`;
+  }
+  if (body.paymentCurrency !== payment.currency) {
+    return `currency ${body.paymentCurrency} != recorded ${payment.currency}`;
+  }
+  // maib documents orderId as nullable, so a missing one is the bank choosing
+  // not to echo it, not a disagreement.
+  if (body.orderId != null && body.orderId !== payment.orderId) {
+    return `orderId ${body.orderId} != recorded ${payment.orderId}`;
+  }
+  return null;
+}
+
 /** States after which nothing more will happen on its own. */
 const TERMINAL: PaymentState[] = [
   PaymentState.paid,
@@ -105,9 +171,11 @@ export class PaymentsService {
    * a session we did not write down is unrecoverable.
    */
   async start(input: StartPaymentInput): Promise<{ checkoutUrl: string; orderId: string }> {
-    const orderId = `${input.targetType}-${Date.now().toString(36)}-${Math.random()
-      .toString(36)
-      .slice(2, 8)}`.toUpperCase();
+    // The order reference is the only thing guarding the public status
+    // endpoint, so it is drawn from the CSPRNG rather than Math.random. Not
+    // uppercased: base64url is case-sensitive and folding it would throw away
+    // half the alphabet.
+    const orderId = `${input.targetType}-${randomBytes(9).toString('base64url')}`;
 
     const site = process.env.PUBLIC_SITE_URL ?? '';
     const api = process.env.PUBLIC_API_URL ?? '';
@@ -131,21 +199,35 @@ export class PaymentsService {
       },
     });
 
-    await this.prisma.payment.create({
-      data: {
-        checkoutId: session.checkoutId,
-        orderId,
-        state: PaymentState.created,
-        amount: new Prisma.Decimal(input.amount),
-        currency: input.currency,
-        targetType: input.targetType,
-        targetId: input.targetId,
-        payerName: input.payerName,
-        payerEmail: input.payerEmail.toLowerCase(),
-        payerPhone: input.payerPhone,
-        patientId: await this.findPatientId(input.payerEmail),
-      },
-    });
+    try {
+      await this.prisma.payment.create({
+        data: {
+          checkoutId: session.checkoutId,
+          orderId,
+          state: PaymentState.created,
+          amount: new Prisma.Decimal(input.amount),
+          currency: input.currency,
+          targetType: input.targetType,
+          targetId: input.targetId,
+          payerName: input.payerName,
+          payerEmail: input.payerEmail.toLowerCase(),
+          payerPhone: input.payerPhone,
+          patientId: await this.findPatientId(input.payerEmail),
+        },
+      });
+    } catch (e) {
+      // A session the bank holds and we have no row for is unrecoverable: the
+      // list endpoints are broken (docs/payments-maib-checkout.md §14). Hand it
+      // back before it becomes a mystery in the merchant portal.
+      await this.maib
+        .cancelCheckout(session.checkoutId)
+        .catch(() =>
+          this.logger.error(
+            `orphaned maib checkout ${session.checkoutId}: recording it failed and cancelling it failed too`,
+          ),
+        );
+      throw e;
+    }
 
     return { checkoutUrl: session.checkoutUrl, orderId };
   }
@@ -170,11 +252,25 @@ export class PaymentsService {
       return;
     }
 
-    const state = toPaymentState(
-      'completed',
-      body.paymentStatus,
-      body.paymentAmount,
-      null,
+    const mismatch = describeCallbackMismatch(payment, body);
+    if (mismatch) {
+      // Answer 200 anyway (the controller does): a retry would deliver the
+      // same payload and we would reject it again. This needs a human, not
+      // another delivery attempt.
+      this.logger.error(
+        `maib callback rejected for checkout ${body.checkoutId}: ${mismatch}`,
+      );
+      return;
+    }
+
+    const state = resolvePaymentState(
+      payment.state,
+      toPaymentState(
+        'completed',
+        body.paymentStatus,
+        body.paymentAmount,
+        Number(payment.refundedAmount),
+      ),
     );
 
     await this.persist(payment.id, {
@@ -189,8 +285,12 @@ export class PaymentsService {
       threeDsResult: body.threeDsResult,
       terminalId: body.terminalId,
       rawCallback: body as unknown as Prisma.InputJsonValue,
-      paidAt: state === PaymentState.paid ? new Date() : undefined,
-      failedAt: state === PaymentState.failed ? new Date() : undefined,
+      paidAt:
+        !payment.paidAt && state === PaymentState.paid
+          ? new Date(body.paymentExecutedAt ?? Date.now())
+          : undefined,
+      failedAt:
+        !payment.failedAt && state === PaymentState.failed ? new Date() : undefined,
     });
   }
 
@@ -211,11 +311,14 @@ export class PaymentsService {
 
     const pay = checkout.payment ?? undefined;
     const refunded = pay?.refundedAmount ?? 0;
-    const state = toPaymentState(
-      checkout.status,
-      pay?.status,
-      pay?.amount ?? Number(payment.amount),
-      refunded,
+    const state = resolvePaymentState(
+      payment.state,
+      toPaymentState(
+        checkout.status,
+        pay?.status,
+        pay?.amount ?? Number(payment.amount),
+        refunded,
+      ),
     );
 
     await this.persist(payment.id, {
@@ -254,43 +357,91 @@ export class PaymentsService {
 
   /* ----------------------------- refunds ----------------------------- */
 
+  /**
+   * Refund, in two acts: reserve the money in our ledger under a row lock,
+   * then ask the bank.
+   *
+   * The reservation is the point. Two admins pressing the button at the same
+   * moment used to read the same balance, both pass the check and both call
+   * the bank, and maib documents no idempotency key on the refund endpoint. So
+   * a refund row is written *before* the bank call and counts against the
+   * balance while it is in flight; the second caller sees the money as already
+   * spoken for. If the bank then refuses, the row stays as `failed` — it is
+   * evidence, not a draft.
+   */
   async refund(
     paymentRowId: string,
     amount: number,
     reason: string,
     authorId?: string,
   ) {
-    const payment = await this.prisma.payment.findUnique({
-      where: { id: paymentRowId },
-    });
-    if (!payment) throw new NotFoundException('payment_not_found');
-    if (!payment.paymentId) throw new BadRequestException('payment_not_executed');
+    const reservation = await this.prisma.$transaction(async (tx) => {
+      // FOR UPDATE, not findUnique: every concurrent refund of this payment
+      // queues on this row before it can read the balance.
+      const [locked] = await tx.$queryRaw<
+        { id: string; paymentId: string | null; checkoutId: string; currency: string }[]
+      >`SELECT "id", "paymentId", "checkoutId", "currency"
+          FROM "Payment" WHERE "id" = ${paymentRowId} FOR UPDATE`;
 
-    const remaining = Number(payment.amount) - Number(payment.refundedAmount);
-    if (amount <= 0 || amount > remaining) {
-      throw new BadRequestException('refund_amount_out_of_range');
+      if (!locked) throw new NotFoundException('payment_not_found');
+      if (!locked.paymentId) throw new BadRequestException('payment_not_executed');
+
+      const payment = await tx.payment.findUniqueOrThrow({
+        where: { id: paymentRowId },
+        select: { amount: true, refundedAmount: true },
+      });
+      const inFlight = await tx.paymentRefund.aggregate({
+        where: { paymentId: paymentRowId, state: RefundState.created },
+        _sum: { amount: true },
+      });
+
+      const remaining =
+        Number(payment.amount) -
+        Number(payment.refundedAmount) -
+        Number(inFlight._sum.amount ?? 0);
+
+      if (amount <= 0 || amount > remaining) {
+        throw new BadRequestException('refund_amount_out_of_range');
+      }
+
+      const row = await tx.paymentRefund.create({
+        data: {
+          paymentId: paymentRowId,
+          state: RefundState.created,
+          amount: new Prisma.Decimal(amount),
+          currency: locked.currency,
+          reason,
+          authorId,
+        },
+      });
+      return { rowId: row.id, payId: locked.paymentId, checkoutId: locked.checkoutId };
+    });
+
+    let res: { refundId: string; status: string };
+    try {
+      res = await this.maib.refund(reservation.payId, amount, reason);
+    } catch (e) {
+      await this.prisma.paymentRefund.update({
+        where: { id: reservation.rowId },
+        data: { state: RefundState.failed },
+      });
+      throw e;
     }
 
-    const res = await this.maib.refund(payment.paymentId, amount, reason);
-
-    await this.prisma.paymentRefund.create({
+    await this.prisma.paymentRefund.update({
+      where: { id: reservation.rowId },
       data: {
-        paymentId: payment.id,
         refundId: res.refundId,
         state:
           res.status?.toLowerCase() === 'accepted'
             ? RefundState.accepted
             : RefundState.created,
-        amount: new Prisma.Decimal(amount),
-        currency: payment.currency,
-        reason,
-        authorId,
       },
     });
 
     // The bank owns the truth about the resulting state; ask it.
-    await this.syncFromBank(payment.checkoutId);
-    return this.findOne(payment.id);
+    await this.syncFromBank(reservation.checkoutId);
+    return this.findOne(paymentRowId);
   }
 
   /* ------------------------------ reads ------------------------------ */
@@ -364,24 +515,36 @@ export class PaymentsService {
 
   /* ---------------------------- internals ---------------------------- */
 
+  /**
+   * Write the payment, its late patient link and the mirror onto the purchase
+   * as one unit. Before, a crash between the three left a paid payment whose
+   * appointment still read `pending`, and no retry repaired it.
+   */
   private async persist(id: string, data: Prisma.PaymentUpdateInput) {
-    const payment = await this.prisma.payment.update({ where: { id }, data });
+    await this.prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.update({ where: { id }, data });
 
-    // Late-link: the Patient may have been created between start and payment.
-    if (!payment.patientId) {
-      const patientId = await this.findPatientId(payment.payerEmail);
-      if (patientId) {
-        await this.prisma.payment.update({ where: { id }, data: { patientId } });
+      // Late-link: the Patient may have been created between start and payment.
+      if (!payment.patientId) {
+        const patientId = await this.findPatientId(payment.payerEmail, tx);
+        if (patientId) {
+          await tx.payment.update({ where: { id }, data: { patientId } });
+        }
       }
-    }
 
-    if (payment.state === PaymentState.paid) await this.markTargetPaid(payment);
+      if (payment.state === PaymentState.paid) {
+        await this.markTargetPaid(payment, tx);
+      }
+    });
   }
 
-  private async findPatientId(email: string): Promise<string | undefined> {
+  private async findPatientId(
+    email: string,
+    client: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<string | undefined> {
     // Link only to a patient who already exists. A payer is not automatically
     // a medical record — promoting one is an explicit act in the back office.
-    const patient = await this.prisma.patient.findUnique({
+    const patient = await client.patient.findUnique({
       where: { email: email.toLowerCase() },
       select: { id: true },
     });
@@ -392,30 +555,47 @@ export class PaymentsService {
    * Mirror the paid state onto the thing that was bought, so every screen that
    * already reads `paymentStatus` keeps working without knowing about Payment.
    */
-  private async markTargetPaid(payment: {
-    targetType: PaymentTargetType;
-    targetId: string | null;
-  }): Promise<void> {
+  private async markTargetPaid(
+    payment: { targetType: PaymentTargetType; targetId: string | null },
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
     const { targetType, targetId } = payment;
     if (!targetId) return;
     const data = { paymentStatus: PaymentStatus.confirmed };
 
-    switch (targetType) {
-      case PaymentTargetType.appointment:
-        await this.prisma.appointment.update({ where: { id: targetId }, data });
-        break;
-      case PaymentTargetType.quick_question:
-        await this.prisma.quickQuestion.update({ where: { id: targetId }, data });
-        break;
-      case PaymentTargetType.deliverable_order:
-        await this.prisma.deliverableOrder.update({ where: { id: targetId }, data });
-        break;
-      case PaymentTargetType.subscription:
-        await this.prisma.subscription.update({ where: { id: targetId }, data });
-        break;
-      case PaymentTargetType.material:
-        // Paid materials have no order row yet — the Payment is the record.
-        break;
+    try {
+      switch (targetType) {
+        case PaymentTargetType.appointment:
+          await tx.appointment.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.quick_question:
+          await tx.quickQuestion.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.deliverable_order:
+          await tx.deliverableOrder.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.subscription:
+          await tx.subscription.update({ where: { id: targetId }, data });
+          break;
+        case PaymentTargetType.material:
+          // Paid materials have no order row yet — the Payment is the record.
+          break;
+      }
+    } catch (e) {
+      // The purchase was deleted between paying for it and the bank telling us.
+      // Letting this throw would 500 the webhook, the bank would retry, and the
+      // retry would throw again forever. The payment record is the source of
+      // truth; the mirror is a convenience.
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2025'
+      ) {
+        this.logger.warn(
+          `paid ${targetType} ${targetId} no longer exists; payment recorded anyway`,
+        );
+        return;
+      }
+      throw e;
     }
   }
 }

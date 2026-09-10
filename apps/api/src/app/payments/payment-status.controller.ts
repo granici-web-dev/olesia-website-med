@@ -1,5 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../common/decorators/public.decorator';
 import { PaymentsService } from './payments.service';
@@ -17,6 +18,10 @@ import { PaymentsService } from './payments.service';
  * user-controllable query parameters, so the page must ask us, not believe them.
  */
 @ApiTags('payments')
+// Each hit can cost an outbound call to the bank, so this sits far below
+// the global ceiling: a return page polls a handful of times, an enumeration
+// loop does not.
+@Throttle({ default: { limit: 10, ttl: 60_000 } })
 @Controller('payment-status')
 export class PaymentStatusController {
   constructor(private readonly payments: PaymentsService) {}

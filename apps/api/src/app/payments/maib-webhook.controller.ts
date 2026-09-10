@@ -9,6 +9,7 @@ import {
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { Public } from '../common/decorators/public.decorator';
 import { MaibService, type MaibCallbackBody } from './maib.service';
@@ -22,6 +23,7 @@ import { PaymentsService } from './payments.service';
  * The URL must be sent explicitly on every checkout: with no `callbackUrl`,
  * maib silently sends nothing at all.
  */
+@SkipThrottle()
 @Controller('payments/maib')
 export class MaibWebhookController {
   constructor(

@@ -596,7 +596,8 @@ export interface PatientInteractionDto {
 /** One refund against a payment. */
 export interface PaymentRefundDto {
   id: string;
-  refundId: string;
+  /** Null while the refund is reserved in our ledger but not yet acknowledged. */
+  refundId: string | null;
   state: RefundState;
   amount: number;
   currency: string;
