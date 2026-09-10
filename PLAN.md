@@ -575,7 +575,7 @@ HTTPS (callback банка проверить нельзя без него).
 | Проход | Команда и граница | Что обязательно проверить | Закрывает | Статус |
 |---|---|---|---|---|
 | A1 | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap | правда контента, см. 10a | 10a | `[x]` `3bb74a0` |
-| A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[>]` аудит 2026-09-10, 15 находок, harden в работе |
+| A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
 | A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[ ]` |
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[ ]` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[ ]` |
@@ -727,6 +727,19 @@ About и WorkingHours без уникального ключа и транзак
 транзакции; при бронировании искать пациента по email; неизвестный `event_type`
 это письмо врачу и `logger.error`; ручной `paymentStatus` решается в A8 вместе
 с чекаутом.
+
+A2 закрыт: `harden` `2396497`, 20 файлов, миграция
+`20260910180000_appointment_reschedule_link` (`calendlyInviteeUri`,
+`rescheduledFromId`), 147 тестов (+23). Контроллер записей только `admin`,
+`/programari` под `RequireRole`. Перенос связывает строки и переносит оплату,
+пациента, план и `Payment.targetId` в транзакции; пациент ищется по email при
+бронировании; окно реплея 180 с; неизвестный `event_type` пишет врачу; prep
+занимает строку до отправки; синхронизация различает пустую страницу и отказ.
+Проверено подписанными запросами против локального Postgres. Перенесено в
+другие проходы: стирание по `clientEmail` для исторических записей без
+`patientId` (A3), MIME вложения плана (A4), ручной `paymentStatus` (A8), кнопки
+`/sync` и `/prep/run` (A10). Не обрабатывается `invitee_no_show.deleted`;
+перенос, случившийся пока API лежал, синхронизация в цепочку не свяжет.
 
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
