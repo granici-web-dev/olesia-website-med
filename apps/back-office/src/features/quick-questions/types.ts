@@ -6,7 +6,9 @@
  * the moment the question arrived (§11.5) — it is NOT derivable from
  * `createdAt` here, because the clock only runs during working hours. This UI
  * displays what the server decided; it never recomputes it.
- * TODO(shared): move to `packages/shared` once it exists.
+ * The wire shapes are the DTOs in `@olesia/shared`; `api.ts` maps them into
+ * the view types below. That layer is deliberate, not a placeholder — it is
+ * where a shared enum gets narrowed to what this UI actually renders.
  */
 
 export type TicketStatus = 'open' | 'answered';

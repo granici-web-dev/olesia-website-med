@@ -43,9 +43,7 @@ export function quotaRemaining(s: Subscription): number {
 }
 
 /* ------------------------------------------------------------------ *
- * Mock data layer — in-memory store shaped like the eventual REST API.
- * TODO(api): replace with HTTP calls to /subscriptions (list + the manual
- * payment confirmation, quota logging and cancel mutations).
+ * Mock data layer — in-memory store shaped like the real REST API.
  * ------------------------------------------------------------------ */
 
 let store: Subscription[] = [

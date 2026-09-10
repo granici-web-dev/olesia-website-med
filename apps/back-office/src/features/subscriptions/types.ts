@@ -4,7 +4,9 @@
  * The spec (module_calendly.md §3.2.4, §11) requires: list with status and
  * remaining video-call quota, plus manual payment confirmation. No explicit
  * model is given, so this is the inferred shape.
- * TODO(shared): move to `packages/shared` once it exists.
+ * `api.ts` maps `SubscriptionDto` from `@olesia/shared` into the view type
+ * below, and folds the DTO's `paused` into `active` because this UI has no
+ * paused state. Narrowing there is the point of the layer.
  */
 
 export type SubscriptionStatus = 'active' | 'expired' | 'canceled';

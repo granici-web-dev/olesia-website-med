@@ -1,8 +1,10 @@
 /**
  * Services / pricing (the 01–05 cards shown publicly on the site).
  *
- * TODO(shared): replace with DTOs/enums from `packages/shared` once it exists —
- * mirrors the `Service` model in module_calendly.md §6.
+ * The wire shapes are the DTOs in `@olesia/shared`; `api.ts` maps them into
+ * the view types below. That layer is deliberate, not a placeholder — it is
+ * where a shared enum gets narrowed to what this UI actually renders.
+ * Mirrors the `Service` model in module_calendly.md §6.
  */
 
 export type ServiceCode =

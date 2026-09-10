@@ -38,9 +38,8 @@ export function generatePassword(): string {
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory CRUD, shaped like the eventual REST API.
- * Passwords are never stored/returned here; create just registers the
- * account. TODO(api): replace with /users endpoints (admin-only) and the
- * real argon2/bcrypt hashing on the backend. See module_calendly.md §4.
+ * Passwords are never stored or returned here; create just registers the
+ * account. Real hashing is argon2 on the backend. See module_calendly.md §4.
  * ------------------------------------------------------------------ */
 
 let store: User[] = [

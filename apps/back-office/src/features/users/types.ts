@@ -3,8 +3,10 @@ import type { Role } from '@/types';
 /**
  * Back-office user accounts.
  *
- * TODO(shared): replace with DTOs/enums from `packages/shared` once it exists —
- * mirrors the `User` model in module_calendly.md §4. `password_hash` is never
+ * The wire shapes are the DTOs in `@olesia/shared`; `api.ts` maps them into
+ * the view types below. That layer is deliberate, not a placeholder — it is
+ * where a shared enum gets narrowed to what this UI actually renders.
+ * Mirrors the `User` model in module_calendly.md §4; `password_hash` is never
  * exposed to the front end.
  */
 

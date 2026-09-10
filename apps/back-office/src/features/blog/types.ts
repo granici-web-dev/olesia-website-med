@@ -1,8 +1,10 @@
 /**
  * Blog posts & categories.
  *
- * TODO(shared): replace with DTOs/enums from `packages/shared` once it exists —
- * mirrors the `Post` / `Category` models in module_calendly.md §7.
+ * The wire shapes are the DTOs in `@olesia/shared`; `api.ts` maps them into
+ * the view types below. That layer is deliberate, not a placeholder — it is
+ * where a shared enum gets narrowed to what this UI actually renders.
+ * Mirrors the `Post` / `Category` models in module_calendly.md §7.
  */
 
 export type PostStatus = 'draft' | 'published';

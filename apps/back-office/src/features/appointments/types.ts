@@ -1,8 +1,10 @@
 /**
  * Appointments (Calendly group-A video consultations).
  *
- * TODO(shared): replace with DTOs/enums from `packages/shared` once it exists —
- * these mirror the `Appointment` model in module_calendly.md §8.
+ * The wire shapes are the DTOs in `@olesia/shared`; `api.ts` maps them into
+ * the view types below. That layer is deliberate, not a placeholder — it is
+ * where a shared enum gets narrowed to what this UI actually renders.
+ * Mirrors the `Appointment` model in module_calendly.md §8.
  */
 
 export type AppointmentStatus =

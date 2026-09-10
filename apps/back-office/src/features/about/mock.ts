@@ -14,8 +14,7 @@ export function formatDateTime(iso: string): string {
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — single in-memory document.
- * TODO(api): replace with GET /about (public) and PATCH /about
- * (admin/editor). See module_calendly.md §10.
+ * See module_calendly.md §10.
  * ------------------------------------------------------------------ */
 
 let about: AboutPage = {

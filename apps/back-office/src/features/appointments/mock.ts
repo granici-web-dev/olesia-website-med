@@ -32,12 +32,8 @@ export function serviceLabel(service: AppointmentServiceCode): string {
 }
 
 /* ------------------------------------------------------------------ *
- * Mock data layer.
- * No backend is wired yet, so this module fakes the `appointments` API
- * over an in-memory store: an async read + three async mutations, shaped
- * exactly like the eventual REST calls so swapping in a real client is
- * a one-file change. See module_calendly.md §8.
- * TODO(api): replace fetch/confirm/markNoShow/uploadPlan with HTTP calls.
+ * Mock data layer — an in-memory store shaped like the real REST calls:
+ * an async read plus three async mutations. See module_calendly.md §8.
  * ------------------------------------------------------------------ */
 
 let store: Appointment[] = [

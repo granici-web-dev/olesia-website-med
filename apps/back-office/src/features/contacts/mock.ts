@@ -47,9 +47,8 @@ export function contactHref(contact: Contact): string | null {
 }
 
 /* ------------------------------------------------------------------ *
- * Mock data layer — in-memory CRUD, shaped like the eventual REST API.
- * TODO(api): replace with HTTP calls to /contacts (GET public,
- * POST/PATCH/DELETE admin/editor). See module_calendly.md §9.
+ * Mock data layer — in-memory CRUD, shaped like the real REST API.
+ * See module_calendly.md §9.
  * ------------------------------------------------------------------ */
 
 let store: Contact[] = [

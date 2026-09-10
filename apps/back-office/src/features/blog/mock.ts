@@ -39,9 +39,7 @@ export function formatDate(iso: string | null): string {
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory CRUD for posts + categories, shaped like
- * the eventual REST API.
- * TODO(api): replace with HTTP calls to /blog/posts and /blog/categories
- * (+ POST /blog/upload for images). See module_calendly.md §7.
+ * the real REST API. See module_calendly.md §7.
  * ------------------------------------------------------------------ */
 
 let categories: Category[] = [

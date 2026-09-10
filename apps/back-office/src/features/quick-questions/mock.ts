@@ -78,9 +78,8 @@ export function formatDuration(ms: number): string {
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory store shaped like the eventual REST API.
- * Timestamps are relative to load time so the 48h countdowns stay live.
- * TODO(api): replace with HTTP calls to /quick-questions (list + answer +
- * manual payment confirmation). PII/attachments are GDPR-sensitive (§15).
+ * Timestamps are relative to load time so the countdowns stay live.
+ * PII and attachments are GDPR-sensitive (module_calendly.md §15).
  * ------------------------------------------------------------------ */
 
 const hoursAgo = (h: number) =>

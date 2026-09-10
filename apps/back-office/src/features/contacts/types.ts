@@ -1,8 +1,10 @@
 /**
  * Contact blocks shown publicly on the site.
  *
- * TODO(shared): replace with DTOs/enums from `packages/shared` once it exists —
- * mirrors the `Contact` model in module_calendly.md §9.
+ * The wire shapes are the DTOs in `@olesia/shared`; `api.ts` maps them into
+ * the view types below. That layer is deliberate, not a placeholder — it is
+ * where a shared enum gets narrowed to what this UI actually renders.
+ * Mirrors the `Contact` model in module_calendly.md §9.
  */
 
 export type ContactType = 'phone' | 'email' | 'address' | 'social' | 'other';

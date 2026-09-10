@@ -32,9 +32,8 @@ export function formatPrice(eur: number): string {
 }
 
 /* ------------------------------------------------------------------ *
- * Mock data layer — in-memory CRUD, shaped like the eventual REST API.
- * TODO(api): replace with HTTP calls to /services (GET public,
- * POST/PATCH/DELETE admin/editor). See module_calendly.md §6.
+ * Mock data layer — in-memory CRUD, shaped like the real REST API.
+ * See module_calendly.md §6.
  * ------------------------------------------------------------------ */
 
 let store: Service[] = [
