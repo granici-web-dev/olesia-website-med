@@ -12,16 +12,39 @@ const API_BASE = (
 
 export type LeadService = 'monitoring' | 'quick_question';
 
-export interface MonitoringLeadInput {
+/** The three locales the site is written in; the API records which one wrote. */
+export type LeadLocale = 'ro' | 'en' | 'ru';
+
+/**
+ * `useLocale()` is typed as `string`, and the API only accepts the three.
+ * Anything else is Romanian, which is the site's default and the API's.
+ */
+export function leadLocale(raw: string): LeadLocale {
+  return raw === 'en' || raw === 'ru' ? raw : 'ro';
+}
+
+/**
+ * What every public form sends.
+ *
+ * `locale` is the page the person is reading, so a written answer comes back
+ * in their language instead of Romanian by default. `company` is the honeypot
+ * — a hidden field a person never fills and a bot does; it is on all four
+ * forms now, not just the contact page (audit A3, F16).
+ */
+export interface PublicLeadInput {
   name: string;
   email: string;
+  locale: LeadLocale;
+  /** Honeypot — leave empty; only bots fill it. */
+  company?: string;
+}
+
+export interface MonitoringLeadInput extends PublicLeadInput {
   phone?: string;
   message?: string;
 }
 
-export interface QuickQuestionLeadInput {
-  name: string;
-  email: string;
+export interface QuickQuestionLeadInput extends PublicLeadInput {
   phone?: string;
   question: string;
 }
@@ -43,9 +66,7 @@ export type DeliverableProduct =
   | 'protocol_pednutri'
   | 'protocol_complementary';
 
-export interface DeliverableLeadInput {
-  name: string;
-  email: string;
+export interface DeliverableLeadInput extends PublicLeadInput {
   phone?: string;
   message?: string;
   product: DeliverableProduct;
@@ -53,13 +74,9 @@ export interface DeliverableLeadInput {
 
 export type ContactSubject = 'appointment' | 'payment' | 'how_it_works' | 'other';
 
-export interface ContactMessageInput {
-  name: string;
-  email: string;
+export interface ContactMessageInput extends PublicLeadInput {
   subject: ContactSubject;
   message: string;
-  /** Honeypot — leave empty; only bots fill it. */
-  company?: string;
 }
 
 /**

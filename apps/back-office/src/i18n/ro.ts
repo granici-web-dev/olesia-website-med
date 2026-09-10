@@ -940,7 +940,7 @@ export const ro = {
     status: {
       open: 'Deschis',
       overdue: 'Întârziat',
-      answered: 'Răspuns trimis',
+      answered: 'Răspuns salvat',
     },
 
     payment: {
@@ -989,12 +989,14 @@ export const ro = {
       received: 'Primit',
       deadline: 'Termen',
       question: 'Întrebarea clientului',
-      attachments: 'Atașamente',
-      sensitive: 'Date medicale sensibile — manipulează conform GDPR.',
       yourAnswer: 'Răspunsul tău',
       answerPlaceholder: 'Scrie răspunsul pentru client…',
-      answer: 'Răspuns trimis',
-      answeredAt: 'Trimis',
+      answer: 'Răspuns salvat',
+      answeredAt: 'Salvat',
+      emailSent: 'Email trimis clientului',
+      emailNotSent:
+        'Email netrimis — serverul de email nu este configurat. Copiază răspunsul și trimite-l tu.',
+      copyAnswer: 'Copiază răspunsul',
     },
 
     actions: {
@@ -1018,10 +1020,11 @@ export const ro = {
     toast: {
       paymentConfirmed: 'Plata a fost confirmată.',
       paymentReverted: 'Plata a fost marcată drept neplătită.',
-      answerSent: 'Răspunsul a fost trimis clientului.',
+      answerSaved: 'Răspunsul a fost salvat și trimis pe email clientului.',
+      answerSavedNotSent:
+        'Răspunsul a fost salvat, dar emailul nu a plecat. Copiază-l și trimite-l tu.',
       answerRequired: 'Scrie un răspuns înainte de a-l trimite.',
-      attachmentMock:
-        'Descărcarea atașamentelor va fi disponibilă după conectarea la API.',
+      answerCopied: 'Răspunsul a fost copiat.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
   },

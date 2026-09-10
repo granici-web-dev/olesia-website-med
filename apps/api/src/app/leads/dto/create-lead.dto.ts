@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsEmail,
   IsEnum,
   IsIn,
@@ -9,7 +8,46 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { DeliverableProduct } from '../../../generated/prisma/enums';
+import { DeliverableProduct, Locale } from '../../../generated/prisma/enums';
+
+/**
+ * Fields every public lead form carries.
+ *
+ * `company` is a honeypot: a hidden field real people leave empty and bots
+ * fill. It was on the contact form only, which is the one route of the four
+ * that carries no medical text — the three that do had nothing but the
+ * captcha, and the captcha is off until the client's keys exist
+ * (audit A3, F16).
+ *
+ * It deliberately validates like any other optional string. It used to carry
+ * `@MaxLength(0)`, which meant the global `ValidationPipe` answered 400 before
+ * the handler ran — so the "drop it silently and report success so the bot
+ * learns nothing" the service comment described never happened, and a 400 on
+ * exactly one field is the clearest possible signal of what to stop sending.
+ * The controller drops it and answers success instead.
+ *
+ * `locale` is which language the person is reading the site in, so an answer
+ * can be written back in it rather than in Romanian by default.
+ */
+export abstract class PublicLeadDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  name!: string;
+
+  @IsEmail()
+  email!: string;
+
+  @IsOptional()
+  @IsEnum(Locale)
+  locale?: Locale;
+
+  /** Honeypot — a person leaves it empty; see the class doc. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  company?: string;
+}
 
 /** Non-medical contact subjects (Contact page triage dropdown). */
 export const CONTACT_SUBJECTS = [
@@ -21,15 +59,7 @@ export const CONTACT_SUBJECTS = [
 export type ContactSubject = (typeof CONTACT_SUBJECTS)[number];
 
 /** Public "Monitorizare 3 luni" lead — contact details + optional message. */
-export class MonitoringLeadDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(120)
-  name!: string;
-
-  @IsEmail()
-  email!: string;
-
+export class MonitoringLeadDto extends PublicLeadDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
@@ -41,16 +71,17 @@ export class MonitoringLeadDto {
   message?: string;
 }
 
-/** Public "Întrebare rapidă" lead — contact details + the question text. */
-export class QuickQuestionLeadDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(120)
-  name!: string;
-
-  @IsEmail()
-  email!: string;
-
+/**
+ * Public "Întrebare rapidă" lead — contact details + the question text.
+ *
+ * No `attachments`. The field used to accept an unbounded array of arbitrary
+ * strings from the open internet; the site never sent it, the back office
+ * only rendered a filename from it, and the only code that read it was the
+ * one that deleted files by that name during erasure (audit A3, F15). Real
+ * file sending belongs to the upload-link flow, which is authenticated,
+ * size-capped and content-sniffed.
+ */
+export class QuickQuestionLeadDto extends PublicLeadDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
@@ -60,11 +91,6 @@ export class QuickQuestionLeadDto {
   @MinLength(1)
   @MaxLength(4000)
   question!: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  attachments?: string[];
 }
 
 /**
@@ -75,15 +101,7 @@ export class QuickQuestionLeadDto {
  * "Meniu 30 zile" for 1 €, and the back office never displays a product name
  * that came from the internet.
  */
-export class DeliverableLeadDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(120)
-  name!: string;
-
-  @IsEmail()
-  email!: string;
-
+export class DeliverableLeadDto extends PublicLeadDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
@@ -101,18 +119,9 @@ export class DeliverableLeadDto {
 /**
  * Public Contact-page message — non-medical questions only (appointments,
  * payment, how it works, other). Medical questions are routed to "Întrebare
- * rapidă" by design, so this carries no medical fields. `company` is a honeypot:
- * a hidden field real users leave empty; bots fill it and are silently dropped.
+ * rapidă" by design, so this carries no medical fields.
  */
-export class ContactMessageDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(120)
-  name!: string;
-
-  @IsEmail()
-  email!: string;
-
+export class ContactMessageDto extends PublicLeadDto {
   @IsIn(CONTACT_SUBJECTS)
   subject!: ContactSubject;
 
@@ -120,10 +129,4 @@ export class ContactMessageDto {
   @MinLength(1)
   @MaxLength(2000)
   message!: string;
-
-  /** Honeypot — must be empty. */
-  @IsOptional()
-  @IsString()
-  @MaxLength(0)
-  company?: string;
 }

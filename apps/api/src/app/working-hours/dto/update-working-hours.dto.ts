@@ -4,14 +4,23 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsOptional,
-  IsString,
   Matches,
   Max,
   Min,
   ValidateNested,
 } from 'class-validator';
+
+/**
+ * The zones this runtime's ICU actually knows. Checked here rather than
+ * trusted, because an unknown zone does not degrade — `Intl.DateTimeFormat`
+ * throws a `RangeError`, which is not an HttpException, so a single typo in
+ * the back office turned every public EXPRESS submission into a 500 and lost
+ * the lead (audit A3, F8).
+ */
+const IANA_TIME_ZONES = Intl.supportedValuesOf('timeZone');
 
 export class WorkingDayInput {
   @IsInt()
@@ -33,7 +42,11 @@ export class WorkingDayInput {
 export class UpdateWorkingHoursDto {
   /** IANA zone, e.g. "Europe/Chisinau". */
   @IsOptional()
-  @IsString()
+  // The default `IsIn` message lists every accepted value, which here is 400+
+  // zone names in the response body of a typo. Say what is wrong instead.
+  @IsIn(IANA_TIME_ZONES, {
+    message: 'timezone must be a valid IANA zone, e.g. Europe/Chisinau',
+  })
   timezone?: string;
 
   @IsOptional()

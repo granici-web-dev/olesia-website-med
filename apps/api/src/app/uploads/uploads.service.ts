@@ -15,7 +15,7 @@ import {
 } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
-import { MailService } from '../mail/mail.service';
+import { PatientNotificationsService } from '../mail/patient-notifications.service';
 import {
   StorageService,
   type UploadedImage,
@@ -51,12 +51,6 @@ const SITE_URL = (
   process.env.PUBLIC_SITE_URL ?? 'http://localhost:3000'
 ).replace(/\/$/, '');
 
-/** PII-safe recipient for logs (first char + domain), as elsewhere. */
-function maskEmail(email: string): string {
-  const at = email.indexOf('@');
-  return at <= 0 ? '***' : `${email[0]}***${email.slice(at)}`;
-}
-
 /**
  * Patient document uploads (client answers v2 §11.14).
  *
@@ -81,7 +75,7 @@ export class UploadsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
-    private readonly mail: MailService,
+    private readonly notifications: PatientNotificationsService,
   ) {}
 
   /* --------------------------- back office --------------------------- */
@@ -175,26 +169,41 @@ export class UploadsService {
     });
     if (!link) throw new NotFoundException('upload_link_not_found');
 
-    const sent = await this.mail.sendToClient({
-      to: link.clientEmail,
-      subject: 'Încărcarea analizelor înainte de consultație',
-      lines: [
-        `Bună ziua, ${link.clientName},`,
-        '',
-        'Pentru ca discuția noastră să fie cât mai utilă, puteți trimite în avans analizele, investigațiile și documentele medicale relevante:',
-        this.publicUrl(link.token),
-        '',
-        `Linkul este personal și expiră la ${link.expiresAt.toLocaleDateString('ro-RO')}.`,
-        '',
-        'Cu drag,',
-        'Dr. Olesea Jalba',
-      ],
-    });
-
-    this.logger.log(
-      `Upload link ${sent ? 'emailed' : 'NOT emailed (no SMTP)'} → ${maskEmail(link.clientEmail)}`,
+    const { sent } = await this.notifications.uploadLink(
+      { to: link.clientEmail, locale: await this.linkLocale(link) },
+      {
+        clientName: link.clientName,
+        url: this.publicUrl(link.token),
+        expiresAt: link.expiresAt,
+      },
     );
     return { sent };
+  }
+
+  /**
+   * The language the link's owner wrote to us in. A link belongs to either an
+   * appointment or a group-C order, and both now record it; a link with
+   * neither (there are none) reads as Romanian, like every other fallback.
+   */
+  private async linkLocale(link: {
+    appointmentId: string | null;
+    orderId: string | null;
+  }): Promise<string | null> {
+    if (link.appointmentId) {
+      const appointment = await this.prisma.appointment.findUnique({
+        where: { id: link.appointmentId },
+        select: { locale: true },
+      });
+      return appointment?.locale ?? null;
+    }
+    if (link.orderId) {
+      const order = await this.prisma.deliverableOrder.findUnique({
+        where: { id: link.orderId },
+        select: { locale: true },
+      });
+      return order?.locale ?? null;
+    }
+    return null;
   }
 
   /** Links (with their documents) attached to an appointment. */

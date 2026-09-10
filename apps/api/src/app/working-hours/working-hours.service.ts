@@ -11,6 +11,9 @@ import {
   type WorkingDay,
 } from './business-hours';
 
+/** Where the practice is, and what an unreadable stored zone falls back to. */
+const FALLBACK_TIMEZONE = 'Europe/Chisinau';
+
 /**
  * The practice schedule, and the EXPRESS deadline computed from it.
  *
@@ -24,7 +27,8 @@ export class WorkingHoursService {
   constructor(private readonly prisma: PrismaService) {}
 
   async get(): Promise<WorkingHoursDto> {
-    return toDto(await this.getOrCreate());
+    const row = await this.getOrCreate();
+    return toDto({ ...row, timezone: this.usableTimezone(row.timezone) });
   }
 
   async update(dto: UpdateWorkingHoursDto): Promise<WorkingHoursDto> {
@@ -68,10 +72,28 @@ export class WorkingHoursService {
   private async schedule(): Promise<Schedule> {
     const row = await this.getOrCreate();
     return {
-      timezone: row.timezone,
+      timezone: this.usableTimezone(row.timezone),
       days: normalizeDays(row.days),
       expressSlaMinutes: row.expressSlaMinutes,
     };
+  }
+
+  /**
+   * The DTO rejects an unknown zone, so a stored one is only ever wrong if it
+   * predates that check or was written straight to the database. Falling back
+   * is still the right answer: an EXPRESS deadline an hour out is a much
+   * smaller problem than a public intake form that returns 500 (audit A3, F8).
+   */
+  private usableTimezone(stored: string): string {
+    try {
+      new Intl.DateTimeFormat('en-US', { timeZone: stored });
+      return stored;
+    } catch {
+      this.logger.error(
+        `Working hours name an unknown timezone (${stored}) — falling back to ${FALLBACK_TIMEZONE}. Fix it in the back office.`,
+      );
+      return FALLBACK_TIMEZONE;
+    }
   }
 
   private async getOrCreate() {

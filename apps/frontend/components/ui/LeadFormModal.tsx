@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useId, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Modal } from './Modal';
 import {
+  leadLocale,
   submitMonitoringLead,
   submitQuickQuestionLead,
   submitDeliverableLead,
@@ -44,6 +45,8 @@ export function LeadFormModal({
   onClose: () => void;
 }) {
   const t = useTranslations('leadForm');
+  const locale = leadLocale(useLocale());
+  const fieldId = useId();
   const isDeliverable = !!deliverable;
   const isQuick = service === 'quick_question';
   const copy = isDeliverable ? 'deliverable' : isQuick ? 'quick' : 'monitoring';
@@ -57,6 +60,10 @@ export function LeadFormModal({
   const [phone, setPhone] = useState('');
   const [text, setText] = useState(''); // message (monitoring) / question (quick)
   const [consent, setConsent] = useState(false);
+  // Honeypot: a hidden field a person never sees and a bot fills. The three
+  // forms behind this modal carry the medical text, and until the client's
+  // reCAPTCHA keys exist they had nothing at all (audit A3, F16).
+  const [company, setCompany] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<Status>('idle');
 
@@ -66,6 +73,7 @@ export function LeadFormModal({
     setPhone('');
     setText('');
     setConsent(false);
+    setCompany('');
     setErrors({});
     setStatus('idle');
   };
@@ -93,26 +101,24 @@ export function LeadFormModal({
     if (!validate()) return;
     setStatus('submitting');
     try {
+      const shared = {
+        name: name.trim(),
+        email: email.trim(),
+        locale,
+        company: company || undefined,
+        phone: phone.trim() || undefined,
+      };
       if (isDeliverable) {
         await submitDeliverableLead({
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim() || undefined,
+          ...shared,
           message: text.trim() || undefined,
           product: deliverable!.code,
         });
       } else if (isQuick) {
-        await submitQuickQuestionLead({
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim() || undefined,
-          question: text.trim(),
-        });
+        await submitQuickQuestionLead({ ...shared, question: text.trim() });
       } else {
         await submitMonitoringLead({
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim() || undefined,
+          ...shared,
           message: text.trim() || undefined,
         });
       }
@@ -149,6 +155,22 @@ export function LeadFormModal({
         </div>
       ) : (
         <form className={styles.body} onSubmit={onSubmit} noValidate>
+          {/* Honeypot — visually hidden, off the tab order, ignored by humans. */}
+          <div
+            aria-hidden="true"
+            className="absolute left-[-9999px] h-px w-px overflow-hidden"
+          >
+            <label htmlFor={`${fieldId}-company`}>Company</label>
+            <input
+              id={`${fieldId}-company`}
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={company}
+              onChange={(ev) => setCompany(ev.target.value)}
+            />
+          </div>
+
           <header className={styles.header}>
             <p className={styles.eyebrow}>{t(`${copy}.tag`)}</p>
             <h2 id="lead-form-title" className={styles.title}>

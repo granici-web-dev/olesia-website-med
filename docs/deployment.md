@@ -111,16 +111,28 @@ Worth naming because they change behaviour rather than where things point:
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | `ACME_EMAIL`                               | empty makes Caddy issue its own certificate instead of asking Let's Encrypt. Correct for a local run, wrong for the server |
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | at least 32 characters, random, different from each other — the API exits at boot otherwise                                |
+| `LEADS_NOTIFY_EMAIL`                       | **required in production** — the API exits at boot without it. No default: it used to fall back to a developer's Gmail    |
+| `RECAPTCHA_SECRET`                         | **required in production** — the API exits at boot without it. Empty disables captcha verification entirely               |
+| `PRIVATE_UPLOADS_DIR`                      | **required in production** — the API exits at boot without it. Defaults to the working directory, which is ephemeral      |
+| `PUBLIC_API_URL`                           | **required in production** — the API exits at boot without it                                                              |
 | `COOKIE_SECURE`                            | defaults to `true`. Caddy terminates TLS in front, so it stays true                                                        |
 | `PUBLIC_SITE_URL`                          | the **site's** origin, not the API's: it builds the patient upload link                                                    |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD`           | read by the seed, not the API. `SEED_PROFILE=prod` refuses to run without them                                             |
 | `BACKUP_HOUR` / `BACKUP_TZ`                | the nightly run, default 03:00 Europe/Chișinău                                                                             |
 | `RCLONE_REMOTE`                            | empty skips the off-site copy and says so in the log                                                                       |
 
-Optional but wanted before launch: `CALENDLY_*` (booking is dead without them),
-`SMTP_*` + `LEADS_NOTIFY_EMAIL` (without these nothing is emailed — leads are
-still saved, and the back office says the mail did not go), `RECAPTCHA_SECRET`
-(empty disables verification entirely).
+**Five variables are checked at boot when `NODE_ENV=production`** and the API
+exits rather than start without them: `LEADS_NOTIFY_EMAIL`,
+`RECAPTCHA_SECRET`, `PRIVATE_UPLOADS_DIR`, `PUBLIC_API_URL`,
+`PUBLIC_SITE_URL`. Each used to fall back to something that looked like it
+worked — a personal mailbox, a disabled captcha, a directory that empties on
+the next deploy — and every one of those failures is silent. This mirrors the
+JWT check that has been there since the secrets were found committed.
+
+Optional but wanted before launch: `CALENDLY_*` (booking is dead without them)
+and `SMTP_*`. Without SMTP nothing is emailed at all — not the practice, not
+the patient. Leads are still saved; the back office says the mail did not go,
+and the EXPRESS answer offers a copy button instead of claiming it was sent.
 
 Payments — **all four blank means online payment is switched off**, which is the
 correct state until the acquirer contract exists, and the API logs one line at

@@ -1,4 +1,5 @@
 import type {
+  AnsweredTicket,
   Ticket,
   TicketBucket,
   PaymentStatus,
@@ -79,7 +80,7 @@ export function formatDuration(ms: number): string {
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory store shaped like the eventual REST API.
  * Timestamps are relative to load time so the countdowns stay live.
- * PII and attachments are GDPR-sensitive (module_calendly.md §15).
+ * PII is GDPR-sensitive (module_calendly.md §15).
  * ------------------------------------------------------------------ */
 
 const hoursAgo = (h: number) =>
@@ -102,7 +103,6 @@ let store: Ticket[] = [
     clientEmail: 'alina.cretu@gmail.com',
     question:
       'Bună ziua! Bebelușul meu de 7 luni refuză legumele la diversificare. Cum putem proceda fără să forțăm, dar fără să renunțăm?',
-    attachments: [{ id: 'f1', name: 'jurnal-alimentar.pdf', sizeKb: 240 }],
     status: 'open',
     answer: null,
     answeredAt: null,
@@ -116,10 +116,6 @@ let store: Ticket[] = [
     clientEmail: 'bogdan.marin@outlook.com',
     question:
       'Copilul are 3 ani și tușește seara de câteva zile, fără febră. Atașez analizele recente. Este nevoie de o consultație sau pot urmări acasă?',
-    attachments: [
-      { id: 'f2', name: 'analize-sange.pdf', sizeKb: 512 },
-      { id: 'f3', name: 'radiografie.jpg', sizeKb: 1840 },
-    ],
     status: 'open',
     answer: null,
     answeredAt: null,
@@ -133,7 +129,6 @@ let store: Ticket[] = [
     clientEmail: 'cristina.lupu@gmail.com',
     question:
       'Ce supliment de vitamina D recomandați pentru un sugar alăptat exclusiv și ce doză?',
-    attachments: [],
     status: 'open',
     answer: null,
     answeredAt: null,
@@ -147,7 +142,6 @@ let store: Ticket[] = [
     clientEmail: 'denis.albu@gmail.com',
     question:
       'Putem începe diversificarea la 5 luni dacă bebelușul stă bine sprijinit și arată interes?',
-    attachments: [],
     status: 'answered',
     answer:
       'Recomandarea este să așteptați împlinirea a 6 luni. Semnele de interes sunt importante, dar maturitatea digestivă contează cel mai mult. Urmăriți încă 2-3 săptămâni.',
@@ -162,7 +156,6 @@ let store: Ticket[] = [
     clientEmail: 'elena.tofan@yahoo.com',
     question:
       'Cât timp se poate păstra laptele matern în frigider și se poate reîncălzi de două ori?',
-    attachments: [],
     status: 'answered',
     answer:
       'Laptele matern se păstrează până la 4 zile în frigider (4 °C). Nu se reîncălzește de două ori — porționați în cantități mici și folosiți o singură dată după încălzire.',
@@ -177,7 +170,6 @@ let store: Ticket[] = [
     clientEmail: 'florin.rosu@gmail.com',
     question:
       'La ce interval este normal să se trezească noaptea un copil de 10 luni care doarme în camera lui?',
-    attachments: [],
     status: 'open',
     answer: null,
     answeredAt: null,
@@ -190,7 +182,6 @@ let store: Ticket[] = [
     clientName: 'Gabriela Sava',
     clientEmail: 'gabriela.sava@outlook.com',
     question: 'Ce alimente sunt cele mai frecvent alergene la diversificare?',
-    attachments: [{ id: 'f4', name: 'istoric-alergii.pdf', sizeKb: 180 }],
     status: 'answered',
     answer:
       'Principalele alergene: ou, arahide, lapte de vacă, pește, fructe de mare, soia, grâu și nuci. Se introduc pe rând, câte unul la 3-4 zile, observând reacțiile.',
@@ -229,13 +220,16 @@ export async function fetchTickets(): Promise<Ticket[]> {
 export async function answerTicket(
   id: string,
   answer: string,
-): Promise<Ticket> {
+): Promise<AnsweredTicket> {
   await delay(550);
-  return mutate(id, {
+  const ticket = mutate(id, {
     status: 'answered',
     answer: answer.trim(),
     answeredAt: new Date().toISOString(),
   });
+  // Mock mode has no transport, which is also the real state until SMTP is
+  // configured — so the UI shows its "saved but not sent" path by default.
+  return { ticket, emailSent: false };
 }
 
 export async function setPaymentStatus(

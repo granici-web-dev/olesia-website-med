@@ -2,7 +2,11 @@
 
 import { useId, useRef, useState } from 'react';
 
-import { submitContactMessage, type ContactSubject } from '@/lib/leads';
+import {
+  leadLocale,
+  submitContactMessage,
+  type ContactSubject,
+} from '@/lib/leads';
 import { track } from '@/lib/analytics';
 import { CaptchaNotice } from './CaptchaNotice';
 
@@ -116,6 +120,7 @@ export function ContactForm({ locale }: { locale: string }) {
         email: email.trim(),
         subject,
         message: message.trim(),
+        locale: leadLocale(locale),
         company: company || undefined,
       });
       track('lead_submit', { service: 'contact', subject });

@@ -12,6 +12,14 @@ datasource db {
 
 // --- Enums ---
 
+/// Which language to write back to this person in. Mirrors `Locale` in
+/// packages/shared; `ro` is the default and the fallback.
+enum Locale {
+  ro
+  en
+  ru
+}
+
 enum Role {
   admin
   editor
@@ -208,6 +216,9 @@ model Appointment {
   paymentStatus      PaymentStatus     @default(pending)
   cancelUrl          String?
   rescheduleUrl      String?
+  /// Calendly does not tell us the invitee's language, so a booking defaults
+  /// to `ro` and the doctor can correct it in the back office.
+  locale             Locale            @default(ro)
   prepSentAt         DateTime?
   planText           String? // written treatment plan typed by the specialist
   planFileKey        String? // PRIVATE storage key of an optional attachment (rx/doc)
@@ -240,6 +251,7 @@ model Subscription {
   clientEmail        String
   phone              String? // lead contact phone (public intake)
   notes              String? // free-text message from the public lead form
+  locale             Locale             @default(ro)
   status             SubscriptionStatus @default(active)
   paymentStatus      PaymentStatus      @default(pending)
   videoQuotaPerMonth Int                @default(2)
@@ -264,9 +276,7 @@ model QuickQuestion {
   clientEmail   String
   phone         String? // lead contact phone (public intake)
   question      String
-  /// Same reason as `Post.ageKeys`: an absent default reads back as
-  /// `undefined` on any row that predates the column.
-  attachments   String[]            @default([])
+  locale        Locale              @default(ro)
   answer        String?
   status        QuickQuestionStatus @default(open)
   paymentStatus PaymentStatus       @default(pending)
@@ -584,6 +594,7 @@ model ContactMessage {
   email     String
   subject   String // ContactSubject value: appointment | payment | how_it_works | other
   message   String
+  locale    Locale               @default(ro)
   status    ContactMessageStatus @default(new)
   readAt    DateTime?
   reply     String? // email reply text (set when answered from the portal)
@@ -621,6 +632,7 @@ model DeliverableOrder {
   phone       String?
   /// Free-text detail from the order form (allergies, goals, age of the child).
   notes       String?
+  locale      Locale  @default(ro)
 
   status        DeliverableOrderStatus @default(new)
   paymentStatus PaymentStatus          @default(pending)

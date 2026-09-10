@@ -15,6 +15,7 @@ import { toQuickQuestionDto } from '../quick-questions/quick-questions.mapper';
 import {
   ContactMessageStatus,
   DeliverableOrderStatus,
+  Locale,
   PaymentStatus,
   QuickQuestionStatus,
   ServiceCode,
@@ -42,6 +43,9 @@ const CONTACT_SUBJECT_LABELS: Record<string, string> = {
  * Public lead intake for the group-B services (portal-only, no calendar).
  * Each submission is persisted as a `pending` record so it surfaces in the
  * back office, and a notification email is sent to the practice inbox.
+ *
+ * Every lead records the locale it arrived in, so the answer can be written
+ * back in the language the person used rather than in Romanian by default.
  */
 @Injectable()
 export class LeadsService {
@@ -52,6 +56,20 @@ export class LeadsService {
     private readonly mail: MailService,
     private readonly workingHours: WorkingHoursService,
   ) {}
+
+  /**
+   * A moment as the practice reads it. `toLocaleString` with no zone formats
+   * in the server's, which in a container is UTC — so the doctor was told an
+   * EXPRESS deadline two hours early (audit A3, F10).
+   */
+  private async inPracticeTime(at: Date): Promise<string> {
+    const { timezone } = await this.workingHours.get();
+    return at.toLocaleString('ro-RO', {
+      timeZone: timezone,
+      dateStyle: 'long',
+      timeStyle: 'short',
+    });
+  }
 
   /** "Monitorizare 3 luni" → a pending Subscription the doctor follows up on. */
   async createMonitoring(dto: MonitoringLeadDto): Promise<SubscriptionDto> {
@@ -71,6 +89,7 @@ export class LeadsService {
         clientEmail: dto.email,
         phone: dto.phone ?? null,
         notes: dto.message ?? null,
+        locale: dto.locale ?? Locale.ro,
         status: SubscriptionStatus.active,
         paymentStatus: PaymentStatus.pending,
         startsAt,
@@ -110,7 +129,7 @@ export class LeadsService {
         clientEmail: dto.email,
         phone: dto.phone ?? null,
         question: dto.question,
-        attachments: dto.attachments ?? [],
+        locale: dto.locale ?? Locale.ro,
         status: QuickQuestionStatus.open,
         paymentStatus: PaymentStatus.pending,
         dueAt,
@@ -120,7 +139,7 @@ export class LeadsService {
     await this.mail.sendLeadNotification({
       subject: 'Întrebare EXPRESS nouă',
       lines: [
-        `Întrebare EXPRESS nouă. Termen de răspuns: ${dueAt.toLocaleString('ro-RO')}.`,
+        `Întrebare EXPRESS nouă. Termen de răspuns: ${await this.inPracticeTime(dueAt)}.`,
         `Nume: ${dto.name}`,
         `Email: ${dto.email}`,
         `Telefon: ${dto.phone ?? '—'}`,
@@ -154,6 +173,7 @@ export class LeadsService {
         clientEmail: dto.email,
         phone: dto.phone ?? null,
         notes: dto.message ?? null,
+        locale: dto.locale ?? Locale.ro,
         status: DeliverableOrderStatus.new,
         paymentStatus: PaymentStatus.pending,
       },
@@ -184,17 +204,13 @@ export class LeadsService {
    * report success so the bot learns nothing.
    */
   async createContact(dto: ContactMessageDto): Promise<{ ok: true }> {
-    if (dto.company) {
-      this.logger.warn('Contact message dropped (honeypot tripped).');
-      return { ok: true };
-    }
-
     await this.prisma.contactMessage.create({
       data: {
         name: dto.name,
         email: dto.email,
         subject: dto.subject,
         message: dto.message,
+        locale: dto.locale ?? Locale.ro,
         status: ContactMessageStatus.new,
       },
     });

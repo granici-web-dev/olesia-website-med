@@ -1,6 +1,6 @@
 /**
  * Quick-question tickets — the "Întrebare EXPRESS" service (05, group B):
- * a written answer within ~1 working hour, with optional attachments.
+ * a written answer within ~1 working hour.
  *
  * The deadline is `dueAt`, computed by the API from the practice schedule at
  * the moment the question arrived (§11.5) — it is NOT derivable from
@@ -17,12 +17,6 @@ export type PaymentStatus = 'pending' | 'confirmed';
 /** Derived bucket: an open ticket past its deadline is `overdue`. */
 export type TicketBucket = 'open' | 'overdue' | 'answered';
 
-export interface Attachment {
-  id: string;
-  name: string;
-  sizeKb: number;
-}
-
 export interface Ticket {
   id: string;
   clientName: string;
@@ -30,7 +24,6 @@ export interface Ticket {
   /** Lead contact phone (public intake; absent for older records). */
   phone?: string | null;
   question: string;
-  attachments: Attachment[];
   status: TicketStatus;
   answer: string | null;
   answeredAt: string | null;
@@ -41,3 +34,13 @@ export interface Ticket {
 }
 
 export type StatusFilter = 'all' | TicketBucket;
+
+/**
+ * The result of answering: the ticket, plus whether the answer actually
+ * reached the patient. Saving and sending are two things, and with no SMTP
+ * only the first happens — the UI has to say which (audit A3, F2).
+ */
+export interface AnsweredTicket {
+  ticket: Ticket;
+  emailSent: boolean;
+}

@@ -15,7 +15,14 @@ import { Injectable, Logger } from '@nestjs/common';
  * become the reason a parent cannot send a medical question. Bad scores are
  * still rejected — only infrastructure failures pass through, and they are
  * logged.
+ *
+ * "Unreachable" includes slow. Node's `fetch` has no default timeout, so a
+ * hanging siteverify used to hold every request to all four public lead
+ * routes open indefinitely — fail-open in intent, hang in practice
+ * (audit A3, F11).
  */
+const VERIFY_TIMEOUT_MS = 3_000;
+
 @Injectable()
 export class CaptchaService {
   private readonly logger = new Logger(CaptchaService.name);
@@ -39,6 +46,7 @@ export class CaptchaService {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ secret: this.secret, response: token }),
+        signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
       });
       const data = (await res.json()) as {
         success?: boolean;
@@ -55,9 +63,12 @@ export class CaptchaService {
         return false;
       }
 
-      // A token minted for another form must not be replayed here.
-      if (data.action && data.action !== action) {
-        this.logger.warn(`captcha action mismatch: expected ${action}, got ${data.action}`);
+      // A token minted for another form must not be replayed here. A response
+      // with no action at all is treated as a mismatch rather than waved
+      // through: v3 always returns one, so its absence is not a normal case.
+      const claimed = data.action ?? '';
+      if (claimed !== action) {
+        this.logger.warn(`captcha action mismatch: expected ${action}, got ${claimed || '(none)'}`);
         return false;
       }
 

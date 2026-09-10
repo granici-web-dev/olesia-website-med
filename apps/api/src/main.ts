@@ -40,8 +40,41 @@ function requireJwtSecrets(): void {
   }
 }
 
+/**
+ * Variables that have no safe default, checked at boot rather than at the
+ * first request that needs them (audit A3, F5; PLAN.md 11d).
+ *
+ * Each of these used to fall back to something that looked like it worked:
+ * lead notifications went to a developer's personal Gmail, the captcha turned
+ * itself off, and private medical uploads landed in the container's working
+ * directory, where they vanish on the next deploy. All three are silent, and
+ * a silent wrong default in production is worse than a container that will
+ * not start.
+ */
+const REQUIRED_IN_PRODUCTION = [
+  'LEADS_NOTIFY_EMAIL',
+  'RECAPTCHA_SECRET',
+  'PRIVATE_UPLOADS_DIR',
+  'PUBLIC_API_URL',
+  'PUBLIC_SITE_URL',
+] as const;
+
+function requireProductionEnv(): void {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  const missing = REQUIRED_IN_PRODUCTION.filter((name) => !process.env[name]);
+  if (missing.length === 0) return;
+
+  Logger.error(
+    `Missing required production environment: ${missing.join(', ')}. ` +
+      'Each of these has no safe default — see docs/deployment.md. Set them and start again.',
+  );
+  process.exit(1);
+}
+
 async function bootstrap() {
   requireJwtSecrets();
+  requireProductionEnv();
 
   // `rawBody: true` preserves the unparsed request body (req.rawBody) so the
   // Calendly webhook can verify its HMAC signature against the exact bytes.

@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { AppointmentStatus } from '../../generated/prisma/enums';
-import { NotificationsService } from './notifications.service';
+import { PatientNotificationsService } from '../mail/patient-notifications.service';
 import { prepChecklist } from './prep.constants';
 
 const PREP_WINDOW_HOURS = 24;
@@ -20,6 +20,12 @@ const PREP_BATCH = 50;
  * a message that went out and then failed to stamp is one the next tick sends
  * again, and two instances running the same cron would both take the same
  * rows.
+ *
+ * With no transport the dispatch does not run at all. It used to claim the
+ * stamp and hand the row to a `logger.log`, so every appointment that ever
+ * passed through the window was permanently marked "prep sent" for a message
+ * nobody received — and on the day SMTP is configured, not one of them would
+ * have been picked up again (audit A3, F3).
  */
 @Injectable()
 export class PrepService {
@@ -27,7 +33,7 @@ export class PrepService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly notifications: NotificationsService,
+    private readonly notifications: PatientNotificationsService,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -36,7 +42,10 @@ export class PrepService {
   }
 
   /** Dispatch prep for all due consultations; safe to call manually. */
-  async runPrepDispatch(): Promise<{ dispatched: number }> {
+  async runPrepDispatch(): Promise<{ dispatched: number; skipped?: string }> {
+    if (!this.notifications.canSend) {
+      return { dispatched: 0, skipped: 'no_smtp' };
+    }
     const now = new Date();
     const until = new Date(now.getTime() + PREP_WINDOW_HOURS * 3_600_000);
 
@@ -60,19 +69,23 @@ export class PrepService {
       if (claimed.count === 0) continue;
 
       try {
-        await this.notifications.sendPrepInstructions({
-          to: appt.clientEmail,
-          clientName: appt.clientName,
-          serviceTitle: appt.service.titleRo,
-          startTime: appt.startTime,
-          videoUrl: appt.videoUrl,
-          checklist: prepChecklist(appt.service.code),
-        });
+        const { sent } = await this.notifications.prepInstructions(
+          { to: appt.clientEmail, locale: appt.locale },
+          {
+            clientName: appt.clientName,
+            serviceTitle: appt.service.titleRo,
+            startsAt: appt.startTime,
+            videoUrl: appt.videoUrl,
+            checklist: prepChecklist(appt.service.code),
+          },
+        );
+        if (!sent) throw new Error('not_delivered');
         dispatched++;
       } catch (err) {
         // Hand the row back so the next tick retries it, and keep going: one
         // undeliverable address must not cost every other patient their
-        // instructions.
+        // instructions. A stamp for a message that did not leave is worse
+        // than no stamp — it is the row never being tried again.
         await this.prisma.appointment.update({
           where: { id: appt.id },
           data: { prepSentAt: null },

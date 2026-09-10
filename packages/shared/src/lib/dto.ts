@@ -6,6 +6,7 @@ import {
   DeliverableProduct,
   MaterialAccess,
   MaterialFlag,
+  Locale,
   MediaEmbedProvider,
   MediaKind,
   PatientEntryType,
@@ -170,15 +171,27 @@ export interface QuickQuestionDto {
   clientEmail: string;
   phone: string | null;
   question: string;
-  attachments: string[];
   answer: string | null;
   status: QuickQuestionStatus;
   paymentStatus: PaymentStatus;
+  /** Which language to answer in. */
+  locale: Locale;
   /** 48h SLA deadline. */
   dueAt: string;
   answeredAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * The answer, plus whether it reached the patient.
+ *
+ * Separate from saving on purpose: with no SMTP the answer is stored and
+ * nothing leaves, and the back office has to say which of the two happened
+ * rather than claim both (audit A3, F2).
+ */
+export interface AnsweredQuickQuestionDto extends QuickQuestionDto {
+  emailSent: boolean;
 }
 
 // --- Blog ---

@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createTransport, type Transporter } from 'nodemailer';
 
+import { maskEmail } from '../common/mask-email';
+
 /** A notification email addressed to the practice inbox. */
 export interface LeadMail {
   subject: string;
@@ -13,26 +15,34 @@ export interface ClientMail extends LeadMail {
   to: string;
 }
 
-/** PII-safe recipient for logs (first char + domain). */
-function maskEmail(email: string): string {
-  const at = email.indexOf('@');
-  return at <= 0 ? '***' : `${email[0]}***${email.slice(at)}`;
+/**
+ * The transport's own error, as nodemailer reports it. `message` is not safe
+ * to log: an SMTP rejection quotes the envelope, so the recipient's address
+ * comes back inside it (audit A3, F14).
+ */
+function transportFailure(err: unknown): string {
+  const e = err as { code?: unknown; responseCode?: unknown } | null;
+  const code = typeof e?.code === 'string' ? e.code : 'unknown';
+  const responseCode =
+    typeof e?.responseCode === 'number' ? ` smtp=${e.responseCode}` : '';
+  return `code=${code}${responseCode}`;
 }
 
 /**
  * Outbound email. Provider-agnostic SMTP configured from env
  * (SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS, optional SMTP_FROM); the
- * destination inbox is LEADS_NOTIFY_EMAIL. When SMTP is not configured the
- * service degrades to log-only so the app runs without a mailer — drop the
- * env vars in and emails start flowing, no code change. Logs never include
- * names/emails/message bodies (GDPR).
+ * destination inbox is LEADS_NOTIFY_EMAIL, which has no default — it used to
+ * fall back to a developer's personal Gmail, so a deployment that forgot the
+ * variable sent every lead, medical questions included, to a private mailbox
+ * (audit A3, F5). In production `main.ts` refuses to start without it; in
+ * development its absence degrades to log-only, like a missing SMTP host.
+ * Logs never include names, addresses or message bodies (GDPR).
  */
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private readonly transport: Transporter | null;
-  private readonly to =
-    process.env.LEADS_NOTIFY_EMAIL ?? 'designer.nefele@gmail.com';
+  private readonly to = process.env.LEADS_NOTIFY_EMAIL ?? '';
   private readonly from =
     process.env.SMTP_FROM ?? process.env.SMTP_USER ?? 'no-reply@olesia.local';
 
@@ -51,16 +61,30 @@ export class MailService {
     } else {
       this.transport = null;
       this.logger.warn(
-        'SMTP not configured — lead emails are logged only (set SMTP_HOST/SMTP_USER/SMTP_PASS).',
+        'SMTP not configured — nothing is emailed, to the practice or to a patient (set SMTP_HOST/SMTP_USER/SMTP_PASS).',
+      );
+    }
+    if (!this.to) {
+      this.logger.warn(
+        'LEADS_NOTIFY_EMAIL is not set — lead notifications have nowhere to go and are logged only.',
       );
     }
   }
 
   /**
-   * Send to a patient (best-effort). Same log-only degradation as the practice
-   * notifications: with no SMTP the message is not delivered, and the caller
-   * has to have a second way to get it there — which is why every upload link
-   * is also copyable from the back office rather than being email-only.
+   * Whether a message can actually leave. Callers that would otherwise claim
+   * "sent" ask this first; the scheduled prep dispatch uses it to skip its
+   * work rather than stamp rows for messages nobody receives.
+   */
+  get isConfigured(): boolean {
+    return this.transport !== null;
+  }
+
+  /**
+   * Send to a patient (best-effort). With no SMTP the message is not
+   * delivered, and the caller has to have a second way to get it there —
+   * which is why every upload link is also copyable from the back office
+   * rather than being email-only.
    *
    * Returns whether it actually went out, so the caller can say so honestly.
    */
@@ -81,15 +105,15 @@ export class MailService {
       this.logger.log(`Client mail sent → ${maskEmail(mail.to)} · ${mail.subject}`);
       return true;
     } catch (err) {
-      this.logger.error(`Client email failed: ${String(err)}`);
+      this.logger.error(`Client email failed: ${transportFailure(err)}`);
       return false;
     }
   }
 
   /** Send a lead notification to the practice inbox (best-effort). */
   async sendLeadNotification(mail: LeadMail): Promise<void> {
-    if (!this.transport) {
-      this.logger.log(`[mail:log-only] lead → ${maskEmail(this.to)} · ${mail.subject}`);
+    if (!this.transport || !this.to) {
+      this.logger.log(`[mail:log-only] lead · ${mail.subject}`);
       return;
     }
     try {
@@ -102,7 +126,7 @@ export class MailService {
       this.logger.log(`Lead notification sent → ${maskEmail(this.to)} · ${mail.subject}`);
     } catch (err) {
       // A failed email must not fail the lead submission — the record is saved.
-      this.logger.error(`Lead email failed: ${String(err)}`);
+      this.logger.error(`Lead email failed: ${transportFailure(err)}`);
     }
   }
 }

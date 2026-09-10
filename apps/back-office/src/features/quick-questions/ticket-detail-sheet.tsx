@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CheckCircle2,
-  Download,
+  Copy,
   Loader2,
-  Lock,
   Mail,
-  Paperclip,
+  MailCheck,
+  MailX,
   Phone,
   RotateCcw,
   Send,
@@ -51,10 +51,6 @@ import type { Ticket } from '@/features/quick-questions/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 
 const t = ro.quickQuestions;
-
-function fileSize(kb: number): string {
-  return kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
-}
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -103,11 +99,21 @@ export function TicketDetailSheet({
     onError: () => toast.error(t.toast.error),
   });
 
+  /**
+   * Saving the answer and delivering it are two outcomes, and the doctor is
+   * told which happened. The toast used to say "sent to the client" for a
+   * write to a database column (audit A3, F2); with no SMTP nothing leaves,
+   * and she needs to know so she sends it herself.
+   */
+  const [lastDelivery, setLastDelivery] = React.useState<boolean | null>(null);
+
   const answerMutation = useMutation({
     mutationFn: ({ id, text }: { id: string; text: string }) =>
       answerTicket(id, text),
-    onSuccess: () => {
-      toast.success(t.toast.answerSent);
+    onSuccess: ({ emailSent }) => {
+      setLastDelivery(emailSent);
+      if (emailSent) toast.success(t.toast.answerSaved);
+      else toast.warning(t.toast.answerSavedNotSent);
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -183,40 +189,6 @@ export function TicketDetailSheet({
                 </p>
               </div>
 
-              {/* Attachments */}
-              <div className="space-y-2">
-                <SectionTitle>{t.detail.attachments}</SectionTitle>
-                {tk.attachments.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">—</p>
-                ) : (
-                  <>
-                    <ul className="space-y-1.5">
-                      {tk.attachments.map((a) => (
-                        <li key={a.id}>
-                          <button
-                            type="button"
-                            onClick={() => toast.info(t.toast.attachmentMock)}
-                            className="flex w-full items-center gap-2.5 rounded-md border px-3 py-2 text-left text-sm transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none"
-                          >
-                            <Paperclip className="size-4 shrink-0 text-muted-foreground" />
-                            <span className="min-w-0 flex-1 truncate font-medium">
-                              {a.name}
-                            </span>
-                            <span className="text-xs text-muted-foreground tabular-nums">
-                              {fileSize(a.sizeKb)}
-                            </span>
-                            <Download className="size-4 shrink-0 text-muted-foreground" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Lock className="size-3" />
-                      {t.detail.sensitive}
-                    </p>
-                  </>
-                )}
-              </div>
 
               <Separator />
 
@@ -232,6 +204,31 @@ export function TicketDetailSheet({
                       <CheckCircle2 className="size-3.5 text-success" />
                       {t.detail.answeredAt} {formatDateTime(tk.answeredAt)}
                     </p>
+                  )}
+                  {lastDelivery === true && (
+                    <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <MailCheck className="size-3.5 text-success" />
+                      {t.detail.emailSent}
+                    </p>
+                  )}
+                  {lastDelivery === false && (
+                    <div className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2.5">
+                      <p className="inline-flex items-start gap-1.5 text-xs">
+                        <MailX className="mt-px size-3.5 shrink-0" />
+                        {t.detail.emailNotSent}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(tk.answer ?? '');
+                          toast.success(t.toast.answerCopied);
+                        }}
+                      >
+                        <Copy />
+                        {t.detail.copyAnswer}
+                      </Button>
+                    </div>
                   )}
                 </div>
               ) : (

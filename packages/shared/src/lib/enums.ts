@@ -10,10 +10,19 @@ export enum Role {
   Editor = 'editor',
 }
 
-/** Supported content locales. `ro` is the default. */
+/**
+ * Supported locales. `ro` is the default and the fallback everywhere: an
+ * absent or unknown locale reads as Romanian rather than as nothing.
+ *
+ * `Ru` was missing here until 2026-09-10 — the enum predates the RU content
+ * fields (migration `20260727190927_content_ru_fields`) and nothing had used
+ * it since, so the gap went unnoticed until a lead needed to record which
+ * language to write back in.
+ */
 export enum Locale {
   Ro = 'ro',
   En = 'en',
+  Ru = 'ru',
 }
 
 /** Stable code identifying each service. */

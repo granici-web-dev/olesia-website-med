@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   ChevronRight,
   MessagesSquare,
-  Paperclip,
   RefreshCw,
   Search,
   SearchX,
@@ -218,12 +217,6 @@ export function QuickQuestionsPage() {
                     <p className="truncate text-sm text-muted-foreground">
                       {tk.question}
                     </p>
-                    {tk.attachments.length > 0 && (
-                      <span className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <Paperclip className="size-3" />
-                        {tk.attachments.length}
-                      </span>
-                    )}
                   </TableCell>
                   <TableCell className="align-top">
                     <DeadlineIndicator ticket={tk} />
