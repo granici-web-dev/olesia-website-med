@@ -575,7 +575,7 @@ HTTPS (callback банка проверить нельзя без него).
 | Проход | Команда и граница | Что обязательно проверить | Закрывает | Статус |
 |---|---|---|---|---|
 | A1 | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap | правда контента, см. 10a | 10a | `[x]` `3bb74a0` |
-| A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[ ]` |
+| A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[>]` аудит 2026-09-10, 15 находок, harden в работе |
 | A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[ ]` |
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[ ]` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[ ]` |
@@ -714,6 +714,19 @@ About и WorkingHours без уникального ключа и транзак
 шаблоны RO/EN/RU, без SMTP лог с маскированным адресом. Вебхук Calendly без окна
 реплея, неизвестный `event_type` только в лог: добавить окно 5 минут и запись в
 таблицу инцидентов или письмо врачу.
+
+Аудит A2 (2026-09-10, 15 находок, 3 high) добавил к этому шагу: перенос
+записи в Calendly приходит как cancel + create с новым URI, поэтому оплата,
+привязка к пациенту и план остаются на отменённой строке, а после чекаута
+`Payment.targetId` укажет в никуда; записи через Calendly никогда не получают
+`patientId`, поэтому GDPR-стирание их не видит; список записей содержит жалобу
+пациента (`reason`), email и ссылки-полномочия `cancelUrl`/`rescheduleUrl`,
+редактору контента этого видеть нельзя. Решения: контроллер записей целиком
+только `admin` (как пациенты и загрузки); перенос связывать через URI
+приглашённого и переносить оплату, пациента, план и `Payment.targetId` в одной
+транзакции; при бронировании искать пациента по email; неизвестный `event_type`
+это письмо врачу и `logger.error`; ручной `paymentStatus` решается в A8 вместе
+с чекаутом.
 
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
