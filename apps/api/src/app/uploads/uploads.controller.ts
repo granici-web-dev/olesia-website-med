@@ -1,13 +1,16 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Param,
   Post,
   Res,
   UploadedFile,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,7 +21,12 @@ import type { Response } from 'express';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
-import type { UploadedImage } from '../storage/storage.service';
+import {
+  PATIENT_UPLOAD_MAX_BYTES,
+  type UploadedImage,
+} from '../storage/storage.service';
+import { uploadLimits } from '../storage/upload-limits';
+import { FileTooLargeFilter } from './file-too-large.filter';
 import { UploadsService } from './uploads.service';
 
 /**
@@ -28,6 +36,10 @@ import { UploadsService } from './uploads.service';
  * Rate limited harder than the rest of the public API. Nobody legitimately
  * touches this more than a handful of times in a minute, and the endpoints
  * both write files and confirm whether a token is real.
+ *
+ * Every answer is `no-store`: the token sits in the path, so the cache key of
+ * any shared proxy in front of us would be the credential itself, and the body
+ * behind it is a list of somebody's medical files.
  */
 @ApiTags('uploads')
 @Throttle({ default: { ttl: 60_000, limit: 20 } })
@@ -37,31 +49,43 @@ export class UploadsPublicController {
 
   @Public()
   @Get(':token')
+  @Header('Cache-Control', 'no-store')
   session(@Param('token') token: string) {
     return this.uploads.session(token);
   }
 
   @Public()
   @Post(':token/consent')
+  @Header('Cache-Control', 'no-store')
   consent(@Param('token') token: string) {
     return this.uploads.acceptConsent(token);
   }
 
   @Public()
   @Post(':token/documents')
+  @Header('Cache-Control', 'no-store')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', uploadLimits(PATIENT_UPLOAD_MAX_BYTES)),
+  )
+  @UseFilters(FileTooLargeFilter)
   add(
     @Param('token') token: string,
     @UploadedFile() file: UploadedImage | undefined,
-    @Body('note') note?: string,
+    // Repeat the part and multer hands over an array, not a string; there is
+    // no DTO on a multipart route to catch that before it reaches the service.
+    @Body('note') note?: unknown,
   ) {
+    if (note !== undefined && typeof note !== 'string') {
+      throw new BadRequestException('invalid_note');
+    }
     return this.uploads.addDocument(token, file, note);
   }
 
   /** The patient removing a file they sent by mistake. */
   @Public()
   @Delete(':token/documents/:documentId')
+  @Header('Cache-Control', 'no-store')
   remove(
     @Param('token') token: string,
     @Param('documentId') documentId: string,
@@ -70,10 +94,16 @@ export class UploadsPublicController {
   }
 }
 
-/** The staff half: issue, send, read and erase. */
+/**
+ * The staff half: issue, send, read and erase.
+ *
+ * `admin` only, deliberately narrower than the content modules: `editor` is a
+ * content role and this route streams patients' analyses. Temporary until the
+ * client answers who gets which account — see PLAN.md, "Роли в бэк-офисе".
+ */
 @ApiTags('uploads')
 @ApiBearerAuth()
-@Roles(Role.admin, Role.editor)
+@Roles(Role.admin)
 @Controller('upload-links')
 export class UploadLinksController {
   constructor(private readonly uploads: UploadsService) {}

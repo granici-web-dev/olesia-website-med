@@ -16,7 +16,12 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
-import { StorageService, type UploadedImage } from '../storage/storage.service';
+import {
+  StorageService,
+  VIDEO_MAX_BYTES,
+  type UploadedImage,
+} from '../storage/storage.service';
+import { uploadLimits } from '../storage/upload-limits';
 import { SiteMediaService } from './site-media.service';
 import { SetSiteMediaDto } from './dto/site-media.dto';
 
@@ -46,7 +51,7 @@ export class SiteMediaController {
   @Roles(Role.admin, Role.editor)
   @Post('video')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(VIDEO_MAX_BYTES)))
   uploadVideo(@UploadedFile() file: UploadedImage) {
     return this.storage
       .saveVideo(file)

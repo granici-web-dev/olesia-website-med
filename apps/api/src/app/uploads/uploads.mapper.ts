@@ -38,6 +38,7 @@ export function toUploadSessionDto(
     greetingName: firstName(link.clientName),
     expiresAt: link.expiresAt.toISOString(),
     consentAt: link.consentAt ? link.consentAt.toISOString() : null,
+    consentVersion: link.consentVersion,
     documents: link.documents.map(toUploadedDocumentDto),
     maxFileBytes: PATIENT_UPLOAD_MAX_BYTES,
     maxFiles: UPLOAD_MAX_FILES,

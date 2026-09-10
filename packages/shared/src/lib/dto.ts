@@ -301,6 +301,11 @@ export interface UploadSessionDto {
   expiresAt: string;
   /** Null until the visitor accepts the consent text. */
   consentAt: string | null;
+  /**
+   * Which wording was accepted (`CONSENT_VERSION`). The page compares it with
+   * the version it is showing: a reworded consent has to be agreed to again.
+   */
+  consentVersion: string | null;
   documents: UploadedDocumentDto[];
   /** Server-enforced limits, so the page can say them before a failed upload. */
   maxFileBytes: number;

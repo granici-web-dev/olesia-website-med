@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
 import {
   DeliverableOrderStatus,
@@ -17,7 +18,10 @@ import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
  */
 @Injectable()
 export class DeliverableOrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async findAll(
     query: PaginationQueryDto,
@@ -75,7 +79,21 @@ export class DeliverableOrdersService {
 
   async remove(id: string): Promise<void> {
     await this.getOrThrow(id);
+
+    // The order's upload link and its documents go with it (schema cascade),
+    // so collect the medical files first: once the rows are gone nothing points
+    // at the bytes, and special-category data nobody can find is data nobody
+    // can delete.
+    const documents = await this.prisma.uploadedDocument.findMany({
+      where: { link: { orderId: id } },
+      select: { fileKey: true },
+    });
+
     await this.prisma.deliverableOrder.delete({ where: { id } });
+
+    await Promise.all(
+      documents.map((d) => this.storage.deletePrivateDocument(d.fileKey)),
+    );
   }
 
   private async getOrThrow(id: string) {

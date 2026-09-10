@@ -10,6 +10,7 @@ import {
   type UploadSession,
 } from '@/lib/uploads';
 import { btnDark, underline } from '@/components/ui/cta';
+import { CONSENT_VERSION, PATIENT_CONSENT_TEXT } from '@olesia/shared';
 
 /**
  * The patient's side of §11.14 — send analyses and investigations before the
@@ -77,11 +78,10 @@ const T = {
     en: 'Your consent',
     ru: 'Ваше согласие',
   },
-  consentText: {
-    ro: 'Sunt de acord ca documentele medicale trimise aici să fie stocate și consultate de medic pentru pregătirea consultației mele. Pot cere oricând ștergerea lor.',
-    en: 'I agree that the medical documents I send here are stored and read by the doctor in order to prepare my consultation. I can ask for them to be deleted at any time.',
-    ru: 'Я согласен(на), что присланные здесь медицинские документы будут сохранены и просмотрены врачом для подготовки моей консультации. Я могу в любой момент попросить их удалить.',
-  },
+  // The wording itself comes from `@olesia/shared`, alongside the version the
+  // API records against the link: what somebody agreed to and the identifier
+  // for it have to move together.
+  consentText: PATIENT_CONSENT_TEXT,
   consentCta: {
     ro: 'Sunt de acord și continui',
     en: 'I agree, continue',
@@ -261,6 +261,10 @@ export function PatientUpload({
   }
 
   const remaining = session.maxFiles - session.documents.length;
+  // Consent to an earlier wording does not carry over — the API refuses the
+  // upload either way, so the page asks again rather than failing at the file.
+  const consented =
+    session.consentAt !== null && session.consentVersion === CONSENT_VERSION;
   // ru-RU long dates end in "г." — appending our own full stop would render
   // "2026 г..". Strip a trailing one and let the sentence supply it.
   const expires = new Intl.DateTimeFormat(
@@ -293,7 +297,7 @@ export function PatientUpload({
           </p>
 
           {/* Consent gate — the file picker does not exist above this line. */}
-          {!session.consentAt ? (
+          {!consented ? (
             <div className="mt-10 border-t border-[var(--rule)] pt-8">
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
                 {t(T.consentTitle)}

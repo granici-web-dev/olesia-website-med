@@ -25,6 +25,8 @@ export interface UploadSession {
   greetingName: string;
   expiresAt: string;
   consentAt: string | null;
+  /** Which wording was accepted; older than ours means ask again. */
+  consentVersion: string | null;
   documents: UploadedDocument[];
   maxFileBytes: number;
   maxFiles: number;

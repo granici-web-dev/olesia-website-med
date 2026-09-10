@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import sharp from 'sharp';
@@ -10,6 +10,11 @@ import {
   STORAGE_DIR,
   STORAGE_URL_PREFIX,
 } from './storage.constants';
+import {
+  SIGNATURE_EXT,
+  detectSignature,
+  type FileSignature,
+} from './file-signature';
 
 /** A multer in-memory file (FileInterceptor default storage). */
 export interface UploadedImage {
@@ -29,12 +34,20 @@ export interface StoredImage {
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
+/**
+ * The caps, exported because every multipart route has to repeat its own on
+ * multer's `limits`: the check below runs after the whole part is already in
+ * memory, which is too late to be the only one.
+ */
+export const IMAGE_MAX_BYTES = MAX_BYTES;
+
 /** Output tuning: cap the longest side and re-encode as WebP. */
 const MAX_DIMENSION = 1600;
 const WEBP_QUALITY = 80;
 
 /** Videos (site media): stored as-is, no transcoding — see `saveVideo`. */
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+export const VIDEO_MAX_BYTES = MAX_VIDEO_BYTES;
 const VIDEO_EXT: Record<string, string> = {
   'video/mp4': 'mp4',
   'video/webm': 'webm',
@@ -42,6 +55,7 @@ const VIDEO_EXT: Record<string, string> = {
 
 /** Documents (written plans): larger cap, office/PDF types, stored as-is. */
 const MAX_DOC_BYTES = 20 * 1024 * 1024;
+export const DOCUMENT_MAX_BYTES = MAX_DOC_BYTES;
 const DOC_EXT: Record<string, string> = {
   'application/pdf': 'pdf',
   'application/msword': 'doc',
@@ -61,17 +75,26 @@ const DOC_EXT: Record<string, string> = {
  * wrong thing to do to a photograph of small print in a lab table.
  */
 const MAX_PATIENT_UPLOAD_BYTES = 15 * 1024 * 1024;
-const PATIENT_UPLOAD_EXT: Record<string, string> = {
-  ...DOC_EXT,
-  'image/jpeg': 'jpg',
+
+/**
+ * What a patient may send, as the signature each declared type has to actually
+ * have. The declared MIME picks the row; the file's own first bytes have to
+ * agree with it, and the extension on disk comes from the bytes.
+ */
+const PATIENT_UPLOAD_SIGNATURE: Record<string, FileSignature> = {
+  'application/pdf': 'pdf',
+  'application/msword': 'ole',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+    'zip',
+  'image/jpeg': 'jpeg',
   'image/png': 'png',
   'image/webp': 'webp',
-  'image/heic': 'heic',
+  'image/heic': 'heif',
   'image/heif': 'heif',
 };
 
 /** MIME types a patient may send — surfaced to the upload page's `accept`. */
-export const PATIENT_UPLOAD_MIME = Object.keys(PATIENT_UPLOAD_EXT);
+export const PATIENT_UPLOAD_MIME = Object.keys(PATIENT_UPLOAD_SIGNATURE);
 export const PATIENT_UPLOAD_MAX_BYTES = MAX_PATIENT_UPLOAD_BYTES;
 
 /**
@@ -221,23 +244,35 @@ export class StorageService {
    * a wider type allowlist and a smaller cap, because these arrive over mobile
    * data from a phone camera.
    *
-   * ⚠ No malware scanning: there is no scanner in this stack yet. The
-   * mitigations that do exist are that the file is never executed, never served
-   * from the public static route, and only ever streamed back to an
-   * authenticated staff download. Wire ClamAV (or the host's equivalent) in
-   * here when the API gets its production home — see docs, task #20.
+   * The declared type is checked against the file's own first bytes
+   * (`detectSignature`), so a `.pdf` here is a PDF.
+   *
+   * ⚠ Still no malware scanning: a real PDF can carry a real exploit and there
+   * is no scanner in this stack yet. The mitigations that do exist are that the
+   * file is never executed, never served from the public static route, and only
+   * ever streamed back to an authenticated staff download. Wire ClamAV (or the
+   * host's equivalent) in here when the API gets its production home — see
+   * docs, task #20.
    */
   async savePatientUpload(
     file: UploadedImage | undefined,
   ): Promise<{ key: string; ext: string }> {
     if (!file) throw new BadRequestException('No file uploaded.');
-    const ext = PATIENT_UPLOAD_EXT[file.mimetype];
-    if (!ext) {
+    const declared = PATIENT_UPLOAD_SIGNATURE[file.mimetype];
+    if (!declared) {
       throw new BadRequestException('unsupported_file_type');
     }
     if (file.size > MAX_PATIENT_UPLOAD_BYTES) {
       throw new BadRequestException('file_too_large');
     }
+    // Same answer for "type we do not take" and "bytes that are not what the
+    // header claims": the sender learns nothing from the difference, and the
+    // page has one thing to say either way.
+    const actual = detectSignature(file.buffer);
+    if (actual !== declared) {
+      throw new BadRequestException('unsupported_file_type');
+    }
+    const ext = SIGNATURE_EXT[actual];
     const key = `${randomUUID()}.${ext}`;
     await mkdir(PRIVATE_STORAGE_DIR, { recursive: true });
     await writeFile(join(PRIVATE_STORAGE_DIR, key), file.buffer);
@@ -261,6 +296,40 @@ export class StorageService {
       // Never let a stray file block erasure; surface for diagnostics only.
       this.logger.warn(`Private document delete failed: ${String(err)}`);
     }
+  }
+
+  /**
+   * Delete private files that no row points at any more, and report what went.
+   *
+   * The caller supplies every referenced key, not a table name: this directory
+   * holds patient uploads, the doctor's own attachments and treatment plans
+   * side by side, so a sweep that knew about one of them would erase the other
+   * two. `minimumAgeMs` keeps a file that was written seconds ago, whose row is
+   * still being inserted, out of the sweep's reach.
+   */
+  async deleteUnreferencedPrivateFiles(
+    referencedKeys: Set<string>,
+    minimumAgeMs: number,
+  ): Promise<string[]> {
+    let names: string[];
+    try {
+      names = await readdir(PRIVATE_STORAGE_DIR);
+    } catch {
+      // Nothing has been stored yet, so there is nothing to sweep.
+      return [];
+    }
+
+    const removed: string[] = [];
+    const now = Date.now();
+    for (const name of names) {
+      if (referencedKeys.has(name)) continue;
+      const path = join(PRIVATE_STORAGE_DIR, name);
+      const info = await stat(path);
+      if (!info.isFile() || now - info.mtimeMs < minimumAgeMs) continue;
+      await rm(path, { force: true });
+      removed.push(name);
+    }
+    return removed;
   }
 
   /**

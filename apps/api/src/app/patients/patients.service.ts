@@ -142,11 +142,14 @@ export class PatientsService {
    *   private document files those entries point to;
    * - anonymizes the PII on linked leads (name/email + free-text medical
    *   fields) and detaches them, keeping only non-identifying business data;
-   * - deletes the public files attached to linked quick questions.
+   * - deletes the public files attached to linked quick questions;
+   * - deletes the patient upload links and everything sent through them, rows
+   *   and bytes. A link carries the name, email and a working token of its own,
+   *   so anonymizing the appointment behind it would leave all three standing.
    * The DB mutations run in one transaction; disk cleanup is best-effort.
    */
   async remove(id: string): Promise<void> {
-    await this.getOrThrow(id);
+    const patient = await this.getOrThrow(id);
 
     // Capture file references BEFORE the cascade/anonymization removes them.
     const [docs, qqs, plans] = await Promise.all([
@@ -168,7 +171,24 @@ export class PatientsService {
       }),
     ]);
 
+    // Upload links reach the patient two ways: through the appointment they
+    // were issued for, and — for a group-C order, which carries no patient id —
+    // through the email the order was placed with.
+    const links = await this.prisma.uploadLink.findMany({
+      where: {
+        OR: [
+          { appointment: { patientId: id } },
+          { order: { clientEmail: patient.email } },
+        ],
+      },
+      select: { id: true, documents: { select: { fileKey: true } } },
+    });
+
     await this.prisma.$transaction([
+      // Documents cascade with their link.
+      this.prisma.uploadLink.deleteMany({
+        where: { id: { in: links.map((l) => l.id) } },
+      }),
       this.prisma.appointment.updateMany({
         where: { patientId: id },
         data: {
@@ -209,6 +229,9 @@ export class PatientsService {
     await Promise.all([
       ...docs.map((d) => this.storage.deletePrivateDocument(d.fileUrl!)),
       ...plans.map((p) => this.storage.deletePrivateDocument(p.planFileKey!)),
+      ...links
+        .flatMap((l) => l.documents)
+        .map((d) => this.storage.deletePrivateDocument(d.fileKey)),
       ...qqs
         .flatMap((q) => q.attachments)
         .map((url) => this.storage.deletePublicFile(url)),

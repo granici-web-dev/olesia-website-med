@@ -27,9 +27,6 @@ export const UPLOAD_RETENTION_DAYS = envInt('MEDICAL_UPLOAD_RETENTION_DAYS', 180
 /** Cap per link. Enough for a full set of analyses, not an upload host. */
 export const UPLOAD_MAX_FILES = envInt('UPLOAD_MAX_FILES', 15);
 
-/**
- * The consent wording the patient agrees to, versioned. Stored per link so a
- * later rewording cannot retroactively change what somebody consented to. The
- * text itself lives on the public page (trilingual); this is the identifier.
- */
-export const CONSENT_VERSION = '2026-08-04';
+// The consent wording and its version live in `@olesia/shared`
+// (`patient-consent.ts`): the API records the version, the public page renders
+// the text, and a version that could drift from its text would record nothing.

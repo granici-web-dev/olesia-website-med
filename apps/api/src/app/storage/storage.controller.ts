@@ -10,10 +10,12 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
 import {
+  IMAGE_MAX_BYTES,
   StorageService,
   type StoredImage,
   type UploadedImage,
 } from './storage.service';
+import { uploadLimits } from './upload-limits';
 
 /** Image uploads for content pages — authenticated staff only. */
 @ApiTags('storage')
@@ -25,7 +27,7 @@ export class StorageController {
   @Post('upload')
   @Roles(Role.admin, Role.editor)
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(IMAGE_MAX_BYTES)))
   upload(@UploadedFile() file: UploadedImage): Promise<StoredImage> {
     return this.storage.saveImage(file);
   }

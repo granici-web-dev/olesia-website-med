@@ -16,7 +16,12 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
-import { StorageService, type UploadedImage } from '../storage/storage.service';
+import {
+  DOCUMENT_MAX_BYTES,
+  StorageService,
+  type UploadedImage,
+} from '../storage/storage.service';
+import { uploadLimits } from '../storage/upload-limits';
 import { MaterialsService } from './materials.service';
 import {
   CreateMaterialCategoryDto,
@@ -67,7 +72,7 @@ export class MaterialsController {
   @Roles(Role.admin, Role.editor)
   @Post('file')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(DOCUMENT_MAX_BYTES)))
   uploadFile(@UploadedFile() file: UploadedImage) {
     return this.storage
       .saveDocument(file)

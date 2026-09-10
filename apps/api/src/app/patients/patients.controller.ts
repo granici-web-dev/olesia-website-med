@@ -18,7 +18,11 @@ import type { Response } from 'express';
 
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
-import { type UploadedImage } from '../storage/storage.service';
+import {
+  DOCUMENT_MAX_BYTES,
+  type UploadedImage,
+} from '../storage/storage.service';
+import { uploadLimits } from '../storage/upload-limits';
 import { PatientsService } from './patients.service';
 import {
   CreatePatientDto,
@@ -28,10 +32,16 @@ import {
 import { CreateEntryDto, UpdateEntryDto } from './dto/entry.dto';
 import { FromLeadDto } from './dto/from-lead.dto';
 
-/** Patients / medical records (module_patients.md). Staff-only. */
+/**
+ * Patients / medical records (module_patients.md). Staff-only.
+ *
+ * `admin` rather than the content modules' `admin | editor`: this is the
+ * medical record. Temporary until the client answers who gets which account —
+ * see PLAN.md, "Роли в бэк-офисе".
+ */
 @ApiTags('patients')
 @ApiBearerAuth()
-@Roles(Role.admin, Role.editor)
+@Roles(Role.admin)
 @Controller('patients')
 export class PatientsController {
   constructor(private readonly patients: PatientsService) {}
@@ -96,7 +106,7 @@ export class PatientsController {
   /** Upload a private medical document (PDF/DOC/DOCX). */
   @Post(':id/documents')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', uploadLimits(DOCUMENT_MAX_BYTES)))
   addDocument(
     @Param('id') id: string,
     @UploadedFile() file: UploadedImage | undefined,

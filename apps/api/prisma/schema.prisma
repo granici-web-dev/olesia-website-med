@@ -654,6 +654,14 @@ model WorkingHours {
 model UploadLink {
   id     String           @id @default(uuid())
   /// The URL is the only credential. High-entropy, opaque, single-purpose.
+  ///
+  /// Stored in the clear, deliberately (audit 2026-09-10, finding 7): the back
+  /// office has to be able to hand the doctor the same link again days later,
+  /// and a hash cannot do that. What the token opens is narrow — see your own
+  /// filenames, add a file, delete one — and never the bytes of a stored
+  /// document. Revisit when backups go off-site: that is the point at which a
+  /// leaked dump becomes the likelier threat, and the answer there is an
+  /// encrypted dump as much as a hashed column.
   token  String           @unique
   target UploadLinkTarget
 

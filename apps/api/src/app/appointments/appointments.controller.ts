@@ -16,7 +16,11 @@ import type { Response } from 'express';
 
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
-import { type UploadedImage } from '../storage/storage.service';
+import {
+  DOCUMENT_MAX_BYTES,
+  type UploadedImage,
+} from '../storage/storage.service';
+import { uploadLimits } from '../storage/upload-limits';
 import { AppointmentsService } from './appointments.service';
 import { CalendlySyncService } from './calendly-sync.service';
 import { CalendlyService } from './calendly.service';
@@ -85,7 +89,11 @@ export class AppointmentsController {
   /** Save the written plan (text required) + an optional private attachment. */
   @Post(':id/plan')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  // `planText` is the doctor's written plan, up to 20 000 characters by its
+  // DTO, so this route needs a field ceiling that fits it in UTF-8.
+  @UseInterceptors(
+    FileInterceptor('file', uploadLimits(DOCUMENT_MAX_BYTES, 80_000)),
+  )
   uploadPlan(
     @Param('id') id: string,
     @Body() dto: SavePlanDto,
