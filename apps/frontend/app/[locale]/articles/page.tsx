@@ -6,12 +6,7 @@ import {
   type BlogPostItem,
   type BlogCategory,
 } from '@/components/sections/BlogList';
-import {
-  PLACEHOLDER_POSTS,
-  PLACEHOLDER_CATEGORIES as CATEGORIES,
-  type Bi,
-} from '@/lib/placeholder-posts';
-import { AGE_GROUPS } from '@/lib/age-taxonomy';
+import { AGE_GROUPS, type Bi } from '@/lib/age-taxonomy';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
 
 export const revalidate = 60;
@@ -20,12 +15,10 @@ export const revalidate = 60;
    Blog — the site's SEO engine. Top of funnel: organic traffic → trust → soft
    conversion into services. Health content for children is YMYL, so trust
    signals matter (author with credentials, dates, disclaimer — these live on
-   the article page). This listing is API-driven (`/blog/published`); when the
-   API has no posts yet it falls back to local placeholder posts so the design
-   is reviewable. The category filter doubles as SEO clusters. The empty state
-   is built in (pass no posts to see it). Bilingual (RO default · EN).
-   ⚠ Placeholder posts have no real article pages — their links 404 until real
-   posts exist (back office, later).
+   the article page). `/blog/published` is the only source: an article carries
+   the doctor's byline, so nothing is listed here that she has not written
+   (`docs/shape-no-invented-content.md`). With no posts the page says so, in
+   all three languages. The category filter doubles as SEO clusters.
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -49,9 +42,6 @@ export async function generateMetadata({
       : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru. Informații în care poți avea încredere.',
   };
 }
-
-/* Categories + placeholder posts now live in lib/placeholder-posts.ts — the
-   single source shared with the article page, so listing links never 404. */
 
 export default async function ArticlesPage({
   params,
@@ -78,63 +68,48 @@ export default async function ArticlesPage({
     [fmtDate(dateIso), minLabel(minutes)].filter(Boolean).join(' · ');
   const href = (slug: string) => `/${locale}/articles/${slug}`;
 
-  let live: PostDto[] = [];
-  try {
-    live = await api.posts();
-  } catch {
-    live = [];
-  }
-  // ⚠ Review mode: prefer local placeholders so the full listing design (filter
-  // + grid) is visible regardless of how many posts the API has. Flip USE_LIVE
-  // to true (or just delete the placeholders) once the blog has real content.
-  const USE_LIVE = false;
-  const usingLive = USE_LIVE && live.length > 0;
+  const published: PostDto[] = await api.posts();
 
-  // Build the listing from live posts, else from placeholders (for review).
-  const items: BlogPostItem[] = usingLive
-    ? live.map((p) => ({
-        slug: p.slug,
-        categoryKey: p.categories[0]?.slug ?? 'all',
-        categoryLabel: p.categories[0]
-          ? loc(locale, p.categories[0].nameRo, p.categories[0].nameEn, p.categories[0].nameRu)
-          : '',
-        ageKeys: p.ageKeys,
-        title: loc(locale, p.titleRo, p.titleEn, p.titleRu),
-        excerpt: loc(locale, p.excerptRo ?? '', p.excerptEn, p.excerptRu),
-        meta: metaLine(
-          p.publishedAt,
-          readMin(loc(locale, p.contentRo, p.contentEn, p.contentRu)),
-        ),
-        coverUrl: p.coverImageUrl,
-        href: href(p.slug),
-      }))
-    : PLACEHOLDER_POSTS.map((p) => ({
-        slug: p.slug,
-        categoryKey: p.category,
-        categoryLabel: lc(CATEGORIES.find((c) => c.key === p.category) ?? { ro: '', en: '', ru: '' }),
-        ageKeys: p.ageKeys,
-        title: lc(p.title),
-        excerpt: lc(p.excerpt),
-        meta: metaLine(p.date, p.minutes),
-        coverUrl: null,
-        href: href(p.slug),
-      }));
+  const items: BlogPostItem[] = published.map((p) => ({
+    slug: p.slug,
+    categoryKey: p.categories[0]?.slug ?? 'all',
+    categoryLabel: p.categories[0]
+      ? loc(locale, p.categories[0].nameRo, p.categories[0].nameEn, p.categories[0].nameRu)
+      : '',
+    ageKeys: p.ageKeys,
+    title: loc(locale, p.titleRo, p.titleEn, p.titleRu),
+    excerpt: loc(locale, p.excerptRo ?? '', p.excerptEn, p.excerptRu),
+    meta: metaLine(
+      p.publishedAt,
+      readMin(loc(locale, p.contentRo, p.contentEn, p.contentRu)),
+    ),
+    coverUrl: p.coverImageUrl,
+    href: href(p.slug),
+  }));
 
-  // Categories present among the filterable posts (rest — the featured post is
-  // shown separately, so a category whose only post is featured gets no chip).
-  const presentKeys = new Set(items.slice(1).map((i) => i.categoryKey));
-  const categories: BlogCategory[] = usingLive
-    ? Array.from(
-        new Map(
-          live
-            .flatMap((p) => p.categories)
-            .map((c) => [
-              c.slug,
-              { key: c.slug, label: loc(locale, c.nameRo, c.nameEn, c.nameRu) },
-            ]),
-        ).values(),
-      )
-    : CATEGORIES.filter((c) => presentKeys.has(c.key)).map((c) => ({ key: c.key, label: lc(c) }));
+  const categories: BlogCategory[] = Array.from(
+    new Map(
+      published
+        .flatMap((p) => p.categories)
+        .map((c) => [
+          c.slug,
+          { key: c.slug, label: loc(locale, c.nameRo, c.nameEn, c.nameRu) },
+        ]),
+    ).values(),
+  );
+
+  // Both BlogList calls take the same empty-state copy: the second only ever
+  // sees a non-empty list, but the labels are part of its contract.
+  const emptyState = {
+    emptyTitle: ru ? 'Первые статьи скоро появятся' : en ? 'First articles are coming soon' : 'Primele articole vin în curând',
+    emptyBody: ru
+      ? 'Мы готовим первые статьи. А пока можно задать вопрос врачу напрямую.'
+      : en
+      ? 'We’re working on the first articles. In the meantime, you can ask the doctor your question directly.'
+      : 'Lucrăm la primele articole. Între timp, dacă ai o întrebare, o poți adresa direct medicului.',
+    emptyCta: ru ? 'Спросить врача' : en ? 'Ask the doctor' : 'Întreabă medicul',
+    emptyCtaHref: `/${locale}/quick-question`,
+  };
 
   const featured = items[0];
   const rest = items.slice(1);
@@ -196,14 +171,7 @@ export default async function ArticlesPage({
             categories={[]}
             labels={{
               all: ru ? 'Все' : en ? 'All' : 'Toate',
-              emptyTitle: ru ? 'Первые статьи скоро появятся' : en ? 'First articles are coming soon' : 'Primele articole vin în curând',
-              emptyBody: ru
-                ? 'Мы готовим первые статьи. А пока можно задать вопрос врачу напрямую.'
-                : en
-                ? 'We’re working on the first articles. In the meantime, you can ask the doctor your question directly.'
-                : 'Lucrăm la primele articole. Între timp, dacă ai o întrebare, o poți adresa direct medicului.',
-              emptyCta: ru ? 'Спросить врача' : en ? 'Ask the doctor' : 'Întreabă medicul',
-              emptyCtaHref: `/${locale}/quick-question`,
+              ...emptyState,
             }}
           />
         </section>
@@ -297,10 +265,7 @@ export default async function ArticlesPage({
                     : en
                       ? 'No articles match these filters.'
                       : 'Niciun articol pentru filtrele selectate.',
-                  emptyTitle: '',
-                  emptyBody: '',
-                  emptyCta: '',
-                  emptyCtaHref: '',
+                  ...emptyState,
                 }}
               />
             </div>

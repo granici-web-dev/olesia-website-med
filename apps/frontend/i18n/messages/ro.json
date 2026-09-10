@@ -23,11 +23,6 @@
       "sub": "Pediatrie și nutriție de calitate, fără să ieși din casă. Toate consultațiile se desfășoară online, iar planul scris ajunge la tine în 24 de ore.",
       "ctaBook": "Programează consultație",
       "ctaHow": "Cum funcționează",
-      "stats": {
-        "experience": { "value": "12+", "label": "Ani practică clinică" },
-        "specializations": { "value": "2", "label": "Specializări · Pediatrie & Nutriție" },
-        "families": { "value": "1.400+", "label": "Familii consultate" }
-      },
       "photoName": "Dr. Olesea Jalba",
       "photoLocation": "Online · Oriunde"
     },
@@ -104,7 +99,6 @@
     "resources": {
       "articles": "Articole",
       "guides": "Bibliotecă digitală",
-      "menus": "Meniuri săptămânale",
       "media": "Apariții media",
       "faq": "FAQ"
     },

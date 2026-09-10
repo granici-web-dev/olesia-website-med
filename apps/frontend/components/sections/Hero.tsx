@@ -1,18 +1,27 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { HeroVideo } from './HeroVideo';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import { btnDark, btnOutline } from '@/components/ui/cta';
 import { siteMedia } from '@/lib/site-media';
+import { api, loc } from '@/lib/api';
 import styles from './Hero.module.css';
 
-const STAT_KEYS = ['experience', 'specializations', 'families'] as const;
+/** The row has the portrait beside it, so it holds three at most. */
+const MAX_STATS = 3;
 
 export async function Hero() {
-  const [t, media] = await Promise.all([
+  const [locale, t, media, about] = await Promise.all([
+    getLocale(),
     getTranslations('home.hero'),
     siteMedia(),
+    api.about(),
   ]);
+
+  // Numbers about the practice are the client's to state: they appear once she
+  // enters them in the back office, and until then the band is not there at all
+  // (`docs/shape-no-invented-content.md`).
+  const stats = (about?.stats ?? []).slice(0, MAX_STATS);
 
   return (
     <section className={styles.section}>
@@ -44,14 +53,18 @@ export async function Hero() {
           </a>
         </div>
 
-        <div className={styles.stats}>
-          {STAT_KEYS.map((key) => (
-            <div key={key}>
-              <div className={styles.statNumber}>{t(`stats.${key}.value`)}</div>
-              <div className={styles.statLabel}>{t(`stats.${key}.label`)}</div>
-            </div>
-          ))}
-        </div>
+        {stats.length > 0 && (
+          <div className={styles.stats}>
+            {stats.map((stat) => (
+              <div key={stat.value + stat.labelRo}>
+                <div className={styles.statNumber}>{stat.value}</div>
+                <div className={styles.statLabel}>
+                  {loc(locale, stat.labelRo, stat.labelEn, stat.labelRu)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.photoWrapper}>

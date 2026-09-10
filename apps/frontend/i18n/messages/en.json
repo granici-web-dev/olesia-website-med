@@ -23,11 +23,6 @@
       "sub": "Quality pediatrics and nutrition without leaving home. All consultations are held online, and the written plan arrives within 24 hours.",
       "ctaBook": "Book a consultation",
       "ctaHow": "How it works",
-      "stats": {
-        "experience": { "value": "12+", "label": "Years of clinical practice" },
-        "specializations": { "value": "2", "label": "Specializations · Pediatrics & Nutrition" },
-        "families": { "value": "1,400+", "label": "Families consulted" }
-      },
       "photoName": "Dr. Olesea Jalba",
       "photoLocation": "Online · Anywhere"
     },
@@ -104,7 +99,6 @@
     "resources": {
       "articles": "Articles",
       "guides": "Digital library",
-      "menus": "Weekly menus",
       "media": "In the media",
       "faq": "FAQ"
     },

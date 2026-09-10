@@ -20,7 +20,6 @@ const SERVICE_LINKS = [
 const RESOURCE_LINKS = [
   { key: 'articles', href: '/articles' },
   { key: 'guides', href: '/guides' },
-  { key: 'menus', href: '/menus' },
   { key: 'media', href: '/media' },
   { key: 'faq', href: '/faq' },
 ] as const;

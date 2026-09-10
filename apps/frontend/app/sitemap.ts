@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
 import { api } from '@/lib/api';
-import { PLACEHOLDER_MENUS } from '@/lib/placeholder-menus';
 import { routing } from '@/i18n/routing';
 import { siteUrl } from '@/lib/site-url';
 
@@ -24,7 +23,6 @@ const STATIC_PATHS = [
   '/quick-question',
   '/pricing',
   '/guides',
-  '/menus',
   '/articles',
   '/media',
   '/faq',
@@ -41,7 +39,7 @@ const STATIC_PATHS = [
 function priorityFor(path: string): number {
   if (path === '') return 1;
   if (path === '/terms' || path === '/gdpr') return 0.3;
-  if (path.startsWith('/articles/') || path.startsWith('/menus/')) return 0.6;
+  if (path.startsWith('/articles/')) return 0.6;
   return 0.8;
 }
 
@@ -75,6 +73,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...published.map((p) =>
       entry(`/articles/${p.slug}`, new Date(p.publishedAt as string)),
     ),
-    ...PLACEHOLDER_MENUS.map((m) => entry(`/menus/${m.slug}`)),
   ];
 }

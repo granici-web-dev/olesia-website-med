@@ -2,10 +2,6 @@ import { notFound } from 'next/navigation';
 import { api, loc } from '../../../../lib/api';
 import { renderMarkdown } from '../../../../lib/markdown';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import {
-  findPlaceholderPost,
-  placeholderCategoryLabel,
-} from '@/lib/placeholder-posts';
 
 export const revalidate = 60;
 
@@ -18,30 +14,8 @@ export default async function ArticlePage({
   const en = locale === 'en';
   const ru = locale === 'ru';
 
-  // Prefer the live API post; fall back to a placeholder article so a link from
-  // the (placeholder-driven) listing always opens a real page instead of 404ing.
-  const apiPost = await api.post(slug);
-  const ph = apiPost ? null : findPlaceholderPost(slug);
-  if (!apiPost && !ph) notFound();
-
-  const post = apiPost ?? {
-    titleRo: ph!.title.ro,
-    titleEn: ph!.title.en,
-    titleRu: ph!.title.ru,
-    contentRo: ph!.body.ro,
-    contentEn: ph!.body.en,
-    contentRu: ph!.body.ru,
-    publishedAt: ph!.date,
-    coverImageUrl: null as string | null,
-    categories: [
-      {
-        id: ph!.category,
-        nameRo: placeholderCategoryLabel(ph!.category, 'ro'),
-        nameEn: placeholderCategoryLabel(ph!.category, 'en'),
-        nameRu: placeholderCategoryLabel(ph!.category, 'ru'),
-      },
-    ],
-  };
+  const post = await api.post(slug);
+  if (!post) notFound();
 
   const title = loc(locale, post.titleRo, post.titleEn, post.titleRu);
   const date = post.publishedAt
