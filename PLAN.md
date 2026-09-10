@@ -577,7 +577,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A1 | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap | правда контента, см. 10a | 10a | `[x]` `3bb74a0` |
 | A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
 | A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[x]` `085a3d2`, `c0dd5f6` |
-| A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[ ]` |
+| A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[>]` аудит 2026-09-10, 22 находки, harden в работе |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[ ]` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[ ]` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[ ]` |
@@ -778,6 +778,25 @@ netrimis» с копированием, `prepSentAt` только при реа�
 honeypot с `MaxLength(0)` отвечал ботам 400 по одному полю вместо тихого успеха,
 исправлено. Колонка «Ultima interacțiune» в списке пациентов удалена вместе с
 мёртвой веткой, заполнить по-настоящему это отдельный craft.
+
+Аудит A4 (2026-09-10, 22 находки, 4 high, все воспроизведены запросами)
+добавил: `/blog/published` отдаёт посты с будущей и пустой датой и ставит их
+первыми (NULL сортируется первым), отложенной публикации фактически нет;
+стаффные загрузки документов и видео верят заявленному MIME, сниффинг есть
+только у файлов пациента; `/uploads` регистрируется до helmet и отдаётся без
+единого защитного заголовка; удаление категории блога молча отвязывает статьи;
+слаг поста без формата, `../../etc/passwd` принимается; четыре ошибки базы
+(занятый слаг, занятый Calendly-URI, удаление услуги с записями, чужая
+категория) возвращают 500 вместо 409/404; ни одного `MaxLength` в пяти
+модулях; превью в бэк-офисе рендерит GFM через `react-markdown`, сайт своим
+парсером на 60 строк без ссылок и таблиц; `/contacts` публичен, но сайт его не
+читает, футер зашит. Решения: `fileUrl: null` для платных до приватного
+хранилища (12c); фильтр даты публикации плюс автопроставление даты при переводе
+в `published`; сниффинг на всех путях записи; статика после helmet; публичные
+и стаффные ответы разделяются в services, contacts и blog; общий переводчик
+ошибок Prisma в 409/404 в `common`; `slugify` в `packages/shared` с тестами
+вместо трёх копий; сайт переходит на `react-markdown` + `remark-gfm` (A7);
+футер читает `/contacts` (A6); email-гейт и счётчики (A6, 12c).
 
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
