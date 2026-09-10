@@ -17,6 +17,8 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { AuthUser } from '../auth/jwt.types';
 import { Role } from '../../generated/prisma/enums';
 import {
   DOCUMENT_MAX_BYTES,
@@ -30,6 +32,7 @@ import {
   UpdatePatientDto,
 } from './dto/patient.dto';
 import { CreateEntryDto, UpdateEntryDto } from './dto/entry.dto';
+import { AddDocumentDto } from './dto/add-document.dto';
 import { FromLeadDto } from './dto/from-lead.dto';
 
 /**
@@ -56,7 +59,11 @@ export class PatientsController {
     return this.patients.create(dto);
   }
 
-  /** Create-or-link a patient from a paid lead. */
+  /**
+   * Create a dossier from a lead. An address that already has one answers
+   * `409 patient_exists` with the candidate, so the operator decides between
+   * linking and a second record (module_patients.md; audit A3, F4).
+   */
   @Post('from-lead')
   fromLead(@Body() dto: FromLeadDto) {
     return this.patients.fromLead(dto);
@@ -72,10 +79,16 @@ export class PatientsController {
     return this.patients.update(id, dto);
   }
 
+  /** GDPR erasure. Answers with what it erased, table by table. */
   @Delete(':id')
-  @HttpCode(204)
   remove(@Param('id') id: string) {
     return this.patients.remove(id);
+  }
+
+  /** Attach a lead to this dossier — the operator's answer to a 409 above. */
+  @Post(':id/link-lead')
+  linkLead(@Param('id') id: string, @Body() dto: FromLeadDto) {
+    return this.patients.linkLead(id, dto);
   }
 
   @Get(':id/timeline')
@@ -84,8 +97,12 @@ export class PatientsController {
   }
 
   @Post(':id/entries')
-  addEntry(@Param('id') id: string, @Body() dto: CreateEntryDto) {
-    return this.patients.addEntry(id, dto);
+  addEntry(
+    @Param('id') id: string,
+    @Body() dto: CreateEntryDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.patients.addEntry(id, dto, user.id);
   }
 
   @Patch(':id/entries/:entryId')
@@ -93,14 +110,19 @@ export class PatientsController {
     @Param('id') id: string,
     @Param('entryId') entryId: string,
     @Body() dto: UpdateEntryDto,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.patients.updateEntry(id, entryId, dto);
+    return this.patients.updateEntry(id, entryId, dto, user.id);
   }
 
   @Delete(':id/entries/:entryId')
   @HttpCode(204)
-  removeEntry(@Param('id') id: string, @Param('entryId') entryId: string) {
-    return this.patients.removeEntry(id, entryId);
+  removeEntry(
+    @Param('id') id: string,
+    @Param('entryId') entryId: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.patients.removeEntry(id, entryId, user.id);
   }
 
   /** Upload a private medical document (PDF/DOC/DOCX). */
@@ -110,9 +132,10 @@ export class PatientsController {
   addDocument(
     @Param('id') id: string,
     @UploadedFile() file: UploadedImage | undefined,
-    @Body('title') title?: string,
+    @Body() dto: AddDocumentDto,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.patients.addDocument(id, file, title);
+    return this.patients.addDocument(id, file, dto.title, user.id);
   }
 
   /** Authenticated streamed download — never a public URL. */
@@ -120,9 +143,14 @@ export class PatientsController {
   async download(
     @Param('id') id: string,
     @Param('entryId') entryId: string,
+    @CurrentUser() user: AuthUser,
     @Res() res: Response,
   ) {
-    const { path, fileName } = await this.patients.getDocument(id, entryId);
+    const { path, fileName } = await this.patients.getDocument(
+      id,
+      entryId,
+      user.id,
+    );
     res.download(path, fileName);
   }
 }

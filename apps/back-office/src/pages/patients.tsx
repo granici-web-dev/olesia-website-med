@@ -30,7 +30,7 @@ import { patientDetailPath } from '@/config/routes';
 
 import { ConsentBadge } from '@/features/patients/badges';
 import { PatientFormSheet } from '@/features/patients/patient-form-sheet';
-import { fetchPatients, formatDate, ageYears } from '@/features/patients/data';
+import { fetchPatients, ageYears } from '@/features/patients/data';
 import { patientsQueryKey } from '@/features/patients/query-key';
 import type { PatientDto } from '@/features/patients/types';
 
@@ -137,7 +137,6 @@ export function PatientsPage() {
               <TableRow className="hover:bg-transparent">
                 <TableHead>{t.columns.patient}</TableHead>
                 <TableHead>{t.columns.contact}</TableHead>
-                <TableHead>{t.columns.lastInteraction}</TableHead>
                 <TableHead className="text-right">{t.columns.entries}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
@@ -192,17 +191,6 @@ function PatientRow({
           </div>
         )}
       </TableCell>
-      <TableCell>
-        {p.lastInteractionAt ? (
-          <span className="text-sm tabular-nums">
-            {formatDate(p.lastInteractionAt)}
-          </span>
-        ) : (
-          <span className="text-xs text-muted-foreground">
-            {t.list.noInteraction}
-          </span>
-        )}
-      </TableCell>
       <TableCell className="text-right tabular-nums">
         {p.entryCount ?? 0}
       </TableCell>
@@ -237,7 +225,6 @@ function PatientsTableSkeleton() {
             <Skeleton className="h-3.5 w-40" />
             <Skeleton className="h-3 w-28" />
           </div>
-          <Skeleton className="h-3.5 w-20" />
           <Skeleton className="h-3.5 w-8" />
         </div>
       ))}

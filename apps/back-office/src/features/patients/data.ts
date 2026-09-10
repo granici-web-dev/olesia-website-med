@@ -23,3 +23,4 @@ export const downloadDocument = USE_MOCKS
   ? mock.downloadDocument
   : remote.downloadDocument;
 export const fromLead = USE_MOCKS ? mock.fromLead : remote.fromLead;
+export const linkLead = USE_MOCKS ? mock.linkLead : remote.linkLead;

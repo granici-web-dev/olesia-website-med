@@ -8,10 +8,15 @@ import type {
   LeadSource,
   PatientDto,
   PatientEntryDto,
+  PatientErasureReportDto,
   PatientFormValues,
   PatientInteractionDto,
   PatientTimeline,
 } from '@/features/patients/types';
+
+/** The same wording the API returns; kept here so mock mode reads the same. */
+const MOCK_CALENDLY_MANUAL_STEP =
+  'Ștergeți manual invitatul din contul Calendly: programările sincronizate păstrează acolo numele, emailul și răspunsurile din formular, iar acest sistem nu le poate șterge.';
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
@@ -89,7 +94,6 @@ let patients: PatientDto[] = [
     createdAt: '2026-05-01T09:00:00+03:00',
     updatedAt: '2026-05-20T11:00:00+03:00',
     entryCount: 3,
-    lastInteractionAt: '2026-05-28T14:00:00+03:00',
   },
   {
     id: 'pat2',
@@ -103,7 +107,6 @@ let patients: PatientDto[] = [
     createdAt: '2026-06-04T09:00:00+03:00',
     updatedAt: '2026-06-04T09:00:00+03:00',
     entryCount: 1,
-    lastInteractionAt: '2026-06-05T10:00:00+03:00',
   },
   {
     id: 'pat3',
@@ -117,7 +120,6 @@ let patients: PatientDto[] = [
     createdAt: '2026-04-20T08:00:00+03:00',
     updatedAt: '2026-04-20T08:00:00+03:00',
     entryCount: 2,
-    lastInteractionAt: null,
   },
 ];
 
@@ -263,11 +265,7 @@ export async function fetchPatients(search?: string): Promise<PatientDto[]> {
         p.email.toLowerCase().includes(q),
     )
     .map((p) => ({ ...p, entryCount: countEntries(p.id) }))
-    .sort((a, b) =>
-      (b.lastInteractionAt ?? b.createdAt).localeCompare(
-        a.lastInteractionAt ?? a.createdAt,
-      ),
-    );
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function fetchPatient(id: string): Promise<PatientDto> {
@@ -311,7 +309,6 @@ export async function createPatient(
     createdAt: ts,
     updatedAt: ts,
     entryCount: 0,
-    lastInteractionAt: null,
   };
   patients = [patient, ...patients];
   return patient;
@@ -343,11 +340,30 @@ export async function updatePatient(
   return updated;
 }
 
-export async function deletePatient(id: string): Promise<void> {
+export async function deletePatient(
+  id: string,
+): Promise<PatientErasureReportDto> {
   await delay(450);
   getOrThrow(id);
+  const erasedEntries = entries.filter((e) => e.patientId === id).length;
   patients = patients.filter((p) => p.id !== id);
   entries = entries.filter((e) => e.patientId !== id);
+  // Row counts the mock store cannot know; the shape is what the UI renders.
+  return {
+    tables: [
+      { table: 'UploadLink', action: 'delete', rows: 1 },
+      { table: 'UploadedDocument', action: 'cascade', rows: 2 },
+      { table: 'Appointment', action: 'anonymize', rows: 2 },
+      { table: 'Subscription', action: 'anonymize', rows: 0 },
+      { table: 'QuickQuestion', action: 'anonymize', rows: 1 },
+      { table: 'DeliverableOrder', action: 'anonymize', rows: 1 },
+      { table: 'ContactMessage', action: 'anonymize', rows: 1 },
+      { table: 'Payment', action: 'anonymize', rows: 1 },
+      { table: 'PatientEntry', action: 'cascade', rows: erasedEntries },
+      { table: 'Patient', action: 'delete', rows: 1 },
+    ],
+    manualSteps: [MOCK_CALENDLY_MANUAL_STEP],
+  };
 }
 
 export async function setConsent(id: string): Promise<PatientDto> {
@@ -456,4 +472,13 @@ export async function fromLead(
   // In mock mode the lead isn't in this store; return the first patient as a
   // stand-in so the "open patient" navigation has a target.
   return { ...patients[0], entryCount: countEntries(patients[0].id) };
+}
+
+export async function linkLead(
+  id: string,
+  _source: LeadSource,
+  _sourceId: string,
+): Promise<PatientDto> {
+  await delay(400);
+  return { ...getOrThrow(id), entryCount: countEntries(id) };
 }

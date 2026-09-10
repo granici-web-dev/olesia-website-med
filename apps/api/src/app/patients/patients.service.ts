@@ -1,21 +1,27 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import type {
   Paginated,
   PatientDto,
   PatientEntryDto,
+  PatientErasureReportDto,
+  PatientErasureTableResultDto,
   PatientInteractionDto,
 } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService, type UploadedImage } from '../storage/storage.service';
 import { paginate } from '../common/dto/pagination.dto';
+import { normalizePatientEmail } from '../common/patient-email';
 import { PatientEntryType } from '../../generated/prisma/enums';
 import { Prisma } from '../../generated/prisma/client';
 import { toPatientDto, toPatientEntryDto } from './patients.mapper';
+import { CALENDLY_MANUAL_STEP, erasureTargets } from './erasure-targets';
 import {
   CreatePatientDto,
   ListPatientsDto,
@@ -24,13 +30,13 @@ import {
 import { CreateEntryDto, UpdateEntryDto } from './dto/entry.dto';
 import { FromLeadDto } from './dto/from-lead.dto';
 
-/** Placeholders written over a linked lead's PII during GDPR erasure. */
-const ANON_NAME = 'Pacient șters';
-const ANON_EMAIL = 'sters@gdpr.local';
-const ANON_TEXT = '[conținut șters la cererea de ștergere]';
+/** Postgres unique violation, as Prisma reports it. */
+const UNIQUE_VIOLATION = 'P2002';
 
 @Injectable()
 export class PatientsService {
+  private readonly logger = new Logger(PatientsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
@@ -40,34 +46,40 @@ export class PatientsService {
   async addDocument(
     id: string,
     file: UploadedImage | undefined,
-    title?: string,
-    authorId?: string,
+    title: string | undefined,
+    authorId: string,
   ): Promise<PatientEntryDto> {
     await this.getOrThrow(id);
     const { key } = await this.storage.savePrivateDocument(file);
-    return toPatientEntryDto(
-      await this.prisma.patientEntry.create({
-        data: {
-          patientId: id,
-          type: PatientEntryType.document,
-          title: title ?? file!.originalname,
-          fileUrl: key,
-          fileName: file!.originalname,
-          authorId: authorId ?? null,
-        },
-      }),
-    );
+    const entry = await this.prisma.patientEntry.create({
+      data: {
+        patientId: id,
+        type: PatientEntryType.document,
+        title: title ?? file!.originalname,
+        fileUrl: key,
+        fileName: file!.originalname,
+        authorId,
+      },
+    });
+    this.audit('document.upload', {
+      patientId: id,
+      entryId: entry.id,
+      userId: authorId,
+    });
+    return toPatientEntryDto(entry);
   }
 
   /** Resolve a private document for streaming (auth-checked by the route). */
   async getDocument(
     id: string,
     entryId: string,
+    userId: string,
   ): Promise<{ path: string; fileName: string }> {
     const e = await this.getEntryOrThrow(id, entryId);
     if (e.type !== PatientEntryType.document || !e.fileUrl) {
       throw new NotFoundException('document_not_found');
     }
+    this.audit('document.download', { patientId: id, entryId, userId });
     return {
       path: this.storage.privateDocPath(e.fileUrl),
       fileName: e.fileName ?? 'document',
@@ -111,119 +123,161 @@ export class PatientsService {
   }
 
   async create(dto: CreatePatientDto): Promise<PatientDto> {
-    if (await this.prisma.patient.findUnique({ where: { email: dto.email } })) {
-      throw new ConflictException('email_taken');
-    }
+    const email = this.requireEmail(dto.email);
     // `toData` widens shared fields to optional (it also serves updates); on
     // create, re-assert the required identity fields from the DTO.
     return toPatientDto(
-      await this.prisma.patient.create({
-        data: { ...this.toData(dto), fullName: dto.fullName, email: dto.email },
-      }),
+      await this.writeOrConflict(() =>
+        this.prisma.patient.create({
+          data: { ...this.toData(dto), fullName: dto.fullName, email },
+        }),
+      ),
     );
   }
 
   async update(id: string, dto: UpdatePatientDto): Promise<PatientDto> {
     await this.getOrThrow(id);
-    if (dto.email) {
-      const clash = await this.prisma.patient.findUnique({
-        where: { email: dto.email },
-      });
-      if (clash && clash.id !== id) throw new ConflictException('email_taken');
-    }
+    const email = dto.email ? this.requireEmail(dto.email) : undefined;
     return toPatientDto(
-      await this.prisma.patient.update({ where: { id }, data: this.toData(dto) }),
+      await this.writeOrConflict(() =>
+        this.prisma.patient.update({
+          where: { id },
+          data: { ...this.toData(dto), ...(email ? { email } : {}) },
+        }),
+      ),
     );
   }
 
   /**
-   * GDPR erasure (right to be forgotten). Removes every trace of the person:
-   * - deletes the patient (cascades `PatientEntry` rows) and the physical
-   *   private document files those entries point to;
-   * - anonymizes the PII on linked leads (name/email + free-text medical
-   *   fields) and detaches them, keeping only non-identifying business data;
-   * - deletes the public files attached to linked quick questions;
-   * - deletes the patient upload links and everything sent through them, rows
-   *   and bytes. A link carries the name, email and a working token of its own,
-   *   so anonymizing the appointment behind it would leave all three standing.
-   * The DB mutations run in one transaction; disk cleanup is best-effort.
+   * GDPR erasure (right to be forgotten).
+   *
+   * What it does, precisely — the previous comment here claimed it removed
+   * "every trace of the person", and audit A3 (F1) found seven places where
+   * it did not:
+   * - deletes the dossier, which cascades its `PatientEntry` rows, and the
+   *   private document files those entries point at;
+   * - deletes every upload link reaching this person, by its own address or
+   *   through the appointment it was issued for, and with them the medical
+   *   documents the patient sent — rows and bytes;
+   * - anonymizes the PII on every appointment, subscription, EXPRESS ticket,
+   *   group-C order and contact message that carries this person's address,
+   *   whether or not it was ever linked to the dossier;
+   * - anonymizes the payer on `Payment` rows while keeping the money and the
+   *   bank's references, which is a deliberate accounting exception.
+   *
+   * What it cannot do: delete Calendly's own copy of the invitee. That is
+   * returned as a manual step rather than left unsaid.
+   *
+   * The row mutations run in one transaction; disk cleanup is best-effort
+   * afterwards, and `deleteUnreferencedPrivateFiles` sweeps whatever a crash
+   * in between leaves behind.
    */
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<PatientErasureReportDto> {
     const patient = await this.getOrThrow(id);
+    const plan = erasureTargets(id, patient.email);
 
-    // Capture file references BEFORE the cascade/anonymization removes them.
-    const [docs, qqs, plans] = await Promise.all([
+    // Captured BEFORE the transaction: the anonymization nulls the keys and
+    // the cascade removes the rows these file references live on.
+    const [docs, plans, links] = await Promise.all([
       this.prisma.patientEntry.findMany({
-        where: {
-          patientId: id,
-          type: PatientEntryType.document,
-          fileUrl: { not: null },
-        },
+        where: { patientId: id, type: PatientEntryType.document, fileUrl: { not: null } },
         select: { fileUrl: true },
       }),
-      this.prisma.quickQuestion.findMany({
-        where: { patientId: id },
-        select: { attachments: true },
-      }),
       this.prisma.appointment.findMany({
-        where: { patientId: id, planFileKey: { not: null } },
+        where: { ...plan.appointment.where, planFileKey: { not: null } },
         select: { planFileKey: true },
       }),
+      this.prisma.uploadLink.findMany({
+        where: plan.uploadLink.where,
+        select: { id: true, documents: { select: { fileKey: true } } },
+      }),
     ]);
 
-    // Upload links reach the patient two ways: through the appointment they
-    // were issued for, and — for a group-C order, which carries no patient id —
-    // through the email the order was placed with.
-    const links = await this.prisma.uploadLink.findMany({
-      where: {
-        OR: [
-          { appointment: { patientId: id } },
-          { order: { clientEmail: patient.email } },
-        ],
-      },
-      select: { id: true, documents: { select: { fileKey: true } } },
-    });
+    const tables = await this.prisma.$transaction(async (tx) => {
+      const counted: PatientErasureTableResultDto[] = [];
+      const record = (table: string, action: PatientErasureTableResultDto['action'], rows: number) =>
+        counted.push({ table, action, rows });
 
-    await this.prisma.$transaction([
-      // Documents cascade with their link.
-      this.prisma.uploadLink.deleteMany({
+      const removedLinks = await tx.uploadLink.deleteMany({
         where: { id: { in: links.map((l) => l.id) } },
-      }),
-      this.prisma.appointment.updateMany({
-        where: { patientId: id },
-        data: {
-          clientName: ANON_NAME,
-          clientEmail: ANON_EMAIL,
-          reason: null,
-          // Treatment plan is medical data — erase text + detach the file.
-          planText: null,
-          planFileKey: null,
-          planFileName: null,
-          planUploadedAt: null,
-          patientId: null,
-        },
-      }),
-      this.prisma.subscription.updateMany({
-        where: { patientId: id },
-        data: {
-          clientName: ANON_NAME,
-          clientEmail: ANON_EMAIL,
-          patientId: null,
-        },
-      }),
-      this.prisma.quickQuestion.updateMany({
-        where: { patientId: id },
-        data: {
-          clientName: ANON_NAME,
-          clientEmail: ANON_EMAIL,
-          question: ANON_TEXT,
-          answer: null,
-          attachments: [],
-          patientId: null,
-        },
-      }),
-      this.prisma.patient.delete({ where: { id } }),
-    ]);
+      });
+      record('UploadLink', 'delete', removedLinks.count);
+      record(
+        'UploadedDocument',
+        'cascade',
+        links.reduce((n, l) => n + l.documents.length, 0),
+      );
+
+      const appointment = plan.appointment;
+      record(
+        'Appointment',
+        'anonymize',
+        (await tx.appointment.updateMany({
+          where: appointment.where,
+          data: appointment.data,
+        })).count,
+      );
+
+      const subscription = plan.subscription;
+      record(
+        'Subscription',
+        'anonymize',
+        (await tx.subscription.updateMany({
+          where: subscription.where,
+          data: subscription.data,
+        })).count,
+      );
+
+      const quickQuestion = plan.quickQuestion;
+      record(
+        'QuickQuestion',
+        'anonymize',
+        (await tx.quickQuestion.updateMany({
+          where: quickQuestion.where,
+          data: quickQuestion.data,
+        })).count,
+      );
+
+      const deliverableOrder = plan.deliverableOrder;
+      record(
+        'DeliverableOrder',
+        'anonymize',
+        (await tx.deliverableOrder.updateMany({
+          where: deliverableOrder.where,
+          data: deliverableOrder.data,
+        })).count,
+      );
+
+      const contactMessage = plan.contactMessage;
+      record(
+        'ContactMessage',
+        'anonymize',
+        (await tx.contactMessage.updateMany({
+          where: contactMessage.where,
+          data: contactMessage.data,
+        })).count,
+      );
+
+      const payment = plan.payment;
+      record(
+        'Payment',
+        'anonymize',
+        (await tx.payment.updateMany({
+          where: payment.where,
+          data: payment.data,
+        })).count,
+      );
+
+      record(
+        'PatientEntry',
+        'cascade',
+        await tx.patientEntry.count({ where: { patientId: id } }),
+      );
+      await tx.patient.delete({ where: plan.patient.where });
+      record('Patient', 'delete', 1);
+
+      return counted;
+    });
 
     // Best-effort physical cleanup — outside the transaction (disk ops).
     await Promise.all([
@@ -232,10 +286,13 @@ export class PatientsService {
       ...links
         .flatMap((l) => l.documents)
         .map((d) => this.storage.deletePrivateDocument(d.fileKey)),
-      ...qqs
-        .flatMap((q) => q.attachments)
-        .map((url) => this.storage.deletePublicFile(url)),
     ]);
+
+    this.audit('patient.erase', {
+      patientId: id,
+      rows: tables.map((t) => `${t.table}:${t.rows}`).join(' '),
+    });
+    return { tables, manualSteps: [CALENDLY_MANUAL_STEP] };
   }
 
   /** Merged medical-record timeline: entries + linked lead interactions. */
@@ -287,7 +344,7 @@ export class PatientsService {
   async addEntry(
     id: string,
     dto: CreateEntryDto,
-    authorId?: string,
+    authorId: string,
   ): Promise<PatientEntryDto> {
     await this.getOrThrow(id);
     return toPatientEntryDto(
@@ -298,7 +355,7 @@ export class PatientsService {
           title: dto.title ?? null,
           body: dto.body ?? null,
           occurredAt: dto.occurredAt ? new Date(dto.occurredAt) : new Date(),
-          authorId: authorId ?? null,
+          authorId,
         },
       }),
     );
@@ -308,6 +365,7 @@ export class PatientsService {
     id: string,
     entryId: string,
     dto: UpdateEntryDto,
+    authorId: string,
   ): Promise<PatientEntryDto> {
     await this.getEntryOrThrow(id, entryId);
     return toPatientEntryDto(
@@ -317,15 +375,17 @@ export class PatientsService {
           type: dto.type,
           title: dto.title,
           body: dto.body,
+          authorId,
           ...(dto.occurredAt ? { occurredAt: new Date(dto.occurredAt) } : {}),
         },
       }),
     );
   }
 
-  async removeEntry(id: string, entryId: string): Promise<void> {
+  async removeEntry(id: string, entryId: string, userId: string): Promise<void> {
     const e = await this.getEntryOrThrow(id, entryId);
     await this.prisma.patientEntry.delete({ where: { id: entryId } });
+    this.audit('entry.delete', { patientId: id, entryId, userId });
     // Right-to-erasure also applies per entry: drop the physical file.
     if (e.type === PatientEntryType.document && e.fileUrl) {
       await this.storage.deletePrivateDocument(e.fileUrl);
@@ -333,17 +393,58 @@ export class PatientsService {
   }
 
   /**
-   * Create-or-link a patient from a paid lead and attach the lead to them.
-   * Matches an existing patient by email to avoid duplicates.
+   * Create a dossier from a lead and attach the lead to it.
+   *
+   * An address that already has a dossier is a 409 carrying the candidate,
+   * not a silent merge: `module_patients.md` asked to "offer to link instead
+   * of creating a duplicate", and one address is often a parent's, behind
+   * whom two children are two medical records (audit A3, F4). Linking is the
+   * separate, explicit `linkLead`.
    */
   async fromLead(dto: FromLeadDto): Promise<PatientDto> {
     const lead = await this.loadLead(dto);
-    const patient = await this.prisma.patient.upsert({
-      where: { email: lead.email },
-      create: { fullName: lead.name, email: lead.email },
-      update: {},
+    const email = normalizePatientEmail(lead.email);
+    if (!email) throw new BadRequestException('lead_without_email');
+
+    const existing = await this.prisma.patient.findUnique({
+      where: { email },
+      select: { id: true, fullName: true },
     });
-    await this.attachLead(dto, patient.id);
+    if (existing) {
+      throw new ConflictException({
+        message: 'patient_exists',
+        patientId: existing.id,
+        fullName: existing.fullName,
+      });
+    }
+
+    const patient = await this.writeOrConflict(() =>
+      this.prisma.$transaction(async (tx) => {
+        const created = await tx.patient.create({
+          data: { fullName: lead.name, email },
+        });
+        await this.attachLead(dto, created.id, tx);
+        return created;
+      }),
+    );
+    this.audit('patient.fromLead', {
+      patientId: patient.id,
+      source: dto.source,
+      sourceId: dto.sourceId,
+    });
+    return toPatientDto(patient);
+  }
+
+  /** Attach a lead to a dossier the operator picked, after a `fromLead` 409. */
+  async linkLead(id: string, dto: FromLeadDto): Promise<PatientDto> {
+    const patient = await this.getOrThrow(id);
+    await this.loadLead(dto);
+    await this.attachLead(dto, id, this.prisma);
+    this.audit('patient.linkLead', {
+      patientId: id,
+      source: dto.source,
+      sourceId: dto.sourceId,
+    });
     return toPatientDto(patient);
   }
 
@@ -352,13 +453,50 @@ export class PatientsService {
   private toData(dto: CreatePatientDto | UpdatePatientDto) {
     return {
       fullName: dto.fullName,
-      email: dto.email,
       phone: dto.phone,
       birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
       gender: dto.gender,
       notes: dto.notes,
       consentAt: dto.consentAt ? new Date(dto.consentAt) : undefined,
     };
+  }
+
+  private requireEmail(raw: string): string {
+    const email = normalizePatientEmail(raw);
+    if (!email) throw new BadRequestException('email_required');
+    return email;
+  }
+
+  /**
+   * Turn the unique-index violation into the 409 the caller already handles.
+   * The pre-flight lookups elsewhere give a friendlier message in the common
+   * case; this covers the one where two requests race past them (F18).
+   */
+  private async writeOrConflict<T>(write: () => Promise<T>): Promise<T> {
+    try {
+      return await write();
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === UNIQUE_VIOLATION
+      ) {
+        throw new ConflictException('email_taken');
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Who did what to which record, with no PII in it — identifiers only.
+   * Erasure and access to a medical document used to leave no trace at all
+   * (audit A3, F23), which is the one thing a data-protection question about
+   * a dossier cannot be answered without.
+   */
+  private audit(action: string, fields: Record<string, string>): void {
+    const detail = Object.entries(fields)
+      .map(([k, v]) => `${k}=${v}`)
+      .join(' ');
+    this.logger.log(`audit ${action} ${detail}`);
   }
 
   private async loadLead(dto: FromLeadDto): Promise<{ name: string; email: string }> {
@@ -377,13 +515,17 @@ export class PatientsService {
     return { name: q.clientName, email: q.clientEmail };
   }
 
-  private async attachLead(dto: FromLeadDto, patientId: string): Promise<void> {
+  private async attachLead(
+    dto: FromLeadDto,
+    patientId: string,
+    tx: Prisma.TransactionClient | PrismaService,
+  ): Promise<void> {
     if (dto.source === 'appointment') {
-      await this.prisma.appointment.update({ where: { id: dto.sourceId }, data: { patientId } });
+      await tx.appointment.update({ where: { id: dto.sourceId }, data: { patientId } });
     } else if (dto.source === 'subscription') {
-      await this.prisma.subscription.update({ where: { id: dto.sourceId }, data: { patientId } });
+      await tx.subscription.update({ where: { id: dto.sourceId }, data: { patientId } });
     } else {
-      await this.prisma.quickQuestion.update({ where: { id: dto.sourceId }, data: { patientId } });
+      await tx.quickQuestion.update({ where: { id: dto.sourceId }, data: { patientId } });
     }
   }
 

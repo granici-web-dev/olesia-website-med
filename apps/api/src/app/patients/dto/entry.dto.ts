@@ -1,6 +1,13 @@
-import { IsEnum, IsISO8601, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsISO8601, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { PatientEntryType } from '../../../generated/prisma/enums';
+
+/**
+ * Lengths match what the lead DTOs already enforce on free text: a title is a
+ * line, a body is a consultation note and not a book (audit A3, F13).
+ */
+const TITLE_MAX = 200;
+const BODY_MAX = 20_000;
 
 export class CreateEntryDto {
   @IsEnum(PatientEntryType)
@@ -8,10 +15,12 @@ export class CreateEntryDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(TITLE_MAX)
   title?: string | null;
 
   @IsOptional()
   @IsString()
+  @MaxLength(BODY_MAX)
   body?: string | null;
 
   /** Clinical date; defaults to now when omitted. */
@@ -27,10 +36,12 @@ export class UpdateEntryDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(TITLE_MAX)
   title?: string | null;
 
   @IsOptional()
   @IsString()
+  @MaxLength(BODY_MAX)
   body?: string | null;
 
   @IsOptional()

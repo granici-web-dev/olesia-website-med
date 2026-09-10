@@ -588,7 +588,7 @@ export interface PatientEntryDto {
   updatedAt: string;
 }
 
-/** A patient profile. `entryCount`/`lastInteractionAt` populated in lists. */
+/** A patient profile. `entryCount` is populated in lists. */
 export interface PatientDto {
   id: string;
   fullName: string;
@@ -601,7 +601,45 @@ export interface PatientDto {
   createdAt: string;
   updatedAt: string;
   entryCount?: number;
-  lastInteractionAt?: string | null;
+}
+
+/**
+ * What `DELETE /patients/:id` actually erased, table by table.
+ *
+ * Audit A3, F1: the method used to claim it removed "every trace" while seven
+ * places kept the person's data. A count per table is the only way the doctor
+ * can see that the group-C order and the contact message went too — and the
+ * only way the next reader finds out when one stops going.
+ */
+export interface PatientErasureReportDto {
+  /** Rows touched per table, in the order the erasure ran them. */
+  tables: PatientErasureTableResultDto[];
+  /**
+   * What erasure cannot reach from here. Calendly holds its own copy of the
+   * invitee (name, email, the answers they typed) and no API call in this
+   * system deletes it, so somebody has to open the Calendly account.
+   */
+  manualSteps: string[];
+}
+
+/** One table's share of an erasure. */
+export interface PatientErasureTableResultDto {
+  table: string;
+  action: 'delete' | 'anonymize' | 'cascade';
+  rows: number;
+}
+
+/**
+ * `409` from `POST /patients/from-lead` when a record already holds this email.
+ *
+ * module_patients.md ("offer to link instead of creating a duplicate") asked
+ * for a decision, not a silent merge: one address is often a parent's, and two
+ * children behind it are two medical records, not one.
+ */
+export interface PatientLeadConflictDto {
+  message: 'patient_exists';
+  patientId: string;
+  fullName: string;
 }
 
 /** A linked lead interaction shown on the patient timeline. */

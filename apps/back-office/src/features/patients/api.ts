@@ -7,6 +7,7 @@ import type {
   LeadSource,
   PatientDto,
   PatientEntryDto,
+  PatientErasureReportDto,
   PatientFormValues,
   PatientTimeline,
 } from '@/features/patients/types';
@@ -75,8 +76,9 @@ export function updatePatient(
   return http.patch<PatientDto>(`/patients/${id}`, toPayload(values));
 }
 
-export function deletePatient(id: string): Promise<void> {
-  return http.del<void>(`/patients/${id}`);
+/** GDPR erasure. Answers with what it erased, table by table (audit A3, F1). */
+export function deletePatient(id: string): Promise<PatientErasureReportDto> {
+  return http.del<PatientErasureReportDto>(`/patients/${id}`);
 }
 
 export function setConsent(id: string): Promise<PatientDto> {
@@ -147,9 +149,26 @@ export async function downloadDocument(
   URL.revokeObjectURL(url);
 }
 
+/**
+ * Create a dossier from a lead. Throws `ApiError` 409 when the address
+ * already has one — `details` then carries the candidate, and the caller
+ * offers linking instead of quietly merging two people (audit A3, F4).
+ */
 export function fromLead(
   source: LeadSource,
   sourceId: string,
 ): Promise<PatientDto> {
   return http.post<PatientDto>('/patients/from-lead', { source, sourceId });
+}
+
+/** Attach the lead to a dossier the operator picked, after that 409. */
+export function linkLead(
+  id: string,
+  source: LeadSource,
+  sourceId: string,
+): Promise<PatientDto> {
+  return http.post<PatientDto>(`/patients/${id}/link-lead`, {
+    source,
+    sourceId,
+  });
 }

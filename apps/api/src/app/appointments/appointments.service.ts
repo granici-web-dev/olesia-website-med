@@ -12,6 +12,7 @@ import {
   PaymentTargetType,
 } from '../../generated/prisma/enums';
 import { MailService } from '../mail/mail.service';
+import { normalizePatientEmail } from '../common/patient-email';
 import { CalendlyService, type CalendlyWebhookBody } from './calendly.service';
 import { toAppointmentDto } from './appointments.mapper';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -431,7 +432,7 @@ export class AppointmentsService {
     email: string,
     tx: Prisma.TransactionClient,
   ): Promise<string | undefined> {
-    const normalized = email.trim().toLowerCase();
+    const normalized = normalizePatientEmail(email);
     if (!normalized) return undefined;
     const patient = await tx.patient.findUnique({
       where: { email: normalized },

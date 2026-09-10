@@ -749,13 +749,11 @@ export const ro = {
     columns: {
       patient: 'Pacient',
       contact: 'Contact',
-      lastInteraction: 'Ultima interacțiune',
       entries: 'Înregistrări',
     },
 
     list: {
       entriesCount: 'înregistrări',
-      noInteraction: 'Fără interacțiuni',
     },
 
     empty: {
@@ -877,6 +875,28 @@ export const ro = {
     fromLead: {
       action: 'Adaugă ca pacient',
       adding: 'Se adaugă…',
+      conflictTitle: 'Există deja un dosar pe acest email',
+      conflictBody:
+        'Adresa este folosită de dosarul de mai jos. Un email este adesea al părintelui, iar doi copii în spatele lui sunt două dosare medicale, nu unul. Alege ce vrei să faci.',
+      conflictExisting: 'Dosar existent',
+      conflictLink: 'Leagă de acest dosar',
+      conflictOpen: 'Deschide dosarul',
+      conflictLinking: 'Se leagă…',
+      noEmail:
+        'Lead-ul nu are adresă de email, deci nu poate deveni dosar. Completează adresa pe lead și încearcă din nou.',
+    },
+
+    erasure: {
+      title: 'Ce a fost șters',
+      subtitle: 'Rânduri atinse de ștergere, pe tabel.',
+      rows: 'rânduri',
+      manualTitle: 'Rămâne de făcut manual',
+      close: 'Am înțeles',
+      action: {
+        delete: 'Șters',
+        anonymize: 'Anonimizat',
+        cascade: 'Șters în cascadă',
+      },
     },
 
     confirm: {
@@ -907,6 +927,7 @@ export const ro = {
       downloadFailed: 'Descărcarea a eșuat.',
       mockNoFile: 'Fișier indisponibil în modul demo.',
       leadAdded: 'Lead-ul a fost adăugat ca pacient.',
+      leadLinked: 'Lead-ul a fost legat de dosarul existent.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
   },

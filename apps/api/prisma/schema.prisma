@@ -822,7 +822,7 @@ enum RefundState {
 model Patient {
   id        String    @id @default(uuid())
   fullName  String
-  email     String    @unique // dedup / link key
+  email     String    @unique @db.Citext // dedup / link key
   phone     String?
   birthDate DateTime?
   gender    String? // 'male' | 'female' | 'other' | null

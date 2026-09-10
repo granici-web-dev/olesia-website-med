@@ -8,11 +8,19 @@
 import type {
   PatientDto,
   PatientEntryDto,
+  PatientErasureReportDto,
   PatientInteractionDto,
+  PatientLeadConflictDto,
 } from '@olesia/shared';
 import { PatientEntryType } from '@olesia/shared';
 
-export type { PatientDto, PatientEntryDto, PatientInteractionDto };
+export type {
+  PatientDto,
+  PatientEntryDto,
+  PatientErasureReportDto,
+  PatientInteractionDto,
+  PatientLeadConflictDto,
+};
 export { PatientEntryType };
 
 /** The four medical-record entry types, in display order. */

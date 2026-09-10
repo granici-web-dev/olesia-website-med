@@ -3,7 +3,7 @@ import type { Patient, PatientEntry } from '../../generated/prisma/client';
 
 export function toPatientDto(
   p: Patient,
-  extra?: { entryCount?: number; lastInteractionAt?: Date | null },
+  extra?: { entryCount?: number },
 ): PatientDto {
   return {
     id: p.id,
@@ -17,13 +17,6 @@ export function toPatientDto(
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
     ...(extra?.entryCount !== undefined ? { entryCount: extra.entryCount } : {}),
-    ...(extra?.lastInteractionAt !== undefined
-      ? {
-          lastInteractionAt: extra.lastInteractionAt
-            ? extra.lastInteractionAt.toISOString()
-            : null,
-        }
-      : {}),
   };
 }
 

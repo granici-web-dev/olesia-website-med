@@ -50,6 +50,7 @@ import { ConsentLine, EntryCard, InteractionItem, Timeline } from '@/features/pa
 import { PatientFormSheet } from '@/features/patients/patient-form-sheet';
 import { EntryFormSheet } from '@/features/patients/entry-form-sheet';
 import { DocumentUploadSheet } from '@/features/patients/document-upload-sheet';
+import { ErasureReportDialog } from '@/features/patients/erasure-report-dialog';
 import {
   fetchPatient,
   fetchTimeline,
@@ -68,6 +69,7 @@ import {
 import type {
   PatientDto,
   PatientEntryDto,
+  PatientErasureReportDto,
 } from '@/features/patients/types';
 
 const t = ro.patients;
@@ -115,12 +117,17 @@ export function PatientDetailPage() {
     onError: () => toast.error(t.toast.error),
   });
 
+  const [erasureReport, setErasureReport] =
+    React.useState<PatientErasureReportDto | null>(null);
+
   const deletePatientMutation = useMutation({
     mutationFn: () => deletePatient(id),
-    onSuccess: () => {
+    onSuccess: (report) => {
       toast.success(t.toast.deleted);
       queryClient.invalidateQueries({ queryKey: patientsQueryKey });
-      navigate(paths.patients);
+      // The report names rows the doctor cannot see anywhere else, and one
+      // step only she can do (Calendly). Read it before leaving the page.
+      setErasureReport(report);
     },
     onError: () => toast.error(t.toast.error),
   });
@@ -437,6 +444,14 @@ export function PatientDetailPage() {
           />
         </>
       )}
+
+      <ErasureReportDialog
+        report={erasureReport}
+        onClose={() => {
+          setErasureReport(null);
+          navigate(paths.patients);
+        }}
+      />
 
       {/* Delete-entry confirmation (shared across tabs) */}
       <AlertDialog
