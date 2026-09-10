@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { http } from '@/api/http';
 import { disableTotp, enableTotp, startTotpEnrolment } from '@/api/auth';
+import { ChangePasswordForm } from '@/auth/change-password-form';
 import { ro } from '@/i18n/ro';
 
 /* Account security — enrolling in and turning off two-factor authentication
@@ -199,6 +200,18 @@ export function SecurityPage() {
               <p className="text-xs text-muted-foreground text-pretty">{t.disableHint}</p>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{ro.changePassword.title}</CardTitle>
+          <CardDescription className="text-pretty">
+            {ro.changePassword.description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChangePasswordForm />
         </CardContent>
       </Card>
     </div>

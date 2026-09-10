@@ -58,7 +58,8 @@ Required:
 | `CORS_ORIGINS` | exact origins, comma-separated, no wildcards |
 | `PUBLIC_API_URL` | the API's own public origin — builds file URLs |
 | `PUBLIC_SITE_URL` | the **site's** origin — builds the patient upload link |
-| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | long, random, different |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | at least 32 characters, random, and different from each other — the API exits at boot otherwise |
+| `COOKIE_SECURE` | defaults to `true`; only set it to `false` for local HTTP |
 
 Optional but wanted before launch: `CALENDLY_*` (booking is dead without them),
 `SMTP_*` + `LEADS_NOTIFY_EMAIL` (without these nothing is emailed — leads are
@@ -103,6 +104,48 @@ of the last successful drill here.
 **Not done: off-site copies.** A backup on the same disk as the database
 survives a bad migration, not a dead server or a closed account. Once the host
 exists, sync the `backups` volume to object storage **in the EU**.
+
+---
+
+## Losing the second factor as the only administrator
+
+Two-factor authentication is per account, and an admin can clear it for someone
+else (`POST /api/users/:id/2fa/reset`, admin only, never on oneself). With a
+single admin account there is nobody to ask, so the way back in is the database.
+
+The recovery codes come first: eight of them are shown once at enrolment and any
+unused one works in the code field at login. Only when those are gone too:
+
+```sql
+-- Clears the second factor for one account. The password is unchanged, so the
+-- next login is email + password alone, and enrolment starts again from the
+-- Securitate page.
+UPDATE "User"
+SET "totpSecret" = NULL,
+    "totpEnabled" = false,
+    "totpEnabledAt" = NULL,
+    "totpRecoveryCodes" = '{}',
+    "totpFailedCount" = 0,
+    "totpLockedUntil" = NULL
+WHERE email = 'the.address@example.com';
+```
+
+Run it through the compose stack, against the running database:
+
+```bash
+docker compose -f docker-compose.prod.yml exec postgres \
+  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+```
+
+The same statement without the `totpSecret` line, keeping only
+`"totpFailedCount" = 0, "totpLockedUntil" = NULL`, lifts the lock that five
+wrong codes in a row put on an account. That lock doubles from one minute to a
+ceiling of fifteen and clears itself; it is worth waiting rather than reaching
+for SQL.
+
+Whoever runs this can read every patient record in the same session, so it is a
+last resort, not a support procedure. Note the date and the reason somewhere the
+client can see it.
 
 ---
 

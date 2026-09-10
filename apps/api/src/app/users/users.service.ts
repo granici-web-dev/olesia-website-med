@@ -40,7 +40,13 @@ export class UsersService {
     }
     const passwordHash = await argon2.hash(dto.password);
     const user = await this.prisma.user.create({
-      data: { email, name: dto.name, role: dto.role, passwordHash },
+      data: {
+        email,
+        name: dto.name,
+        role: dto.role,
+        passwordHash,
+        mustChangePassword: true,
+      },
     });
     return toUserDto(user);
   }
@@ -65,7 +71,10 @@ export class UsersService {
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id },
-        data: { passwordHash: await argon2.hash(password) },
+        data: {
+          passwordHash: await argon2.hash(password),
+          mustChangePassword: true,
+        },
       }),
       this.prisma.refreshSession.updateMany({
         where: { userId: id, revokedAt: null },

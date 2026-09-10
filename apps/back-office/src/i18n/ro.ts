@@ -94,6 +94,25 @@ export const ro = {
     invalidCode: 'Cod incorect. Mai încearcă o dată.',
     errorGeneric: 'A apărut o eroare. Încearcă din nou.',
   },
+  changePassword: {
+    title: 'Schimbă parola',
+    description:
+      'Parola nouă înlocuiește parola primită de la administrator. Toate celelalte sesiuni se închid.',
+    forcedTitle: 'Alege o parolă nouă',
+    forcedHint:
+      'Contul folosește încă parola primită de la administrator. Alege una proprie ca să continui.',
+    currentLabel: 'Parola actuală',
+    newLabel: 'Parola nouă',
+    repeatLabel: 'Repetă parola nouă',
+    lengthHint: 'Minimum 12 caractere.',
+    tooShort: 'Parola trebuie să aibă cel puțin 12 caractere.',
+    mismatch: 'Parolele nu coincid.',
+    submit: 'Salvează parola',
+    done: 'Parola a fost schimbată.',
+    wrongCurrent: 'Parola actuală nu este corectă.',
+    errorGeneric: 'Nu am putut schimba parola. Încearcă din nou.',
+  },
+
   login: {
     title: 'Autentificare',
     subtitle: 'Accesează panoul de administrare Olesia.',

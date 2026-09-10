@@ -11,6 +11,7 @@ export function toUserDto(u: User): UserDto {
     role: u.role as UserDto['role'],
     isActive: u.isActive,
     totpEnabled: u.totpEnabled,
+    mustChangePassword: u.mustChangePassword,
     createdAt: u.createdAt.toISOString(),
     updatedAt: u.updatedAt.toISOString(),
   };

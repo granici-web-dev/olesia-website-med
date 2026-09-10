@@ -43,6 +43,21 @@ export async function logout(): Promise<void> {
   tokenStore.set(null);
 }
 
+/**
+ * Replace one's own password. The API ends every other session and answers
+ * with a fresh pair, so the tab this ran in stays signed in.
+ */
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const tokens = await http.post<AuthTokens>('/auth/change-password', {
+    currentPassword,
+    newPassword,
+  });
+  tokenStore.set(tokens.accessToken);
+}
+
 // --- Two-factor authentication (client answers v2 §10) ---
 
 /** Step 1 — mint a secret and get the QR. 2FA is not active yet. */

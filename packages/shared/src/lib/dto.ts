@@ -45,6 +45,16 @@ export interface LoginRequest {
 /** Access token is returned in the body; the refresh token is an httpOnly cookie. */
 export interface AuthTokens {
   accessToken: string;
+  /**
+   * The password was set by somebody else (a new account, or an admin reset),
+   * so the session is only good for changing it.
+   */
+  mustChangePassword: boolean;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface UserDto {
@@ -55,6 +65,8 @@ export interface UserDto {
   isActive: boolean;
   /** Whether the account has two-factor authentication switched on. */
   totpEnabled: boolean;
+  /** Still carrying a password an admin handed over. */
+  mustChangePassword: boolean;
   createdAt: string;
   updatedAt: string;
 }

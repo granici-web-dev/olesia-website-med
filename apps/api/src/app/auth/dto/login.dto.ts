@@ -35,3 +35,18 @@ export class OptionalTotpCodeDto {
   @Length(6, 20)
   code?: string;
 }
+
+/**
+ * Changing one's own password. Twelve characters minimum: this is the only
+ * credential on an account that reaches patient records, and the starter
+ * password it replaces was chosen by somebody else.
+ */
+export class ChangePasswordDto {
+  @IsString()
+  @MinLength(1)
+  currentPassword!: string;
+
+  @IsString()
+  @MinLength(12)
+  newPassword!: string;
+}

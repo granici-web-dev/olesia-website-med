@@ -13,4 +13,7 @@ export interface User {
   name: string;
   email: string;
   role: Role;
+  /** The password came from an admin, so the session only gets as far as the
+   *  change-password form. */
+  mustChangePassword: boolean;
 }

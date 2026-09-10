@@ -95,7 +95,11 @@ export class AuthService {
   async rotate(
     refreshToken: string,
     userAgent?: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    mustChangePassword: boolean;
+  }> {
     const payload = readRefreshToken(this.jwt, refreshToken, refreshSecret());
     if (!payload) throw new UnauthorizedException('invalid_refresh');
 
@@ -128,7 +132,13 @@ export class AuthService {
       throw new UnauthorizedException('invalid_refresh');
     }
 
-    return this.issueTokens(user, { userAgent, sessionId: nextSessionId });
+    return {
+      ...(await this.issueTokens(user, {
+        userAgent,
+        sessionId: nextSessionId,
+      })),
+      mustChangePassword: user.mustChangePassword,
+    };
   }
 
   /** End the session behind a refresh token. Unknown tokens are not an error. */
@@ -142,6 +152,39 @@ export class AuthService {
       where: { id: payload.jti, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  /**
+   * Change one's own password, then take every other session with it: the
+   * reason to change a password is that somebody else might know the old one.
+   * The caller keeps working, on a freshly issued pair.
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+    userAgent?: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !(await argon2.verify(user.passwordHash, currentPassword))) {
+      throw new UnauthorizedException('invalid_credentials');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          passwordHash: await argon2.hash(newPassword),
+          mustChangePassword: false,
+        },
+      }),
+      this.prisma.refreshSession.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+
+    return this.issueTokens(user, { userAgent });
   }
 
   /**

@@ -107,6 +107,11 @@ model User {
   name         String
   role         Role     @default(editor)
   isActive     Boolean  @default(true)
+  /// Set when an admin creates or resets the account: the starter password was
+  /// chosen by somebody else and read off their screen, so it is a handover,
+  /// not a password. Login says so and the back office insists before it lets
+  /// the account any further.
+  mustChangePassword Boolean @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -119,6 +124,10 @@ model User {
   /// Argon2 hashes of single-use recovery codes — never the codes themselves,
   /// so a database leak cannot be used to bypass the second factor.
   totpRecoveryCodes String[] @default([])
+  /// Consecutive wrong second factors. Per account, because the login throttle
+  /// counts per IP and a six-digit code is worth spreading across addresses.
+  totpFailedCount   Int       @default(0)
+  totpLockedUntil   DateTime?
 
   posts           Post[]
   refreshSessions RefreshSession[]

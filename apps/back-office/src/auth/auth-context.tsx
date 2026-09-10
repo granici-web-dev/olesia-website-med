@@ -18,6 +18,8 @@ interface AuthContextValue {
   login: (email: string, password: string, totpCode?: string) => Promise<void>;
   logout: () => void;
   hasRole: (roles?: Role[]) => boolean;
+  /** Called once the account has a password of its own. */
+  passwordChanged: () => void;
 }
 
 const STORAGE_KEY = 'olesia.bo.session';
@@ -30,6 +32,7 @@ function toUser(dto: UserDto): User {
     name: dto.name,
     email: dto.email,
     role: String(dto.role) as Role,
+    mustChangePassword: dto.mustChangePassword,
   };
 }
 
@@ -91,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: email.split('@')[0] || 'Administrator',
         email,
         role: 'admin',
+        mustChangePassword: false,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
       setUser(demo);
@@ -113,6 +117,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStatus('unauthenticated');
   }, []);
 
+  const passwordChanged = React.useCallback(() => {
+    setUser((current) =>
+      current ? { ...current, mustChangePassword: false } : current,
+    );
+  }, []);
+
   const hasRole = React.useCallback(
     (roles?: Role[]) => {
       if (!roles || roles.length === 0) return true;
@@ -122,8 +132,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = React.useMemo<AuthContextValue>(
-    () => ({ user, status, login, logout, hasRole }),
-    [user, status, login, logout, hasRole],
+    () => ({ user, status, login, logout, hasRole, passwordChanged }),
+    [user, status, login, logout, hasRole, passwordChanged],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

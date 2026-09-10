@@ -1,11 +1,20 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { generateSecret, generateURI, verifySync } from 'otplib';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { generateSecret, generateURI } from 'otplib';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'node:crypto';
 import * as QRCode from 'qrcode';
 
 import { PrismaService } from '../prisma/prisma.service';
 import type { User } from '../../generated/prisma/client';
+import { isValidTotpCode } from './totp-code';
+import { totpLockMs } from './totp-lockout';
 
 /**
  * Two-factor authentication with TOTP (client answers v2 §10:
@@ -27,23 +36,6 @@ import type { User } from '../../generated/prisma/client';
 
 const ISSUER = 'Dr. Olesea Jalba';
 const RECOVERY_CODE_COUNT = 8;
-/** One 30s step of slack either way: phone clocks drift, and rejecting a code
- *  the user can still read on screen reads as "broken". */
-const EPOCH_TOLERANCE_SECONDS = 30;
-
-/**
- * otplib THROWS on anything that is not 6 digits ("Token must be 6 digits"),
- * and the same input may legitimately be a recovery code — so a malformed token
- * is simply "not a valid TOTP code" here, and the caller moves on to the
- * recovery codes instead of blowing up with a 500.
- */
-const isValidCode = (secret: string, token: string): boolean => {
-  try {
-    return verifySync({ secret, token, epochTolerance: EPOCH_TOLERANCE_SECONDS }).valid;
-  } catch {
-    return false;
-  }
-};
 
 export interface EnrolmentStart {
   /** Base32 secret, shown for manual entry when a QR cannot be scanned. */
@@ -55,7 +47,16 @@ export interface EnrolmentStart {
 
 @Injectable()
 export class TotpService {
+  private readonly logger = new Logger(TotpService.name);
+
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Seconds until this account may try a code again; 0 when it may now. */
+  lockRemainingSeconds(user: Pick<User, 'totpLockedUntil'>): number {
+    if (!user.totpLockedUntil) return 0;
+    const remaining = user.totpLockedUntil.getTime() - Date.now();
+    return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
+  }
 
   /**
    * Start (or restart) enrolment. Restarting an account that already has 2FA on
@@ -95,7 +96,7 @@ export class TotpService {
     if (!user?.totpSecret) {
       throw new BadRequestException('totp_not_started');
     }
-    if (!isValidCode(user.totpSecret, code.trim())) {
+    if (!isValidTotpCode(user.totpSecret, code.trim())) {
       throw new BadRequestException('totp_invalid_code');
     }
 
@@ -136,27 +137,96 @@ export class TotpService {
 
   /**
    * Accepts a TOTP code or a single-use recovery code. Consuming a recovery
-   * code removes it, so it cannot be replayed.
+   * code removes it, so it cannot be replayed, and the removal is conditional
+   * on it still being there: two logins racing the same code leave only one
+   * winner.
+   *
+   * Every path through here counts, so a wrong code is a wrong code whether it
+   * arrived at login or at the 2FA settings page.
    */
   async verify(user: User, code: string): Promise<boolean> {
-    const candidate = code.replace(/\s+/g, '');
+    const locked = this.lockRemainingSeconds(user);
+    if (locked > 0) {
+      throw new HttpException(
+        { statusCode: HttpStatus.TOO_MANY_REQUESTS, message: 'totp_locked', retryAfterSeconds: locked },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
     if (!user.totpSecret) return false;
 
-    if (isValidCode(user.totpSecret, candidate)) return true;
-
-    for (const hash of user.totpRecoveryCodes) {
-      if (await argon2.verify(hash, candidate.toLowerCase())) {
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: {
-            totpRecoveryCodes: user.totpRecoveryCodes.filter((h) => h !== hash),
-          },
-        });
-        return true;
-      }
+    const candidate = code.replace(/\s+/g, '');
+    if (isValidTotpCode(user.totpSecret, candidate)) {
+      await this.recordAttempt(user.id, true);
+      return true;
     }
 
+    for (const hash of user.totpRecoveryCodes) {
+      if (!(await argon2.verify(hash, candidate.toLowerCase()))) continue;
+
+      const consumed = await this.prisma.user.updateMany({
+        where: { id: user.id, totpRecoveryCodes: { has: hash } },
+        data: {
+          totpRecoveryCodes: user.totpRecoveryCodes.filter((h) => h !== hash),
+        },
+      });
+      if (consumed.count === 0) break;
+
+      await this.recordAttempt(user.id, true);
+      return true;
+    }
+
+    await this.recordAttempt(user.id, false);
     return false;
+  }
+
+  /**
+   * Reset the second factor for someone who lost it. Admin-only, and never on
+   * oneself: the point is that another person vouches for the recovery.
+   */
+  async resetFor(targetUserId: string, byUserId: string): Promise<void> {
+    if (targetUserId === byUserId) {
+      throw new BadRequestException('cannot_reset_own_totp');
+    }
+    const user = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+    });
+    if (!user) throw new BadRequestException('user_not_found');
+
+    await this.prisma.user.update({
+      where: { id: targetUserId },
+      data: {
+        totpEnabled: false,
+        totpSecret: null,
+        totpEnabledAt: null,
+        totpRecoveryCodes: [],
+        totpFailedCount: 0,
+        totpLockedUntil: null,
+      },
+    });
+    // Ids, not emails: this line ends up in whatever collects the logs.
+    this.logger.warn(`2FA reset for user ${targetUserId} by ${byUserId}.`);
+  }
+
+  private async recordAttempt(userId: string, success: boolean): Promise<void> {
+    if (success) {
+      await this.prisma.user.updateMany({
+        where: { id: userId, OR: [{ totpFailedCount: { gt: 0 } }, { totpLockedUntil: { not: null } }] },
+        data: { totpFailedCount: 0, totpLockedUntil: null },
+      });
+      return;
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { totpFailedCount: { increment: 1 } },
+    });
+    const delay = totpLockMs(user.totpFailedCount);
+    if (delay > 0) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { totpLockedUntil: new Date(Date.now() + delay) },
+      });
+    }
   }
 
   /** Guard helper for the login flow. */

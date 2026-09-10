@@ -19,7 +19,12 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { ttlToMs } from './token-ttl';
 import { TotpService, type EnrolmentStart } from './totp.service';
-import { LoginDto, OptionalTotpCodeDto, TotpCodeDto } from './dto/login.dto';
+import {
+  ChangePasswordDto,
+  LoginDto,
+  OptionalTotpCodeDto,
+  TotpCodeDto,
+} from './dto/login.dto';
 import type { AuthUser } from './jwt.types';
 
 const REFRESH_COOKIE = 'olesia_rt';
@@ -72,13 +77,17 @@ export class AuthController {
   ): Promise<AuthTokens> {
     const user = await this.auth.validateUser(dto.email, dto.password);
     if (user.totpEnabled) {
+      // The header has to be set on the response before the throw, and only
+      // the handler holds the response.
+      const lockedFor = this.totp.lockRemainingSeconds(user);
+      if (lockedFor > 0) res.setHeader('Retry-After', String(lockedFor));
       await this.totp.assertCode(user, dto.totpCode);
     }
     const { accessToken, refreshToken } = await this.auth.issueTokens(user, {
       userAgent: req.get('user-agent'),
     });
     setRefreshCookie(res, refreshToken);
-    return { accessToken };
+    return { accessToken, mustChangePassword: user.mustChangePassword };
   }
 
   @Public()
@@ -90,12 +99,10 @@ export class AuthController {
   ): Promise<AuthTokens> {
     const token = req.cookies?.[REFRESH_COOKIE];
     if (!token) throw new UnauthorizedException('no_refresh');
-    const { accessToken, refreshToken } = await this.auth.rotate(
-      token,
-      req.get('user-agent'),
-    );
+    const { accessToken, refreshToken, mustChangePassword } =
+      await this.auth.rotate(token, req.get('user-agent'));
     setRefreshCookie(res, refreshToken);
-    return { accessToken };
+    return { accessToken, mustChangePassword };
   }
 
   @Public()
@@ -108,6 +115,30 @@ export class AuthController {
     const token = req.cookies?.[REFRESH_COOKIE];
     if (token) await this.auth.endSession(token);
     res.clearCookie(REFRESH_COOKIE, { path: REFRESH_COOKIE_PATH });
+  }
+
+  /**
+   * Replace one's own password. Every other session of the account goes with
+   * the old password; this one continues on the pair returned here.
+   */
+  @Throttle({ default: { ttl: 60_000, limit: 8 } })
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @Post('change-password')
+  async changePassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ChangePasswordDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthTokens> {
+    const { accessToken, refreshToken } = await this.auth.changePassword(
+      user.id,
+      dto.currentPassword,
+      dto.newPassword,
+      req.get('user-agent'),
+    );
+    setRefreshCookie(res, refreshToken);
+    return { accessToken, mustChangePassword: false };
   }
 
   @ApiBearerAuth()

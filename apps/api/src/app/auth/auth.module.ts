@@ -6,17 +6,16 @@ import { APP_GUARD } from '@nestjs/core';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { TotpService } from './totp.service';
+import { TotpModule } from './totp.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 
 @Module({
-  imports: [PassportModule, JwtModule.register({}), UsersModule],
+  imports: [PassportModule, JwtModule.register({}), UsersModule, TotpModule],
   controllers: [AuthController],
   providers: [
     AuthService,
-    TotpService,
     JwtStrategy,
     // Global guards: every route requires a valid access token unless @Public(),
     // and @Roles(...) is enforced on top.
