@@ -578,7 +578,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
 | A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[x]` `085a3d2`, `c0dd5f6` |
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
-| A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[ ]` |
+| A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[>]` аудит 2026-09-10, 20 находок, harden в работе |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[ ]` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[ ]` |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[ ]` |
@@ -818,6 +818,28 @@ A4 закрыт: `harden` `22e0b86`, 39 файлов, 220 тестов (+37), б
 `UPDATE` с заменой префикса, записать в runbook `docs/deployment.md`;
 (3) 12 файлов не проходят `prettier --check` ещё до этих правок, CI prettier не
 гоняет, решить на A11.
+
+Аудит A5 (2026-09-10, 20 находок, 4 high, воспроизведены запросами) добавил:
+админ может понизить или деактивировать сам себя и остаться без единственной
+учётки с доступом к пользователям; квота видеозвонков проверяется и пишется
+двумя запросами, десять параллельных вызовов дали 7 из 6; `paymentStatus`
+объявлен зеркалом `Payment`, но три PATCH (записи, подписки, заказы) пишут его
+руками, и бэк-офис это делает; синглтоны About и WorkingHours создаются
+анонимным GET без уникального ключа; `isPlaceholder` рабочих часов снимается
+полем в теле вопреки комментарию; квота названа месячной, но никогда не
+сбрасывается, а подписки никогда не истекают; заказ группы C не имеет связи с
+пациентом и не виден в досье; `about.images` принимает `javascript:`; порог
+капчи с опечаткой в env превращается в `NaN` и пропускает всех. Решения:
+запрет самопонижения и последнего админа в транзакции; квота одним условным
+`updateMany`; `paymentStatus` становится настоящим зеркалом, ручная оплата это
+`Payment` с методом `manual` через `POST /payments/manual` (admin) и `void`,
+поле убирается из трёх DTO; синглтоны с фиксированным id и upsert;
+`isPlaceholder` только из `days`; `videoQuotaPerMonth` переименовывается в
+`videoQuotaTotal` на срок подписки плюс ежедневный крон истечения, месячного
+сброса не будет (сказать клиенту); `DeliverableOrder.patientId` и ветка
+таймлайна; `RolesGuard` deny-by-default с явными ролями на самообслуживании
+auth, `AppController` и два Nx-спека удаляются; `DELETE` заказа только admin с
+аудит-логом; `/about` и `/working-hours` не читаются сайтом, это A6/A7.
 
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
