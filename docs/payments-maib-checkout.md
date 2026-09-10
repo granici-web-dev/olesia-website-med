@@ -851,3 +851,72 @@ None of this before the two things already blocking: **EUR and MIA enabled on th
 and **the callback proven on a public HTTPS host** (§13). RTP is a callback-only flow — it
 has no browser redirect to fall back on — so it is strictly downstream of getting callbacks
 working at all.
+
+---
+
+## 18. Re-read of the documentation before the checkout build (2026-09-10, evening)
+
+Read again from `https://docs.maibmerchants.md/checkout/llms.txt` (the page index; the
+paths guessed from the section names 404, the index is authoritative). Compared against
+`maib.service.ts`, `payments.service.ts` and §§1–17 above. What holds, what changed,
+what the checkout step must add.
+
+### Confirmed, no action
+
+- Signature: `HMAC_SHA256(key, "{rawBody}.{timestamp}")`, base64, `X-Signature:
+  sha256=…`, `X-Signature-Timestamp` in **milliseconds**, constant-time compare,
+  freshness "less than N minutes" with N left to us. Matches `verifySignature()` and the
+  5-minute window exactly. The Node sample on the "Signature Key Verification" page is
+  the same algorithm.
+- Callback fires "after a successful payment"; nothing promised for failed, expired,
+  cancelled or refunds. So `publicStatus` re-syncing with the bank and the 10-minute
+  reconcile sweep remain the authority, not the callback.
+- Redirect query on `successUrl`/`failUrl`: `checkoutId`, `checkoutStatus`
+  (`Completed`|`Failed`), `orderId`. Still untrusted; our `?order=` is appended before
+  theirs and the return page asks `/payment-status/:orderId`.
+- Session statuses per docs: `WaitingForInit | Initialized | PaymentMethodSelected |
+  Completed | Expired | Abandoned | Cancelled | Failed`. Sandbox returns them in
+  different casing (§11); `toPaymentState` lowercases, so both spellings work.
+- Error envelope `{ ok:false, errors:[{errorCode, errorMessage, errorArgs}] }` and the
+  catalogue `42000–42007`, `43000–43001`, `44000–44003`, `common.error-1`. Two codes we
+  had not listed: `42005` "Field has invalid format" (this is what a non-E.164 phone
+  will produce) and `43000` "merchant does not exist". The undocumented
+  `payments.acquiring.payments.app-*` namespace seen in sandbox (§11) is still not in
+  the docs; the default branch in the client stays.
+- Refund: `amount` + `reason` (max 500) required, response status `Created` only.
+  `RefundPaymentDto` already caps `reason` at 500. Sandbox additionally shows
+  `Accepted` and `refundType` (§13); handled.
+- Sandbox: same test card, MIA completes only through the QR API simulation with IBAN
+  `MD88AG000000011621810140`. No failure or 3-D Secure test cards are documented, so
+  the failed-payment path can only be exercised by abandoning or cancelling a session.
+- No saved cards, recurring, tokenisation or one-click anywhere in the Checkout docs.
+  §1 and §17 stand: Request to Pay is the honest answer to the subscription question.
+- "Retrieve all checkouts" documents `count`/`offset`/`totalCount` filters and says
+  nothing about sandbox; the endpoint is still broken there (§14). Persisting every id
+  ourselves stays mandatory.
+
+### Divergences that need code — go into the checkout shape (PLAN.md A8 / 12a)
+
+1. **`CompletedAt`, `FailedAt`, `CancelledAt` are capitalised in the documented
+   `GET /v2/checkouts/{id}` schema** (like `PaymentId`), while `MaibCheckout` reads
+   `completedAt` in lower case. The sandbox returned lower case and the §15
+   verification passed on it, so production may differ from sandbox in the other
+   direction. Read both spellings, as already done for `PaymentId`/`paymentId`.
+2. **`payerInfo.phone` must be E.164** or the whole session is refused with `42005`.
+   Nothing in the codebase normalises phones; leads store them as typed. The checkout
+   must normalise (`+373…`) or omit the field when it cannot.
+3. **`amount` must be `> 1.00`**. `start()` has no guard. Services priced `0` (on
+   request, free consult) and any future discount below one unit must never reach
+   `createCheckout`; guard in `start()` with a clear error, not a bank error.
+4. **`orderInfo.items[]`** (title ≤ 125, amount, currency, quantity, displayOrder) is
+   still unused; the hosted page shows line items. Send one item per purchase.
+5. `description` ≤ 125 is already sliced; `orderInfo.date` (ISO 8601) is cheap to add.
+
+### Documented but not in this section of the docs
+
+The merchant-site requirements (T&C page, acceptance checkbox, confirmation email,
+return-page contents, company details, logos) and the onboarding steps quoted in §8–§9
+are **not** part of the Checkout index any more; they lived on a separate
+"integration requirements / steps" page that now 404s under `/checkout/`. Keep §8–§9
+as the record of what maib asked, and ask `ecom@maib.md` for the current location of
+that checklist before the compliance review.
