@@ -1,4 +1,17 @@
 /**
+ * PARKED — not part of the build, not in any package.json, kept for reference.
+ *
+ * One-off generator that produced placeholder imagery through the Vercel AI
+ * Gateway. Parked because it never had a payment method attached and because
+ * images now arrive the right way: the client uploads them in the back office,
+ * where they land in the site-media slots and the storage pipeline.
+ *
+ * Removed from apps/frontend on 2026-09-10 along with its `ai` and
+ * `@google/genai` dependencies and the `gen:images` script — see STACK.md.
+ * Restoring it means re-adding both packages; it will not run from here.
+ */
+
+/**
  * Generate site imagery via Vercel AI Gateway (image model — "Nano Banana" /
  * Gemini Flash Image by default). One-time generation → PNGs under
  * public/assets/{blog,menus}/<slug>.png, then referenced from the content.

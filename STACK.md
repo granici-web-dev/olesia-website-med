@@ -105,10 +105,15 @@ define the visual intent. Never edited; implementations live in `components/` an
 
 Kept honest so nobody treats them as load-bearing.
 
-- **`ai`, `@google/genai`** — the parked AI image generation. Used by one script,
-  `apps/frontend/scripts/generate-images.ts`, and not by any running code.
 - **`agentation`** — dev-tools components only.
 - **`zustand`** — named as the UI state library in `CLAUDE.md`, present in one file.
+
+**Removed 2026-09-10:** `ai` and `@google/genai`, which existed for one parked
+script and nothing else. The script is kept for reference, outside the dependency
+tree, at `docs/parked/generate-images.ts`. Images reach the site the supported
+way — the client uploads them in the back office, into the site-media slots and
+the storage pipeline. Reviving the generator means re-adding both packages
+deliberately, which is the point of moving it out.
 
 ## Payments — maib e-Commerce Checkout
 
