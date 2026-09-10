@@ -105,7 +105,8 @@ solicitare sau o întrebare.
 ### 6. Оплата
 ```
 Heading: Plată
-Plata se face exclusiv prin transfer bancar (nu există plată online).
+Plata se face pe site cu cardul sau prin MIA (pagina securizată
+BC „MAIB" S.A.) ori prin transfer bancar.
 [Plata se achită înainte de consultație.]              ⚠ когда
 Prețurile sunt afișate la fiecare serviciu.            ⚠ цены
 [Factură / confirmare de plată: ...]                   ⚠

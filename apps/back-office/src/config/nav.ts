@@ -1,4 +1,5 @@
 import {
+  CreditCard,
   ShieldCheck,
   Clock,
   LayoutDashboard,
@@ -49,6 +50,7 @@ export const navGroups: NavGroup[] = [
       { to: paths.subscriptions, label: ro.nav.subscriptions, icon: Repeat2 },
       { to: paths.quickQuestions, label: ro.nav.quickQuestions, icon: MessagesSquare },
       { to: paths.orders, label: ro.nav.orders, icon: PackageOpen },
+      { to: paths.payments, label: ro.nav.payments, icon: CreditCard },
       { to: paths.messages, label: ro.nav.messages, icon: Mail },
     ],
   },

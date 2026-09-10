@@ -24,6 +24,7 @@ import { EmptyState } from '@/components/common/empty-state';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { PatientPayments } from '@/features/payments/patient-payments';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tabs,
@@ -601,6 +602,16 @@ function ProfileTab({ patient }: { patient: PatientDto }) {
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">{t.detail.noNotes}</p>
       )}
+
+      <Separator className="my-5" />
+
+      {/* What this person has actually paid, taken from the payments ledger
+          rather than from the per-record `paymentStatus` flags — those say
+          whether something was settled, not when or how much. */}
+      <SectionTitle>{ro.payments.patientSection.title}</SectionTitle>
+      <div className="mt-2">
+        <PatientPayments patientId={patient.id} />
+      </div>
     </Card>
   );
 }

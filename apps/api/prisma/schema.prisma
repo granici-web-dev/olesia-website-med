@@ -782,6 +782,37 @@ enum PatientEntryType {
   document
 }
 
+/// What a payment was for. `targetId` points at the row of that kind.
+enum PaymentTargetType {
+  appointment
+  quick_question
+  deliverable_order
+  subscription
+  material
+}
+
+/// Our own normalized payment lifecycle. Deliberately NOT maib's strings:
+/// the bank returns inconsistent casing (`Waitingforinit` vs the documented
+/// `WaitingForInit`) and undocumented values (`Refunded`), so everything is
+/// mapped through `toPaymentState()` on the way in.
+enum PaymentState {
+  created
+  pending
+  paid
+  failed
+  expired
+  abandoned
+  cancelled
+  refunded
+  partially_refunded
+}
+
+enum RefundState {
+  created
+  accepted
+  failed
+}
+
 model Patient {
   id        String    @id @default(uuid())
   fullName  String
@@ -798,6 +829,7 @@ model Patient {
   appointments   Appointment[]
   subscriptions  Subscription[]
   quickQuestions QuickQuestion[]
+  payments       Payment[]
 }
 
 model PatientEntry {
@@ -815,4 +847,96 @@ model PatientEntry {
   updatedAt  DateTime         @updatedAt
 
   @@index([patientId, occurredAt])
+}
+
+/// One maib checkout session and the payment that completed it.
+///
+/// This is the ledger: the bank's list endpoints are broken (see
+/// docs/payments-maib-checkout.md §14), so an id we fail to store here is a
+/// payment we can never look up again. Every field the bank gives us is kept.
+model Payment {
+  id String @id @default(uuid())
+
+  /// maib session id — also the idempotency key for the callback.
+  checkoutId String  @unique
+  /// maib payment id (`payId`). Absent until the payer actually pays.
+  paymentId  String? @unique
+  /// Our own order reference, sent as `orderInfo.id` and echoed back.
+  orderId    String  @unique
+
+  state    PaymentState @default(created)
+  amount   Decimal      @db.Decimal(12, 2)
+  currency String
+  /// `Card` | `MiaQr` | … Captured at payment time on purpose: maib blanks
+  /// it out on the payment record once a refund is accepted.
+  method   String?
+
+  /// What was bought. Polymorphic because one payment flow serves
+  /// appointments, EXPRESS questions, deliverables and paid materials.
+  targetType PaymentTargetType
+  targetId   String?
+
+  /// The payer, as given to the bank. Kept even when no Patient exists yet —
+  /// a payer is not automatically a medical record.
+  payerName  String?
+  payerEmail String
+  payerPhone String?
+
+  /// Linked when a Patient with this email already exists. History lookups
+  /// also match on `payerEmail`, so a patient created later still sees
+  /// everything they paid for.
+  patient   Patient? @relation(fields: [patientId], references: [id])
+  patientId String?
+
+  /// Bank references, for reconciliation and support tickets.
+  rrn           String?
+  approvalCode  String?
+  cardMask      String?
+  threeDsResult String?
+  terminalId    String?
+
+  refundedAmount Decimal @default(0) @db.Decimal(12, 2)
+
+  /// Verbatim last callback payload — the audit trail for a disputed charge.
+  rawCallback Json?
+
+  expiresAt DateTime?
+  paidAt    DateTime?
+  failedAt  DateTime?
+
+  refunds   PaymentRefund[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([state])
+  @@index([patientId])
+  @@index([payerEmail])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+model PaymentRefund {
+  id String @id @default(uuid())
+
+  payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId String
+
+  /// maib refund id. Null until the bank answers: the row is written first, so
+  /// a refund that is in flight still counts against the remaining balance.
+  refundId String?     @unique
+  state    RefundState @default(created)
+  amount   Decimal     @db.Decimal(12, 2)
+  currency String
+  /// `Full` | `Partial`, as reported by maib.
+  kind     String?
+  reason   String
+
+  /// Who pressed the button in the back office.
+  authorId String?
+
+  executedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([paymentId])
 }

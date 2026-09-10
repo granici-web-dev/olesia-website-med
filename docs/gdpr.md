@@ -89,8 +89,9 @@ Heading: Ce date colectăm
   monitorizare.                                                ⚠ особая категория
 • Date despre copil — furnizate de părinte / reprezentant legal.  ⚠ дети
 • Date de programare — gestionate prin Calendly.               ⚠ третья сторона
-• Date de plată — nume și detaliile transferului bancar
-  (nu colectăm date de card — nu există plată online).
+• Date de plată — suma, moneda, referința comenzii, starea plății și,
+  de la bancă, ultimele cifre ale cardului + codurile tranzacției.
+  Datele complete ale cardului NU ajung la noi (pagina securizată maib).
 • Date tehnice — cookie-uri, adresă IP, statistici de utilizare. ⚠ если есть analytics
 • Email — dacă te abonezi la ghiduri sau newsletter.           ⚠ если gated
 ```
@@ -103,6 +104,8 @@ Heading: De ce prelucrăm datele și pe ce temei
 • Pentru date de sănătate — pe baza consimțământului explicit și a
   prestării de servicii de sănătate.                          ⚠ точное основание — юрист
 • Pentru obligații legale — păstrarea documentației.          ⚠ юрист
+• Pentru plăți — executarea contractului + obligație contabilă/fiscală
+  de păstrare a documentelor de plată.                        ⚠ срок — юрист
 • Pe baza consimțământului — pentru newsletter/ghiduri.
 ```
 
@@ -115,7 +118,9 @@ Lucrăm cu furnizori care ne ajută să oferim serviciul:
 • Furnizor de găzduire — [hosting]                              ⚠
 • Furnizor de email — [email]                                  ⚠
 • Statistici — [analytics, dacă există]                        ⚠
-• Banca — pentru plata prin transfer.
+• BC „MAIB" S.A. — plăți online cu cardul și prin MIA. Banca primește
+  datele cardului direct, în calitate de operator propriu.     ⚠ не процессор!
+• Banca — pentru plățile prin transfer bancar.
 
 Nu vindem datele tale și nu le transmitem în scopuri de marketing
 ale terților.

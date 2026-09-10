@@ -158,3 +158,36 @@ export enum MaterialFlag {
   Popular = 'popular',
   New = 'new',
 }
+
+/** What an online payment was for. */
+export enum PaymentTargetType {
+  Appointment = 'appointment',
+  QuickQuestion = 'quick_question',
+  DeliverableOrder = 'deliverable_order',
+  Subscription = 'subscription',
+  Material = 'material',
+}
+
+/**
+ * Normalized lifecycle of an online payment. Not maib's own strings — the bank
+ * returns inconsistent casing and undocumented values, so everything is mapped
+ * on the way in. See docs/payments-maib-checkout.md §11.
+ */
+export enum PaymentState {
+  Created = 'created',
+  Pending = 'pending',
+  Paid = 'paid',
+  Failed = 'failed',
+  Expired = 'expired',
+  Abandoned = 'abandoned',
+  Cancelled = 'cancelled',
+  Refunded = 'refunded',
+  PartiallyRefunded = 'partially_refunded',
+}
+
+/** Lifecycle of a refund request. */
+export enum RefundState {
+  Created = 'created',
+  Accepted = 'accepted',
+  Failed = 'failed',
+}
