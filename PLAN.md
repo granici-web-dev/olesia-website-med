@@ -576,7 +576,7 @@ HTTPS (callback банка проверить нельзя без него).
 |---|---|---|---|---|
 | A1 | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap | правда контента, см. 10a | 10a | `[x]` `3bb74a0` |
 | A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
-| A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[ ]` |
+| A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[>]` аудит 2026-09-10, 25 находок, harden в работе |
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[ ]` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[ ]` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[ ]` |
@@ -740,6 +740,25 @@ A2 закрыт: `harden` `2396497`, 20 файлов, миграция
 `patientId` (A3), MIME вложения плана (A4), ручной `paymentStatus` (A8), кнопки
 `/sync` и `/prep/run` (A10). Не обрабатывается `invitee_no_show.deleted`;
 перенос, случившийся пока API лежал, синхронизация в цепочку не свяжет.
+
+Аудит A3 (2026-09-10, 25 находок, 5 high) добавил: стирание пациента не видит
+семь мест с PII, включая заказы группы C (у модели нет связи с пациентом),
+сообщения контактной формы и медицинские файлы под ссылкой записи без
+`patientId`; бэк-офис в трёх местах говорит врачу «ответ отправлен», хотя
+отправки нет, а крон подготовки штампует `prepSentAt` за log-only отправку, так
+что в день включения SMTP ни одна из прошедших записей инструкций не получит;
+`fromLead` сливает родителя с двумя детьми в одну карту и создаёт пациентов на
+пустой email; автор записей медкарты никогда не заполняется; опечатка в
+таймзоне рабочих часов роняет публичный приём EXPRESS; `sendToClient` вызывается
+в одном месте (uploads, вручную), запись «не используется» в 11d неточна.
+Решения: одна точка уведомлений пациенту поверх `MailService` сейчас, log-only
+до SMTP, интерфейс говорит правду по образцу uploads, `prepSentAt` только при
+реальной отправке, лид получает `locale`; стирание через чистую функцию
+«строки этого человека» по восьми таблицам, `Payment` анонимизируется с
+сохранением сумм и идентификаторов банка; email нормализуется одной функцией на
+входе, `fromLead` при совпадении отвечает 409 и связывание идёт явным вызовом;
+поле `attachments` у EXPRESS убирается; дедупликация повторных отправок в A8,
+`nodemailer` в A12.
 
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
