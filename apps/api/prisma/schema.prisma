@@ -120,7 +120,32 @@ model User {
   /// so a database leak cannot be used to bypass the second factor.
   totpRecoveryCodes String[] @default([])
 
-  posts Post[]
+  posts           Post[]
+  refreshSessions RefreshSession[]
+}
+
+/// One issued refresh token, so that a session can be ended rather than only
+/// expiring: a signed token nobody records cannot be revoked at logout, when a
+/// password changes, or when it turns out to have been stolen.
+model RefreshSession {
+  /// The `jti` of the refresh JWT handed to the browser.
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  expiresAt DateTime
+  revokedAt DateTime?
+  /// The session this one was rotated into. A plain id, not a relation: it is
+  /// an audit trail for reuse detection, and a self-relation would buy nothing
+  /// but a foreign key that has to be nulled on delete.
+  replacedById String?
+
+  /// Truncated, for telling one's own sessions apart in a future session list.
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // --- Service catalog (5 services) ---

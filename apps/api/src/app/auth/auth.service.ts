@@ -1,10 +1,26 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
+import { randomUUID } from 'node:crypto';
 import * as argon2 from 'argon2';
 
 import { PrismaService } from '../prisma/prisma.service';
 import type { User } from '../../generated/prisma/client';
 import type { AccessTokenPayload, RefreshTokenPayload } from './jwt.types';
+import { decideRefresh, readRefreshToken } from './refresh-rules';
+import { ttlToMs } from './token-ttl';
+
+/**
+ * An argon2 hash of a string nobody knows, verified against when the email
+ * does not exist. Without it the "no such user" answer comes back in a few
+ * milliseconds and the "wrong password" answer in thirty, which tells an
+ * attacker which addresses have accounts.
+ */
+const ABSENT_USER_HASH =
+  '$argon2id$v=19$m=65536,t=3,p=4$L/WYUUpgVrnwiuKoFWgfxg$Rt4wWCL7Y5XXZ5aYNeVXXbzejfEcpMvyaZ6IgbQT5NE';
+
+const accessSecret = () => process.env.JWT_ACCESS_SECRET as string;
+const refreshSecret = () => process.env.JWT_REFRESH_SECRET as string;
+const refreshTtl = () => process.env.JWT_REFRESH_TTL ?? '7d';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +35,7 @@ export class AuthService {
       where: { email: email.toLowerCase() },
     });
     if (!user || !user.isActive) {
+      await argon2.verify(ABSENT_USER_HASH, password);
       throw new UnauthorizedException('invalid_credentials');
     }
     const valid = await argon2.verify(user.passwordHash, password);
@@ -28,48 +45,118 @@ export class AuthService {
     return user;
   }
 
-  /** Issue a short-lived access token and a long-lived refresh token. */
+  /**
+   * Issue an access token and a refresh token, recording the refresh token as
+   * a session so it can be ended before it expires.
+   */
   async issueTokens(
     user: Pick<User, 'id' | 'email' | 'role'>,
+    /** `sessionId` is pre-allocated by `rotate`, which records it before the
+     *  new session exists so that the hand-over is a single write. */
+    context: { userAgent?: string; sessionId?: string } = {},
   ): Promise<{ accessToken: string; refreshToken: string }> {
+    const session = await this.prisma.refreshSession.create({
+      data: {
+        id: context.sessionId,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + ttlToMs(refreshTtl())),
+        userAgent: context.userAgent?.slice(0, 200) ?? null,
+      },
+    });
+
     const accessPayload: AccessTokenPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
     };
-    const refreshPayload: RefreshTokenPayload = { sub: user.id };
+    const refreshPayload: RefreshTokenPayload = { sub: user.id, jti: session.id };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(accessPayload, {
-        secret: process.env.JWT_ACCESS_SECRET ?? 'dev-access-secret',
+        secret: accessSecret(),
         expiresIn: (process.env.JWT_ACCESS_TTL ??
           '15m') as JwtSignOptions['expiresIn'],
       }),
       this.jwt.signAsync(refreshPayload, {
-        secret: process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret',
-        expiresIn: (process.env.JWT_REFRESH_TTL ??
-          '7d') as JwtSignOptions['expiresIn'],
+        secret: refreshSecret(),
+        expiresIn: refreshTtl() as JwtSignOptions['expiresIn'],
       }),
     ]);
     return { accessToken, refreshToken };
   }
 
-  /** Validate a refresh token and return its (still-active) user. */
-  async userFromRefreshToken(refreshToken: string): Promise<User> {
-    let payload: RefreshTokenPayload;
-    try {
-      payload = await this.jwt.verifyAsync<RefreshTokenPayload>(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret',
+  /**
+   * Exchange a refresh token for a new pair, retiring the one presented.
+   *
+   * The retirement is a conditional update, so two requests carrying the same
+   * token cannot both succeed: the loser sees an already-revoked session and is
+   * treated as reuse, which is what it is indistinguishable from.
+   */
+  async rotate(
+    refreshToken: string,
+    userAgent?: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = readRefreshToken(this.jwt, refreshToken, refreshSecret());
+    if (!payload) throw new UnauthorizedException('invalid_refresh');
+
+    const nextSessionId = randomUUID();
+    const claimed = await this.prisma.refreshSession.updateMany({
+      where: {
+        id: payload.jti,
+        userId: payload.sub,
+        revokedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      data: { revokedAt: new Date(), replacedById: nextSessionId },
+    });
+
+    if (claimed.count === 0) {
+      const session = await this.prisma.refreshSession.findUnique({
+        where: { id: payload.jti },
       });
-    } catch {
-      throw new UnauthorizedException('invalid_refresh');
+      const decision = decideRefresh(session, payload, new Date());
+      if (decision === 'refresh_reused') {
+        await this.revokeAllSessions(session!.userId);
+      }
+      throw new UnauthorizedException(decision);
     }
+
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('invalid_refresh');
     }
-    return user;
+
+    return this.issueTokens(user, { userAgent, sessionId: nextSessionId });
+  }
+
+  /** End the session behind a refresh token. Unknown tokens are not an error. */
+  async endSession(refreshToken: string): Promise<void> {
+    const payload = readRefreshToken(this.jwt, refreshToken, refreshSecret());
+    // Logging out with a token we cannot read still clears the cookie; there is
+    // nothing to revoke and nothing the caller could do about it.
+    if (!payload) return;
+
+    await this.prisma.refreshSession.updateMany({
+      where: { id: payload.jti, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  /**
+   * Revoke every live session of a user, optionally sparing one. Called
+   * wherever the password changes: the point of changing it is that whoever
+   * had the old one is out.
+   */
+  async revokeAllSessions(userId: string, exceptId?: string): Promise<void> {
+    await this.prisma.refreshSession.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+        ...(exceptId ? { NOT: { id: exceptId } } : {}),
+      },
+      data: { revokedAt: new Date() },
+    });
   }
 }

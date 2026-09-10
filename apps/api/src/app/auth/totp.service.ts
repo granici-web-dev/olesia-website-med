@@ -57,13 +57,30 @@ export interface EnrolmentStart {
 export class TotpService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async startEnrolment(user: Pick<User, 'id' | 'email'>): Promise<EnrolmentStart> {
+  /**
+   * Start (or restart) enrolment. Restarting an account that already has 2FA on
+   * requires a current code: this method turns the flag off, so without that
+   * check a stolen session could strip the second factor in one request.
+   */
+  async startEnrolment(userId: string, code?: string): Promise<EnrolmentStart> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('user_not_found');
+
+    if (user.totpEnabled) {
+      if (!code) throw new BadRequestException('totp_code_required');
+      if (!(await this.verify(user, code))) {
+        throw new BadRequestException('totp_invalid_code');
+      }
+    }
+
     const secret = generateSecret();
     const otpauthUrl = generateURI({ issuer: ISSUER, label: user.email, secret });
 
     await this.prisma.user.update({
-      where: { id: user.id },
-      data: { totpSecret: secret, totpEnabled: false },
+      where: { id: userId },
+      // The old recovery codes belong to the old secret; leaving them behind
+      // would keep a way in that the new enrolment never handed out.
+      data: { totpSecret: secret, totpEnabled: false, totpRecoveryCodes: [] },
     });
 
     return { secret, otpauthUrl, qrDataUrl: await QRCode.toDataURL(otpauthUrl) };

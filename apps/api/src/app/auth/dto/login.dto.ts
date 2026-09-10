@@ -24,3 +24,14 @@ export class TotpCodeDto {
   @Length(6, 20)
   code!: string;
 }
+
+/**
+ * Body for starting enrolment. The code is optional because it is only needed
+ * when 2FA is already on: first-time enrolment has nothing to prove yet.
+ */
+export class OptionalTotpCodeDto {
+  @IsOptional()
+  @IsString()
+  @Length(6, 20)
+  code?: string;
+}

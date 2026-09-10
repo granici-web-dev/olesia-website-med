@@ -9,18 +9,9 @@ import type { Paginated, UserDto } from '@olesia/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
 import { toUserDto } from './users.mapper';
+import { generateStarterPassword } from './starter-password';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-
-/** Readable starter password for admin-created accounts. */
-function generatePassword(): string {
-  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let out = '';
-  for (let i = 0; i < 12; i += 1) {
-    out += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return out;
-}
 
 @Injectable()
 export class UsersService {
@@ -63,13 +54,24 @@ export class UsersService {
     return toUserDto(user);
   }
 
+  /**
+   * Hand the account a new password and end every session it had. A reset is
+   * what an admin reaches for when access has gone somewhere it should not
+   * have, and leaving the old refresh tokens alive would make it pointless.
+   */
   async resetPassword(id: string): Promise<{ password: string }> {
     await this.getOrThrow(id);
-    const password = generatePassword();
-    await this.prisma.user.update({
-      where: { id },
-      data: { passwordHash: await argon2.hash(password) },
-    });
+    const password = generateStarterPassword();
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id },
+        data: { passwordHash: await argon2.hash(password) },
+      }),
+      this.prisma.refreshSession.updateMany({
+        where: { userId: id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
     return { password };
   }
 

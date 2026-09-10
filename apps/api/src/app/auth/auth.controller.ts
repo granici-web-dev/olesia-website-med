@@ -17,21 +17,30 @@ import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { ttlToMs } from './token-ttl';
 import { TotpService, type EnrolmentStart } from './totp.service';
-import { LoginDto, TotpCodeDto } from './dto/login.dto';
+import { LoginDto, OptionalTotpCodeDto, TotpCodeDto } from './dto/login.dto';
 import type { AuthUser } from './jwt.types';
 
 const REFRESH_COOKIE = 'olesia_rt';
 const REFRESH_COOKIE_PATH = '/api/auth';
-const REFRESH_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * `Secure` is on unless COOKIE_SECURE says otherwise, rather than off unless
+ * NODE_ENV says otherwise: the previous shape meant any deployment started
+ * outside the Docker image sent the refresh cookie over plain HTTP without
+ * anyone choosing that.
+ */
+const cookieSecure = () => process.env.COOKIE_SECURE !== 'false';
 
 function setRefreshCookie(res: Response, token: string): void {
   res.cookie(REFRESH_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: cookieSecure(),
     path: REFRESH_COOKIE_PATH,
-    maxAge: REFRESH_MAX_AGE_MS,
+    // The cookie dies with the token inside it.
+    maxAge: ttlToMs(process.env.JWT_REFRESH_TTL ?? '7d'),
   });
 }
 
@@ -58,13 +67,16 @@ export class AuthController {
    */
   async login(
     @Body() dto: LoginDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokens> {
     const user = await this.auth.validateUser(dto.email, dto.password);
     if (user.totpEnabled) {
       await this.totp.assertCode(user, dto.totpCode);
     }
-    const { accessToken, refreshToken } = await this.auth.issueTokens(user);
+    const { accessToken, refreshToken } = await this.auth.issueTokens(user, {
+      userAgent: req.get('user-agent'),
+    });
     setRefreshCookie(res, refreshToken);
     return { accessToken };
   }
@@ -78,8 +90,10 @@ export class AuthController {
   ): Promise<AuthTokens> {
     const token = req.cookies?.[REFRESH_COOKIE];
     if (!token) throw new UnauthorizedException('no_refresh');
-    const user = await this.auth.userFromRefreshToken(token);
-    const { accessToken, refreshToken } = await this.auth.issueTokens(user);
+    const { accessToken, refreshToken } = await this.auth.rotate(
+      token,
+      req.get('user-agent'),
+    );
     setRefreshCookie(res, refreshToken);
     return { accessToken };
   }
@@ -87,7 +101,12 @@ export class AuthController {
   @Public()
   @HttpCode(200)
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response): void {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const token = req.cookies?.[REFRESH_COOKIE];
+    if (token) await this.auth.endSession(token);
     res.clearCookie(REFRESH_COOKIE, { path: REFRESH_COOKIE_PATH });
   }
 
@@ -99,12 +118,23 @@ export class AuthController {
 
   // --- Two-factor authentication (answers v2 §10) ---
 
-  /** Step 1: mint a secret and show the QR. 2FA is NOT on yet. */
+  /**
+   * Step 1: mint a secret and show the QR. 2FA is NOT on yet.
+   *
+   * Re-enrolling an account that already has 2FA on needs a current code:
+   * without that requirement this endpoint was a way to switch the second
+   * factor off from a stolen session, which is exactly what `disable` refuses
+   * to allow.
+   */
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiBearerAuth()
   @HttpCode(200)
   @Post('2fa/setup')
-  setupTotp(@CurrentUser() user: AuthUser): Promise<EnrolmentStart> {
-    return this.totp.startEnrolment({ id: user.id, email: user.email });
+  setupTotp(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: OptionalTotpCodeDto,
+  ): Promise<EnrolmentStart> {
+    return this.totp.startEnrolment(user.id, dto.code);
   }
 
   /** Step 2: prove the authenticator works, then switch 2FA on. */

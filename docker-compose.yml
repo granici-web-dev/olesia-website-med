@@ -34,6 +34,12 @@ services:
       # Browser-facing origin used to build uploaded-image URLs. Set to the
       # public API domain in production (e.g. https://api.example.com).
       PUBLIC_API_URL: http://localhost:3333
+      # Local development only. The API refuses to start without these, and
+      # anything reachable from outside this machine needs real ones.
+      JWT_ACCESS_SECRET: dev-access-secret-not-for-any-real-deployment
+      JWT_REFRESH_SECRET: dev-refresh-secret-not-for-any-real-deployment
+      # Plain HTTP locally, so the refresh cookie cannot carry `Secure`.
+      COOKIE_SECURE: 'false'
       # Calendly (group-A booking). Passed through from the host environment;
       # the webhook rejects every request until the signing key is set.
       CALENDLY_API_TOKEN: ${CALENDLY_API_TOKEN:-}

@@ -7,9 +7,13 @@ export interface AccessTokenPayload {
   role: Role;
 }
 
-/** Decoded refresh-token claims (carried in the httpOnly cookie). */
+/**
+ * Decoded refresh-token claims (carried in the httpOnly cookie). `jti` is the
+ * id of the `RefreshSession` row, which is what makes the token revocable.
+ */
 export interface RefreshTokenPayload {
   sub: string;
+  jti: string;
 }
 
 /** The authenticated principal attached to the request by JwtStrategy. */
