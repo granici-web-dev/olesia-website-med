@@ -2,37 +2,40 @@
 
 Entry point for Claude Code agents. **Procedural rules and read order live in `AGENTS.md`.**
 
-## ⚠️ ACTIVE WORK — client brief changes (2026-06-24)
+## Where the project stands (2026-09-10)
 
-Client answered our brief (`docs/Бриф проекта — Dr. Olesea Jalba.csv`). It **redefines the service catalog** and adds large features. **Full plan, blockers, and phased TODO live in `docs/brief-changes-2026-06-24.md` — read it before starting brief work.** Headlines:
+All three applications are live and well ahead of the client: the API runs 27 domain
+modules, the back office has 24 pages, the site has 20 routes in three languages. The
+features that older notes still list as "next" — FAQ, testimonials, media appearances,
+the digital library, patient uploads, working hours, 2FA, reCAPTCHA, rate limiting, the
+production stack, CI — are built. What blocks launch is on the client's side: legal
+entity, EU hosting, the domain, a paid Calendly, working hours, SMTP, content.
 
-- **Currency MDL → EUR**, durations changed, catalog grows from 5 to ~13 services (see the doc's price table). The "Services (5)" fact below is now **superseded** by the new catalog.
-- **New service group C (deliverables):** 3 personalized menus (7/14/30 zile) + 2 protocols — async pay→form→delivery products.
-- **Întrebare rapidă → "Întrebare EXPRESS":** SLA 48h → ~1h, 180 lei → 8 EUR, email/WhatsApp delivery.
-- **Subscriptions (Abonament):** 4 types × 1/2/3/6 months, **on-request** (decided 2026-07-01 — no price matrix; doctor contacts the client and sets duration + price directly). Frontend reframed "Monitorizare 3 luni" → "Monitorizare și abonamente". Backend still owes the 4×4 model.
-- **Catalog must be data-driven** (admin-editable prices/descriptions + add new services) — open architectural decision (doc §10).
-- **New features:** Biblioteca Digitală (downloads, email-gate, free+paid, search, age filter), Analytics (GA4/GTM/GSC/Meta Pixel), Newsletter, Q17 homepage/About sections, age filter for blog+library, Calendly→Google Meet auto-link.
-- **Real contacts ready to swap:** phone +373 68837774, email oleseajalba@gmail.com; socials IG `dr.olesea_jalba_pediatru`, FB `olesea.jalba.2025`, Telegram `dr_olesea_jalba_official` (drop LinkedIn).
-- **Blocked on client:** legal entity data, article texts/images + upload channel, exact address, newsletter/SMTP provider, working hours, media-appearance list. (Subscription prices, service texts, "~1h" SLA and the lawyer gate were resolved — see the doc.)
+- **The working plan is `PLAN.md`.** One step at a time, in order; a step opens only after
+  the previous one is verified and committed. Read it before picking anything up.
+- **The standards are `PRINCIPLES.md` (judgment), `STACK.md` (technology) and
+  `TESTING.md` (what is worth testing).** `AGENTS.md` holds the procedural rules.
+- **Client scope and blockers:** `docs/brief-changes-2026-06-24.md` — two rounds of client
+  answers (2026-06-24 and 2026-07-26) with a per-phase status. Its price table is the
+  service catalog: ~13 services in EUR, plus group C deliverables.
 
-### ⚠️ SECOND scope change — client answers v2 (2026-07-26)
-
-Client answered a 14-point follow-up (`docs/response_v2.md`). **Details + phased TODO in `docs/brief-changes-2026-06-24.md` §11 and Phases 9–13.** Headlines:
-
-- **Online payments are now IN scope** — card (Visa/MC), MIA, Revolut, PayPal, SEPA, paid *inside* the booking flow (service → slot → pay → auto-confirmation). This **reverses** "Payments: out of scope — manual" in `module_calendly.md` and the earlier manual-confirm decisions. **Blocked on scope/budget sign-off — do not start coding.**
-- **Patients must upload analyses/documents before consults** — new surface, special-category GDPR data, no patient accounts exist today.
-- **Security package:** reCAPTCHA (nothing exists), admin 2FA/TOTP (nothing exists), automated backups, WAF/rate limiting, dependency-update process.
-- **Back office must edit:** texts, prices, photos, articles, PDF guides, **FAQ, testimonials, media appearances** — the last three plus site media have no modules yet. Content models are RO/EN only while the site is RO/EN/**RU** → RU fields needed.
-- **Confirmed:** paid Calendly incoming · standard legal drafts OK for launch (lawyer later) · EXPRESS ~1h *during working hours* (schedule pending) · dedicated `/media` page · RO video + EN/RU **subtitles** (no AI dubbing) · cookie banner with Accept all / Reject / Customize · blog + newsletter.
+**Payments (this reverses the older "out of scope — manual" note).** The maib e-Commerce
+Checkout ledger is built and merged into `main`: the `payments` API module, the schema,
+the back-office `Plăți` page, 39 tests. It is verified against the bank's sandbox but
+**dark** — nothing calls `PaymentsService.start()`, there is no pre-checkout step and no
+return pages, and the bank's callback has never been delivered because there is no public
+HTTPS host yet. `paymentStatus` on an appointment, order, subscription or question is now
+a **mirror of the `Payment` row**, not a field set by hand. Anything payments-related
+starts at `docs/payments-maib-checkout.md`, which is the source of truth.
 
 ## Quick orientation
 
 - **Monorepo:** Nx + pnpm workspaces.
-- **Frontend:** Next.js 15 App Router, TypeScript strict, Tailwind CSS v4 + CSS Modules, Zustand (UI state), TanStack Query (server state), next-intl (EN/RO).
-- **Content:** **No third-party CMS — fully custom (decided 2026-06-10).** All content (services, blog, contacts, about) is served by the **NestJS content API** (`apps/api`) and edited in the custom back office (`apps/back-office`). **Sanity is dropped** — legacy `apps/frontend/lib/sanity/` is to be removed. Rationale: the back office must also own appointments/payments/GDPR data and `admin`/`editor` roles, which a CMS can't host. See `module_calendly.md`.
-- **Booking:** **Calendly** (paid plan, ≥ Standard) — webhook-driven into the `appointments` backend module. **Replaces the earlier Cal.com plan** (legacy `apps/frontend/lib/cal/` to be removed).
-- **i18n:** Three locales — `ro` (default), `en`, and `ru`. Messages in `apps/frontend/i18n/messages/{ro,en,ru}.json`. Note: most page copy is authored inline via `const en/ru = locale === '…'` + `ru ? RU : en ? EN : RO` ternaries (not in the JSON), so all three branches must stay in sync. Dynamic content from the NestJS content API is still RO/EN only (`*_ro`/`*_en`) and falls back to RO for `ru`.
-- **Deploy:** Docker Compose for local/staging. Production TBD.
+- **Frontend:** Next.js 16 App Router (16.3.4), React 19, TypeScript strict, Tailwind CSS v4 + CSS Modules, TanStack Query (server state), next-intl. Zustand is named as the UI-state library but lives in exactly one file (`store/ui.store.ts`).
+- **Content:** **No third-party CMS — fully custom (decided 2026-06-10).** All content is served by the **NestJS content API** (`apps/api`) and edited in the custom back office (`apps/back-office`): services, blog, about, contacts, FAQ, testimonials, media appearances, library materials, site media, working hours. Rationale: the same admin surface must also own appointments, payments, patient files and the `admin`/`editor` roles, which an off-the-shelf CMS cannot host. Sanity was dropped and its integration deleted. See `STACK.md`.
+- **Booking:** **Calendly** (needs a paid plan, ≥ Standard — the free plan allows one active event type, which is why four of the five links currently fail) — webhook-driven into the `appointments` module. The earlier Cal.com integration was deleted.
+- **i18n:** Three locales — `ro` (default), `en`, `ru`. Page copy is authored inline as a locale ternary; the JSON in `i18n/messages/` carries the shared frame only (nav, footer, UI primitives). API content is trilingual with `*Ru` nullable, falling back RU → RO. The rule and its example are `AGENTS.md` R3.
+- **Deploy:** the site is on Vercel. The API + Postgres ship as `docker-compose.prod.yml` with nightly backups — prepared and locally verified, but the host is not chosen yet. See `docs/deployment.md`.
 
 ## Workspace layout
 
@@ -46,36 +49,38 @@ apps/
       sections/      Page sections (Hero, HowItWorks, Services, About, …)
       ui/            Reusable primitives (Button, Badge, …)
     i18n/
-      messages/      en.json, ro.json
+      messages/      ro.json, en.json, ru.json — the shared frame only
       routing.ts     Locale config (defaultLocale: ro)
       request.ts     next-intl server config
-    lib/
-      sanity/        LEGACY — being removed (content moves to the NestJS API)
-      cal/           LEGACY — being removed (booking moves to Calendly)
-    store/           Zustand stores (ui.store.ts, …)
+    lib/             api.ts (content client), calendly.ts, analytics.ts,
+                     legal-entity.ts, uploads.ts, service-content.ts, …
+    store/           ui.store.ts (the only Zustand store)
     hooks/           Custom React hooks
     types/           Shared TypeScript types
     origin/          READ-ONLY reference design (HTML/JSX prototypes). Never edit.
-libs/                Shared libs (future: shared-types, shared-utils)
+  api/               NestJS API (27 domain modules)
+  back-office/       React + Vite admin panel (24 pages), Romanian-only
+packages/
+  shared/            DTOs and enums imported by all three apps
 ```
 
 ## Target architecture — backend + back office
 
-The repo is expanding from a frontend-only app into a **3-app monorepo + shared types package**. Binding source of truth for this work: **`module_calendly.md`** (read it before touching backend, back office, or booking).
+Three applications and one shared package, all built. `module_calendly.md` is the original specification and still governs the booking integration and the data model; where it and the code disagree, the code and the dated notes in `docs/` win — the file itself says which parts are superseded.
 
-- **apps/frontend** — current public site (`@olesia/frontend`, Next.js). Will consume the backend API and type its responses via `packages/shared`. (Kept as `apps/frontend` — this **is** the spec's `apps/web`; do not rename.)
-- **apps/api** — **NestJS** backend, one module per domain: `auth`, `users`, `services`, `appointments`, `subscriptions`, `quick-questions`, `blog`, `contacts`, `about`, `dashboard`, `storage`, `health`. **PostgreSQL + Prisma**, Swagger at `/api/docs`, deployed via Docker.
-- **apps/back-office** — **React + Vite + shadcn/ui** admin panel. UI is **Romanian-only** (strings in one i18n dictionary). Build its UI with the **`impeccable`** skill.
-- **packages/shared** — single source of TS DTOs + enums (service codes, roles, statuses) imported by all apps. No manual type duplication on the frontends.
+- **apps/frontend** — the public site (`@olesia/frontend`, Next.js), consuming the API and typing its responses via `packages/shared`. (Kept as `apps/frontend` — this **is** the spec's `apps/web`; do not rename.)
+- **apps/api** — **NestJS** backend, one module per domain, 27 of them: `auth`, `users`, `services`, `appointments`, `subscriptions`, `quick-questions`, `deliverable-orders`, `payments`, `blog`, `contacts`, `about`, `faq`, `testimonials`, `media-appearances`, `materials`, `site-media`, `working-hours`, `patients`, `uploads`, `storage`, `leads`, `contact-messages`, `mail`, `dashboard`, `health`, `prisma`, `captcha`. **PostgreSQL + Prisma**, Swagger at `/api/docs`, deployed via Docker.
+- **apps/back-office** — **React + Vite + shadcn/ui** admin panel, 24 pages. UI is **Romanian-only** (every string in `src/i18n/ro.ts`). Build its UI with the **`impeccable`** skill.
+- **packages/shared** — single source of TS DTOs + enums (service codes, roles, statuses, payment states) imported by all apps. No manual type duplication on the frontends.
 
 **Key facts**
 
 - **Auth:** JWT (short access + refresh), roles `admin` / `editor`; closed registration (admin creates users); passwords hashed (argon2/bcrypt).
-- **Services:** ⚠️ **being reworked per the 2026-06-24 brief — see `docs/brief-changes-2026-06-24.md` (now ~13 services in EUR, +group C deliverables, data-driven catalog).** Legacy model (still in code until Phase 1): group **A** = Calendly video slots (`pediatric`, `nutrition`, `integrative`); group **B** = portal only, no calendar (`monitoring` = sub 04, `quick_question` = 05). Map a booking to a service **by `event_type` URI only** — never by the editable `a1` answer.
-- **Content:** every content entity is bilingual RO/EN (`*_ro` / `*_en`); public GETs are read-only/unauthenticated; lists are paginated.
-- **Payments:** out of scope — manual. Entities carry `payment_status` `pending` → `confirmed` (set by hand in back office).
+- **Services:** the catalog is data — a `services` table edited in the back office, prices in EUR. Group **A** are Calendly video slots (`pediatric`, `nutrition_copii`, `nutrition_adulti`, `integrative`, `free_consult`), group **B** are portal-only (monitoring/subscriptions, EXPRESS questions), group **C** are the deliverables (menus and protocols). Map a booking to a service **by `event_type` URI only** — never by the editable `a1` answer, and never by the slug: on the test account the slugs do not match their own event names. ⚠️ Known debt: the site still reads prices from `SERVICE_PRICE_META` and the i18n JSON, so editing one in the back office does not change the page. `PLAN.md` step 8.
+- **Content:** every content entity is trilingual — RO and EN required, `*Ru` nullable with a RU → RO fallback; public GETs are read-only/unauthenticated; lists are paginated.
+- **Payments:** maib e-Commerce Checkout. The ledger is in `main` and the bank's sandbox is verified, but no flow calls it yet — see the header above and `docs/payments-maib-checkout.md`. `paymentStatus` on an appointment, order, subscription or question mirrors the `Payment` row; the back office no longer sets it by hand.
 - **Calendly:** env `CALENDLY_API_TOKEN`, `CALENDLY_ORG_URI`, `CALENDLY_WEBHOOK_SIGNING_KEY`; verify webhook signature; idempotency by `scheduled_event.uri`.
-- **Deploy:** multi-stage Dockerfile + docker-compose (`api`, `postgres`; volumes for PG + `uploads/`); `/health` healthcheck; Prisma migrations on container start.
+- **Deploy:** multi-stage Dockerfile + docker-compose (`api`, `postgres`, `backup`; volumes for PG, `uploads/` and `private-uploads/`); `/health` healthcheck; Prisma migrations on container start. Details and the required environment: `docs/deployment.md`.
 - **GDPR:** portal stores names/emails/medical attachments (EU/Moldova) — handle consent, storage, and PII-safe logging.
 
 **Decided** (overrides the spec's `[DEFAULT]`s, 2026-06-10): keep **Nx + pnpm workspaces** (not Turborepo); the site app stays **`apps/frontend`** (= the spec's `apps/web`); file storage stays **local `uploads/`** for now (→ S3/Cloudinary later, behind the `storage` abstraction); blog content is **Markdown**.
@@ -87,10 +92,15 @@ The repo is expanding from a frontend-only app into a **3-app monorepo + shared 
 
 ## Pointers
 
+- **What to work on next:** `PLAN.md`.
+- **Standards:** `PRINCIPLES.md` (judgment), `STACK.md` (technology), `TESTING.md` (tests).
 - **Read order, binding rules, workflow, naming, glossary:** `AGENTS.md`.
-- **Backend / back office / Calendly spec:** `module_calendly.md` — binding source of truth for the NestJS API, admin panel, and booking integration.
+- **Backend / back office / Calendly spec:** `module_calendly.md` — the original specification; superseded in places, and it says where.
+- **Payments:** `docs/payments-maib-checkout.md`.
+- **Client scope, blockers, per-phase status:** `docs/brief-changes-2026-06-24.md`.
+- **Production deployment and the required environment:** `docs/deployment.md`.
 - **Reference design:** `apps/frontend/origin/` — HTML/JSX prototypes. Source of truth for visual design decisions.
-- **Environment variables:** `apps/frontend/.env.local.example`.
+- **Environment variables:** `apps/frontend/.env.local.example` (site), `docs/deployment.md` (API).
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

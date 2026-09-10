@@ -28,7 +28,7 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 - **Newsletter provider + endpoint** — pick Mailchimp/Brevo/Resend/own API (Phase 4, blocker #8). Code env-gated; set `NEXT_PUBLIC_NEWSLETTER_ENDPOINT` (prefer same-origin to dodge CORS). Recommendation to put to the client: **Brevo** (one provider for transactional SMTP + newsletter).
 - **Working hours (`program de lucru`)** — 🟡 **no longer a blocker for the code (2026-08-04):** the schedule is a back-office page (`/program`) and the EXPRESS deadline is counted against it. What ships is a **placeholder** Mon–Fri 09:00–17:00, flagged as provisional in the UI until she saves her real hours. ⛔ Still owed — until then every deadline is computed against hours we invented, and the hours are deliberately **not** shown anywhere on the public site.
 - **Prod hosting for API + Postgres** — 🟡 **prepared 2026-08-04, host not chosen** (deferred pending Sergiu's clarification). `docker-compose.prod.yml` + `docker/backup.sh` + `docker/restore.sh` + **`docs/deployment.md`**. Secrets are `${VAR:?}`-required so the stack refuses to boot with defaults; Postgres publishes no port; the API binds to loopback behind a proxy. Nightly backup covers the DB **and** the uploaded files — a dump alone restores appointments referencing analyses nobody can open. **Restore verified locally**: dropped a table, deleted a file, restored, both came back. ⛔ Still open: the host, an **off-site** backup copy (must stay in the EU — special-category data), and malware scanning. **The hosting account goes in the client's name** — she is the data controller.
-- **Payment scope sign-off** — 5 methods requested (§11.8); needs a scope/budget/timeline decision before any code.
+- ~~**Payment scope sign-off**~~ — 🟡 **UNPARKED 2026-09-10.** Card via **maib e-Commerce Checkout** is chosen and the ledger is built and merged (see Phase 11). What the client still owes: the **acquirer contract** (blocked on her legal entity), and a decision on the remaining four methods — MIA arrives free with the maib contract, PayPal/Revolut/SEPA are separate. ⛔ Nothing can be finished without **an EU host with public HTTPS**: the bank's callback has no address to reach.
 - **Medical-data retention + jurisdiction** — now mandatory: the upload feature shipped 2026-08-04 with a placeholder 180-day purge (§11.14). Confirm the real period before launch.
 - ~~**Real Calendly event-type API URIs** for `nutrition_copii` / `nutrition_adulti`~~ — ✅ captured 2026-08-04 from the live API (see the table below). They are the *test* account's; the client's paid account still has to replace them, but that swap is now a **pick from a list, not a retyping**: the service form has a Calendly event picker that fills the URI and the scheduling URL together, and the Services page shows whether the account is connected and how many bookable services are still unmapped.
 - **Calendly mapping RE-audited against the live API (2026-08-04)** — supersedes the 2026-07-01 "normalization", which renamed slugs to *look* self-documenting without checking them against the account and left two services pointing at the wrong event. Read from `GET /appointments/calendly/event-types`:
@@ -81,15 +81,15 @@ The **frontend slice of every brief feature is built** (Phases 0–7; see per-ph
 ### 🛠️ Deferred to the BACKEND pass (our work; needs apps/api + back-office)
 - **Data-driven catalog** (decided option A): services as DB rows the back office can edit/add (§10). Currently `code` is a fixed enum.
 - ~~**Nutrition full split**~~ — ✅ **DONE 2026-08-04.** Two catalog codes (`nutrition_copii` / `nutrition_adulti`), migration `20260804160000_nutrition_split` (hand-written: the generated enum cast would have failed on the existing `nutrition` row, so a CASE carries it over to the children's service and the seed creates the adults' one), shared `ServiceCode` + `SERVICE_CATALOG`, seed, back-office types/mocks/labels, **two separate /pricing rows**. The homepage tile and the /services row stay **single** and offer **two booking links** (`Rezervă · copii` / `Rezervă · adulți`) — two tiles differing by one word read as a duplicate, not a choice; /nutrition already served both audiences. ⛔ Still owed by the client: the **real Calendly `event_type` API URIs** for the two — both rows carry `calendlyEventTypeUri: null` because a wrong URI would file a child's booking under the adults' service silently.
-- **Group C catalog modeling** — ✅ **ORDERING DONE 2026-08-04.** `POST /leads/deliverable` exists, orders persist as `DeliverableOrder`, and the back office has a **"Comenzi"** page (list · status · manual payment · delete). Until 2026-08-04 every "Comandă" on /pricing 404'd *after* telling the visitor it had been sent. The request now carries **only the product code**: label and price are stamped server-side from `DELIVERABLE_CATALOG` in `packages/shared` and copied onto the row, so a public form cannot name its own price and a later price change does not rewrite past orders. **Still owed:** the document upload that some protocols need (ties into §11.14), and paid delivery once payments are unparked.
+- **Group C catalog modeling** — ✅ **ORDERING DONE 2026-08-04.** `POST /leads/deliverable` exists, orders persist as `DeliverableOrder`, and the back office has a **"Comenzi"** page (list · status · manual payment · delete). Until 2026-08-04 every "Comandă" on /pricing 404'd *after* telling the visitor it had been sent. The request now carries **only the product code**: label and price are stamped server-side from `DELIVERABLE_CATALOG` in `packages/shared` and copied onto the row, so a public form cannot name its own price and a later price change does not rewrite past orders. **Still owed:** the document upload that some protocols need (ties into §11.14), and paid delivery — the checkout now exists, nothing calls it yet (Phase 11).
 - **Subscriptions** 4×4 structure in the model (once prices unblocked).
 - **Biblioteca Digitală**: ~~`materials` API module + back-office CRUD~~ ✅ 2026-07-28. Still owed: **the real PDFs** (client), paid-download flow (payments module), newsletter persistence (SMTP).
 - **Age tagging**: ~~`materials`~~ ✅ 2026-07-28 · ~~`posts`~~ ✅ **2026-08-04** — `Post.ageKeys`, tagged from the blog editor with the same taxonomy as the library (promoted to `@/config/ages` + `ro.ages`). ⚠ The migration spells out `NOT NULL DEFAULT`: a scalar list left NULL on rows that predate the column reads back as `undefined` and the key vanishes from the API response entirely. `Material.ageKeys` and `QuickQuestion.attachments` got the same default. Note `/articles` still renders **placeholder posts** (`USE_LIVE = false`) until the client's real articles arrive — the age chips come from real tags the moment that flips.
 - **Calendly → store/show Meet link** from the webhook `location` payload when the appointments module lands (Phase 7).
-- ~~**Operational 48h→~1h SLA**~~ — ✅ **DONE 2026-08-04.** `dueAt` is computed at intake by `addWorkingMinutes()` against the practice schedule, in the practice's own IANA zone, and **stored** — editing the schedule later never rewrites a deadline that was already promised. A question sent 23:40 Saturday is due Monday morning, not 00:40 Sunday. Covered by 17 unit tests including both DST transitions, an all-days-closed schedule (falls back to wall-clock minutes rather than hanging the public form) and a closes-before-opens typo. **Bug fixed on the way:** the back office was recomputing the deadline locally as `createdAt + 48h`, ignoring the `dueAt` the API had stored — it now displays the server's value.
+- ~~**Operational 48h→~1h SLA**~~ — ✅ **DONE 2026-08-04.** `dueAt` is computed at intake by `addWorkingMinutes()` against the practice schedule, in the practice's own IANA zone, and **stored** — editing the schedule later never rewrites a deadline that was already promised. A question sent 23:40 Saturday is due Monday morning, not 00:40 Sunday. Covered by 15 unit tests including both DST transitions, an all-days-closed schedule (falls back to wall-clock minutes rather than hanging the public form) and a closes-before-opens typo. **Bug fixed on the way:** the back office was recomputing the deadline locally as `createdAt + 48h`, ignoring the `dueAt` the API had stored — it now displays the server's value.
 
 #### ➕ Added by client answers v2 (2026-07-26) — see §11 for detail
-- **Payments module** (§11.8+§11.11) — ⏸ **PARKED 2026-07-28** (Sergiu is clarifying with the client). Would have reversed the earlier "payments out of scope / manual confirm" decision; for now that earlier decision simply stands, and every paid surface keeps working manually. See Phase 11.
+- **Payments module** (§11.8+§11.11) — 🟡 **ledger built and merged 2026-09-10**, flow not wired. This reverses the earlier "payments out of scope / manual confirm" decision for good. Every paid surface still works manually until the flow is connected. See Phase 11.
 - **Patient document upload** (§11.14) — ✅ **DONE 2026-08-04**, option A as recommended. No accounts: an expiring, opaque token in a URL, scoped to one appointment (or one group-C order), granting exactly *see your files / add one / remove one*. Built as one primitive so the order flow reuses it. Back office issues, copies, emails, revokes, downloads and erases from the appointment sheet; the public page is at `/{locale}/incarcare/{token}`, `noindex` + `no-referrer` so the token never leaks in a Referer header.
   - **Consent is a gate, not a checkbox**: the file picker does not render until it is accepted, the API refuses uploads before it, and the wording's version is stored per link so a rewrite cannot retroactively change what was agreed to.
   - **Unknown / expired / revoked all answer the same 404** — a differentiated error is a token-guessing oracle.
@@ -524,7 +524,7 @@ All of these are **not started**. Ordered by dependency, not by client priority.
   - **Storefront fix found while wiring it:** a free material with no file still showed a "Descarcă" button that opened the email gate — the visitor handed over an address and only then learned there was no file. It now says "În curând" up front. With 12/12 materials fileless, that path was about to be the common one.
 - [ ] ⛔ **Real PDFs — blocked on the client.** All 12 materials are seeded without a file. The catalog copy is also interim (titles/descriptions drafted from her topics, page counts and prices placeholders): she owns all of it from the back office now.
 - [ ] Email-gate persistence + newsletter — still blocked on her SMTP provider. The gate unlocks the download but stores nothing.
-- [ ] Paid materials still route to /contact; a real checkout waits on the payments module — ⏸ parked 2026-07-28 (Phase 11).
+- [ ] Paid materials still route to /contact. The checkout exists now (Phase 11) but nothing calls it; wiring the library is step 4 of the flow order in `docs/payments-maib-checkout.md` §10.
 - [x] ~~**Site media** module~~ — ✅ **DONE 2026-07-28.** Migration `20260728170000_site_media`.
   - **Slots, not a gallery.** Ten fixed keys (3 hero videos + poster + 6 page portraits) live in `packages/shared/src/lib/site-media.ts`, because each is wired into one specific place in one specific layout. Only the file behind a key is data; an unknown key is refused (`site_media_unknown_slot`) rather than stored where nothing renders it.
   - **A row is an override.** With no row the site serves the asset committed under `public/assets/`, which is also the fallback if the API is unreachable — a homepage with no hero is a far worse failure than a slightly stale one. "Revino la varianta inițială" deletes the row and the original comes back.
@@ -535,18 +535,53 @@ All of these are **not started**. Ordered by dependency, not by client priority.
 - [x] ~~**RU fields across content models**~~ — ✅ **DONE 2026-07-27** for services/blog/contacts/about (migration `20260727190927_content_ru_fields`). New modules below inherit the convention: RO/EN required, `*Ru` nullable, readers fall back RU → RO (`loc()` in `apps/frontend/lib/api.ts` treats `''` as missing).
   - ⛔ Follow-up for the client: the About stats/credentials rows she already edited have empty RU — she fills them in the back office, we do not invent translations for her content. (The About FAQ block was dropped with the `faq` module; its replacement is fully trilingual from the seed.)
 
-### Phase 11 — Payments (§11.8) ⏸ **PARKED 2026-07-28** — out of scope until further notice
+### Phase 11 — Payments (§11.8) 🟡 **ledger built 2026-09-10, flow not connected**
 
-**Sergiu's call, 2026-07-28: online payments come out of the plan; he is clarifying the question with the client.** Do not start any of the items below without an explicit go-ahead from him.
+**Status corrected 2026-09-10.** The 2026-07-28 note said payments were parked and no
+payment code existed. Both halves are now out of date: Sergiu unparked the question, maib
+e-Commerce Checkout was chosen, and the ledger is built, tested against the bank's sandbox
+and merged into `main` (merge `4fb7161`). **The reference for everything below is
+`docs/payments-maib-checkout.md`** — the bank's API, the four places where the sandbox
+disagrees with its own documentation, and the sandbox validation runs.
 
-Nothing had to be undone: no payment code was ever written, and every surface already works in manual mode and keeps working — paid library materials link to /contact, EXPRESS and subscriptions are lead forms, `paymentStatus` (pending → confirmed) is set by hand in the back office, and Calendly confirms a slot without taking money. The questions that would settle this (legal entity → Stripe eligibility, which merchant accounts are actually obtainable) are §1.1–1.3 of `docs/questions_v3.md`, still unsent.
+**Built and merged.** `apps/api/src/app/payments/` (checkout, status, callback with
+signature verification, reconciliation sweep, refunds), migrations `20260910120000_payments`
+and `20260910140000_payment_refund_guards`, the shared payment DTOs, and the `Plăți` page in
+the back office. 39 unit tests cover the state mapping and the callback signature.
+`paymentStatus` on an appointment, order, subscription or question is now a **mirror** of
+the `Payment` row rather than a field set by hand — `module_calendly.md` §12 is rewritten
+accordingly.
 
-- [ ] Agree scope/budget/timeline and the method priority with the client **before any code**.
-- [ ] Verify merchant availability for a Moldovan entity: acquirer for card + MIA (maib / Victoriabank / Paynet), PayPal, Revolut. Record what is actually obtainable.
-- [ ] `payments` module: provider adapter(s), checkout session, webhook + signature verification, idempotency, `paymentStatus` transitions, refunds, receipts.
-- [ ] Rework the booking flow: service → slot → **payment** → confirmation. Decide custom checkout before Calendly vs Calendly-native collection (PayPal-only in practice).
-- [ ] Reuse the same checkout for **group C deliverables**, **subscriptions**, and **paid library materials**.
-- [ ] SEPA: display IBAN + manual confirmation in the back office (no auto-confirm without a bank API) — set this expectation with the client.
+**Deliberately dark.** Nothing calls `PaymentsService.start()`. There are no
+`/payment/success` and `/payment/failed` pages, no pre-checkout step, and the bank's
+back-channel callback has **never been delivered** — the signature code matches the
+documented algorithm but is unproven until a real callback arrives.
+
+⛔ **What blocks finishing it**
+
+- **An EU host with public HTTPS.** The callback cannot reach a laptop behind a temporary
+  tunnel, so the one untested piece stays untested. This is the same blocker as
+  `docs/deployment.md`, and it gates everything else here.
+- **The acquirer contract**, which is blocked on the client's **legal entity** data. Also
+  unresolved from her side: the domain she gave the bank is not the one she owns
+  (§12.1 of the payments doc).
+- **The T&C checkbox and the currency-conversion notice** on our pre-redirect step — the
+  bank looks for both at review, and the hosted page is maib's, so they have to live on
+  our side. Neither exists yet.
+- **A refund policy** in the T&C covering deliverables and paid library materials; the
+  cancellation section currently covers consultations only.
+
+**Order of work** (`docs/payments-maib-checkout.md` §10, and `PLAN.md` step 9)
+
+- [ ] Pre-checkout step: order summary, T&C checkbox, conversion notice, payer details,
+      redirect to `checkoutUrl`.
+- [ ] `/[locale]/payment/success` and `/[locale]/payment/failed`, polling
+      `/payment-status/:orderId`.
+- [ ] Wire **Întrebare EXPRESS** as the first paid scenario, then deliverables, paid
+      materials, consultations.
+- [ ] Decide the remaining methods: MIA comes with the maib contract; PayPal, Revolut and
+      SEPA are separate calls. SEPA stays manual by definition — display the IBAN and
+      confirm in the back office.
 
 ### Phase 12 — Patient document upload (§11.14) ⛔ blocked on blockers #11 + #12
 - [ ] Choose (A) tokenised per-appointment upload link vs (B) patient accounts. Recommend (A).

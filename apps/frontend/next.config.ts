@@ -68,13 +68,7 @@ const apiImagePatterns = (() => {
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'cdn.sanity.io',
-      },
-      ...apiImagePatterns,
-    ],
+    remotePatterns: apiImagePatterns,
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];

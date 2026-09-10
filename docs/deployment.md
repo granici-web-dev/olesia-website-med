@@ -41,6 +41,24 @@ HTTP and must never be exposed directly.
 Prisma migrations run on container start (see `docker/Dockerfile.api`), so a
 deploy applies pending migrations by itself.
 
+### The back office and the API must share one origin
+
+Serve the admin panel and the API from the same scheme, host and port — the
+panel under a path on the API's origin, or both behind one proxy — not from two
+different hostnames.
+
+The refresh token is an `httpOnly` cookie with `SameSite=Lax`, scoped to
+`/api/auth`. `Lax` is what stops another site from silently spending that cookie:
+the browser withholds it from cross-site background requests, so a hostile page
+cannot mint a fresh access token in the victim's name. Split the two across
+origins and the panel's own `fetch` becomes cross-site too — at which point the
+cookie either stops being sent at all (the panel cannot stay logged in) or has to
+be loosened to `SameSite=None`, which hands the CSRF protection back. There is no
+CSRF token behind it to take over: `Lax` plus one origin *is* the defence.
+
+Same reasoning applies to `CORS_ORIGINS`. It lists exact origins for a reason;
+adding the back office to it is not a substitute for putting it on the same host.
+
 ---
 
 ## Environment
@@ -59,12 +77,28 @@ Required:
 | `PUBLIC_API_URL` | the API's own public origin — builds file URLs |
 | `PUBLIC_SITE_URL` | the **site's** origin — builds the patient upload link |
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | at least 32 characters, random, and different from each other — the API exits at boot otherwise |
-| `COOKIE_SECURE` | defaults to `true`; only set it to `false` for local HTTP |
+| `COOKIE_SECURE` | defaults to `true`, and the default is deliberate — `Secure` is on unless this says otherwise, so a deployment started outside the Docker image cannot send the refresh cookie over plain HTTP without someone choosing that. Only `false` for local HTTP. |
 
 Optional but wanted before launch: `CALENDLY_*` (booking is dead without them),
 `SMTP_*` + `LEADS_NOTIFY_EMAIL` (without these nothing is emailed — leads are
 still saved, and the back office says the mail did not go), `RECAPTCHA_SECRET`
 (empty disables verification entirely).
+
+Payments — **all four blank means online payment is switched off**, which is the
+correct state until the acquirer contract exists. `MaibService.isConfigured()`
+tests the first three and the module simply does not offer a checkout without
+them; a partially filled set is the dangerous shape, so fill them together or
+not at all:
+
+| Variable | Notes |
+|---|---|
+| `MAIB_BASE_URL` | sandbox or production; the two are different hosts |
+| `MAIB_CLIENT_ID` / `MAIB_CLIENT_SECRET` | project credentials from the bank |
+| `MAIB_SIGNATURE_KEY` | verifies the back-channel callback. **Missing means every callback is rejected and logged** — deliberately: an unverified callback moves money in our records on someone else's say-so. |
+
+The callback also needs the API to be reachable from the internet over HTTPS at
+`PUBLIC_API_URL`. Until that exists the signature path stays unproven — see
+`docs/payments-maib-checkout.md`.
 
 `MEDICAL_UPLOAD_RETENTION_DAYS` defaults to 180 — **a placeholder**, pending the
 client's and her lawyer's answer on how long medical files may be kept.

@@ -4,7 +4,7 @@
 >
 > **Дизайн back office:** дизайн-система **shadcn/ui**; при сборке UI использовать скил **`impeccable`**.
 > **Деплой backend:** через **Docker**.
-> **Оплата:** вне scope этой итерации (клиент переводит деньги вручную, подтверждение — ручное).
+> **Оплата:** ⚠️ **это утверждение отменено 2026-09-10.** Онлайн-оплата вошла в scope (ответы клиента v2, §11.8), построен модуль maib e-Commerce Checkout. Источник правды — `docs/payments-maib-checkout.md`; §12 ниже переписан.
 >
 > Решения, помеченные `[DEFAULT]`, выбраны по умолчанию — их можно изменить до старта.
 
@@ -97,7 +97,7 @@ repo/
 ### 3.2 Разделы (страницы) back office
 1. **Login** — форма входа (email + пароль).
 2. **Dashboard** — статистика (см. §11; конкретные метрики уточним позже, заложить каркас с карточками и графиками).
-3. **Записи (Appointments)** — список видеоконсультаций, фильтры по услуге/статусу/дате, карточка записи, ручное подтверждение оплаты, загрузка письменного плана, отметка no-show.
+3. **Записи (Appointments)** — список видеоконсультаций, фильтры по услуге/статусу/дате, карточка записи, статус оплаты (зеркало `Payment`, см. §12), загрузка письменного плана, отметка no-show.
 4. **Подписки (Subscriptions)** — список подписок 04, статус, остаток квоты видеозвонков.
 5. **Быстрые вопросы (Quick questions)** — тикеты 05, дедлайн 48 ч, ответ.
 6. **Блог** — список постов, создание/редактирование (markdown-редактор с превью), категории/теги, загрузка обложки, статус draft/published, RO/EN.
@@ -291,7 +291,7 @@ Cron-джоб опрашивает `GET /scheduled_events` за период (`m
 | start_time, end_time | datetime | |
 | video_url | string\|null | |
 | status | enum | `scheduled` / `canceled` / `completed` / `no_show` |
-| payment_status | enum | `pending` / `confirmed` (ручное) |
+| payment_status | enum | `pending` / `confirmed` — **зеркало строки `Payment`**, не ручное поле (см. §12) |
 | cancel_url, reschedule_url | string | |
 | prep_sent_at | datetime\|null | |
 | plan_uploaded_at | datetime\|null | |
@@ -342,18 +342,34 @@ Cron-джоб опрашивает `GET /scheduled_events` за период (`m
 - Конверсия `scheduled → completed`, доля `no_show`, доля `canceled`.
 - Активные подписки + использование квоты видеозвонков.
 - Тикеты: кол-во и SLA (доля ответов в пределах 48 ч).
-- (Когда появится оплата) выручка по `payment_status=confirmed`.
+- Выручка по `payment_status=confirmed`. Деньги считать по таблице `Payment` (`state`, `amount`, `refundedAmount`), а не по зеркалу.
 
 Backend: эндпоинт(ы) `GET /dashboard/stats?from=&to=`. Front: карточки + графики (shadcn + chart-библиотека). Сделать так, чтобы новые метрики добавлялись без переписывания каркаса.
 
 ---
 
-## 12. Оплата (вне scope сейчас)
+## 12. Оплата — maib e-Commerce Checkout
 
-Оплата **ручная**: клиент переводит деньги отдельно, менеджер подтверждает.
-- Сущности `Appointment`, `Subscription`, `QuickQuestionTicket` имеют `payment_status` (`pending` / `confirmed`).
-- После записи — `pending`; менеджер переводит в `confirmed` вручную через back office.
-- Платёжный шлюз не интегрируется в этой итерации; модель данных к нему готова.
+⚠️ **Переписано 2026-09-10.** Прежняя редакция говорила «оплата вне scope, подтверждение
+ручное». Это больше не так: клиент запросил онлайн-оплату (ответы v2, §11.8), и платёжный
+модуль построен. **Единственный источник правды — `docs/payments-maib-checkout.md`**: там
+API банка, четыре расхождения песочницы с документацией, схема ledger'а и то, что ещё
+закрыто клиентом.
+
+- Отдельная сущность **`Payment`** (+ `PaymentRefund`) хранит состояние платежа:
+  `created` / `pending` / `paid` / `failed` / `expired` / `abandoned` / `cancelled` /
+  `refunded` / `partially_refunded`, суммы, RRN, маску карты, сырой callback.
+- `payment_status` на `Appointment`, `Subscription`, `QuickQuestion` и `DeliverableOrder`
+  остаётся, но теперь это **зеркало**: `markTargetPaid()` проставляет `confirmed`, когда
+  платёж перешёл в `paid`. Руками его не ставят. Считать деньги по зеркалу нельзя —
+  оно не знает про возвраты.
+- Callback банка проверяется по подписи (HMAC над `{rawBody}.{timestamp}`, base64 —
+  порядок и кодировка **обратные** нашему вебхуку Calendly, не «чинить» одно под другое),
+  идемпотентно по `payId`.
+- ⛔ **Поток ещё не подключён:** `PaymentsService.start()` никто не вызывает, страниц
+  возврата на сайте нет, callback ни разу не приходил — нет публичного HTTPS-хоста.
+  Пока это не сделано, каждая платная поверхность работает как раньше, вручную.
+- SEPA остаётся ручным по определению: показываем IBAN, подтверждаем в back office.
 
 ---
 
@@ -391,7 +407,7 @@ Backend: эндпоинт(ы) `GET /dashboard/stats?from=&to=`. Front: карт�
 8. `appointments` + webhook Calendly + backup-cron + подготовка/план.
 9. `subscriptions` (04) и `quick-questions` (05).
 10. `dashboard` — каркас + базовые метрики.
-11. Ручное подтверждение оплаты в back office.
+11. Платежи: ledger `Payment` + страница «Plăți» в back office. Подключение к потокам оплаты — по `docs/payments-maib-checkout.md` §10.
 
 ---
 
