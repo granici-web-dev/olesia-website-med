@@ -577,7 +577,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A1 | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap | правда контента, см. 10a | 10a | `[x]` `3bb74a0` |
 | A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
 | A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[x]` `085a3d2`, `c0dd5f6` |
-| A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[>]` аудит 2026-09-10, 22 находки, harden в работе |
+| A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[ ]` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[ ]` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[ ]` |
@@ -797,6 +797,27 @@ honeypot с `MaxLength(0)` отвечал ботам 400 по одному по�
 ошибок Prisma в 409/404 в `common`; `slugify` в `packages/shared` с тестами
 вместо трёх копий; сайт переходит на `react-markdown` + `remark-gfm` (A7);
 футер читает `/contacts` (A6); email-гейт и счётчики (A6, 12c).
+
+A4 закрыт: `harden` `22e0b86`, 39 файлов, 220 тестов (+37), без миграций.
+Публичные ответы services, contacts, blog и materials отделены от стаффных
+(`/services/all`, `/contacts/all`, `toPublicMaterialDto`, `toPublicPostDto`),
+`isPubliclyVisible` с автопроставлением даты публикации, сниффинг на всех
+четырёх путях записи с сигнатурами mp4 и webm, статика после helmet, общий
+`common/prisma-errors.ts` (P2002/P2003/P2025 → 409/409/404, с разбором
+`meta.driverAdapterError`, потому что Prisma 7 через pg-адаптер не заполняет
+`meta.target`), `slugify` и `SLUG_PATTERN` в `packages/shared`, `MaxLength` во
+всех DTO, `@IsUploadedFileUrl`. Проверено запросами: пост из 2030 не виден и не
+в sitemap, HTML под PDF и под mp4 отвергается, `../x` в слаге отвергается,
+удаление занятой услуги и категории даёт 409. По ходу выяснилось, что `active`
+проверял только `/pricing`, три другие страницы нет.
+
+Хвосты: (1) `@IsUploadedFileUrl` привязан к `PUBLIC_API_URL`, на туннеле хост
+меняется при каждом рестарте, решение: проверять только путь `/uploads/<один
+сегмент>`, хост не проверять, правка в начале A5; (2) `fileUrl` и `coverImageUrl`
+хранятся абсолютными URL со старым хостом, при переезде на домен нужен один
+`UPDATE` с заменой префикса, записать в runbook `docs/deployment.md`;
+(3) 12 файлов не проходят `prettier --check` ещё до этих правок, CI prettier не
+гоняет, решить на A11.
 
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
