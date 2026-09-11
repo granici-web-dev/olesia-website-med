@@ -43,3 +43,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agent rules written by `next dev`
+# It regenerates both on every start (the `nextjs-agent-rules` block at the top
+# of AGENTS.md, which CLAUDE.md only imports), so they are build output, not the
+# project's own rules — those are the repo-root CLAUDE.md and AGENTS.md.
+/AGENTS.md
+/CLAUDE.md

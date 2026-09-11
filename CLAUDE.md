@@ -31,6 +31,10 @@ starts at `docs/payments-maib-checkout.md`, which is the source of truth.
 ## Quick orientation
 
 - **Monorepo:** Nx + pnpm workspaces.
+- **Next 16 is not the Next.js in your training data.** Read the relevant guide in
+  `node_modules/next/dist/docs/` before touching the frontend. (`next dev` writes
+  `apps/frontend/AGENTS.md` and `apps/frontend/CLAUDE.md` saying so; they are
+  generated and git-ignored, not this project's rules.)
 - **Frontend:** Next.js 16 App Router (16.3.4), React 19, TypeScript strict, Tailwind CSS v4 + CSS Modules, next-intl, react-markdown for the client's own text. **No client state library and no client data-fetching library**: pages are server components that read the API directly, and the handful of interactive pieces use `useState`. Zustand and TanStack Query were both listed here and used nowhere; they went with audit A7.
 - **Content:** **No third-party CMS — fully custom (decided 2026-06-10).** All content is served by the **NestJS content API** (`apps/api`) and edited in the custom back office (`apps/back-office`): services, blog, about, contacts, FAQ, testimonials, media appearances, library materials, site media, working hours. Rationale: the same admin surface must also own appointments, payments, patient files and the `admin`/`editor` roles, which an off-the-shelf CMS cannot host. Sanity was dropped and its integration deleted. See `STACK.md`.
 - **Booking:** **Calendly** (needs a paid plan, ≥ Standard — the free plan allows one active event type, which is why four of the five links currently fail) — webhook-driven into the `appointments` module. The earlier Cal.com integration was deleted.
