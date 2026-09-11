@@ -10,9 +10,12 @@ import { siteUrl } from '@/lib/site-url';
  * leak through a Referer header, and this is the second lock: a crawler that
  * somehow learns a token must not put it in a public index.
  *
- * `/payment/*` does not exist yet (`PLAN.md` step 9), and is listed now so the
- * return pages are excluded the day they land rather than the day someone
- * notices an order id in a search result.
+ * `/payment/*` is where the bank returns a payer. The URL carries an order
+ * reference and the page renders what somebody just bought, which is one
+ * person's receipt and nobody else's business; the two pages send `noindex`
+ * themselves as well. The prefix was listed here before the pages existed, so
+ * they were excluded on the day they landed rather than on the day somebody
+ * noticed an order id in a search result.
  *
  * Both prefixes are written once per locale as well as bare, because every
  * route on this site carries a locale prefix: the middleware redirects

@@ -37,6 +37,20 @@ describe('describeLeadError', () => {
     expect(ru).toContain('спам');
   });
 
+  it('says payment is off rather than "try again in a few minutes"', () => {
+    // 503 `legal_entity_missing` is the checkout refusing because the
+    // practice's registered entity is not configured. Trying again will not
+    // help, which is exactly what the generic 5xx sentence promises — so the
+    // code has to beat the status here, not the other way round.
+    const [ro, en, ru] = distinctAcrossLocales((l) =>
+      describeLeadError(503, 'legal_entity_missing', l),
+    );
+    expect(ro).toContain('Plata online');
+    expect(en).toContain('Online payment');
+    expect(ru).toContain('Онлайн-оплата');
+    expect(en).not.toContain('few minutes');
+  });
+
   it('reads the code even when the status is an unexpected one', () => {
     expect(describeLeadError(400, 'captcha_failed', 'en')).toBe(
       describeLeadError(403, 'captcha_failed', 'en'),

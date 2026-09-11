@@ -7,7 +7,8 @@ import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
 import { LegalDraftNotice } from '@/components/ui/LegalDraftNotice';
-import { LEGAL_ENTITY, LEGAL_UPDATED } from '@/lib/legal-entity';
+import { api } from '@/lib/api';
+import { LEGAL_UPDATED, SITE_IDENTITY } from '@/lib/legal-entity';
 import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
@@ -32,10 +33,14 @@ export const revalidate = 60;
    resolution, prescription policy, and which language version prevails.
    ────────────────────────────────────────────────────────────────────────── */
 
-/** Identity and dates come from `lib/legal-entity.ts` — see /gdpr for why. */
+/**
+ * Dates and the trading name come from `lib/legal-entity.ts`; the registered
+ * entity comes from the API — see /gdpr for why. `provider` falls back to the
+ * trading name so the page reads as prose while the entity is outstanding, and
+ * the draft banner says what is missing.
+ */
 const META = {
-  provider: LEGAL_ENTITY.registeredName || LEGAL_ENTITY.displayName,
-  email: LEGAL_ENTITY.email,
+  email: SITE_IDENTITY.email,
   updatedRo: LEGAL_UPDATED.ro,
   updatedEn: LEGAL_UPDATED.en,
   updatedRu: LEGAL_UPDATED.ru,
@@ -79,6 +84,7 @@ const TOC: TocItem[] = [
   { id: 'programare', ro: 'Programare', en: 'Booking', ru: 'Запись' },
   { id: 'plata', ro: 'Plată', en: 'Payment', ru: 'Оплата' },
   { id: 'anulare', ro: 'Anulare și rambursare', en: 'Cancellation & refunds', ru: 'Отмена и возврат' },
+  { id: 'rambursare', ro: 'Rambursarea, pe tipuri', en: 'Refunds by purchase', ru: 'Возврат по видам' },
   { id: 'natura', ro: 'Natura serviciilor', en: 'Nature of the services', ru: 'Характер услуг' },
   { id: 'obligatii', ro: 'Obligațiile tale', en: 'Your obligations', ru: 'Ваши обязанности' },
   { id: 'raspundere', ro: 'Răspundere', en: 'Liability', ru: 'Ответственность' },
@@ -114,6 +120,43 @@ const SUMMARY: Bi[] = [
     ro: 'Pentru copii, serviciile sunt solicitate de un părinte sau reprezentant legal.',
     en: 'For children, services are requested by a parent or legal guardian.',
     ru: 'Услуги для детей заказывает родитель или законный представитель.',
+  },
+];
+
+/**
+ * What is refundable, per kind of purchase. The acquirer's compliance review
+ * asks for this in so many words, and the three kinds genuinely differ: a
+ * consultation can be cancelled, a written answer is work already done once it
+ * is written, and a file cannot be returned after it has been downloaded.
+ *
+ * ⚠ These are the practice's stated terms, not a lawyer's. Confirm them with
+ * the same review that confirms the rest of this page.
+ */
+const REFUNDS: Bi[] = [
+  {
+    ro: 'Consultații video: rambursare integrală dacă anulezi cu cel puțin 24 de ore înainte. Sub acest termen, plata acoperă intervalul rezervat.',
+    en: 'Video consultations: a full refund if you cancel at least 24 hours ahead. Inside that window, the payment covers the slot that was held for you.',
+    ru: 'Видеоконсультации: полный возврат при отмене не позднее чем за 24 часа. Позже оплата покрывает забронированное время.',
+  },
+  {
+    ro: 'Întrebare EXPRESS: rambursare integrală oricând înainte ca medicul să trimită răspunsul. După ce răspunsul a plecat, serviciul a fost prestat.',
+    en: 'Express question: a full refund any time before the doctor sends the answer. Once the answer has gone out, the service has been delivered.',
+    ru: 'Экспресс-вопрос: полный возврат в любой момент, пока врач не отправил ответ. После отправки ответа услуга считается оказанной.',
+  },
+  {
+    ro: 'Meniuri și protocoale personalizate: rambursare integrală înainte de începerea lucrului. După livrarea documentului, nu se rambursează — este realizat pentru situația ta.',
+    en: 'Personalized menus and protocols: a full refund before work starts. Once the document has been delivered it is not refundable — it was written for your situation.',
+    ru: 'Персональные меню и протоколы: полный возврат до начала работы. После передачи документа возврат не производится — он составлен под вашу ситуацию.',
+  },
+  {
+    ro: 'Materiale din bibliotecă: fiind fișiere descărcate imediat, nu se rambursează după descărcare. Dacă fișierul nu se deschide sau nu este cel comandat, scrie-ne și îl înlocuim sau returnăm banii.',
+    en: 'Library materials: a file downloaded straight away is not refundable once downloaded. If the file will not open, or is not the one you ordered, write to us and we replace it or refund it.',
+    ru: 'Материалы из библиотеки: файл скачивается сразу, поэтому после скачивания возврат не производится. Если файл не открывается или это не то, что вы заказывали, напишите нам — заменим или вернём деньги.',
+  },
+  {
+    ro: 'Cererea de rambursare se trimite pe email, cu numărul comenzii din confirmarea de plată. Răspundem în cel mult 5 zile lucrătoare.',
+    en: 'Ask for a refund by email, quoting the order number from your payment confirmation. We answer within 5 working days.',
+    ru: 'Запрос на возврат отправляйте по электронной почте, указав номер заказа из письма-подтверждения. Отвечаем в течение 5 рабочих дней.',
   },
 ];
 
@@ -168,10 +211,11 @@ export default async function TermsPage({
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = biFor(locale);
+  const legalEntity = await api.legalEntity();
 
   return (
     <main className="bg-cream text-ink">
-      <LegalDraftNotice locale={locale} />
+      <LegalDraftNotice locale={locale} entity={legalEntity} />
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
@@ -214,21 +258,23 @@ export default async function TermsPage({
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                   {ru ? 'Поставщик услуг' : en ? 'Provider' : 'Furnizor'}
                 </dt>
-                <dd className="text-ink">{META.provider}</dd>
-                {LEGAL_ENTITY.idno && (
+                <dd className="text-ink">
+                  {legalEntity.registeredName || SITE_IDENTITY.displayName}
+                </dd>
+                {legalEntity.idno && (
                   <>
                     <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                       IDNO
                     </dt>
-                    <dd className="text-ink">{LEGAL_ENTITY.idno}</dd>
+                    <dd className="text-ink">{legalEntity.idno}</dd>
                   </>
                 )}
-                {LEGAL_ENTITY.address && (
+                {legalEntity.address && (
                   <>
                     <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                       {ru ? 'Адрес' : en ? 'Address' : 'Adresă'}
                     </dt>
-                    <dd className="text-ink">{LEGAL_ENTITY.address}</dd>
+                    <dd className="text-ink">{legalEntity.address}</dd>
                   </>
                 )}
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
@@ -402,6 +448,36 @@ export default async function TermsPage({
                   ? 'You can cancel or reschedule a consultation at least 24 hours before the scheduled time, from your confirmation link. Refunds are made if you cancel within this window, per the cancellation policy. If you’re too late for the consultation to take place, we can reschedule it.'
                   : 'Poți anula sau reprograma o consultație cu cel puțin 24 de ore înainte de ora programată, din linkul de confirmare. Rambursările se fac dacă anulezi în acest interval, conform politicii de anulare. Dacă întârzii prea mult pentru a desfășura consultația, o putem reprograma.'}
             </p>
+          </Section>
+
+          {/* Rambursare pe tip de produs — cerută de banca acceptatoare */}
+          <Section
+            id="rambursare"
+            title={
+              ru
+                ? 'Возврат средств по видам услуг'
+                : en
+                  ? 'Refunds, by kind of purchase'
+                  : 'Rambursarea, pe tipuri de achiziție'
+            }
+          >
+            <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Возврат всегда идёт на ту же карту, которой была произведена оплата, и поступает в течение нескольких рабочих дней — срок зависит от вашего банка, а не от нас. Ниже — что именно возвращается для каждого вида покупки.'
+                : en
+                  ? 'A refund always goes back to the card the payment was made with, and lands within a few working days — the timing is your bank’s, not ours. What is refundable depends on what was bought.'
+                  : 'Rambursarea se face întotdeauna pe cardul cu care s-a plătit și ajunge în câteva zile lucrătoare — termenul ține de banca ta, nu de noi. Mai jos, ce se rambursează pentru fiecare tip de achiziție.'}
+            </p>
+            <ul className="mt-8 grid gap-4">
+              {REFUNDS.map((r) => (
+                <li key={r.en} className="flex gap-3.5">
+                  <Dot />
+                  <span className="max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+                    {lc(r)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </Section>
 
           {/* Natura serviciilor medicale și limitele lor — CORE */}

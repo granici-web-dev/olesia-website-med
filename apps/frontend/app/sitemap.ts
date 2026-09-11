@@ -8,9 +8,11 @@ import { siteUrl } from '@/lib/site-url';
  * `alternates.languages` so a crawler treats them as one page in three
  * languages rather than three competing pages.
  *
- * Deliberately absent: `/incarcare/<token>` (the token is a credential) and the
- * `/payment/*` return pages that `PLAN.md` step 9 will add. `robots.ts`
- * disallows both.
+ * Deliberately absent: `/incarcare/<token>` (the token is a credential), the
+ * `/payment/*` return pages (one person's receipt, carrying their order
+ * reference) and `/quick-question/checkout`, which is a step inside somebody's
+ * purchase rather than a page to arrive at. `robots.ts` disallows the first
+ * two; all three send `noindex` of their own.
  */
 const STATIC_PATHS = [
   '',

@@ -10,6 +10,7 @@
 import type {
   AboutPageDto,
   FaqCategoryDto,
+  LegalEntityDto,
   MaterialCategoryDto,
   PublicContactDto,
   PublicMaterialDto,
@@ -26,6 +27,7 @@ export type {
   AboutPageDto,
   AboutStat,
   FaqCategoryDto,
+  LegalEntityDto,
   FaqItemDto,
   MaterialCategoryDto,
   PublicContactDto,
@@ -162,9 +164,23 @@ const WORKING_HOURS_AT_BUILD: WorkingHoursDto = {
   updatedAt: new Date(0).toISOString(),
 };
 
+/**
+ * What the API answers before the client's incorporation exists — and what a
+ * build with no API reachable must assume. Empty is the honest reading: the
+ * legal pages then render their draft banner, which is exactly right for a
+ * site whose entity is still outstanding.
+ */
+const LEGAL_ENTITY_AT_BUILD: LegalEntityDto = {
+  registeredName: '',
+  idno: '',
+  address: '',
+};
+
 export const api = {
   services: () => getJson<PublicServiceDto[]>('/services', []),
   contacts: () => getJson<PublicContactDto[]>('/contacts', []),
+  legalEntity: () =>
+    getRequired<LegalEntityDto>('/contacts/legal-entity', LEGAL_ENTITY_AT_BUILD),
   about: () => getJson<AboutPageDto | null>('/about', null),
   workingHours: () =>
     getRequired<WorkingHoursDto>('/working-hours', WORKING_HOURS_AT_BUILD),

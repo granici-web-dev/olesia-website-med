@@ -7,7 +7,8 @@ import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
 import { LegalDraftNotice } from '@/components/ui/LegalDraftNotice';
-import { LEGAL_ENTITY, LEGAL_UPDATED } from '@/lib/legal-entity';
+import { api } from '@/lib/api';
+import { LEGAL_UPDATED, SITE_IDENTITY } from '@/lib/legal-entity';
 import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
@@ -32,13 +33,15 @@ export const revalidate = 60;
    ────────────────────────────────────────────────────────────────────────── */
 
 /**
- * Identity and dates come from `lib/legal-entity.ts` — the single place both
- * legal pages read, so they cannot drift apart, and the one edit that has to
- * happen when the client finally sends her entity data.
+ * Dates and the trading name come from `lib/legal-entity.ts`; the registered
+ * entity comes from the API (`api.legalEntity()`), which reads it from the
+ * environment. Two halves, one place each — the three fields the acquirer's
+ * compliance review checks are the API's, because /terms and the bank's
+ * payment receipt name the same ones and a second copy is how they drift.
  */
 const META = {
-  operator: LEGAL_ENTITY.displayName,
-  email: LEGAL_ENTITY.email,
+  operator: SITE_IDENTITY.displayName,
+  email: SITE_IDENTITY.email,
   updatedRo: LEGAL_UPDATED.ro,
   updatedEn: LEGAL_UPDATED.en,
   updatedRu: LEGAL_UPDATED.ru,
@@ -364,10 +367,11 @@ export default async function GdprPage({
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = biFor(locale);
+  const legalEntity = await api.legalEntity();
 
   return (
     <main className="bg-cream text-ink">
-      <LegalDraftNotice locale={locale} />
+      <LegalDraftNotice locale={locale} entity={legalEntity} />
       <Breadcrumbs
         className="shell pt-6 md:pt-8"
         items={[
@@ -411,22 +415,22 @@ export default async function GdprPage({
                   {ru ? 'Оператор' : en ? 'Operator' : 'Operator'}
                 </dt>
                 <dd className="text-ink">
-                  {LEGAL_ENTITY.registeredName || META.operator}
+                  {legalEntity.registeredName || META.operator}
                 </dd>
-                {LEGAL_ENTITY.idno && (
+                {legalEntity.idno && (
                   <>
                     <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                       IDNO
                     </dt>
-                    <dd className="text-ink">{LEGAL_ENTITY.idno}</dd>
+                    <dd className="text-ink">{legalEntity.idno}</dd>
                   </>
                 )}
-                {LEGAL_ENTITY.address && (
+                {legalEntity.address && (
                   <>
                     <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                       {ru ? 'Адрес' : en ? 'Address' : 'Adresă'}
                     </dt>
-                    <dd className="text-ink">{LEGAL_ENTITY.address}</dd>
+                    <dd className="text-ink">{legalEntity.address}</dd>
                   </>
                 )}
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
@@ -647,6 +651,18 @@ export default async function GdprPage({
                 : en
                 ? 'Payment records are kept for as long as accounting and tax law requires. That period applies even if you ask us to delete the rest of your data: the law obliges us to keep the fact and the amount of the payment, but not anything about your health.'
                 : 'Documentele de plată le păstrăm atât timp cât cer legislația contabilă și cea fiscală. Termenul se aplică inclusiv dacă ne ceri ștergerea celorlalte date: legea ne obligă să păstrăm faptul și suma plății, dar nu și informații despre sănătatea ta.'}
+            </p>
+            {/* An EXPRESS question is written before it is paid for, so an
+                abandoned checkout leaves medical text nobody bought. Seven days
+                is our own operational choice, not a legal period — which is why
+                it is stated as a number here rather than as "the period
+                required by law" (docs/shape-express-checkout.md, decision 2). */}
+            <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+              {ru
+                ? 'Если вы написали экспресс-вопрос, но не завершили оплату, текст вопроса остаётся у нас не более семи дней и затем удаляется автоматически. Врач его за это время не видит: неоплаченный вопрос не попадает в рабочий список.'
+                : en
+                  ? 'If you wrote an express question but did not complete the payment, the text stays with us for at most seven days and is then deleted automatically. The doctor does not see it in the meantime: an unpaid question never reaches the working list.'
+                  : 'Dacă ai scris o întrebare EXPRESS, dar nu ai finalizat plata, textul rămâne la noi cel mult șapte zile și apoi se șterge automat. Medicul nu îl vede între timp: o întrebare neachitată nu ajunge în lista de lucru.'}
             </p>
           </Section>
 

@@ -126,12 +126,16 @@ async function readCode(res: Response): Promise<string> {
  * header and the same failure modes, and had its own copy of all of it — one
  * that turned every failure into the string `'error'`, so a rate limit and a
  * rejected captcha reached the visitor as "something went wrong" (audit A7).
+ *
+ * The response body is returned for the one caller that needs it: the EXPRESS
+ * checkout, which is answered with the bank's URL to redirect to. The four
+ * lead forms ignore it and are typed `void`.
  */
-export async function postLead(
+export async function postLead<T = void>(
   path: string,
   body: unknown,
   action: CaptchaAction,
-): Promise<void> {
+): Promise<T> {
   const token = await getCaptchaToken(action);
   let res: Response;
   try {
@@ -148,6 +152,7 @@ export async function postLead(
     throw new LeadError(0, '');
   }
   if (!res.ok) throw new LeadError(res.status, await readCode(res));
+  return (await res.json().catch(() => undefined)) as T;
 }
 
 export function submitMonitoringLead(input: MonitoringLeadInput): Promise<void> {

@@ -64,12 +64,28 @@ const UNAVAILABLE: Tri = {
   ru: 'Сервис временно недоступен. Попробуйте ещё раз через несколько минут.',
 };
 
+/**
+ * Online payment is switched off because the practice's registered entity is
+ * not configured yet — the checkout refuses rather than taking money on behalf
+ * of a company that is not named anywhere (`legal_entity_missing`).
+ *
+ * Its own wording because the visitor did nothing wrong and trying again will
+ * not help, which is what every other sentence here implies. It points at the
+ * thing that still works: writing to us.
+ */
+const PAYMENT_OFF: Tri = {
+  ro: 'Plata online este temporar indisponibilă. Scrie-ne direct și îți răspundem.',
+  en: 'Online payment is temporarily unavailable. Write to us directly and we will answer.',
+  ru: 'Онлайн-оплата временно недоступна. Напишите нам напрямую — мы ответим.',
+};
+
 export function describeLeadError(
   status: number,
   code: string,
   locale: Locale,
 ): string {
   if (code === 'captcha_failed') return pick(CAPTCHA, locale);
+  if (code === 'legal_entity_missing') return pick(PAYMENT_OFF, locale);
   if (status === 0) return pick(OFFLINE, locale);
   if (status === 429) return pick(TOO_MANY, locale);
   if (status === 400) return pick(INVALID, locale);

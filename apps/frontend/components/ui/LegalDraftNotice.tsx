@@ -1,17 +1,26 @@
-import { LEGAL_ENTITY_INCOMPLETE } from '@/lib/legal-entity';
+import type { LegalEntityDto } from '@olesia/shared';
+
+import { legalEntityIncomplete } from '@/lib/legal-entity';
 
 /**
  * Says out loud that a legal page is not finished.
  *
- * It renders only while `LEGAL_ENTITY` is missing a required field, so it
- * cannot be forgotten on the page after the data arrives, and it cannot be
- * dismissed while the page is genuinely incomplete. The alternative — a policy
+ * It renders only while the entity the API serves is missing a required field,
+ * so it cannot be forgotten on the page after the data arrives, and it cannot
+ * be dismissed while the page is genuinely incomplete. The entity is passed in
+ * rather than fetched here: both pages already read it to print it. The alternative — a policy
  * that reads as authoritative but names no controller and no registered entity
  * — is worse than an obviously unfinished one, because a visitor has no way to
  * tell.
  */
-export function LegalDraftNotice({ locale }: { locale: string }) {
-  if (!LEGAL_ENTITY_INCOMPLETE) return null;
+export function LegalDraftNotice({
+  locale,
+  entity,
+}: {
+  locale: string;
+  entity: LegalEntityDto;
+}) {
+  if (!legalEntityIncomplete(entity)) return null;
 
   const ru = locale === 'ru';
   const en = locale === 'en';

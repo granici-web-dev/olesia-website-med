@@ -4,7 +4,7 @@ import { useLocale } from 'next-intl';
 import { useEffect } from 'react';
 
 import { btnDark, underline } from '@/components/ui/cta';
-import { LEGAL_ENTITY } from '@/lib/legal-entity';
+import { SITE_IDENTITY } from '@/lib/legal-entity';
 
 /**
  * What a visitor sees when the content API cannot answer.
@@ -58,8 +58,8 @@ export default function LocaleError({
           </button>
           {/* The legal-notice address, not the editable contacts list: this
               page renders precisely when the API cannot be read. */}
-          <a href={`mailto:${LEGAL_ENTITY.email}`} className={underline}>
-            {LEGAL_ENTITY.email}
+          <a href={`mailto:${SITE_IDENTITY.email}`} className={underline}>
+            {SITE_IDENTITY.email}
           </a>
         </div>
       </section>

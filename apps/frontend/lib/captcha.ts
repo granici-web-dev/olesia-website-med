@@ -27,6 +27,7 @@ export type CaptchaAction =
   | 'lead_quick_question'
   | 'lead_contact'
   | 'lead_deliverable'
+  | 'quick_question_checkout'
   | 'newsletter_subscribe'
   | 'material_download';
 
