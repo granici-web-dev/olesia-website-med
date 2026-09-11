@@ -1,8 +1,7 @@
 import type { Paginated } from '@olesia/shared';
 
-import { http, tokenStore } from '@/api/http';
+import { http } from '@/api/http';
 import { asList } from '@/api/list';
-import { API_BASE_URL } from '@/api/config';
 import type {
   EntryFormValues,
   LeadSource,
@@ -137,30 +136,15 @@ export function uploadDocument(
   return http.post<PatientEntryDto>(`/patients/${id}/documents`, form);
 }
 
-/**
- * Authenticated, streamed download. Fetched with the access token so it never
- * touches the public `/uploads` static path; the blob is handed to the browser
- * as a save dialog.
- */
-export async function downloadDocument(
+/** Authenticated, streamed download of a document in the patient's file. */
+export function downloadDocument(
   id: string,
   entry: PatientEntryDto,
 ): Promise<void> {
-  const token = tokenStore.get();
-  const res = await fetch(`${API_BASE_URL}/patients/${id}/documents/${entry.id}`, {
-    credentials: 'include',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) throw new Error(`download_failed:${res.status}`);
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = entry.fileName ?? 'document';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  return http.download(
+    `/patients/${id}/documents/${entry.id}`,
+    entry.fileName ?? 'document',
+  );
 }
 
 /**

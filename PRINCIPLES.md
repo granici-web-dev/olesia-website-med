@@ -81,7 +81,8 @@ procedure. Where the two disagree, see "Known divergences" at the end.
 - **No escape hatches.** Zero `any`, zero `@ts-ignore` in hand-written code. Five
   `as unknown as` casts exist, each at a point where a value genuinely leaves the type
   system: the JSON `days` column in `working-hours.service.ts` (twice), the raw callback
-  body stored as `Prisma.InputJsonValue` in `payments.service.ts`, the raw text response in
+  body stored as `Prisma.InputJsonValue` in `payments.service.ts`, the `Blob` an
+  authenticated download returns from `request()` in
   `apps/back-office/src/api/http.ts`, and the payment DTO widened into the view layer's
   unions in `apps/back-office/src/features/payments/api.ts`. A sixth needs a reason in a
   comment; a cast used to silence a type error rather than to cross a boundary does not go

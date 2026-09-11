@@ -1,7 +1,6 @@
 import type { AppointmentDto, ServiceDto } from '@olesia/shared';
 
-import { API_BASE_URL } from '@/api/config';
-import { http, tokenStore } from '@/api/http';
+import { http } from '@/api/http';
 import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type {
   Appointment,
@@ -98,28 +97,7 @@ export async function uploadPlan(args: {
   return toView(d, codes);
 }
 
-/**
- * Authenticated, streamed download of the plan attachment. Fetched with the
- * access token so the private file never touches a public path; the blob is
- * handed to the browser as a save dialog (mirrors patient-document download).
- */
-export async function downloadPlanFile(
-  id: string,
-  fileName: string,
-): Promise<void> {
-  const token = tokenStore.get();
-  const res = await fetch(`${API_BASE_URL}/appointments/${id}/plan/file`, {
-    credentials: 'include',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) throw new Error(`download_failed:${res.status}`);
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName || 'plan';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+/** Authenticated, streamed download of the plan attachment. */
+export function downloadPlanFile(id: string, fileName: string): Promise<void> {
+  return http.download(`/appointments/${id}/plan/file`, fileName || 'plan');
 }

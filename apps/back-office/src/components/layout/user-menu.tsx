@@ -32,8 +32,19 @@ export function UserMenu() {
 
   if (!user) return null;
 
-  const handleLogout = () => {
-    logout();
+  /**
+   * Say "signed out" only after the server has said so. When it refuses, the
+   * session is still open and the panel stays where it is: a login screen over
+   * a live session is the panel telling the doctor something untrue about who
+   * can reach her patients.
+   */
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      toast.error(ro.userMenu.logoutFailed);
+      return;
+    }
     toast.success(ro.userMenu.logout, { description: ro.app.name });
     navigate(paths.login, { replace: true });
   };
@@ -69,7 +80,10 @@ export function UserMenu() {
           {ro.userMenu.settings}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
+        <DropdownMenuItem
+          variant="destructive"
+          onSelect={() => void handleLogout()}
+        >
           <LogOut />
           {ro.userMenu.logout}
         </DropdownMenuItem>

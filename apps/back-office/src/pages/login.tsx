@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BrandMark } from '@/components/common/brand-mark';
 import { useAuth } from '@/auth/auth-context';
+import { remainingSeconds, totpLockSeconds } from '@/auth/session-rules';
+import type { SessionEndReason } from '@/api/http';
 import { paths } from '@/config/routes';
 import { ro } from '@/i18n/ro';
 
@@ -23,13 +25,22 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+/** What sent the user here, when it was not their own click on "Deconectare". */
+function sessionNotice(reason: SessionEndReason | undefined): string | null {
+  if (reason === 'refresh_reused') return ro.login.sessionReused;
+  if (reason === 'expired') return ro.login.sessionExpired;
+  return null;
+}
+
 export function LoginPage() {
   const { status, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from =
-    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ??
-    paths.dashboard;
+  const arrival = location.state as {
+    from?: string;
+    reason?: SessionEndReason;
+  } | null;
+  const from = arrival?.from ?? paths.dashboard;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -39,6 +50,25 @@ export function LoginPage() {
   const [rootError, setRootError] = React.useState<string | null>(null);
   /** Second step: the account has 2FA on, so a code is required. */
   const [needsTotp, setNeedsTotp] = React.useState(false);
+  /**
+   * When the API refused further codes, and for how long. Counted down on the
+   * button rather than reported once: the doctor needs to see the wait ending,
+   * otherwise she keeps trying codes and each attempt pushes the lock further.
+   */
+  const [lockedUntil, setLockedUntil] = React.useState<number | null>(null);
+  const [lockedFor, setLockedFor] = React.useState(0);
+
+  React.useEffect(() => {
+    if (lockedUntil === null) return;
+    const tick = () => {
+      const left = remainingSeconds(lockedUntil, Date.now());
+      setLockedFor(left);
+      if (left === 0) setLockedUntil(null);
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [lockedUntil]);
 
   // Already signed in → bounce to the app.
   if (status === 'authenticated') {
@@ -52,6 +82,12 @@ export function LoginPage() {
       toast.success(ro.login.success);
       navigate(from, { replace: true });
     } catch (err) {
+      const locked = totpLockSeconds(err);
+      if (locked !== null) {
+        setNeedsTotp(true);
+        setLockedUntil(Date.now() + locked * 1000);
+        return;
+      }
       // The API answers 401 `totp_required` when the account has 2FA on and no
       // code was sent — the password was correct, so we only add the code field
       // rather than showing a credentials error.
@@ -70,6 +106,7 @@ export function LoginPage() {
   };
 
   const submitting = form.formState.isSubmitting;
+  const notice = rootError === null ? sessionNotice(arrival?.reason) : null;
 
   return (
     <div className="relative grid min-h-svh place-items-center overflow-hidden px-4 py-10">
@@ -93,6 +130,14 @@ export function LoginPage() {
         </div>
 
         <div className="rounded-xl border bg-card p-6 shadow-sm">
+          {notice && (
+            <p
+              role="status"
+              className="mb-5 rounded-md bg-muted px-3 py-2 text-xs font-medium text-muted-foreground text-pretty"
+            >
+              {notice}
+            </p>
+          )}
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             noValidate
@@ -158,21 +203,27 @@ export function LoginPage() {
               </div>
             )}
 
-            {rootError && (
+            {(rootError || lockedFor > 0) && (
               <p
                 role="alert"
                 className="rounded-md bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive"
               >
-                {rootError}
+                {lockedFor > 0 ? ro.login.totpLocked(lockedFor) : rootError}
               </p>
             )}
 
-            <Button type="submit" className="w-full" disabled={submitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={submitting || lockedFor > 0}
+            >
               {submitting ? (
                 <>
                   <Loader2 className="animate-spin" />
                   {ro.login.submitting}
                 </>
+              ) : lockedFor > 0 ? (
+                ro.login.totpLocked(lockedFor)
               ) : (
                 ro.login.submit
               )}

@@ -69,7 +69,10 @@ export class AuthService {
       email: user.email,
       role: user.role,
     };
-    const refreshPayload: RefreshTokenPayload = { sub: user.id, jti: session.id };
+    const refreshPayload: RefreshTokenPayload = {
+      sub: user.id,
+      jti: session.id,
+    };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(accessPayload, {
@@ -89,8 +92,9 @@ export class AuthService {
    * Exchange a refresh token for a new pair, retiring the one presented.
    *
    * The retirement is a conditional update, so two requests carrying the same
-   * token cannot both succeed: the loser sees an already-revoked session and is
-   * treated as reuse, which is what it is indistinguishable from.
+   * token cannot both succeed. What the loser is treated as depends on how late
+   * it is: inside `REFRESH_GRACE_MS` it is a second tab, after that it is a
+   * replay and every session of the account goes.
    */
   async rotate(
     refreshToken: string,

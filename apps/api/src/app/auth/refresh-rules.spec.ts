@@ -1,6 +1,10 @@
 import { JwtService } from '@nestjs/jwt';
 
-import { decideRefresh, readRefreshToken } from './refresh-rules';
+import {
+  decideRefresh,
+  readRefreshToken,
+  REFRESH_GRACE_MS,
+} from './refresh-rules';
 
 /**
  * What a refresh token is allowed to do. The expensive mistakes here are quiet
@@ -72,7 +76,11 @@ describe('decideRefresh', () => {
 
   it('rejects a session that has expired', () => {
     expect(
-      decideRefresh({ ...live, expiresAt: minutes(-1) }, { sub: 'user-1' }, NOW),
+      decideRefresh(
+        { ...live, expiresAt: minutes(-1) },
+        { sub: 'user-1' },
+        NOW,
+      ),
     ).toBe('invalid_refresh');
   });
 
@@ -80,6 +88,30 @@ describe('decideRefresh', () => {
     expect(
       decideRefresh(
         { ...live, revokedAt: minutes(-5), replacedById: 'session-2' },
+        { sub: 'user-1' },
+        NOW,
+      ),
+    ).toBe('refresh_reused');
+  });
+
+  it('forgives a predecessor presented seconds after the rotation', () => {
+    // Two tabs restoring at once. The late one is refused, but calling it
+    // theft would end the session on the doctor's phone as well.
+    const justRotated = new Date(NOW.getTime() - REFRESH_GRACE_MS + 1_000);
+    expect(
+      decideRefresh(
+        { ...live, revokedAt: justRotated, replacedById: 'session-2' },
+        { sub: 'user-1' },
+        NOW,
+      ),
+    ).toBe('invalid_refresh');
+  });
+
+  it('stops forgiving once the window has passed', () => {
+    const stale = new Date(NOW.getTime() - REFRESH_GRACE_MS - 1);
+    expect(
+      decideRefresh(
+        { ...live, revokedAt: stale, replacedById: 'session-2' },
         { sub: 'user-1' },
         NOW,
       ),

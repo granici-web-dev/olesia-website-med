@@ -14,6 +14,7 @@ import type { Request, Response } from 'express';
 import type { AuthTokens, UserDto } from '@olesia/shared';
 
 import { Public } from '../common/decorators/public.decorator';
+import { AllowsPasswordChangePending } from '../common/decorators/password-change-pending.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../../generated/prisma/enums';
@@ -115,7 +116,7 @@ export class AuthController {
   }
 
   @Public()
-  @HttpCode(200)
+  @HttpCode(204)
   @Post('logout')
   async logout(
     @Req() req: Request,
@@ -132,6 +133,7 @@ export class AuthController {
    */
   @Throttle({ default: { ttl: 60_000, limit: 8 } })
   @ApiBearerAuth()
+  @AllowsPasswordChangePending()
   @HttpCode(200)
   @Roles(...SELF_SERVICE)
   @Post('change-password')
@@ -152,6 +154,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @AllowsPasswordChangePending()
   @Roles(...SELF_SERVICE)
   @Get('me')
   me(@CurrentUser() user: AuthUser): Promise<UserDto> {
@@ -190,13 +193,15 @@ export class AuthController {
     @CurrentUser() user: AuthUser,
     @Body() dto: TotpCodeDto,
   ): Promise<{ recoveryCodes: string[] }> {
-    return { recoveryCodes: await this.totp.confirmEnrolment(user.id, dto.code) };
+    return {
+      recoveryCodes: await this.totp.confirmEnrolment(user.id, dto.code),
+    };
   }
 
   /** Turning it off also needs a valid code — a stolen session must not suffice. */
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiBearerAuth()
-  @HttpCode(200)
+  @HttpCode(204)
   @Roles(...SELF_SERVICE)
   @Post('2fa/disable')
   async disableTotp(

@@ -1,6 +1,11 @@
-import type { AuthTokens, LoginRequest, TotpEnrolment, UserDto } from '@olesia/shared';
+import type {
+  AuthTokens,
+  LoginRequest,
+  TotpEnrolment,
+  UserDto,
+} from '@olesia/shared';
 
-import { http, tokenStore } from '@/api/http';
+import { http, refreshAccessToken, tokenStore } from '@/api/http';
 
 /**
  * Real auth flow against the NestJS `auth` module (module_calendly.md §4).
@@ -19,13 +24,19 @@ export async function login(body: LoginRequest): Promise<UserDto> {
 /**
  * Restore a session on app load: exchange the refresh cookie for a fresh
  * access token, then load the current user. Returns null if not signed in.
+ *
+ * Through the shared refresh rather than a POST of its own: two tabs opened at
+ * the same moment each presented the cookie they had been loaded with, and the
+ * one that arrived second was read by the API as a replayed token, which ended
+ * the session on every device the account had.
  */
 export async function restoreSession(): Promise<UserDto | null> {
+  const refreshed = await refreshAccessToken();
+  if (!refreshed.ok) {
+    tokenStore.set(null);
+    return null;
+  }
   try {
-    const tokens = await http.post<AuthTokens>('/auth/refresh', undefined, {
-      noAuth: true,
-    });
-    tokenStore.set(tokens.accessToken);
     return await http.get<UserDto>('/auth/me');
   } catch {
     tokenStore.set(null);
@@ -33,13 +44,16 @@ export async function restoreSession(): Promise<UserDto | null> {
   }
 }
 
-/** Invalidate the session server-side and clear the in-memory token. */
+/**
+ * Invalidate the session server-side, then clear the in-memory token.
+ *
+ * Throws when the API did not confirm it. This used to be best-effort, which
+ * meant a laptop with no network showed "Deconectare" and a login screen while
+ * the session it was supposed to have ended stayed open on the server — the one
+ * case where the panel must not say a thing it has not verified.
+ */
 export async function logout(): Promise<void> {
-  try {
-    await http.post('/auth/logout');
-  } catch {
-    // best-effort; clear locally regardless
-  }
+  await http.post<void>('/auth/logout');
   tokenStore.set(null);
 }
 

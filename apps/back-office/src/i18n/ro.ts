@@ -59,6 +59,8 @@ export const ro = {
     profile: 'Profilul meu',
     settings: 'Setări',
     logout: 'Deconectare',
+    logoutFailed:
+      'Nu am reușit să te deconectăm. Sesiunea este încă activă; verifică conexiunea și încearcă din nou.',
   },
 
   roles: {
@@ -132,6 +134,12 @@ export const ro = {
     totpHint:
       'Deschide aplicația de autentificare și introdu codul de 6 cifre. Poți folosi și un cod de recuperare.',
     totpError: 'Cod incorect. Mai încearcă o dată.',
+    totpLocked: (seconds: number) =>
+      `Prea multe coduri greșite. Mai încearcă peste ${seconds} s.`,
+    sessionExpired:
+      'Sesiunea a expirat. Autentifică-te din nou ca să continui de unde ai rămas.',
+    sessionReused:
+      'Sesiunea a fost închisă pe toate dispozitivele, din motive de securitate. Autentifică-te din nou.',
     footnote: 'Acces restricționat. Conturile sunt create de administrator.',
   },
 

@@ -1,7 +1,6 @@
 import type { UploadLinkDto } from '@olesia/shared';
 
-import { API_BASE_URL } from '@/api/config';
-import { http, tokenStore } from '@/api/http';
+import { http } from '@/api/http';
 import type { UploadLink } from '@/features/uploads/types';
 
 /** Real `upload-links` endpoints — the staff half of §11.14. */
@@ -50,7 +49,9 @@ export async function sendUploadLink(id: string): Promise<{ sent: boolean }> {
 }
 
 export async function revokeUploadLink(id: string): Promise<UploadLink> {
-  return toView(await http.post<UploadLinkDto>(`/upload-links/${id}/revoke`, {}));
+  return toView(
+    await http.post<UploadLinkDto>(`/upload-links/${id}/revoke`, {}),
+  );
 }
 
 export async function deleteUploadedDocument(
@@ -59,27 +60,13 @@ export async function deleteUploadedDocument(
   await http.del<void>(`/upload-links/documents/${documentId}`);
 }
 
-/**
- * Authenticated streamed download — medical files have no public URL, so this
- * fetches with the bearer token and hands the browser a blob.
- */
-export async function downloadUploadedDocument(
+/** Authenticated streamed download of a document a patient uploaded. */
+export function downloadUploadedDocument(
   documentId: string,
   fileName: string,
 ): Promise<void> {
-  const token = tokenStore.get();
-  const res = await fetch(`${API_BASE_URL}/upload-links/documents/${documentId}`, {
-    credentials: 'include',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) throw new Error(`download_failed:${res.status}`);
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName || 'document';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  return http.download(
+    `/upload-links/documents/${documentId}`,
+    fileName || 'document',
+  );
 }

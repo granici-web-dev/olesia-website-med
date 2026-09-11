@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { useAuth } from '@/auth/auth-context';
+import { returnPath } from '@/auth/session-rules';
 import { ChangePasswordForm } from '@/auth/change-password-form';
 import { paths } from '@/config/routes';
 import { ro } from '@/i18n/ro';
@@ -11,7 +12,7 @@ import { ro } from '@/i18n/ro';
  * changing it.
  */
 export function ProtectedRoute() {
-  const { status, user } = useAuth();
+  const { status, user, sessionEndReason } = useAuth();
   const location = useLocation();
 
   if (status === 'loading') {
@@ -27,7 +28,13 @@ export function ProtectedRoute() {
   }
 
   if (status === 'unauthenticated') {
-    return <Navigate to={paths.login} replace state={{ from: location }} />;
+    return (
+      <Navigate
+        to={paths.login}
+        replace
+        state={{ from: returnPath(location), reason: sessionEndReason }}
+      />
+    );
   }
 
   if (user?.mustChangePassword) {

@@ -21,4 +21,6 @@ export interface AuthUser {
   id: string;
   email: string;
   role: Role;
+  /** Still on the password an admin read out; see MustChangePasswordGuard. */
+  mustChangePassword: boolean;
 }

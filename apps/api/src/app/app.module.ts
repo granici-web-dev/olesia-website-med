@@ -5,6 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { MustChangePasswordGuard } from './auth/guards/must-change-password.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -77,17 +78,19 @@ import { CaptchaModule } from './common/captcha/captcha.module';
     PaymentsModule,
   ],
   /**
-   * All three global guards, in one place and in this order (audit A5, F15).
+   * All four global guards, in one place and in this order (audit A5, F15).
    *
    * Nest runs APP_GUARD providers in registration order, and registration
    * order across modules is import order — so with the throttler declared here
-   * and the two auth guards declared in AuthModule, the sequence was an
+   * and the auth guards declared in AuthModule, the sequence was an
    * accident of where `AuthModule` happened to sit in the imports above.
-   * Spelling all three out here makes it a decision:
+   * Spelling them all out here makes it a decision:
    *
    * 1. Throttler — a flood is refused before it costs a token verification.
    * 2. JwtAuthGuard — establishes who is asking.
    * 3. RolesGuard — decides whether they may, which needs step 2 to have run.
+   * 4. MustChangePasswordGuard — holds a starter-password account to the three
+   *    routes that get it out of that state, which needs step 2 as well.
    *
    * The per-route limit still overrides the default through `@Throttle`.
    */
@@ -95,6 +98,7 @@ import { CaptchaModule } from './common/captcha/captcha.module';
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: MustChangePasswordGuard },
   ],
 })
 export class AppModule {}
