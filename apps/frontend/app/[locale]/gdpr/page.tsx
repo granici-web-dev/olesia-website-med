@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -48,7 +51,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/gdpr',
     title: ru
       ? 'Политика конфиденциальности | Dr. Olesea Jalba'
       : en
@@ -59,7 +64,7 @@ export async function generateMetadata({
       : en
       ? 'How we collect, use, and protect your data — including health data and data about your child — and the rights you have.'
       : 'Cum colectăm, folosim și protejăm datele tale, inclusiv datele despre sănătate și despre copil, și drepturile pe care le ai.',
-  };
+  });
 }
 
 interface TocItem {
@@ -356,6 +361,7 @@ export default async function GdprPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);

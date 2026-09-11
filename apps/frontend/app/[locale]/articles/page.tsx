@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Link } from '@/i18n/navigation';
 import { api, loc, type PublicPostDto } from '@/lib/api';
 import {
@@ -29,7 +32,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/articles',
     title: ru
       ? 'Блог — здоровье и питание ребёнка | Dr. Olesea Jalba'
       : en
@@ -40,7 +45,7 @@ export async function generateMetadata({
       : en
       ? 'Articles on your child’s health and nutrition, written by a pediatrician. Information you can trust.'
       : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru. Informații în care poți avea încredere.',
-  };
+  });
 }
 
 export default async function ArticlesPage({
@@ -49,6 +54,7 @@ export default async function ArticlesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);

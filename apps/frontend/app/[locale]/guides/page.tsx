@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Link } from '@/i18n/navigation';
 import { MaterialLibrary } from '@/components/sections/MaterialLibrary';
@@ -28,7 +31,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/guides',
     title: ru
       ? 'Цифровая библиотека — гайды и материалы | Dr. Olesea Jalba'
       : en
@@ -39,7 +44,7 @@ export async function generateMetadata({
       : en
       ? 'Materials on child health and nutrition by a pediatrician: free and paid, with search and filters by age and topic.'
       : 'Materiale despre sănătatea și nutriția copilului, scrise de un medic pediatru: gratuite și cu plată, cu căutare și filtre după vârstă și temă.',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -51,6 +56,7 @@ export default async function LibraryPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);

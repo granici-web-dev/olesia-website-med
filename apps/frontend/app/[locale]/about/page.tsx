@@ -1,11 +1,16 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Certificates } from '@/components/sections/Certificates';
 import { btnDark, creamPill } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
-import { api, loc } from '@/lib/api';
+import { ApiUnavailableError, api, loc } from '@/lib/api';
+import { JsonLd } from '@/components/ui/JsonLd';
+import { physicianJsonLd } from '@/lib/structured-data';
 import { renderMarkdown } from '@/lib/markdown';
 
 export const revalidate = 60;
@@ -28,7 +33,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/about',
     title: ru
       ? 'Обо мне — Dr. Olesea Jalba, врач-педиатр и нутрициолог'
       : en
@@ -39,7 +46,7 @@ export async function generateMetadata({
       : en
         ? 'Pediatrician with a master’s in human nutrition and experience in pediatric gastroenterology. Consultations in Romanian, Russian, and English.'
         : 'Medic pediatru cu master în nutriție umană și experiență în gastroenterologie pediatrică. Consultații în română, rusă și engleză.',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -181,9 +188,17 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [portrait, about] = await Promise.all([
+  setRequestLocale(locale);
+  const [portrait, about, contacts, hours] = await Promise.all([
     siteMediaAsset('portrait_about'),
     api.about(),
+    api.contacts(),
+    // `/working-hours` is a required singleton and throws on an outage; the
+    // record below is what this page is for, and it does not need a schedule.
+    api.workingHours().catch((e: unknown) => {
+      if (e instanceof ApiUnavailableError) return null;
+      throw e;
+    }),
   ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
@@ -191,6 +206,16 @@ export default async function AboutPage({
 
   return (
     <main className="bg-cream text-ink">
+      <JsonLd
+        data={physicianJsonLd({
+          locale,
+          path: '/about',
+          contacts,
+          hours,
+          imageUrl: portrait.url,
+        })}
+      />
+
       {/* 1 · Hero — name + title + tagline + photo */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell grid items-start gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">

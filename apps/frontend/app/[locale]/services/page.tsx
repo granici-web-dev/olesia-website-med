@@ -1,4 +1,8 @@
 import Image from 'next/image';
+import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Link } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
@@ -17,6 +21,30 @@ const DETAIL_ROUTE: Record<string, string> = {
 };
 
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const en = locale === 'en';
+  const ru = locale === 'ru';
+  return pageMetadata({
+    locale,
+    path: '/services',
+    title: ru
+      ? 'Услуги — онлайн-консультации | Dr. Olesea Jalba'
+      : en
+        ? 'Services — online consultations | Dr. Olesea Jalba'
+        : 'Servicii — consultații online | Dr. Olesea Jalba',
+    description: ru
+      ? 'Пять услуг в двух форматах: видеоконсультации педиатра и нутрициолога, наблюдение и экспресс-вопрос врачу.'
+      : en
+        ? 'Five services in two formats: pediatric and nutrition video consultations, ongoing monitoring, and a written express question.'
+        : 'Cinci servicii în două formate: consultații video de pediatrie și nutriție, monitorizare și întrebare EXPRESS.',
+  });
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
    Content lives here, bilingual (RO default · EN), so the page renders fully
@@ -531,6 +559,7 @@ export default async function ServicesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const portrait = await siteMediaAsset('portrait_services');
 
   const en = locale === 'en';

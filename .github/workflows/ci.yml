@@ -81,6 +81,12 @@ jobs:
         run: pnpm nx build back-office
 
       - name: Build frontend
+        # `siteUrl()` refuses to build a production bundle without an origin to
+        # put in robots.txt, the sitemap and every canonical link (audit A7,
+        # F6). CI has no domain, so it declares a placeholder one — what is
+        # being checked here is that the app compiles, not what it points at.
+        env:
+          NEXT_PUBLIC_SITE_URL: https://ci.invalid
         run: pnpm nx build @olesia/frontend
 
   # Migrations are the one thing a type error cannot catch and a broken one

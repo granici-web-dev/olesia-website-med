@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -28,7 +31,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/pediatrics',
     title: ru
       ? 'Онлайн педиатрические консультации | Dr. Olesea Jalba'
       : en
@@ -39,7 +44,7 @@ export async function generateMetadata({
       : en
       ? 'Video pediatric consultation with a pediatrician: symptoms, digestion, the often-ill child, allergies, growth. Book online.'
       : 'Consultație pediatrică video cu un medic pediatru: simptome, digestie, copilul frecvent bolnav, alergii, creștere. Programează online.',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -198,6 +203,7 @@ export default async function PediatricsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const portrait = await siteMediaAsset('portrait_pediatrics');
   const en = locale === 'en';
   const ru = locale === 'ru';

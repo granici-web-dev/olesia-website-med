@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -30,7 +33,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/nutrition',
     title: ru
       ? 'Онлайн-консультации по питанию | Dr. Olesea Jalba'
       : en
@@ -41,7 +46,7 @@ export async function generateMetadata({
       : en
         ? 'Online video nutrition consultation for children and adults: feeding difficulties, starting solids, a personalized nutrition plan. Book online.'
         : 'Consultație de nutriție video pentru copii și adulți: dificultăți de hrănire, diversificare, plan alimentar personalizat. Programează online.',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -147,6 +152,7 @@ export default async function NutritionPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const portrait = await siteMediaAsset('portrait_nutrition');
   const en = locale === 'en';
   const ru = locale === 'ru';

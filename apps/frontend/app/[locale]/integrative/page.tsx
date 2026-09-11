@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -28,7 +31,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/integrative',
     title: ru
       ? 'Интегративная консультация и наблюдение | Dr. Olesea Jalba'
       : en
@@ -39,7 +44,7 @@ export async function generateMetadata({
       : en
         ? 'In-depth video consultation (90 min) combining pediatrics and nutrition, with a personalized plan and monitoring. For complex situations.'
         : 'Consultație video aprofundată (90 min) care îmbină pediatria și nutriția, cu plan personalizat și monitorizare. Pentru situații complexe.',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -165,6 +170,7 @@ export default async function IntegrativePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const portrait = await siteMediaAsset('portrait_integrative');
   const en = locale === 'en';
   const ru = locale === 'ru';

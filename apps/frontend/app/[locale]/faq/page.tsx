@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -26,7 +29,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/faq',
     title: ru
       ? 'Частые вопросы | Dr. Olesea Jalba'
       : en
@@ -37,7 +42,7 @@ export async function generateMetadata({
       : en
         ? 'Answers about online consultations, booking, payment by transfer, and services — pediatrics and nutrition.'
         : 'Răspunsuri despre consultațiile online, programare, plată prin transfer și servicii — pediatrie și nutriție.',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -94,6 +99,7 @@ export default async function FaqPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);

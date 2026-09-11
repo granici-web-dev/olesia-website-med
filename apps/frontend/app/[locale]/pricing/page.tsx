@@ -1,4 +1,8 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { DELIVERABLE_CATALOG } from '@olesia/shared';
 import { api, loc, serviceTag } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
@@ -18,6 +22,30 @@ import {
 } from '@/lib/service-price';
 
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const en = locale === 'en';
+  const ru = locale === 'ru';
+  return pageMetadata({
+    locale,
+    path: '/pricing',
+    title: ru
+      ? 'Цены | Dr. Olesea Jalba'
+      : en
+        ? 'Pricing | Dr. Olesea Jalba'
+        : 'Tarife | Dr. Olesea Jalba',
+    description: ru
+      ? 'Цены на консультации, наблюдение и персональные меню и протоколы. Без скрытых платежей.'
+      : en
+        ? 'Prices for consultations, monitoring, and personalized menus and protocols. No hidden costs.'
+        : 'Tarifele pentru consultații, monitorizare și meniuri sau protocoale personalizate. Fără costuri ascunse.',
+  });
+}
 
 /* Group C — deliverable products (brief §2): pay → short form/upload → a
    written/PDF result. No calendar, no portal subscription. Surfaced here as a
@@ -91,6 +119,7 @@ export default async function PricingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const [services, hours] = await Promise.all([

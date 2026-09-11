@@ -34,6 +34,21 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+/**
+ * The three locales, so every page under this layout can be prerendered.
+ *
+ * Without it nothing was static: `[locale]` is a dynamic segment, so every
+ * request rendered every page on the server, `revalidate = 60` had no entry to
+ * revalidate, and the ISR cache that `PRINCIPLES.md` describes as covering an
+ * API restart covered nothing until someone had already visited the page
+ * (audit A7, F16). The pair to this is `setRequestLocale(locale)` as the first
+ * line of every page — next-intl opts a route out of static rendering unless
+ * it is told the locale up front.
+ */
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
 export async function generateMetadata({
   params,
 }: {

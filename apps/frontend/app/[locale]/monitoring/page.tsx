@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -27,7 +30,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/monitoring',
     title: ru
       ? 'Наблюдение и абонементы | Dr. Olesea Jalba'
       : en
@@ -38,7 +43,7 @@ export async function generateMetadata({
       : en
         ? '4 subscription types (Pediatrics, Child nutrition, Adult nutrition, Complex) over 1, 2, 3, or 6 months: periodic monitoring, plan adjustments, and direct communication with the doctor. Duration and price are set individually.'
         : '4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex) pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului și comunicare directă cu medicul. Durata și prețul se stabilesc individual.',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -167,6 +172,7 @@ export default async function MonitoringPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const portrait = await siteMediaAsset('portrait_monitoring');
   const en = locale === 'en';
   const ru = locale === 'ru';

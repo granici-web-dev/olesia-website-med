@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -31,7 +34,9 @@ export async function generateMetadata({
   const minutes = (await api.workingHours()).expressSlaMinutes;
   const sla = formatSla(locale, minutes);
   const inHours = formatSlaInHours(locale, minutes);
-  return {
+  return pageMetadata({
+    locale,
+    path: '/quick-question',
     title: ru
       ? `Экспресс-вопрос — ответ за ${sla} | Dr. Olesea Jalba`
       : en
@@ -42,7 +47,7 @@ export async function generateMetadata({
       : en
       ? `Have one specific, non-urgent question? Get a written, documented answer from a pediatrician within ${inHours}. Photos and documents welcome.`
       : `Ai o întrebare punctuală, non-urgentă? Primești un răspuns scris și documentat de la un medic pediatru în ${inHours}. Poți atașa poze și documente.`,
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -143,6 +148,7 @@ export default async function QuickQuestionPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const minutes = (await api.workingHours()).expressSlaMinutes;

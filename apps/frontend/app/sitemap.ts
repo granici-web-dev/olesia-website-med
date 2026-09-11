@@ -52,9 +52,14 @@ function entry(path: string, lastModified?: Date): MetadataRoute.Sitemap[number]
     lastModified,
     priority: priorityFor(path),
     alternates: {
-      languages: Object.fromEntries(
-        locales.map((l) => [l, `${base}/${l}${path}`]),
-      ),
+      // `x-default` is what a crawler serves a reader whose language is none
+      // of the three, and without it the Romanian entry and the other two look
+      // like three competing pages rather than one page in three languages
+      // (audit A7, F21).
+      languages: {
+        ...Object.fromEntries(locales.map((l) => [l, `${base}/${l}${path}`])),
+        'x-default': `${base}/${routing.defaultLocale}${path}`,
+      },
     },
   };
 }

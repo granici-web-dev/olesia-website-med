@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { routing } from '@/i18n/routing';
 import { siteUrl } from '@/lib/site-url';
 
 /**
@@ -12,15 +13,30 @@ import { siteUrl } from '@/lib/site-url';
  * `/payment/*` does not exist yet (`PLAN.md` step 9), and is listed now so the
  * return pages are excluded the day they land rather than the day someone
  * notices an order id in a search result.
+ *
+ * Both prefixes are written once per locale as well as bare, because every
+ * route on this site carries a locale prefix: the middleware redirects
+ * `/incarcare/abc` to `/ro/incarcare/abc`, so the bare rule this file used to
+ * carry alone matched no URL a crawler would ever be handed (audit A7, F1/F20).
+ *
+ * No `host` line. It is a Yandex-only extension that every other crawler
+ * ignores, and its only effect here was to publish whatever `siteUrl()`
+ * happened to resolve to as the canonical origin of the site.
  */
+const PRIVATE_PREFIXES = ['/incarcare/', '/payment/'] as const;
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/incarcare/', '/payment/'],
+      disallow: [
+        ...PRIVATE_PREFIXES,
+        ...routing.locales.flatMap((locale) =>
+          PRIVATE_PREFIXES.map((prefix) => `/${locale}${prefix}`),
+        ),
+      ],
     },
     sitemap: `${siteUrl()}/sitemap.xml`,
-    host: siteUrl(),
   };
 }

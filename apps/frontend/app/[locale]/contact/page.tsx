@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 import { Link } from '@/i18n/navigation';
 import { ContactForm } from '@/components/ui/ContactForm';
 import { Reveal } from '@/components/ui/Reveal';
@@ -33,7 +36,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/contact',
     title: ru
       ? 'Контакты | Dr. Olesea Jalba'
       : en
@@ -44,7 +49,7 @@ export async function generateMetadata({
       : en
       ? 'Get in touch about online consultations, appointments, and payment. For a medical question, use “Ask the doctor”.'
       : 'Contactează-ne pentru întrebări despre consultații online, programări și plată. Pentru întrebări medicale, folosește „Întreabă medicul".',
-  };
+  });
 }
 
 type Bi = { ro: string; en: string; ru: string };
@@ -87,6 +92,7 @@ export default async function ContactPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);

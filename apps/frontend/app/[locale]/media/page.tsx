@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+
+import { pageMetadata } from '@/lib/page-metadata';
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Link } from '@/i18n/navigation';
@@ -31,7 +34,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  return {
+  return pageMetadata({
+    locale,
+    path: '/media',
     title: ru
       ? 'СМИ о враче — телеэфиры и интервью | Dr. Olesea Jalba'
       : en
@@ -42,7 +47,7 @@ export async function generateMetadata({
       : en
         ? 'Pediatrician Olesea Jalba on Moldova 1, TVR Moldova and Canal 2: children’s appetite, seasonal flu, protecting kids from heatstroke.'
         : 'Medicul pediatru Olesea Jalba la Moldova 1, TVR Moldova și Canal 2: inapetența la copii, gripa sezonieră, protecția de insolație.',
-  };
+  });
 }
 
 export default async function MediaPage({
@@ -51,6 +56,7 @@ export default async function MediaPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lang = (ru ? 'ru' : en ? 'en' : 'ro') as 'ro' | 'en' | 'ru';
