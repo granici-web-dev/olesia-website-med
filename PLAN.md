@@ -583,7 +583,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[x]` `1f31ba6`…`e345c72`, `4e9cb04`, `640a780`…`f13ffc5` |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[x]` `fb90486`, `57c96d9`, `3c7871a` |
-| A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
+| A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[>]` аудит 2026-09-11, 17 находок + simplify, harden в работе |
 | A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[ ]` |
 | A12 | без аудита, механика: Dependabot по одному, тесты из списка 15 | зелёный CI после каждого слияния | 14, 15 | `[ ]` |
 | A13 | не `rigorous`: `impeccable` в браузере по сайту и бэк-офису, Lighthouse на проде после A7 | визуальная иерархия, состояния, мобильные, контраст, CWV | отдельный шаг | `[ ]` |
@@ -1145,6 +1145,35 @@ A9 закрыт тремя коммитами: `fb90486` (ветки ошибк�
 клиент не доходит; `FileTooLargeFilter` не на документах пациента, клиент
 понимает обе формы 413; мёртвые пункты меню, колокольчик и поиск в шапке это
 A10; prettier-дрейф около 20 файлов ждёт A11.
+
+Аудит A10 (2026-09-11, 17 находок + simplify) подтвердил 13c, 13d и добавил:
+`POST /auth/2fa/disable` отвечает 200 с пустым телом, клиент падает на
+`res.json()` и показывает «Cod invalid», а 2FA на сервере уже выключена;
+`queryClient.clear()` не вызывается нигде, кэш прошлого пользователя живёт
+30 с после входа следующего; «Ieși din cont» глотает ошибку сети и уводит на
+логин при живой сессии; две вкладки, восстановленные одновременно, шлют один
+refresh, вторая получает `refresh_reused` и выбивает все устройства; `/pacienti`
+без `RequireRole` при admin-only контроллере; кнопка удаления заказа рендерится
+редактору; дашборд отдаёт редактору имена ближайших записей при закрытом
+`/programari`; три blob-скачивания мимо refresh; `totp_locked` с `Retry-After`
+показан как «неверный пароль»; истечение сессии без сообщения и с потерей
+`?search`; `mustChangePassword` нигде не проверяется API; нет таймаута у
+fetch; четыре мёртвых элемента шапки и меню; пять маршрутов API без кнопок.
+Simplify: `TextField`/`TextAreaField` шесть копий, `SectionTitle` шесть,
+`LocaleTabs` пять, две ячейки-пустышки, мёртвые пропсы и экспорты, четыре
+карты и пять словарей для одного статуса оплаты с двумя разными парами слов;
+мок-слой 21 файл и 3126 строк, потерявший оправдание после A9. Решения:
+пустое тело 200 читается как `undefined` и `2fa/disable` становится 204;
+`queryClient.clear()` при выходе и при 401; выход ждёт ответа и при отказе
+говорит об этом; окно прощения 10 с на сервере для повторного refresh без
+отзыва всех сессий плюс Web Lock между вкладками; `/pacienti` под `admin`;
+удаление заказа за `hasRole`; ближайшие записи дашборда только `admin`; blob
+через `request()`; таймер `totp_locked`; причина и полный путь при истечении
+сессии; API-гард `mustChangePassword` на три маршрута; таймаут 20 с и
+`network_error`; четыре мёртвых элемента убираются, «Setări» ведёт на
+`/securitate`; пять кнопок, включая `POST /deliverable-orders` (admin) как
+форму заказа по телефону; **мок-слой удаляется целиком**, `data.ts` → `api.ts`,
+`VITE_API_MOCKS` исчезает; статус оплаты везде «Achitată / Neachitată».
 
 Проходы программы аудита: A9 (13a, 13b), A10 (13c, 13d, 13e). В A9 первым
 делом Vitest-конфиг бэк-офиса и тесты на `deadlineMs`/`slaMet`,
