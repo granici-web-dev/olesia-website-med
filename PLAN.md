@@ -579,7 +579,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[x]` `085a3d2`, `c0dd5f6` |
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
-| A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[>]` аудит 2026-09-11, 25 находок, harden в работе |
+| A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[ ]` |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[ ]` |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
@@ -684,6 +684,28 @@ SLA EXPRESS из `expressSlaMinutes`), «что входит» остаётся 
 Calendly по клику; публичные DTO в `packages/shared`; `isEmailLike` одна;
 сообщения для 400 по коду, 429 и `captcha_failed`; бэк-офис говорит «~1 oră
 în programul de lucru».
+
+A6 закрыт двумя коммитами: `f0e1c0d` (Calendly только по клику, модуль
+`newsletter` с таблицей `Subscriber` на citext и страницей «Abonați», гейт
+библиотеки ждёт ответ и отдаёт файл сам, одна `isEmailLike`, `maxLength` по
+лимитам API, `describeLeadError` и `describeUploadError` с отдельными
+сообщениями для 429 и капчи, отказ по размеру до отправки, согласие читается
+из cookie при старте) и `2ca0dc6` (`getJson` различает пусто и недоступно,
+трёхъязычный `error.tsx`, удалены фолбэк FAQ, `SERVICE_DESCRIPTIONS`, вшитые
+контакты и CV, часы работы и SLA EXPRESS из API, `/nutrition` из каталога,
+публичные DTO в `packages/shared`, `serviceTag` с RU, бэк-офис без «48 de
+ore»). 348 тестов (275 Jest + 73 Vitest). Измерено про ISR: прогретая страница
+отдаёт последний хороший HTML до деплоя, холодная даёт `error.tsx`;
+`PRINCIPLES.md` переписан под факт. Проверено Playwright: ноль запросов к
+Calendly до клика, подписка создаёт строку и открывает файл, повтор адреса в
+другом регистре не дублирует, 429 показывает «подождите минуту».
+
+Хвосты: `/services` держит собственную копию каталога на 250 строк с ценами и
+«~1h», без API; заменять нечем, пока у услуги нет поля «что входит», идёт
+вместе с 8c. Подписи «~1ч» в навигации шести страниц захардкожены, три `<img>`
+в статьях, нет `global-error.tsx`: всё в A7. Отписка от рассылки появится
+вместе с письмами, до тех пор удаление адреса это действие в бэк-офисе, и
+`/gdpr` говорит это.
 
 Проходы программы аудита: A1 (10a), A6 (10b, 10e), A7 (10c, 10d, 10e).
 
