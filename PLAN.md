@@ -580,7 +580,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
-| A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[>]` аудит 2026-09-11, 31 находка + critique, harden в работе |
+| A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[>]` harden `f5ae6cd`, `efb04eb`, `0dddd11`; сборка при недоступном API падает, фикс до push |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[ ]` |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
@@ -732,6 +732,25 @@ BreadcrumbList; `siteUrl()` бросает в production; SLA и длитель�
 сайта, `agentation` в dev; сайт переходит на `react-markdown` (решение A4);
 alt у фотографий `/about` это поле редактора, A9; `<img>` → `next/image`
 вместе с деплоем API, потому что хост картинок зашит в сборку.
+
+A7 `harden` сделан тремя коммитами (`f5ae6cd` метаданные, 404, пререндер, CSP
+Report-Only; `efb04eb` доступность, медиа, SLA из API на всех страницах,
+`react-markdown`; `0dddd11` critique: четыре мёртвых файла, `zustand` отовсюду,
+один `Bi`, `biFor`, один базовый URL API, Calendly-фолбэк удалён). 354 теста,
+`public/assets` 24 МБ, 48 пререндеренных маршрутов. Решения по ходу: кнопка
+записи ведёт на `/services`, пока `free_consult` неактивна; `favicon.ico`
+перегенерирован из знака, там был треугольник Vercel.
+
+⚠ Найдено при проверке, не закоммичено: **сборка с недостижимым API падает на
+пререндере** (`ApiUnavailableError` из `getJson` при `next build`, проверено
+локально с `api.ci.invalid`). CI и Vercel упадут при push, у прода API нет.
+Решение: на этапе `phase-production-build` сетевая ошибка и 5xx возвращают
+пустое, как `200 []`, а в рантайме бросают как сейчас; после возврата API ISR
+обновит страницу в течение минуты после первого запроса. Записать в
+`deployment.md`. Плюс: три сообщения коммитов на русском и румынском при
+английской конвенции репо, переписать до push; `apps/frontend/AGENTS.md` и
+`CLAUDE.md` генерирует `next dev`, добавить в `.gitignore`, ссылку на
+`node_modules/next/dist/docs/` дать в корневом `CLAUDE.md`.
 
 Проходы программы аудита: A1 (10a), A6 (10b, 10e), A7 (10c, 10d, 10e).
 
