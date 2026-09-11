@@ -17,3 +17,8 @@ pnpm-lock.yaml
 
 # Screenshots, and whatever sits beside them.
 screenshots
+
+# Written by `next build` and git-ignored, so CI never sees it — but it does
+# exist after a local build, and then `prettier --check .` fails on a file
+# nobody can commit a fix for.
+apps/frontend/next-env.d.ts
