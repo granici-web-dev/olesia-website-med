@@ -22,7 +22,9 @@ const distinctAcrossLocales = (of: (locale: string) => string) => {
 
 describe('describeLeadError', () => {
   it('says to wait after a rate limit, in each language', () => {
-    const [ro, en, ru] = distinctAcrossLocales((l) => describeLeadError(429, '', l));
+    const [ro, en, ru] = distinctAcrossLocales((l) =>
+      describeLeadError(429, '', l),
+    );
     expect(ro).toContain('minut');
     expect(en).toContain('minute');
     expect(ru).toContain('минут');
@@ -68,7 +70,9 @@ describe('describeLeadError', () => {
   });
 
   it('treats an unknown locale as Romanian', () => {
-    expect(describeLeadError(429, '', 'de')).toBe(describeLeadError(429, '', 'ro'));
+    expect(describeLeadError(429, '', 'de')).toBe(
+      describeLeadError(429, '', 'ro'),
+    );
   });
 
   it('never answers with an empty string', () => {
@@ -82,7 +86,9 @@ describe('describeLeadError', () => {
 
 describe('describeUploadError', () => {
   it('names an oversized file from our own code', () => {
-    expect(describeUploadError(400, 'file_too_large', 'ro')).toContain('prea mare');
+    expect(describeUploadError(400, 'file_too_large', 'ro')).toContain(
+      'prea mare',
+    );
   });
 
   it('names an oversized file from a proxy that only sent 413', () => {
@@ -92,7 +98,9 @@ describe('describeUploadError', () => {
   });
 
   it('names the wrong file type', () => {
-    expect(describeUploadError(400, 'unsupported_file_type', 'en')).toContain('PDF');
+    expect(describeUploadError(400, 'unsupported_file_type', 'en')).toContain(
+      'PDF',
+    );
   });
 
   it('names the file limit', () => {
@@ -112,7 +120,9 @@ describe('describeUploadError', () => {
     expect(describeUploadError(403, 'consent_required', 'en')).not.toBe(
       describeUploadError(404, '', 'en'),
     );
-    expect(describeUploadError(403, 'consent_required', 'en')).toContain('consent');
+    expect(describeUploadError(403, 'consent_required', 'en')).toContain(
+      'consent',
+    );
   });
 
   it('says to wait on 429', () => {
@@ -126,7 +136,9 @@ describe('describeUploadError', () => {
   it('never answers with an empty string', () => {
     for (const status of [0, 400, 403, 404, 413, 429, 500]) {
       for (const locale of LOCALES) {
-        expect(describeUploadError(status, '', locale).length).toBeGreaterThan(0);
+        expect(describeUploadError(status, '', locale).length).toBeGreaterThan(
+          0,
+        );
       }
     }
   });

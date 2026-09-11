@@ -19,10 +19,22 @@ export function CaptchaNotice({ className = '' }: { className?: string }) {
     ? ['Форма защищена reCAPTCHA. Применяются ', ' и ', ' Google.']
     : en
       ? ['This form is protected by reCAPTCHA. Google’s ', ' and ', ' apply.']
-      : ['Formularul este protejat de reCAPTCHA. Se aplică ', ' și ', ' Google.'];
+      : [
+          'Formularul este protejat de reCAPTCHA. Se aplică ',
+          ' și ',
+          ' Google.',
+        ];
 
-  const privacy = ru ? 'Политика конфиденциальности' : en ? 'Privacy Policy' : 'Politica de confidențialitate';
-  const terms = ru ? 'Условия использования' : en ? 'Terms of Service' : 'Termenii de utilizare';
+  const privacy = ru
+    ? 'Политика конфиденциальности'
+    : en
+      ? 'Privacy Policy'
+      : 'Politica de confidențialitate';
+  const terms = ru
+    ? 'Условия использования'
+    : en
+      ? 'Terms of Service'
+      : 'Termenii de utilizare';
 
   const link =
     'underline decoration-[var(--rule)] underline-offset-2 transition-colors hover:text-sage';
@@ -30,11 +42,21 @@ export function CaptchaNotice({ className = '' }: { className?: string }) {
   return (
     <p className={`text-[0.75rem] leading-relaxed text-ink-soft ${className}`}>
       {text[0]}
-      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className={link}>
+      <a
+        href="https://policies.google.com/privacy"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={link}
+      >
         {privacy}
       </a>
       {text[1]}
-      <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className={link}>
+      <a
+        href="https://policies.google.com/terms"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={link}
+      >
         {terms}
       </a>
       {text[2]}

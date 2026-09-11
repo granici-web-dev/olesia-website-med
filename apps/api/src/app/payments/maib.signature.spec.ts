@@ -37,7 +37,9 @@ const RAW_BODY = JSON.stringify({
 /** The bank's algorithm, spelled out here so the test does not import the
  *  implementation it is checking. */
 function sign(body: string, timestamp: string, key = SIGNATURE_KEY): string {
-  return createHmac('sha256', key).update(`${body}.${timestamp}`).digest('base64');
+  return createHmac('sha256', key)
+    .update(`${body}.${timestamp}`)
+    .digest('base64');
 }
 
 function serviceWith(key: string | undefined): MaibService {
@@ -62,9 +64,9 @@ describe('MaibService.verifySignature', () => {
 
   it('accepts a signature over {rawBody}.{timestamp} in base64', () => {
     const ts = String(Date.now());
-    expect(service.verifySignature(body, `sha256=${sign(RAW_BODY, ts)}`, ts)).toBe(
-      true,
-    );
+    expect(
+      service.verifySignature(body, `sha256=${sign(RAW_BODY, ts)}`, ts),
+    ).toBe(true);
   });
 
   it('accepts the signature without the sha256= prefix', () => {
@@ -77,7 +79,9 @@ describe('MaibService.verifySignature', () => {
     const calendlyStyle = createHmac('sha256', SIGNATURE_KEY)
       .update(`${ts}.${RAW_BODY}`)
       .digest('hex');
-    expect(service.verifySignature(body, `sha256=${calendlyStyle}`, ts)).toBe(false);
+    expect(service.verifySignature(body, `sha256=${calendlyStyle}`, ts)).toBe(
+      false,
+    );
   });
 
   it('rejects a signature made with the wrong key', () => {
@@ -112,14 +116,16 @@ describe('MaibService.verifySignature', () => {
   });
 
   it('rejects a timestamp that is not a number', () => {
-    expect(service.verifySignature(body, 'sha256=whatever', 'not-a-timestamp')).toBe(
-      false,
-    );
+    expect(
+      service.verifySignature(body, 'sha256=whatever', 'not-a-timestamp'),
+    ).toBe(false);
   });
 
   it('rejects everything when no signing key is configured', () => {
     const unconfigured = serviceWith('');
-    jest.spyOn(unconfigured['logger'], 'error').mockImplementation(() => undefined);
+    jest
+      .spyOn(unconfigured['logger'], 'error')
+      .mockImplementation(() => undefined);
     const ts = String(Date.now());
     expect(
       unconfigured.verifySignature(body, `sha256=${sign(RAW_BODY, ts)}`, ts),
@@ -131,6 +137,8 @@ describe('MaibService.verifySignature', () => {
     ['missing signature', Buffer.from('{}'), undefined, String(Date.now())],
     ['missing timestamp', Buffer.from('{}'), 'sha256=x', undefined],
   ])('rejects a callback with a %s', (_name, b, sig, ts) => {
-    expect(service.verifySignature(b as Buffer | undefined, sig, ts)).toBe(false);
+    expect(service.verifySignature(b as Buffer | undefined, sig, ts)).toBe(
+      false,
+    );
   });
 });

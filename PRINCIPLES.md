@@ -2,7 +2,7 @@
 
 Engineering posture for `olesia-website-med`. Reverse-engineered from the code on
 **2026-09-10** and corrected against the repository by the maintainer. This describes what
-the project *is*, not what it aspires to be. Re-run `/rigorous document` when the posture
+the project _is_, not what it aspires to be. Re-run `/rigorous document` when the posture
 shifts materially.
 
 Procedural rules (read order, file naming, styling, i18n keys, commit format) live in
@@ -51,7 +51,7 @@ procedure. Where the two disagree, see "Known divergences" at the end.
 > **This section overrides the default "zero comments" policy.** Do not strip these
 > comments during `simplify`, `critique`, or `refactor`. They are load-bearing.
 
-- **A comment carries provenance.** The house style is a comment that says *why*, and
+- **A comment carries provenance.** The house style is a comment that says _why_, and
   points at where the decision came from: `module_calendly.md §8.4`,
   `client answers v2 §10`, `brief §11.14`, `decided 2026-07-01`, `corrected 2026-08-04`.
   A reader six months from now needs the source, not a restatement.
@@ -75,12 +75,12 @@ procedure. Where the two disagree, see "Known divergences" at the end.
   answer.
 - **One `@Catch` filter exists, and it is the shape of the exception that justifies it.**
   `uploads/file-too-large.filter.ts`. Multer aborts an oversized upload inside the
-  interceptor chain, *before* the handler runs, so the route has no opportunity to map it —
+  interceptor chain, _before_ the handler runs, so the route has no opportunity to map it —
   Nest renders English prose where the public upload page keys its three languages off the
   API's machine codes. The filter answers with the same `file_too_large` the storage
   service throws when a file gets past the parser, so a patient reads one wording either
   way. A second filter needs the same argument: the exception cannot be caught where it
-  matters. Anything a handler *can* raise stays a thrown exception.
+  matters. Anything a handler _can_ raise stays a thrown exception.
 - **A swallowed error must say why it is swallowed.** The few `catch {}` blocks that
   continue carry a comment explaining the fallback (best-effort logout, bank unavailable
   and the sweep will retry).
@@ -139,7 +139,7 @@ the code here.
   for what the API actually said: a 200 with `[]`, or the 404 of a slug that does not
   exist. `app/[locale]/error.tsx` answers the first case in three languages.
   Two readers deliberately swallow it, each for a stated reason: `app/sitemap.ts`, which
-  is prerendered and would otherwise fail the *build* while the API restarts, and the
+  is prerendered and would otherwise fail the _build_ while the API restarts, and the
   `Footer`, which renders on every page including the one that reports the outage.
 - **What the cache actually covers, measured on 2026-09-11.** The earlier note here
   said "ISR already keeps the last good page", which was true of the case it was written

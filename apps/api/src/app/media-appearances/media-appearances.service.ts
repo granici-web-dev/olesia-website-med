@@ -66,9 +66,7 @@ export class MediaAppearancesService {
     return list.map(toMediaAppearanceDto);
   }
 
-  async create(
-    dto: CreateMediaAppearanceDto,
-  ): Promise<MediaAppearanceDto> {
+  async create(dto: CreateMediaAppearanceDto): Promise<MediaAppearanceDto> {
     const created = await this.prisma.mediaAppearance.create({
       data: {
         kind: dto.kind,
@@ -109,9 +107,7 @@ export class MediaAppearancesService {
         data: {
           ...rest,
           // `date` crosses the wire as an ISO string; the column is a DateTime.
-          ...(date !== undefined
-            ? { date: date ? new Date(date) : null }
-            : {}),
+          ...(date !== undefined ? { date: date ? new Date(date) : null } : {}),
         },
       }),
     );

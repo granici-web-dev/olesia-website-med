@@ -23,7 +23,11 @@ import { PaymentsReconcileService } from './payments-reconcile.service';
  */
 @Module({
   imports: [PrismaModule, UploadsModule, MaterialsModule],
-  controllers: [PaymentsController, MaibWebhookController, PaymentStatusController],
+  controllers: [
+    PaymentsController,
+    MaibWebhookController,
+    PaymentStatusController,
+  ],
   providers: [
     MaibService,
     PaymentsService,

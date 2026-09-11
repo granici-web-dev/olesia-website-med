@@ -25,7 +25,10 @@ describe('calendlyUrlFor', () => {
   const catalog = [
     service('pediatric', 'https://calendly.com/dr-olesea/pediatrie'),
     service('nutrition_copii', 'https://calendly.com/dr-olesea/nutritie-copii'),
-    service('nutrition_adulti', 'https://calendly.com/dr-olesea/nutritie-adulti'),
+    service(
+      'nutrition_adulti',
+      'https://calendly.com/dr-olesea/nutritie-adulti',
+    ),
     service('monitoring', null),
   ];
 
@@ -64,7 +67,10 @@ describe('freeConsultTarget', () => {
       freeConsultTarget([
         service('free_consult', 'https://calendly.com/dr-olesea/gratuit'),
       ]),
-    ).toEqual({ kind: 'calendly', url: 'https://calendly.com/dr-olesea/gratuit' });
+    ).toEqual({
+      kind: 'calendly',
+      url: 'https://calendly.com/dr-olesea/gratuit',
+    });
   });
 
   it('sends people to the services page when it is not', () => {

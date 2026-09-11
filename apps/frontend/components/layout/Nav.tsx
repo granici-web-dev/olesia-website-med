@@ -65,9 +65,7 @@ export function Nav({ locale, booking }: NavProps) {
     '/integrative',
     '/monitoring',
     '/quick-question',
-  ].some(
-    (r) => pathname === r || pathname.startsWith(`${r}/`),
-  );
+  ].some((r) => pathname === r || pathname.startsWith(`${r}/`));
   const navCls = (href: string) => (matches(href) ? styles.active : undefined);
   // Anchor items (/services#…) can't be matched by path alone, so only the
   // dedicated landing pages get the active sub-item style.
@@ -93,15 +91,21 @@ export function Nav({ locale, booking }: NavProps) {
   const langSwitch = (
     <span className={styles.lang}>
       <Link href={pathname} locale="ro" onClick={close}>
-        <span className={locale === 'ro' ? styles.langActive : undefined}>RO</span>
+        <span className={locale === 'ro' ? styles.langActive : undefined}>
+          RO
+        </span>
       </Link>
       <span>/</span>
       <Link href={pathname} locale="en" onClick={close}>
-        <span className={locale === 'en' ? styles.langActive : undefined}>EN</span>
+        <span className={locale === 'en' ? styles.langActive : undefined}>
+          EN
+        </span>
       </Link>
       <span>/</span>
       <Link href={pathname} locale="ru" onClick={close}>
-        <span className={locale === 'ru' ? styles.langActive : undefined}>RU</span>
+        <span className={locale === 'ru' ? styles.langActive : undefined}>
+          RU
+        </span>
       </Link>
     </span>
   );
@@ -133,7 +137,8 @@ export function Nav({ locale, booking }: NavProps) {
           onMouseLeave={() => setServicesOpen(false)}
           onFocus={() => setServicesOpen(true)}
           onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget as Node)) setServicesOpen(false);
+            if (!e.currentTarget.contains(e.relatedTarget as Node))
+              setServicesOpen(false);
           }}
         >
           <Link
@@ -178,7 +183,12 @@ export function Nav({ locale, booking }: NavProps) {
         </div>
 
         {NAV_LINKS.map(({ href, key }) => (
-          <Link key={href} href={href} className={navCls(href)} aria-current={matches(href) ? 'page' : undefined}>
+          <Link
+            key={href}
+            href={href}
+            className={navCls(href)}
+            aria-current={matches(href) ? 'page' : undefined}
+          >
             {t(key)}
           </Link>
         ))}
@@ -257,7 +267,12 @@ export function Nav({ locale, booking }: NavProps) {
             </Link>
           ))}
           {NAV_LINKS.map(({ href, key }) => (
-            <Link key={href} href={href} onClick={close} className={navCls(href)}>
+            <Link
+              key={href}
+              href={href}
+              onClick={close}
+              className={navCls(href)}
+            >
               {t(key)}
             </Link>
           ))}

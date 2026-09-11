@@ -128,14 +128,16 @@ describe('CalendlyService.verifySignature', () => {
 
   it('rejects a header with no t part', () => {
     const t = String(Math.floor(nowSeconds()));
-    expect(service.verifySignature(body, `v1=${sign(RAW_BODY, t)}`)).toBe(false);
+    expect(service.verifySignature(body, `v1=${sign(RAW_BODY, t)}`)).toBe(
+      false,
+    );
   });
 
   it('rejects a missing header and a missing body', () => {
     expect(service.verifySignature(body, undefined)).toBe(false);
-    expect(service.verifySignature(undefined, header(RAW_BODY, nowSeconds()))).toBe(
-      false,
-    );
+    expect(
+      service.verifySignature(undefined, header(RAW_BODY, nowSeconds())),
+    ).toBe(false);
   });
 
   it('rejects everything when no signing key is configured', () => {

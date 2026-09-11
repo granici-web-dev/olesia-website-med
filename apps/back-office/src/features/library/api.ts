@@ -86,10 +86,7 @@ export async function updateMaterialCategory(
   input: Partial<MaterialCategoryInput>,
 ): Promise<MaterialCategory> {
   return toCategoryView(
-    await http.patch<MaterialCategoryDto>(
-      `/materials/categories/${id}`,
-      input,
-    ),
+    await http.patch<MaterialCategoryDto>(`/materials/categories/${id}`, input),
   );
 }
 

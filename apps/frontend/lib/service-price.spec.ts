@@ -10,7 +10,9 @@ import {
 
 const priced = (
   price: number,
-  labels: Partial<Pick<PricedService, 'priceLabelRo' | 'priceLabelEn' | 'priceLabelRu'>> = {},
+  labels: Partial<
+    Pick<PricedService, 'priceLabelRo' | 'priceLabelEn' | 'priceLabelRu'>
+  > = {},
 ): PricedService => ({
   price,
   priceLabelRo: null,

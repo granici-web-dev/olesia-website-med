@@ -19,14 +19,14 @@
 
 Рамка `user-research` / JTBD. Гипотезы, не данные исследования.
 
-| Сегмент | JTBD |
-|---|---|
-| Родитель перед записью | «Можно ли доверить этому врачу ребёнка?» |
-| Сравнивает специалистов | «Чем она отличается» |
-| Хочет понять подход | «Что она за человек, как работает» |
-| Проверяет квалификацию | «Реальные ли регалии» |
+| Сегмент                 | JTBD                                     |
+| ----------------------- | ---------------------------------------- |
+| Родитель перед записью  | «Можно ли доверить этому врачу ребёнка?» |
+| Сравнивает специалистов | «Чем она отличается»                     |
+| Хочет понять подход     | «Что она за человек, как работает»       |
+| Проверяет квалификацию  | «Реальные ли регалии»                    |
 
-**Вывод:** страница должна одновременно *очеловечить*, *подтвердить авторитет* и *перевести регалии в пользу для родителя*. Ведём историей, доказываем — фактами. Не дамп CV.
+**Вывод:** страница должна одновременно _очеловечить_, _подтвердить авторитет_ и _перевести регалии в пользу для родителя_. Ведём историей, доказываем — фактами. Не дамп CV.
 
 ---
 
@@ -51,6 +51,7 @@
 ## 3. Текст страницы (RO, факты выверены по CV)
 
 ### 1. Hero
+
 ```
 Eyebrow:  Despre
 H1:       Dr. Olesea Jalba
@@ -62,15 +63,18 @@ CTA:      Vezi serviciile
 ```
 
 ### 2. Краткая история
+
 ```
 Sunt medic pediatru, cu un master în nutriție umană și o experiență
 care a început în gastroenterologia pediatrică. Această combinație îmi
 permite să privesc sănătatea copilului în ansamblu — nu doar simptomul
 de azi, ci și felul în care se hrănește și se dezvoltă în timp.
 ```
+
 > ⚠ Выбор тона: 1-е лицо («Sunt…») — теплее для solo-практика. Если предпочитает 3-е лицо — переформулирую.
 
 ### 3. Что это даёт тебе
+
 ```
 Heading: Ce înseamnă asta pentru tine
 O singură persoană care înțelege atât partea medicală, cât și
@@ -78,6 +82,7 @@ alimentația copilului — fără să mergi de la un specialist la altul.
 ```
 
 ### 4. Домены фокуса (выверено)
+
 ```
 Heading: Domenii de focus
 
@@ -91,6 +96,7 @@ Heading: Domenii de focus
 ```
 
 ### 5. Опыт (выверено)
+
 ```
 Heading: Experiență
 
@@ -103,6 +109,7 @@ aici vine și interesul meu pentru sănătatea digestivă a copiilor.
 ```
 
 ### 6. Образование (выверено)
+
 ```
 Heading: Studii
 
@@ -114,6 +121,7 @@ Heading: Studii
 ```
 
 ### 7. Формация континуэ (хайлайты, не дамп)
+
 ```
 Heading: Formare continuă
 
@@ -124,9 +132,11 @@ Particip constant la congrese și cursuri de specialitate, în Moldova
   Sibiu (2025)
 • Cursuri de urgențe pediatrice ale Organizației Mondiale a Sănătății
 ```
+
 > Из 60+ сертификатов взяты 3 самых релевантных и свежих. Полный список — опционально скачиваемым CV. ⚠
 
 ### 8. Научная деятельность (выверено)
+
 ```
 Heading: Activitate științifică
 
@@ -136,13 +146,16 @@ diareea și constipația la copii și despre rinita alergică la copii.
 ```
 
 ### 9. Языки (выверено, польза)
+
 ```
 Heading: Limbi
 Consultațiile pot avea loc în română, rusă și engleză.
 ```
+
 > Практическая ценность: молдавские, русскоязычные семьи и диаспора. (FR в CV есть, но для консультаций не выношу — ⚠ если нужно, добавлю.)
 
 ### 10. Членство (выверено)
+
 ```
 Heading: Membru și acreditare
 Membră a Societății Române de Pediatrie. Categorie de calificare
@@ -150,6 +163,7 @@ confirmată de Ministerul Sănătății al Republicii Moldova.
 ```
 
 ### 11. CTA + кросс-ссылки
+
 ```
 Heading:    Programează o consultație
 CTA primar: Vezi serviciile
@@ -201,4 +215,7 @@ page_about:
 4. Какие контакты публичные (и совпадают ли с найденными в CV) — для Contact.
 5. Включать ли французский в блок языков.
 6. Давать ли скачиваемый полный CV.
+
+```
+
 ```

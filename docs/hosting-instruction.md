@@ -6,9 +6,7 @@
 
 ---
 
-
 ЧАСТЬ 1. РУССКАЯ ВЕРСИЯ
-
 
 Добрый день!
 
@@ -19,7 +17,6 @@
 
 Времени это займёт минут двадцать. Стоимость — порядка 5–10 евро
 в месяц.
-
 
 1. ПОЧЕМУ НА ВАШЕ ИМЯ, А НЕ НА НАШЕ
 
@@ -44,7 +41,6 @@
 в любой момент можете отозвать наш доступ, и ничего не сломается.
 
 Нас вы добавите в проект как сотрудника — как это сделать, в пункте 3.
-
 
 2. ЧТО ЗАВЕСТИ, ПО ШАГАМ
 
@@ -125,7 +121,6 @@ Name — назовите сервер, например:
 месте — это страховка именно от этого случая. Место в ЕС, как и
 всё остальное.
 
-
 3. КАК ДАТЬ НАМ ДОСТУП
 
 В проекте Hetzner откройте «Security», вкладку «Members», нажмите
@@ -141,7 +136,6 @@ Role: Admin.
 никому и никогда — ни нам, ни поддержке Hetzner. Приглашение даёт
 ровно тот доступ, который нужен для работы, и вы можете отозвать
 его в один клик в том же разделе.
-
 
 4. ЧТО ПОНАДОБИТСЯ ОТ ВАС В ТОТ ЖЕ ДЕНЬ
 
@@ -173,7 +167,6 @@ Role: Admin.
 об этом и подскажем, куда его вписать, — просто держите в голове,
 что такой шаг будет.
 
-
 5. ЧТО БУДЕТ ДАЛЬШЕ
 
 Как только приглашение придёт, мы разворачиваем всё за один рабочий
@@ -190,7 +183,6 @@ Role: Admin.
 пациентов, и одного пароля для такого мало.
 
 Дальше мы вместе пройдём остальное: график работы, тексты, оплату.
-
 
 6. ЧЕГО ДЕЛАТЬ НЕ НУЖНО
 
@@ -210,16 +202,12 @@ Role: Admin.
 Если придёт письмо, которого вы не ждали, или что-то покажется
 странным, перешлите нам, прежде чем что-то нажимать.
 
-
 Спасибо! Если на каком-то шаге что-то пойдёт не так — напишите,
 разберёмся вместе.
 
-
 ---
 
-
 PARTEA 2. VERSIUNEA ÎN ROMÂNĂ
-
 
 Bună ziua!
 
@@ -230,7 +218,6 @@ ce ne va trebui de la dumneavoastră în ziua lansării.
 
 Vă va lua aproximativ douăzeci de minute. Costul este de ordinul
 a 5–10 euro pe lună.
-
 
 1. DE CE PE NUMELE DUMNEAVOASTRĂ, NU PE AL NOSTRU
 
@@ -257,7 +244,6 @@ colaborarea cu noi. Ne puteți retrage accesul oricând, fără ca ceva
 să se strice.
 
 Pe noi ne veți adăuga în proiect ca membru — cum se face, la punctul 3.
-
 
 2. CE TREBUIE ÎNREGISTRAT, PAS CU PAS
 
@@ -340,7 +326,6 @@ vă salvează de o eroare în program, dar nu vă salvează dacă serverul
 cedează în întregime sau devine inaccesibil. O copie în alt loc este
 asigurarea exact pentru acest caz. Locul este tot în UE, ca restul.
 
-
 3. CUM NE DAȚI ACCES
 
 În proiectul Hetzner deschideți „Security”, fila „Members”, apăsați
@@ -356,7 +341,6 @@ Parola contului dumneavoastră nu ne trebuie și nu trebuie trimisă
 nimănui, niciodată — nici nouă, nici suportului Hetzner. Invitația dă
 exact accesul necesar pentru lucru, iar dumneavoastră îl puteți retrage
 dintr-un clic, din aceeași secțiune.
-
 
 4. CE NE VA TREBUI DE LA DUMNEAVOASTRĂ ÎN ACEEAȘI ZI
 
@@ -388,7 +372,6 @@ banca acceptă cereri doar de la adrese pe care le cunoaște. Vă vom
 reaminti și vă vom arăta unde se introduce — rețineți doar că va exista
 și acest pas.
 
-
 5. CE URMEAZĂ
 
 Imediat ce primim invitația, punem totul în funcțiune într-o zi
@@ -408,7 +391,6 @@ așa ceva.
 Mai departe parcurgem împreună restul: programul de lucru, textele,
 plățile.
 
-
 6. CE NU TREBUIE FĂCUT
 
 Nu instalați nimic pe server și nu intrați în el prin consola Hetzner.
@@ -426,7 +408,6 @@ punctul 2.1.
 
 Dacă primiți un email la care nu vă așteptați sau ceva vi se pare
 ciudat, trimiteți-ni-l înainte de a apăsa ceva.
-
 
 Mulțumim! Dacă la vreun pas ceva nu merge, scrieți-ne și rezolvăm
 împreună.

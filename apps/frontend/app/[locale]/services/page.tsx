@@ -92,7 +92,11 @@ const SERVICES_A: ServiceContent[] = [
       en: 'Pediatric consultation',
       ru: 'Педиатрическая консультация',
     },
-    duration: { ro: '{duration} · video', en: '{duration} · video', ru: '{duration} · видео' },
+    duration: {
+      ro: '{duration} · video',
+      en: '{duration} · video',
+      ru: '{duration} · видео',
+    },
     value: {
       ro: 'O consultație video dedicată sănătății copilului — simptome, creștere, dezvoltare sau o a doua opinie.',
       en: "A focused video visit for your child's health — symptoms, growth, development, or a second opinion.",
@@ -115,7 +119,11 @@ const SERVICES_A: ServiceContent[] = [
       en: 'Nutrition consultation',
       ru: 'Консультация по питанию',
     },
-    duration: { ro: '{duration} · video', en: '{duration} · video', ru: '{duration} · видео' },
+    duration: {
+      ro: '{duration} · video',
+      en: '{duration} · video',
+      ru: '{duration} · видео',
+    },
     value: {
       ro: 'O analiză personalizată a alimentației, pe bază de dovezi — pentru copii sau adulți.',
       en: 'A personalized, evidence-based look at feeding and nutrition — for children or adults.',
@@ -144,7 +152,11 @@ const SERVICES_A: ServiceContent[] = [
       en: 'Integrative consultation & monitoring',
       ru: 'Интегративная консультация и наблюдение',
     },
-    duration: { ro: '{duration} · video', en: '{duration} · video', ru: '{duration} · видео' },
+    duration: {
+      ro: '{duration} · video',
+      en: '{duration} · video',
+      ru: '{duration} · видео',
+    },
     value: {
       ro: 'O consultație amănunțită care îmbină pediatria și nutriția, cu un plan de urmat în timp.',
       en: 'An in-depth visit that combines pediatric and nutrition expertise, with a plan to follow over time.',
@@ -170,7 +182,11 @@ const SERVICES_B: ServiceContent[] = [
       en: 'Monitoring & subscriptions',
       ru: 'Наблюдение и абонементы',
     },
-    duration: { ro: '1–6 luni · portal', en: '1–6 months · portal', ru: '1–6 месяцев · портал' },
+    duration: {
+      ro: '1–6 luni · portal',
+      en: '1–6 months · portal',
+      ru: '1–6 месяцев · портал',
+    },
     value: {
       ro: 'Monitorizare și suport continuu — 4 tipuri de abonament, pe 1, 2, 3 sau 6 luni. Durata și prețul le stabilim individual cu medicul.',
       en: 'Continuous monitoring and support — 4 subscription types, over 1, 2, 3, or 6 months. Duration and price are set individually with the doctor.',
@@ -181,15 +197,27 @@ const SERVICES_B: ServiceContent[] = [
       en: 'For families who want steady support, not a one-off visit.',
       ru: 'Для семей, которым нужна постоянная поддержка, а не разовый визит.',
     },
-    cta: { ro: 'Solicită un abonament', en: 'Request a subscription', ru: 'Оставить заявку' },
+    cta: {
+      ro: 'Solicită un abonament',
+      en: 'Request a subscription',
+      ru: 'Оставить заявку',
+    },
   },
   {
     code: 'quick_question',
     group: 'B_portal',
     num: '05',
     tag: { ro: 'EXPRESS', en: 'Express', ru: 'Экспресс' },
-    title: { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
-    duration: { ro: 'răspuns în {sla} · scris', en: '{sla} reply · written', ru: 'ответ за {sla} · письменно' },
+    title: {
+      ro: 'Întrebare EXPRESS',
+      en: 'Express question',
+      ru: 'Экспресс-вопрос',
+    },
+    duration: {
+      ro: 'răspuns în {sla} · scris',
+      en: '{sla} reply · written',
+      ru: 'ответ за {sla} · письменно',
+    },
     value: {
       ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în {slaInHours}.',
       en: 'Have one question? Get a written answer from the doctor within {slaInHours}.',
@@ -206,7 +234,11 @@ const SERVICES_B: ServiceContent[] = [
       en: 'Not for emergencies. If it’s urgent, call 112.',
       ru: 'Не для неотложных случаев. Если ситуация срочная, звоните 112.',
     },
-    cta: { ro: 'Trimite întrebarea', en: 'Ask your question', ru: 'Отправить вопрос' },
+    cta: {
+      ro: 'Trimite întrebarea',
+      en: 'Ask your question',
+      ru: 'Отправить вопрос',
+    },
   },
 ];
 
@@ -214,18 +246,42 @@ const SERVICES_B: ServiceContent[] = [
 const CHOICE: { to: string; situation: Bi; service: Bi }[] = [
   {
     to: 'quick_question',
-    situation: { ro: 'O singură întrebare punctuală', en: 'One specific question', ru: 'Один конкретный вопрос' },
-    service: { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
+    situation: {
+      ro: 'O singură întrebare punctuală',
+      en: 'One specific question',
+      ru: 'Один конкретный вопрос',
+    },
+    service: {
+      ro: 'Întrebare EXPRESS',
+      en: 'Express question',
+      ru: 'Экспресс-вопрос',
+    },
   },
   {
     to: 'pediatric',
-    situation: { ro: 'Sănătatea copilului tău', en: "Your child's health", ru: 'Здоровье вашего ребёнка' },
-    service: { ro: 'Consultație pediatrică', en: 'Pediatric consultation', ru: 'Педиатрическая консультация' },
+    situation: {
+      ro: 'Sănătatea copilului tău',
+      en: "Your child's health",
+      ru: 'Здоровье вашего ребёнка',
+    },
+    service: {
+      ro: 'Consultație pediatrică',
+      en: 'Pediatric consultation',
+      ru: 'Педиатрическая консультация',
+    },
   },
   {
     to: 'nutrition',
-    situation: { ro: 'Alimentație sau diversificare', en: 'Feeding or diet', ru: 'Питание или прикорм' },
-    service: { ro: 'Consultație nutrițională', en: 'Nutrition consultation', ru: 'Консультация по питанию' },
+    situation: {
+      ro: 'Alimentație sau diversificare',
+      en: 'Feeding or diet',
+      ru: 'Питание или прикорм',
+    },
+    service: {
+      ro: 'Consultație nutrițională',
+      en: 'Nutrition consultation',
+      ru: 'Консультация по питанию',
+    },
   },
   {
     to: 'integrative',
@@ -234,7 +290,11 @@ const CHOICE: { to: string; situation: Bi; service: Bi }[] = [
       en: 'A complex case or ongoing care',
       ru: 'Сложный случай или наблюдение в динамике',
     },
-    service: { ro: 'Consultație integrativă', en: 'Integrative consultation', ru: 'Интегративная консультация' },
+    service: {
+      ro: 'Consultație integrativă',
+      en: 'Integrative consultation',
+      ru: 'Интегративная консультация',
+    },
   },
 ];
 
@@ -252,7 +312,11 @@ const COMPARE_COLS: Bi[] = [
   { ro: 'Pediatrică', en: 'Pediatric', ru: 'Педиатрическая' },
   { ro: 'Nutrițională', en: 'Nutrition', ru: 'По питанию' },
   { ro: 'Integrativă', en: 'Integrative', ru: 'Интегративная' },
-  { ro: 'Monitorizare și abonamente', en: 'Monitoring & subscriptions', ru: 'Наблюдение и абонементы' },
+  {
+    ro: 'Monitorizare și abonamente',
+    en: 'Monitoring & subscriptions',
+    ru: 'Наблюдение и абонементы',
+  },
   { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
 ];
 
@@ -281,9 +345,21 @@ const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
     label: { ro: 'Pentru', en: 'For', ru: 'Для чего' },
     cells: [
       { ro: 'Sănătatea copilului', en: 'Child health', ru: 'Здоровье ребёнка' },
-      { ro: 'Alimentație / dietă', en: 'Feeding / diet', ru: 'Питание / диета' },
-      { ro: 'Caz complex / de durată', en: 'Complex / ongoing', ru: 'Сложный / длительный случай' },
-      { ro: 'Sprijin continuu', en: 'Continuous support', ru: 'Постоянная поддержка' },
+      {
+        ro: 'Alimentație / dietă',
+        en: 'Feeding / diet',
+        ru: 'Питание / диета',
+      },
+      {
+        ro: 'Caz complex / de durată',
+        en: 'Complex / ongoing',
+        ru: 'Сложный / длительный случай',
+      },
+      {
+        ro: 'Sprijin continuu',
+        en: 'Continuous support',
+        ru: 'Постоянная поддержка',
+      },
       { ro: 'O întrebare', en: 'One question', ru: 'Один вопрос' },
     ],
   },
@@ -301,22 +377,50 @@ const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
 
 /* How it works — two tracks. */
 const TRACK_VIDEO: Bi[] = [
-  { ro: 'Alegi serviciul și ora', en: 'Choose a service and time', ru: 'Выбираете услугу и время' },
-  { ro: 'Plătești prin transfer și confirmi', en: 'Pay by transfer and confirm', ru: 'Оплачиваете переводом и подтверждаете' },
-  { ro: 'Ne vedem pe video', en: 'Join the video call', ru: 'Встречаемся по видеосвязи' },
-  { ro: 'Primești planul scris', en: 'Get your written summary', ru: 'Получаете письменный план' },
+  {
+    ro: 'Alegi serviciul și ora',
+    en: 'Choose a service and time',
+    ru: 'Выбираете услугу и время',
+  },
+  {
+    ro: 'Plătești prin transfer și confirmi',
+    en: 'Pay by transfer and confirm',
+    ru: 'Оплачиваете переводом и подтверждаете',
+  },
+  {
+    ro: 'Ne vedem pe video',
+    en: 'Join the video call',
+    ru: 'Встречаемся по видеосвязи',
+  },
+  {
+    ro: 'Primești planul scris',
+    en: 'Get your written summary',
+    ru: 'Получаете письменный план',
+  },
 ];
 const TRACK_PORTAL: Bi[] = [
   { ro: 'Alegi serviciul', en: 'Choose the service', ru: 'Выбираете услугу' },
-  { ro: 'Plătești și trimiți datele', en: 'Pay and submit your details', ru: 'Оплачиваете и отправляете данные' },
+  {
+    ro: 'Plătești și trimiți datele',
+    en: 'Pay and submit your details',
+    ru: 'Оплачиваете и отправляете данные',
+  },
   { ro: 'Medicul analizează', en: 'The doctor reviews', ru: 'Врач изучает' },
-  { ro: 'Primești răspunsul sau planul', en: 'Get your answer or plan', ru: 'Получаете ответ или план' },
+  {
+    ro: 'Primești răspunsul sau planul',
+    en: 'Get your answer or plan',
+    ru: 'Получаете ответ или план',
+  },
 ];
 
 /* FAQ. */
 const FAQ: { q: Bi; a: Bi }[] = [
   {
-    q: { ro: 'Cum decurg consultațiile video?', en: 'How do video consultations work?', ru: 'Как проходят видеоконсультации?' },
+    q: {
+      ro: 'Cum decurg consultațiile video?',
+      en: 'How do video consultations work?',
+      ru: 'Как проходят видеоконсультации?',
+    },
     a: {
       ro: 'Printr-un link în browser, fără să instalezi nimic. Primești instrucțiunile cu 24 de ore înainte.',
       en: 'Through a link in your browser — nothing to install. You get instructions 24 hours before.',
@@ -325,7 +429,11 @@ const FAQ: { q: Bi; a: Bi }[] = [
   },
   {
     q: { ro: 'În ce limbi?', en: 'Which languages?', ru: 'На каких языках?' },
-    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.', ru: 'Румынский, русский и английский.' },
+    a: {
+      ro: 'Română, rusă și engleză.',
+      en: 'Romanian, Russian, and English.',
+      ru: 'Румынский, русский и английский.',
+    },
   },
   {
     q: { ro: 'Cum plătesc?', en: 'How do I pay?', ru: 'Как оплатить?' },
@@ -336,7 +444,11 @@ const FAQ: { q: Bi; a: Bi }[] = [
     },
   },
   {
-    q: { ro: 'Pot reprograma sau anula?', en: 'Can I reschedule or cancel?', ru: 'Можно перенести или отменить?' },
+    q: {
+      ro: 'Pot reprograma sau anula?',
+      en: 'Can I reschedule or cancel?',
+      ru: 'Можно перенести или отменить?',
+    },
     a: {
       ro: 'Da. Reprogramezi sau anulezi din linkul de confirmare, cu cel puțin 24 de ore înainte.',
       en: 'Yes. Reschedule or cancel from your confirmation link at least 24 hours ahead.',
@@ -344,7 +456,11 @@ const FAQ: { q: Bi; a: Bi }[] = [
     },
   },
   {
-    q: { ro: 'Este pentru urgențe?', en: 'Is this for emergencies?', ru: 'Это для неотложных случаев?' },
+    q: {
+      ro: 'Este pentru urgențe?',
+      en: 'Is this for emergencies?',
+      ru: 'Это для неотложных случаев?',
+    },
     a: {
       ro: 'Nu. Consultațiile online nu sunt pentru urgențe. Dacă situația e urgentă, sună la 112.',
       en: "No. Online consultations aren't for emergencies. If it's urgent, call 112.",
@@ -411,10 +527,13 @@ function ServiceRow({
   // drifted from it (audit A7).
   const shared = SERVICE_INCLUDED[s.code];
   const included = shared
-    ? fillIncluded(locale === 'ru' ? shared.ru : locale === 'en' ? shared.en : shared.ro, {
-        duration: facts.duration(CATALOG_CODE[s.code] ?? s.code),
-        slaInHours: facts.slaInHours,
-      })
+    ? fillIncluded(
+        locale === 'ru' ? shared.ru : locale === 'en' ? shared.en : shared.ro,
+        {
+          duration: facts.duration(CATALOG_CODE[s.code] ?? s.code),
+          slaInHours: facts.slaInHours,
+        },
+      )
     : [];
   const ru = locale === 'ru';
   const en = locale === 'en';
@@ -448,7 +567,9 @@ function ServiceRow({
             {fillFacts(pick(s.duration), s.code, facts)}
           </p>
           <p className="mt-5 max-w-[40ch] text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
-            <span className="text-ink">{ru ? 'Рекомендуется — ' : en ? 'Best for — ' : 'Recomandat — '}</span>
+            <span className="text-ink">
+              {ru ? 'Рекомендуется — ' : en ? 'Best for — ' : 'Recomandat — '}
+            </span>
             {pick(s.bestFor)}
           </p>
         </div>
@@ -547,7 +668,11 @@ export default async function ServicesPage({
       : en
         ? 'Five services in two formats — from a single video consultation to a monitoring subscription. Pick the one that fits and book in minutes.'
         : 'Cinci servicii în două formate: de la o consultație video la un abonament cu monitorizare. Alege-l pe cel potrivit și programează în câteva minute.',
-    ctaBook: ru ? 'Записаться на бесплатную беседу' : en ? 'Book a free intro call' : 'Programează o discuție gratuită',
+    ctaBook: ru
+      ? 'Записаться на бесплатную беседу'
+      : en
+        ? 'Book a free intro call'
+        : 'Programează o discuție gratuită',
     seePricing: ru ? 'Смотреть цены' : en ? 'See pricing' : 'Vezi tarifele',
     slogan: ru
       ? 'Оказываю услуги педиатрии и клинической нутрициологии для детей и взрослых — с акцентом на профилактику, гармоничный рост и развитие, введение прикорма, здоровье пищеварения, пищевые непереносимости и аллергии, метаболические нарушения и оптимизацию образа жизни.'
@@ -559,14 +684,26 @@ export default async function ServicesPage({
       : en
         ? 'Pediatrician · MSc in Human Nutrition (USMF) · member of the Society of Pediatrics'
         : 'Medic pediatru · MSc Nutriția Omului (USMF) · membră a Societății de Pediatrie',
-    choiceTitle: ru ? 'Не знаете, с чего начать?' : en ? 'Not sure where to start?' : 'Nu ești sigură de unde să începi?',
+    choiceTitle: ru
+      ? 'Не знаете, с чего начать?'
+      : en
+        ? 'Not sure where to start?'
+        : 'Nu ești sigură de unde să începi?',
     choiceSub: ru
       ? 'Выберите ситуацию, похожую на вашу.'
       : en
         ? 'Pick the situation that sounds like yours.'
         : 'Alege situația care seamănă cu a ta.',
-    videoEyebrow: ru ? 'Группа A · Live' : en ? 'Group A · Live' : 'Grupa A · Live',
-    portalEyebrow: ru ? 'Группа B · Портал' : en ? 'Group B · Portal' : 'Grupa B · Portal',
+    videoEyebrow: ru
+      ? 'Группа A · Live'
+      : en
+        ? 'Group A · Live'
+        : 'Grupa A · Live',
+    portalEyebrow: ru
+      ? 'Группа B · Портал'
+      : en
+        ? 'Group B · Portal'
+        : 'Grupa B · Portal',
     videoSub: ru
       ? 'Живые встречи, запись через календарь. Оплата переводом, письменный план — после.'
       : en
@@ -580,7 +717,11 @@ export default async function ServicesPage({
     compareEyebrow: ru ? 'Все рядом' : en ? 'Side by side' : 'Toate, alături',
     service: ru ? 'Услуга' : en ? 'Serviciu' : 'Serviciu',
     pricingCell: ru ? 'Цены' : en ? 'Pricing' : 'Tarife',
-    howEyebrow: ru ? 'Как это работает' : en ? 'How it works' : 'Cum funcționează',
+    howEyebrow: ru
+      ? 'Как это работает'
+      : en
+        ? 'How it works'
+        : 'Cum funcționează',
     howSub: ru
       ? 'Два простых пути. Выбираете формат — остальное понятно.'
       : en
@@ -592,7 +733,11 @@ export default async function ServicesPage({
       : en
         ? 'Olesea Jalba, a pediatrician with an MSc in Human Nutrition (USMF “Nicolae Testemițanu”). She works exclusively online, so distance is never the obstacle — for families across the country and the diaspora.'
         : 'Olesea Jalba, medic pediatru cu masterat în Nutriția Omului (USMF „Nicolae Testemițanu”). Lucrează exclusiv online, ca distanța să nu mai fie o problemă — pentru familii din toată țara și din diasporă.',
-    doctorLink: ru ? 'Смотреть полный профиль' : en ? 'See full profile' : 'Vezi profilul complet',
+    doctorLink: ru
+      ? 'Смотреть полный профиль'
+      : en
+        ? 'See full profile'
+        : 'Vezi profilul complet',
     docFocusLabel: ru ? 'Специализации' : en ? 'Focus areas' : 'Specializări',
     docFocus: ru
       ? 'Питание ребёнка\nТрудности кормления\nДетская гастроэнтерология'
@@ -625,10 +770,12 @@ export default async function ServicesPage({
       }`}
     >
       {a}{' '}
-      <span className={`serif-it ${onDark ? 'text-[var(--sage-soft)]' : 'text-sage'}`}>
+      <span
+        className={`serif-it ${onDark ? 'text-[var(--sage-soft)]' : 'text-sage'}`}
+      >
         {accent}
       </span>
-      {b ? <>{' '}{b}</> : null}
+      {b ? <> {b}</> : null}
     </h2>
   );
 
@@ -638,7 +785,10 @@ export default async function ServicesPage({
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+            <span
+              className="size-1.5 rounded-full bg-sage"
+              aria-hidden="true"
+            />
             {T.eyebrow}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
@@ -646,15 +796,19 @@ export default async function ServicesPage({
               <h1 className="serif max-w-[15ch] text-[clamp(2.8rem,6.5vw,5.8rem)] leading-[1.02] tracking-[-0.015em] text-balance">
                 {ru ? (
                   <>
-                    Педиатрия и <span className="serif-it text-sage">питание</span>, онлайн
+                    Педиатрия и{' '}
+                    <span className="serif-it text-sage">питание</span>, онлайн
                   </>
                 ) : en ? (
                   <>
-                    Pediatric & <span className="serif-it text-sage">nutrition</span> care, online
+                    Pediatric &{' '}
+                    <span className="serif-it text-sage">nutrition</span> care,
+                    online
                   </>
                 ) : (
                   <>
-                    Pediatrie și <span className="serif-it text-sage">nutriție</span>, online
+                    Pediatrie și{' '}
+                    <span className="serif-it text-sage">nutriție</span>, online
                   </>
                 )}
               </h1>
@@ -704,10 +858,18 @@ export default async function ServicesPage({
         <div className="shell py-16 md:py-24">
           <div className="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
             <SectionTitle
-              a={ru ? 'С чего' : en ? 'Not sure where to' : 'Nu ești sigură de unde'}
+              a={
+                ru
+                  ? 'С чего'
+                  : en
+                    ? 'Not sure where to'
+                    : 'Nu ești sigură de unde'
+              }
               accent={ru ? 'начать?' : en ? 'start?' : 'să începi?'}
             />
-            <p className="max-w-[300px] text-sm leading-[1.7] text-ink-soft">{T.choiceSub}</p>
+            <p className="max-w-[300px] text-sm leading-[1.7] text-ink-soft">
+              {T.choiceSub}
+            </p>
           </div>
           <ul className="mt-10 border-t border-[var(--rule)]">
             {CHOICE.map((c) => (
@@ -740,9 +902,14 @@ export default async function ServicesPage({
         <header className="mb-4 flex flex-col gap-4 md:flex-row md:items-baseline md:justify-between">
           <div>
             <p className="eyebrow mb-3">{T.videoEyebrow}</p>
-            <SectionTitle a={ru ? 'Видео' : en ? 'Video' : 'Consultații'} accent={ru ? 'консультации' : en ? 'consultations' : 'video'} />
+            <SectionTitle
+              a={ru ? 'Видео' : en ? 'Video' : 'Consultații'}
+              accent={ru ? 'консультации' : en ? 'consultations' : 'video'}
+            />
           </div>
-          <p className="max-w-[340px] text-sm leading-[1.7] text-ink-soft md:pt-4">{T.videoSub}</p>
+          <p className="max-w-[340px] text-sm leading-[1.7] text-ink-soft md:pt-4">
+            {T.videoSub}
+          </p>
         </header>
         <div>
           {SERVICES_A.map((s) => (
@@ -778,7 +945,10 @@ export default async function ServicesPage({
       <section className="shell border-t border-[var(--rule)] py-20 md:py-28">
         <div className="mb-12 md:mb-16">
           <p className="eyebrow mb-3">{T.compareEyebrow}</p>
-          <SectionTitle a={ru ? 'Сравните' : en ? 'Compare' : 'Compară'} accent={ru ? 'услуги' : en ? 'services' : 'serviciile'} />
+          <SectionTitle
+            a={ru ? 'Сравните' : en ? 'Compare' : 'Compară'}
+            accent={ru ? 'услуги' : en ? 'services' : 'serviciile'}
+          />
         </div>
 
         <div className="grid grid-cols-1 border-t border-[var(--rule)] lg:grid-cols-5 lg:divide-x lg:divide-[var(--rule)]">
@@ -788,7 +958,11 @@ export default async function ServicesPage({
               className="flex flex-col border-b border-[var(--rule)] py-7 lg:border-b-0 lg:px-7 lg:pb-5 lg:pt-9 lg:first:pl-0 lg:last:pr-0"
             >
               <span className="mono self-start rounded-full border border-[var(--rule)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-ink-soft">
-                {fillFacts(lc(COMPARE_ROWS[0].cells[ci]), COMPARE_CODES[ci], facts)}
+                {fillFacts(
+                  lc(COMPARE_ROWS[0].cells[ci]),
+                  COMPARE_CODES[ci],
+                  facts,
+                )}
               </span>
               <h3 className="serif mt-4 text-[clamp(1.45rem,1.8vw,1.8rem)] leading-[1.1] tracking-[-0.01em] text-balance">
                 {lc(col)}
@@ -809,7 +983,10 @@ export default async function ServicesPage({
                   </div>
                 ))}
               </dl>
-              <a href={`#${COMPARE_CODES[ci]}`} className={`mt-auto self-start pt-7 ${underline}`}>
+              <a
+                href={`#${COMPARE_CODES[ci]}`}
+                className={`mt-auto self-start pt-7 ${underline}`}
+              >
                 {ru ? 'Подробнее' : en ? 'Details' : 'Detalii'} →
               </a>
             </div>
@@ -835,7 +1012,11 @@ export default async function ServicesPage({
             {T.howEyebrow}
           </p>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <SectionTitle a={ru ? 'Как это' : en ? 'How it' : 'Cum'} accent={ru ? 'работает' : en ? 'works' : 'decurge'} onDark />
+            <SectionTitle
+              a={ru ? 'Как это' : en ? 'How it' : 'Cum'}
+              accent={ru ? 'работает' : en ? 'works' : 'decurge'}
+              onDark
+            />
             <p className="max-w-[320px] text-sm leading-[1.7] text-[var(--sage-soft)] text-pretty md:text-right">
               {T.howSub}
             </p>
@@ -844,15 +1025,31 @@ export default async function ServicesPage({
           <div className="mt-14 grid gap-14 md:mt-20 md:grid-cols-2 md:gap-0">
             {[
               {
-                title: ru ? 'Видеоконсультации' : en ? 'Video consultations' : 'Consultații video',
+                title: ru
+                  ? 'Видеоконсультации'
+                  : en
+                    ? 'Video consultations'
+                    : 'Consultații video',
                 chip: 'Video',
-                descr: ru ? 'Живые встречи, в календаре.' : en ? 'Live visits, on a calendar.' : 'Întâlniri live, în calendar.',
+                descr: ru
+                  ? 'Живые встречи, в календаре.'
+                  : en
+                    ? 'Live visits, on a calendar.'
+                    : 'Întâlniri live, în calendar.',
                 steps: TRACK_VIDEO,
               },
               {
-                title: ru ? 'Сопровождение и вопросы' : en ? 'Support & questions' : 'Acompaniere și întrebări',
+                title: ru
+                  ? 'Сопровождение и вопросы'
+                  : en
+                    ? 'Support & questions'
+                    : 'Acompaniere și întrebări',
                 chip: 'Portal',
-                descr: ru ? 'Без календаря, через портал.' : en ? 'No calendar, through the portal.' : 'Fără calendar, prin portal.',
+                descr: ru
+                  ? 'Без календаря, через портал.'
+                  : en
+                    ? 'No calendar, through the portal.'
+                    : 'Fără calendar, prin portal.',
                 steps: TRACK_PORTAL,
               },
             ].map((track, ti) => (
@@ -869,12 +1066,17 @@ export default async function ServicesPage({
                   <span className="mono rounded-full border border-[rgba(245,241,234,0.3)] px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--sage-soft)]">
                     {track.chip}
                   </span>
-                  <span className="h-px flex-1 bg-[rgba(245,241,234,0.15)]" aria-hidden="true" />
+                  <span
+                    className="h-px flex-1 bg-[rgba(245,241,234,0.15)]"
+                    aria-hidden="true"
+                  />
                 </div>
                 <h3 className="serif mt-5 text-[clamp(1.5rem,2.4vw,2rem)] leading-snug text-cream">
                   {track.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-cream/60">{track.descr}</p>
+                <p className="mt-2 text-sm leading-relaxed text-cream/60">
+                  {track.descr}
+                </p>
 
                 {/* Numbered timeline */}
                 <ol className="relative mt-9 grid gap-8">
@@ -913,18 +1115,25 @@ export default async function ServicesPage({
       <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
         <div className="md:sticky md:top-[133px] md:self-start">
           <p className="eyebrow mb-4">{T.doctorEyebrow}</p>
-          <SectionTitle a={ru ? 'Кто вас' : en ? "Who you'll" : 'Cine te'} accent={ru ? 'консультирует' : en ? 'see' : 'consultă'} />
+          <SectionTitle
+            a={ru ? 'Кто вас' : en ? "Who you'll" : 'Cine te'}
+            accent={ru ? 'консультирует' : en ? 'see' : 'consultă'}
+          />
           <p className="mt-6 max-w-[54ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">
             {T.doctorBody}
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <div>
               <p className="eyebrow mb-3">{T.docFocusLabel}</p>
-              <p className="whitespace-pre-line text-sm leading-[1.7] text-ink">{T.docFocus}</p>
+              <p className="whitespace-pre-line text-sm leading-[1.7] text-ink">
+                {T.docFocus}
+              </p>
             </div>
             <div>
               <p className="eyebrow mb-3">{T.docRecLabel}</p>
-              <p className="whitespace-pre-line text-sm leading-[1.7] text-ink">{T.docRec}</p>
+              <p className="whitespace-pre-line text-sm leading-[1.7] text-ink">
+                {T.docRec}
+              </p>
             </div>
           </div>
           <Link href="/about" className={`mt-10 ${underlineLg}`}>
@@ -950,7 +1159,13 @@ export default async function ServicesPage({
           </div>
           <div className="mono mt-4 flex justify-between text-[11px] uppercase tracking-[0.08em] text-ink-soft">
             <span>Dr. Olesea Jalba</span>
-            <span>{ru ? 'Онлайн · Где угодно' : en ? 'Online · Anywhere' : 'Online · Oriunde'}</span>
+            <span>
+              {ru
+                ? 'Онлайн · Где угодно'
+                : en
+                  ? 'Online · Anywhere'
+                  : 'Online · Oriunde'}
+            </span>
           </div>
         </div>
       </section>
@@ -966,7 +1181,10 @@ export default async function ServicesPage({
         </div>
         <div className="mx-auto mt-12 max-w-[760px]">
           {FAQ.map((it) => (
-            <details key={it.q.en} className="group border-t border-[var(--rule)] last:border-b">
+            <details
+              key={it.q.en}
+              className="group border-t border-[var(--rule)] last:border-b"
+            >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
                 <span className="serif text-[clamp(1.3rem,2vw,1.7rem)] leading-snug text-ink">
                   {lc(it.q)}

@@ -23,7 +23,7 @@ Four things found while reading. The first one changes a decision.
    (`node_modules/@nx/webpack/src/plugins/nx-webpack-plugin/lib/apply-base-config.js:329`).
    The allowlist holds **non-buildable** workspace libs only. `packages/shared` has an
    inferred `build` target, so it is never on it. The one other branch,
-   `externalDependencies: [...]`, inverts the meaning — everything *not* listed gets
+   `externalDependencies: [...]`, inverts the meaning — everything _not_ listed gets
    bundled, which would pull `@nestjs/core`, `argon2`, `sharp` and `@prisma/client`
    into the bundle: native addons and reflection-driven DI. `mergeExternals` is
    additive and cannot un-externalize. Dropping the `build` target from
@@ -98,7 +98,7 @@ Five independent pieces, in the order they can be verified:
   `{$CADDY_ADMIN_HOST}` → `handle /api/* reverse_proxy api:3333` plus `file_server`
   with `try_files {path} /index.html`; global `email {$ACME_EMAIL}`. ~40
 - `docker/Dockerfile.backup` — new. `postgres:16-alpine` plus `apk add rclone
-  tzdata`. `postgres:16-alpine` ships neither. ~12
+tzdata`. `postgres:16-alpine` ships neither. ~12
 
 **Compose**
 
@@ -126,7 +126,7 @@ Five independent pieces, in the order they can be verified:
   from `prisma/`, unchanged. Moving them under `src/` puts 1192 lines of seed under
   `tsc` for the first time.
 - `apps/api/webpack.config.js` — `additionalEntryPoints: [{ entryName: 'seed',
-  entryPath: './src/seed/seed.ts' }]`. +6
+entryPath: './src/seed/seed.ts' }]`. +6
 - `apps/api/prisma.config.ts` — `migrations.seed: 'node ../dist/seed.js'`. +3
 
 **Scripts**

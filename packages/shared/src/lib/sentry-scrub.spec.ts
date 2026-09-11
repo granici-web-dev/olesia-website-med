@@ -10,9 +10,9 @@ import { scrubSentryEvent, scrubUrl } from './sentry-scrub.js';
 
 describe('scrubUrl', () => {
   it('redacts the token in a patient upload link', () => {
-    expect(scrubUrl('https://oleseajalba.md/ro/incarcare/9f3a-secret-token')).toBe(
-      'https://oleseajalba.md/ro/incarcare/[redacted]',
-    );
+    expect(
+      scrubUrl('https://oleseajalba.md/ro/incarcare/9f3a-secret-token'),
+    ).toBe('https://oleseajalba.md/ro/incarcare/[redacted]');
   });
 
   it('keeps what comes after the token, which names the action', () => {
@@ -24,9 +24,9 @@ describe('scrubUrl', () => {
   it('redacts a stored file name and a signed download', () => {
     // The file name is the whole authorisation for a public upload, and a
     // grant link is what a buyer was emailed.
-    expect(scrubUrl('https://api.oleseajalba.md/uploads/2b1c-analize.pdf')).toBe(
-      'https://api.oleseajalba.md/uploads/[redacted]',
-    );
+    expect(
+      scrubUrl('https://api.oleseajalba.md/uploads/2b1c-analize.pdf'),
+    ).toBe('https://api.oleseajalba.md/uploads/[redacted]');
     expect(scrubUrl('/api/materials/download/grant-8817')).toBe(
       '/api/materials/download/[redacted]',
     );
@@ -35,9 +35,9 @@ describe('scrubUrl', () => {
   it('drops the query string whole', () => {
     // Nothing here needs it, and it is where an email address ends up when a
     // form submits by GET.
-    expect(scrubUrl('/ro/checkout/express?email=ana@example.md&amount=350')).toBe(
-      '/ro/checkout/express?[redacted]',
-    );
+    expect(
+      scrubUrl('/ro/checkout/express?email=ana@example.md&amount=350'),
+    ).toBe('/ro/checkout/express?[redacted]');
   });
 
   it('leaves an ordinary path alone', () => {
@@ -52,7 +52,11 @@ describe('scrubSentryEvent', () => {
     const event = scrubSentryEvent({
       request: {
         url: 'https://api.oleseajalba.md/api/leads/quick-question',
-        data: { childAge: 4, symptoms: 'febră de 3 zile', email: 'ana@example.md' },
+        data: {
+          childAge: 4,
+          symptoms: 'febră de 3 zile',
+          email: 'ana@example.md',
+        },
         query_string: 'utm_source=fb',
         cookies: 'refresh_token=abc',
         headers: {
@@ -84,7 +88,9 @@ describe('scrubSentryEvent', () => {
 
   it('scrubs the URL it reports the error against', () => {
     const event = scrubSentryEvent({
-      request: { url: 'https://oleseajalba.md/ru/incarcare/token-9f3a?lang=ru' },
+      request: {
+        url: 'https://oleseajalba.md/ru/incarcare/token-9f3a?lang=ru',
+      },
     });
 
     expect(event.request?.url).toBe(

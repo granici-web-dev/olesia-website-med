@@ -12,21 +12,21 @@
 
 ## 0. Решения по умолчанию (подтвердить или изменить)
 
-| Тема | Значение `[DEFAULT]` |
-|------|----------------------|
-| Менеджер монорепы | pnpm workspaces + Turborepo |
-| БД | PostgreSQL |
-| ORM | Prisma |
-| Авторизация | JWT (access + refresh), роли `admin` / `editor` |
-| Регистрация | закрытая — пользователей создаёт только `admin` |
-| Сброс пароля | отложен (заложить место, реализовать позже) |
-| Формат контента блога | Markdown |
-| Хранилище загружаемых изображений | локальная папка `uploads/` за абстракцией storage-сервиса (позже — S3/Cloudinary) |
-| Контент-страницы (Contacts/About/тарифы) | отдаются на фронт через API (фронт динамический) |
-| Фронтенд сайта | **входит в монорепу** как `apps/web`; типизирует ответы API через DTO из `packages/shared` |
-| Язык документации/комментариев в коде | румынский + английские технические термины |
-| Язык интерфейса back office | **румынский (RO)** |
-| i18n контента | двуязычность RO / EN |
+| Тема                                     | Значение `[DEFAULT]`                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Менеджер монорепы                        | pnpm workspaces + Turborepo                                                                |
+| БД                                       | PostgreSQL                                                                                 |
+| ORM                                      | Prisma                                                                                     |
+| Авторизация                              | JWT (access + refresh), роли `admin` / `editor`                                            |
+| Регистрация                              | закрытая — пользователей создаёт только `admin`                                            |
+| Сброс пароля                             | отложен (заложить место, реализовать позже)                                                |
+| Формат контента блога                    | Markdown                                                                                   |
+| Хранилище загружаемых изображений        | локальная папка `uploads/` за абстракцией storage-сервиса (позже — S3/Cloudinary)          |
+| Контент-страницы (Contacts/About/тарифы) | отдаются на фронт через API (фронт динамический)                                           |
+| Фронтенд сайта                           | **входит в монорепу** как `apps/web`; типизирует ответы API через DTO из `packages/shared` |
+| Язык документации/комментариев в коде    | румынский + английские технические термины                                                 |
+| Язык интерфейса back office              | **румынский (RO)**                                                                         |
+| i18n контента                            | двуязычность RO / EN                                                                       |
 
 ---
 
@@ -54,6 +54,7 @@ repo/
 ## 2. Backend — NestJS (`apps/api`)
 
 ### 2.1 Базовый стек
+
 - NestJS (модульная архитектура: каждый домен — отдельный модуль).
 - PostgreSQL + Prisma `[DEFAULT]`.
 - Валидация через `class-validator` + `ValidationPipe` (whitelist, forbidNonWhitelisted).
@@ -62,6 +63,7 @@ repo/
 - CORS настроить под домены фронта и back office.
 
 ### 2.2 Модули backend
+
 1. `auth` — авторизация back office (см. §4).
 2. `users` — пользователи back office (CRUD, только admin).
 3. `services` — каталог услуг/тарифов (CRUD, см. §6).
@@ -76,6 +78,7 @@ repo/
 12. `health` — healthcheck для Docker/orchestration.
 
 ### 2.3 Общие требования
+
 - Все мутирующие эндпоинты защищены JWT + проверкой роли (`@Roles('admin' | 'editor')`).
 - Публичные (для сайта) GET-эндпоинты контента (услуги, блог published, контакты, about) — без авторизации, но read-only.
 - Единый формат ошибок (exception filter), пагинация на списках.
@@ -88,6 +91,7 @@ repo/
 > Интерфейс полностью на **румынском языке (RO)**.
 
 ### 3.1 Стек
+
 - React + Vite + TypeScript.
 - **Дизайн-система: shadcn/ui** (компоненты Button, Input, Table, Dialog, Form, Tabs, Card, Toast и т.д.). Tailwind как основа.
 - **При сборке UI использовать скил `impeccable`** — для качества верстки, состояний (loading/empty/error), доступности и аккуратной композиции компонентов.
@@ -95,6 +99,7 @@ repo/
 - Типы DTO импортировать из `packages/shared`.
 
 ### 3.2 Разделы (страницы) back office
+
 1. **Login** — форма входа (email + пароль).
 2. **Dashboard** — статистика (см. §11; конкретные метрики уточним позже, заложить каркас с карточками и графиками).
 3. **Записи (Appointments)** — список видеоконсультаций, фильтры по услуге/статусу/дате, карточка записи, статус оплаты (зеркало `Payment`, см. §12), загрузка письменного плана, отметка no-show.
@@ -107,6 +112,7 @@ repo/
 10. **Пользователи (Users)** — только для `admin`: создание/блокировка пользователей back office.
 
 ### 3.3 Общие требования UI
+
 - **Весь интерфейс back office — на румынском языке (RO).** Все подписи, кнопки, заголовки разделов, тексты ошибок и тостов, плейсхолдеры — по-румынски. Строки UI держать в одном месте (словарь/i18n-файл), даже если язык один, чтобы не хардкодить по компонентам.
 - Единый layout: боковое меню + хедер с текущим пользователем и выходом.
 - Везде состояния loading / empty / error (через shadcn + skeleton).
@@ -128,15 +134,16 @@ repo/
 - Сброс пароля — заложить место, реализация позже `[DEFAULT]`.
 
 ### Модель `User`
-| поле | тип | описание |
-|------|-----|----------|
-| id | uuid pk | |
-| email | string unique | |
-| password_hash | string | |
-| name | string | |
-| role | enum | `admin` / `editor` |
-| is_active | bool | блокировка |
-| created_at, updated_at | datetime | |
+
+| поле                   | тип           | описание           |
+| ---------------------- | ------------- | ------------------ |
+| id                     | uuid pk       |                    |
+| email                  | string unique |                    |
+| password_hash          | string        |                    |
+| name                   | string        |                    |
+| role                   | enum          | `admin` / `editor` |
+| is_active              | bool          | блокировка         |
+| created_at, updated_at | datetime      |                    |
 
 ---
 
@@ -145,17 +152,19 @@ repo/
 5 услуг, две группы по тому, нужен ли слот в календаре.
 
 ### Группа A — видеовстреча (через Calendly)
-| № | Услуга | Длительность | Цена | `service_code` | Calendly event type |
-|---|--------|-------------|------|----------------|---------------------|
-| 01 | Consultație pediatrică | 50 мин | 600 lei | `pediatric` | `pediatric` |
-| 02 | Consultație nutrițională | 60 мин | 700 lei | `nutrition` | `nutrition` |
-| 03 | Consultație integrativă & monitorizare | 90 мин | 1 100 lei | `integrative` | `integrative` |
+
+| №   | Услуга                                 | Длительность | Цена      | `service_code` | Calendly event type |
+| --- | -------------------------------------- | ------------ | --------- | -------------- | ------------------- |
+| 01  | Consultație pediatrică                 | 50 мин       | 600 lei   | `pediatric`    | `pediatric`         |
+| 02  | Consultație nutrițională               | 60 мин       | 700 lei   | `nutrition`    | `nutrition`         |
+| 03  | Consultație integrativă & monitorizare | 90 мин       | 1 100 lei | `integrative`  | `integrative`       |
 
 ### Группа B — без слота (только портал/back office)
-| № | Услуга | Тип | Цена | `service_code` |
-|---|--------|-----|------|----------------|
-| 04 | Monitorizare 3 luni | подписка 3 мес (мессенджер + корректировки + 2 видеозвонка/мес) | от 2 400 lei | `monitoring` |
-| 05 | Întrebare rapidă | письменный ответ за 48 ч (форма + вложения) | 180 lei | `quick_question` |
+
+| №   | Услуга              | Тип                                                             | Цена         | `service_code`   |
+| --- | ------------------- | --------------------------------------------------------------- | ------------ | ---------------- |
+| 04  | Monitorizare 3 luni | подписка 3 мес (мессенджер + корректировки + 2 видеозвонка/мес) | от 2 400 lei | `monitoring`     |
+| 05  | Întrebare rapidă    | письменный ответ за 48 ч (форма + вложения)                     | 180 lei      | `quick_question` |
 
 **Принцип:** услуги 04 и 05 **не** создают запись в Calendly. Кнопка `Rezervă` у них ведёт во внутренний поток (подписка / форма), а не в календарь.
 
@@ -168,19 +177,20 @@ repo/
 - Поддержка RO/EN полей.
 
 ### Модель `Service`
-| поле | тип | описание |
-|------|-----|----------|
-| id | uuid pk | |
-| code | string unique | `pediatric` / `nutrition` / `integrative` / `monitoring` / `quick_question` |
-| group | enum | `A_booking` / `B_portal` |
-| title_ro, title_en | string | название |
-| description_ro, description_en | text | описание |
-| duration_min | int\|null | для группы A |
-| price | int | в lei |
-| price_label_ro, price_label_en | string\|null | напр. «de la 2.400 lei», «3 luni», «48h · scris» |
-| calendly_event_type_uri | string\|null | только группа A |
-| sort_order | int | порядок на сайте |
-| active | bool | |
+
+| поле                           | тип           | описание                                                                    |
+| ------------------------------ | ------------- | --------------------------------------------------------------------------- |
+| id                             | uuid pk       |                                                                             |
+| code                           | string unique | `pediatric` / `nutrition` / `integrative` / `monitoring` / `quick_question` |
+| group                          | enum          | `A_booking` / `B_portal`                                                    |
+| title_ro, title_en             | string        | название                                                                    |
+| description_ro, description_en | text          | описание                                                                    |
+| duration_min                   | int\|null     | для группы A                                                                |
+| price                          | int           | в lei                                                                       |
+| price_label_ro, price_label_en | string\|null  | напр. «de la 2.400 lei», «3 luni», «48h · scris»                            |
+| calendly_event_type_uri        | string\|null  | только группа A                                                             |
+| sort_order                     | int           | порядок на сайте                                                            |
+| active                         | bool          |                                                                             |
 
 Эндпоинты: `GET /services` (public), `GET /services/:id`, `POST/PATCH/DELETE /services/:id` (admin/editor).
 
@@ -191,6 +201,7 @@ repo/
 «Полный kit для написания блога».
 
 ### Возможности
+
 - CRUD постов; markdown-контент `[DEFAULT]` с превью в редакторе.
 - Статусы `draft` / `published`, дата публикации.
 - Категории и/или теги.
@@ -199,25 +210,27 @@ repo/
 - Публичные GET только для `published`.
 
 ### Модель `Post`
-| поле | тип | описание |
-|------|-----|----------|
-| id | uuid pk | |
-| slug | string unique | для URL |
-| title_ro, title_en | string | |
-| excerpt_ro, excerpt_en | text\|null | анонс |
-| content_ro, content_en | text | markdown |
-| cover_image_url | string\|null | |
-| status | enum | `draft` / `published` |
-| published_at | datetime\|null | |
-| author_id | fk User | |
-| created_at, updated_at | datetime | |
+
+| поле                   | тип            | описание              |
+| ---------------------- | -------------- | --------------------- |
+| id                     | uuid pk        |                       |
+| slug                   | string unique  | для URL               |
+| title_ro, title_en     | string         |                       |
+| excerpt_ro, excerpt_en | text\|null     | анонс                 |
+| content_ro, content_en | text           | markdown              |
+| cover_image_url        | string\|null   |                       |
+| status                 | enum           | `draft` / `published` |
+| published_at           | datetime\|null |                       |
+| author_id              | fk User        |                       |
+| created_at, updated_at | datetime       |                       |
 
 ### Модель `Category` (или `Tag`)
-| поле | тип |
-|------|-----|
-| id | uuid pk |
-| slug | string unique |
-| name_ro, name_en | string |
+
+| поле             | тип           |
+| ---------------- | ------------- |
+| id               | uuid pk       |
+| slug             | string unique |
+| name_ro, name_en | string        |
 
 Связь Post ↔ Category — many-to-many.
 
@@ -230,7 +243,9 @@ repo/
 Подробности по записи на видеоконсультации.
 
 ### 8.1 Предусловия Calendly
+
 Нужен **платный план** (минимум Standard): несколько event types и webhooks (на Free — 1 event type, без webhooks).
+
 1. Создать 3 event type (50/60/90 мин, видео) под услуги 01–03.
 2. Подключить **Google Calendar** (заголовок event type попадёт в событие) и видео-провайдер (Google Meet / Zoom) — ссылка генерируется автоматически.
 3. Настроить кастомный вопрос при бронировании (`a1` = «motivul vizitei» / причина визита).
@@ -238,6 +253,7 @@ repo/
 5. Webhook-подписка на `invitee.created` и `invitee.canceled` (scope = organization).
 
 ### 8.2 Env
+
 ```
 CALENDLY_API_TOKEN=
 CALENDLY_ORG_URI=
@@ -245,23 +261,29 @@ CALENDLY_WEBHOOK_SIGNING_KEY=
 ```
 
 ### 8.3 Prefill типа услуги (на стороне сайта/фронта)
+
 Тип услуги подставляется автоматически, клиент ничего не вводит.
 
 Ссылка:
+
 ```
 https://calendly.com/<account>/pediatric?a1=Consultatie%20pediatrica
 ```
+
 Inline embed:
+
 ```javascript
 Calendly.initInlineWidget({
   url: 'https://calendly.com/<account>/pediatric',
   parentElement: document.getElementById('calendly-embed'),
-  prefill: { customAnswers: { a1: 'Consultatie pediatrica' } }
+  prefill: { customAnswers: { a1: 'Consultatie pediatrica' } },
 });
 ```
+
 Правила: значения чувствительны к регистру; номер `a1` зависит от порядка вопросов; prefill — подсказка, **не** источник истины (поле редактируемо клиентом).
 
 ### 8.4 Webhook handler (`POST /webhooks/calendly`)
+
 1. Верифицировать подпись по `CALENDLY_WEBHOOK_SIGNING_KEY`. Невалидные — 401.
 2. Тип события: `invitee.created` / `invitee.canceled`.
 3. Достать из payload: `scheduled_event.uri` (idempotency key), `scheduled_event.event_type` (**источник истины об услуге**), `start_time`, `end_time`, `location` (видеоссылка), `name`, `email`, `questions_and_answers` (причина визита), `cancel_url`, `reschedule_url`.
@@ -273,29 +295,32 @@ Calendly.initInlineWidget({
 > Маппинг услуги — **только** по `event_type` URI, не по тексту `a1` (его клиент может изменить).
 
 ### 8.5 Backup-синхронизация
+
 Cron-джоб опрашивает `GET /scheduled_events` за период (`min_start_time`/`max_start_time`, scope=organization) + по каждому `GET /scheduled_events/{uuid}/invitees`, сверяет с БД и дозаписывает пропущенное (на случай потери webhook).
 
 ### 8.6 Подготовка и план
+
 - **За 24 ч до** `start_time`: шедулер шлёт клиенту инструкции/чек-лист, **зависящие от `service_id`** (нутрициология — дневник питания/анализы; педиатрия — свой набор). Проставляет `prep_sent_at`.
 - **После встречи:** специалист загружает письменный план в карточку записи через back office; клиент скачивает в ЛК; `plan_uploaded_at`, `status=completed`. Неявка → `status=no_show`.
 
 ### Модель `Appointment`
-| поле | тип | описание |
-|------|-----|----------|
-| id | uuid pk | |
-| service_id | fk | |
-| calendly_event_uri | string unique | idempotency key |
-| client_name | string | |
-| client_email | string | |
-| reason | text\|null | причина визита |
-| start_time, end_time | datetime | |
-| video_url | string\|null | |
-| status | enum | `scheduled` / `canceled` / `completed` / `no_show` |
-| payment_status | enum | `pending` / `confirmed` — **зеркало строки `Payment`**, не ручное поле (см. §12) |
-| cancel_url, reschedule_url | string | |
-| prep_sent_at | datetime\|null | |
-| plan_uploaded_at | datetime\|null | |
-| created_at, updated_at | datetime | |
+
+| поле                       | тип            | описание                                                                         |
+| -------------------------- | -------------- | -------------------------------------------------------------------------------- |
+| id                         | uuid pk        |                                                                                  |
+| service_id                 | fk             |                                                                                  |
+| calendly_event_uri         | string unique  | idempotency key                                                                  |
+| client_name                | string         |                                                                                  |
+| client_email               | string         |                                                                                  |
+| reason                     | text\|null     | причина визита                                                                   |
+| start_time, end_time       | datetime       |                                                                                  |
+| video_url                  | string\|null   |                                                                                  |
+| status                     | enum           | `scheduled` / `canceled` / `completed` / `no_show`                               |
+| payment_status             | enum           | `pending` / `confirmed` — **зеркало строки `Payment`**, не ручное поле (см. §12) |
+| cancel_url, reschedule_url | string         |                                                                                  |
+| prep_sent_at               | datetime\|null |                                                                                  |
+| plan_uploaded_at           | datetime\|null |                                                                                  |
+| created_at, updated_at     | datetime       |                                                                                  |
 
 ---
 
@@ -304,15 +329,16 @@ Cron-джоб опрашивает `GET /scheduled_events` за период (`m
 Отдельная страница в back office: список контактов, добавление новых, редактирование.
 
 ### Модель `Contact`
-| поле | тип | описание |
-|------|-----|----------|
-| id | uuid pk | |
-| type | enum | напр. `phone` / `email` / `address` / `social` / `other` |
-| label_ro, label_en | string | подпись |
-| value | string | значение (номер, email, ссылка, адрес) |
-| sort_order | int | |
-| active | bool | |
-| created_at, updated_at | datetime | |
+
+| поле                   | тип      | описание                                                 |
+| ---------------------- | -------- | -------------------------------------------------------- |
+| id                     | uuid pk  |                                                          |
+| type                   | enum     | напр. `phone` / `email` / `address` / `social` / `other` |
+| label_ro, label_en     | string   | подпись                                                  |
+| value                  | string   | значение (номер, email, ссылка, адрес)                   |
+| sort_order             | int      |                                                          |
+| active                 | bool     |                                                          |
+| created_at, updated_at | datetime |                                                          |
 
 Эндпоинты: публичный `GET /contacts` (для сайта), защищённые `POST/PATCH/DELETE`.
 
@@ -323,13 +349,14 @@ Cron-джоб опрашивает `GET /scheduled_events` за период (`m
 Отдельная страница: редактирование контента «О нас». Обычно это singleton-документ (одна запись), но с версионностью полей RO/EN и блоками.
 
 ### Модель `AboutPage` (singleton)
-| поле | тип | описание |
-|------|-----|----------|
-| id | uuid pk | один экземпляр |
-| title_ro, title_en | string | |
-| content_ro, content_en | text | markdown `[DEFAULT]` |
-| images | json\|null | ссылки на изображения |
-| updated_at | datetime | |
+
+| поле                   | тип        | описание              |
+| ---------------------- | ---------- | --------------------- |
+| id                     | uuid pk    | один экземпляр        |
+| title_ro, title_en     | string     |                       |
+| content_ro, content_en | text       | markdown `[DEFAULT]`  |
+| images                 | json\|null | ссылки на изображения |
+| updated_at             | datetime   |                       |
 
 Эндпоинты: публичный `GET /about`, защищённый `PATCH /about` (admin/editor).
 
@@ -338,6 +365,7 @@ Cron-джоб опрашивает `GET /scheduled_events` за период (`m
 ## 11. Dashboard / статистика (модуль `dashboard`)
 
 Конкретные метрики **уточним позже** — заложить каркас и базовый набор:
+
 - Кол-во записей по каждой услуге за период (group by `service`).
 - Конверсия `scheduled → completed`, доля `no_show`, доля `canceled`.
 - Активные подписки + использование квоты видеозвонков.

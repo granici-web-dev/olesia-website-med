@@ -9,7 +9,11 @@ import { openCookiePreferences } from '@/components/analytics/CookieConsent';
 export function CookiePreferencesLink({ className }: { className?: string }) {
   const locale = useLocale();
   const label =
-    locale === 'ru' ? 'Настройки cookie' : locale === 'en' ? 'Cookie settings' : 'Setări cookie';
+    locale === 'ru'
+      ? 'Настройки cookie'
+      : locale === 'en'
+        ? 'Cookie settings'
+        : 'Setări cookie';
 
   return (
     <button type="button" className={className} onClick={openCookiePreferences}>

@@ -3,10 +3,7 @@ import type {
   MaterialDto,
   PublicMaterialDto,
 } from '@olesia/shared';
-import type {
-  Material,
-  MaterialCategory,
-} from '../../generated/prisma/client';
+import type { Material, MaterialCategory } from '../../generated/prisma/client';
 
 export function toMaterialCategoryDto(
   c: MaterialCategory,

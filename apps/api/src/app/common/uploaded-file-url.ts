@@ -1,5 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { IsUrl, Matches, MaxLength, type ValidationOptions } from 'class-validator';
+import {
+  IsUrl,
+  Matches,
+  MaxLength,
+  type ValidationOptions,
+} from 'class-validator';
 
 import { STORAGE_URL_PREFIX } from '../storage/storage.constants';
 

@@ -45,7 +45,8 @@ const TRANSLATIONS: Record<Lang, CC.Translation> = {
       acceptAllBtn: 'Accept toate',
       acceptNecessaryBtn: 'Refuz',
       showPreferencesBtn: 'Personalizează',
-      footer: '<a href="/ro/gdpr">Politica de confidențialitate</a> · <a href="/ro/terms">Termeni</a>',
+      footer:
+        '<a href="/ro/gdpr">Politica de confidențialitate</a> · <a href="/ro/terms">Termeni</a>',
     },
     preferencesModal: {
       title: 'Preferințe cookie-uri',
@@ -83,7 +84,8 @@ const TRANSLATIONS: Record<Lang, CC.Translation> = {
       acceptAllBtn: 'Accept all',
       acceptNecessaryBtn: 'Reject',
       showPreferencesBtn: 'Customize',
-      footer: '<a href="/en/gdpr">Privacy policy</a> · <a href="/en/terms">Terms</a>',
+      footer:
+        '<a href="/en/gdpr">Privacy policy</a> · <a href="/en/terms">Terms</a>',
     },
     preferencesModal: {
       title: 'Cookie preferences',
@@ -160,7 +162,9 @@ const broadcast = () => {
     analytics: CC.acceptedCategory('analytics'),
     marketing: CC.acceptedCategory('marketing'),
   };
-  window.dispatchEvent(new CustomEvent<ConsentState>(CONSENT_EVENT, { detail }));
+  window.dispatchEvent(
+    new CustomEvent<ConsentState>(CONSENT_EVENT, { detail }),
+  );
 };
 
 export function CookieConsent() {
@@ -178,7 +182,11 @@ export function CookieConsent() {
       // Ask again after a year, and re-ask if the visitor never chose.
       cookie: { name: 'olesea_consent', expiresAfterDays: 365 },
       guiOptions: {
-        consentModal: { layout: 'box', position: 'bottom left', equalWeightButtons: true },
+        consentModal: {
+          layout: 'box',
+          position: 'bottom left',
+          equalWeightButtons: true,
+        },
         preferencesModal: { layout: 'box', equalWeightButtons: true },
       },
       categories: {

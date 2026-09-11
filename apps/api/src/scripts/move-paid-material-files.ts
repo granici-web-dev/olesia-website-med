@@ -53,7 +53,9 @@ async function main(): Promise<void> {
     // path out of the filesystem.
     const key = basename(new URL(material.fileUrl!).pathname);
     if (!new URL(material.fileUrl!).pathname.startsWith(STORAGE_URL_PREFIX)) {
-      console.warn(`  ${material.slug}: ${material.fileUrl} is not ours, skipped`);
+      console.warn(
+        `  ${material.slug}: ${material.fileUrl} is not ours, skipped`,
+      );
       continue;
     }
 
@@ -93,7 +95,9 @@ async function main(): Promise<void> {
   const after = await prisma.material.count({
     where: { access: 'paid', fileUrl: { not: null } },
   });
-  console.log(`Moved ${moved}. Paid materials still carrying a fileUrl: ${after}.`);
+  console.log(
+    `Moved ${moved}. Paid materials still carrying a fileUrl: ${after}.`,
+  );
   if (after !== 0) {
     throw new Error(
       `${after} paid material(s) still have a public fileUrl after the move`,

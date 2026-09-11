@@ -55,6 +55,12 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter api exec prisma generate
 
+      # 253 files had drifted from the formatter by the time anyone checked
+      # (audit A11). One option is the whole policy, so this costs a second and
+      # settles every argument about spacing that would otherwise reach review.
+      - name: Prettier
+        run: pnpm exec prettier --check .
+
       - name: Typecheck API
         run: pnpm exec tsc -p apps/api/tsconfig.app.json --noEmit
 

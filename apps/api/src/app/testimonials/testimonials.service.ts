@@ -47,10 +47,7 @@ export class TestimonialsService {
     return toTestimonialDto(created);
   }
 
-  async update(
-    id: string,
-    dto: UpdateTestimonialDto,
-  ): Promise<TestimonialDto> {
+  async update(id: string, dto: UpdateTestimonialDto): Promise<TestimonialDto> {
     await this.getOrThrow(id);
     return toTestimonialDto(
       await this.prisma.testimonial.update({ where: { id }, data: dto }),

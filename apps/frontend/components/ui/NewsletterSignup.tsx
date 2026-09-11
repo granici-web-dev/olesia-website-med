@@ -17,13 +17,21 @@ import { biFor, type Bi } from '@/lib/i18n-types';
    Trilingual via the active locale. `source` tags where the signup happened. */
 
 const T: Record<string, Bi> = {
-  title: { ro: 'Abonează-te la newsletter', en: 'Subscribe to the newsletter', ru: 'Подпишитесь на рассылку' },
+  title: {
+    ro: 'Abonează-te la newsletter',
+    en: 'Subscribe to the newsletter',
+    ru: 'Подпишитесь на рассылку',
+  },
   body: {
     ro: 'Materiale noi și sfaturi practice despre sănătatea și nutriția copilului — fără spam.',
     en: 'New materials and practical tips on child health and nutrition — no spam.',
     ru: 'Новые материалы и практичные советы о здоровье и питании ребёнка — без спама.',
   },
-  placeholder: { ro: 'email@exemplu.md', en: 'email@example.com', ru: 'email@example.com' },
+  placeholder: {
+    ro: 'email@exemplu.md',
+    en: 'email@example.com',
+    ru: 'email@example.com',
+  },
   cta: { ro: 'Abonează-te', en: 'Subscribe', ru: 'Подписаться' },
   sending: { ro: 'Se trimite…', en: 'Sending…', ru: 'Отправка…' },
   consent: {
@@ -34,7 +42,11 @@ const T: Record<string, Bi> = {
   privacy: { ro: 'Confidențialitate', en: 'Privacy', ru: 'Конфиденциальность' },
   // Nothing is mailed yet, so "check your email" would be a promise the site
   // cannot keep. It says what actually happened instead (audit A6, F3).
-  success: { ro: 'Mulțumim! Adresa ta este pe listă.', en: 'Thank you! Your address is on the list.', ru: 'Спасибо! Ваш адрес в списке.' },
+  success: {
+    ro: 'Mulțumim! Adresa ta este pe listă.',
+    en: 'Thank you! Your address is on the list.',
+    ru: 'Спасибо! Ваш адрес в списке.',
+  },
 };
 
 export function NewsletterSignup({
@@ -48,7 +60,9 @@ export function NewsletterSignup({
   const lc = biFor(locale);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>(
+    'idle',
+  );
   // The API's own wording for what went wrong, not one sentence for every
   // failure: a rate limit and a rejected captcha ask for different things
   // (audit A7).
@@ -75,15 +89,21 @@ export function NewsletterSignup({
   if (status === 'success') {
     return (
       <div className={className}>
-        <p className="text-[0.95rem] leading-relaxed text-ink">{lc(T.success)}</p>
+        <p className="text-[0.95rem] leading-relaxed text-ink">
+          {lc(T.success)}
+        </p>
       </div>
     );
   }
 
   return (
     <div className={className}>
-      <p className="serif text-[1.4rem] leading-snug tracking-[-0.01em] text-ink">{lc(T.title)}</p>
-      <p className="mt-2 max-w-[42ch] text-[0.9rem] leading-relaxed text-ink-soft text-pretty">{lc(T.body)}</p>
+      <p className="serif text-[1.4rem] leading-snug tracking-[-0.01em] text-ink">
+        {lc(T.title)}
+      </p>
+      <p className="mt-2 max-w-[42ch] text-[0.9rem] leading-relaxed text-ink-soft text-pretty">
+        {lc(T.body)}
+      </p>
 
       <form className="mt-5" onSubmit={onSubmit} noValidate>
         <div className="flex flex-wrap items-center gap-3">
@@ -115,14 +135,20 @@ export function NewsletterSignup({
           />
           <span>
             {lc(T.consent)}{' '}
-            <Link href="/gdpr" className="underline underline-offset-2 transition-colors hover:text-sage">
+            <Link
+              href="/gdpr"
+              className="underline underline-offset-2 transition-colors hover:text-sage"
+            >
               {lc(T.privacy)}
             </Link>
           </span>
         </label>
 
         {error && (
-          <p role="alert" className="mt-2 text-[0.85rem] text-[var(--walnut,#8a5a3a)]">
+          <p
+            role="alert"
+            className="mt-2 text-[0.85rem] text-[var(--walnut,#8a5a3a)]"
+          >
             {error}
           </p>
         )}

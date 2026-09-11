@@ -116,9 +116,7 @@ export function detectSignature(buffer: Buffer): FileSignature | null {
     return 'zip';
   }
   // OLE compound document — the pre-2007 .doc container.
-  if (
-    startsWith(buffer, [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1])
-  ) {
+  if (startsWith(buffer, [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1])) {
     return 'ole';
   }
   return null;

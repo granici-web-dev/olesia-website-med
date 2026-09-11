@@ -212,7 +212,14 @@ export function addWorkingMinutes(
 
     // Move to the start of the next calendar day in the practice's zone.
     p = partsPlusDays(p, 1, schedule.timezone);
-    cursor = instantFromWallClock(p.year, p.month, p.day, 0, 0, schedule.timezone);
+    cursor = instantFromWallClock(
+      p.year,
+      p.month,
+      p.day,
+      0,
+      0,
+      schedule.timezone,
+    );
   }
 
   // Unreachable for any schedule with an open day; kept so the function is
@@ -222,7 +229,10 @@ export function addWorkingMinutes(
 
 /** Whether the practice is open at a given instant. */
 export function isOpenAt(instant: Date, schedule: Schedule): boolean {
-  const interval = intervalOn(partsInZone(instant, schedule.timezone), schedule);
+  const interval = intervalOn(
+    partsInZone(instant, schedule.timezone),
+    schedule,
+  );
   if (!interval) return false;
   const t = instant.getTime();
   return t >= interval.start.getTime() && t < interval.end.getTime();

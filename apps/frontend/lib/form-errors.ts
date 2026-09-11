@@ -148,7 +148,8 @@ export function describeUploadError(
   code: string,
   locale: Locale,
 ): string {
-  if (code === 'file_too_large' || status === 413) return pick(TOO_LARGE, locale);
+  if (code === 'file_too_large' || status === 413)
+    return pick(TOO_LARGE, locale);
   if (code === 'unsupported_file_type') return pick(WRONG_TYPE, locale);
   if (code === 'too_many_files') return pick(TOO_MANY_FILES, locale);
   if (status === 0) return pick(UPLOAD_OFFLINE, locale);

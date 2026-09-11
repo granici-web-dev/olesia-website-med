@@ -43,7 +43,6 @@ export function Modal({
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
 
-
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();

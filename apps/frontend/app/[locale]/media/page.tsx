@@ -79,7 +79,10 @@ export default async function MediaPage({
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+            <span
+              className="size-1.5 rounded-full bg-sage"
+              aria-hidden="true"
+            />
             {ru ? 'СМИ' : en ? 'In the media' : 'Apariții media'}
           </p>
 
@@ -119,7 +122,9 @@ export default async function MediaPage({
                 </dd>
               </div>
               <div>
-                <dt className="eyebrow mb-2">{ru ? 'Каналы' : en ? 'Outlets' : 'Televiziuni'}</dt>
+                <dt className="eyebrow mb-2">
+                  {ru ? 'Каналы' : en ? 'Outlets' : 'Televiziuni'}
+                </dt>
                 <dd className="mt-1 text-[0.95rem] leading-relaxed text-ink">
                   {outlets.join(' · ')}
                 </dd>
@@ -133,7 +138,9 @@ export default async function MediaPage({
       <section className="shell py-20 md:py-28">
         <header className="mb-12 flex flex-col gap-4 md:mb-14 md:flex-row md:items-baseline md:justify-between">
           <div>
-            <p className="eyebrow mb-3">{ru ? 'Телеэфиры' : en ? 'On television' : 'La televizor'}</p>
+            <p className="eyebrow mb-3">
+              {ru ? 'Телеэфиры' : en ? 'On television' : 'La televizor'}
+            </p>
             <h2 className="serif text-[clamp(2.2rem,4.5vw,4rem)] leading-[1.0] tracking-[-0.02em] text-balance">
               {ru ? (
                 <>
@@ -141,11 +148,13 @@ export default async function MediaPage({
                 </>
               ) : en ? (
                 <>
-                  Shows and <span className="serif-it text-sage">interviews</span>
+                  Shows and{' '}
+                  <span className="serif-it text-sage">interviews</span>
                 </>
               ) : (
                 <>
-                  Emisiuni și <span className="serif-it text-sage">interviuri</span>
+                  Emisiuni și{' '}
+                  <span className="serif-it text-sage">interviuri</span>
                 </>
               )}
             </h2>
@@ -181,15 +190,24 @@ export default async function MediaPage({
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
                 {ru ? (
                   <>
-                    Приглашение в <span className="serif-it text-[var(--sage-soft)]">эфир?</span>
+                    Приглашение в{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      эфир?
+                    </span>
                   </>
                 ) : en ? (
                   <>
-                    An interview or <span className="serif-it text-[var(--sage-soft)]">a talk?</span>
+                    An interview or{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      a talk?
+                    </span>
                   </>
                 ) : (
                   <>
-                    O invitație sau un <span className="serif-it text-[var(--sage-soft)]">interviu?</span>
+                    O invitație sau un{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      interviu?
+                    </span>
                   </>
                 )}
               </h2>
@@ -198,7 +216,11 @@ export default async function MediaPage({
                   {ru ? 'Написать' : en ? 'Get in touch' : 'Scrie-mi'}
                 </Link>
                 <Link href="/about" className={creamUnderline}>
-                  {ru ? 'О враче →' : en ? 'About the doctor →' : 'Despre medic →'}
+                  {ru
+                    ? 'О враче →'
+                    : en
+                      ? 'About the doctor →'
+                      : 'Despre medic →'}
                 </Link>
               </div>
             </div>
@@ -224,7 +246,11 @@ export default async function MediaPage({
               : 'Ai nevoie de o părere pentru copilul tău?'}
         </p>
         <Link href="/services" className={btnDark}>
-          {ru ? 'Смотреть консультации' : en ? 'See the consultations' : 'Vezi consultațiile'}
+          {ru
+            ? 'Смотреть консультации'
+            : en
+              ? 'See the consultations'
+              : 'Vezi consultațiile'}
         </Link>
       </section>
     </main>

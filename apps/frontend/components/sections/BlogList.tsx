@@ -45,9 +45,25 @@ export interface BlogListLabels {
 
 function PenIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" aria-hidden="true">
-      <path d="M4 20h4l10-10-4-4L4 16v4Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M13.5 6.5l4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <svg
+      viewBox="0 0 24 24"
+      width="32"
+      height="32"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 20h4l10-10-4-4L4 16v4Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.5 6.5l4 4"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -55,7 +71,10 @@ function PenIcon() {
 function PostCard({ p }: { p: BlogPostItem }) {
   return (
     <article>
-      <a href={p.href} className="group block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage">
+      <a
+        href={p.href}
+        className="group block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+      >
         <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden bg-cream-2 text-sage">
           {p.coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -74,7 +93,9 @@ function PostCard({ p }: { p: BlogPostItem }) {
           </span>
         </div>
 
-        <p className="mono mt-4 text-[11px] uppercase tracking-[0.08em] text-ink-soft">{p.meta}</p>
+        <p className="mono mt-4 text-[11px] uppercase tracking-[0.08em] text-ink-soft">
+          {p.meta}
+        </p>
         <h3 className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-ink text-pretty transition-colors group-hover:text-[var(--walnut)]">
           {p.title}
         </h3>
@@ -90,7 +111,9 @@ function PostCard({ p }: { p: BlogPostItem }) {
 
 const chipCls = (on: boolean) =>
   `cursor-pointer rounded-full border px-4 py-2 text-[12px] font-medium uppercase tracking-[0.08em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage ${
-    on ? 'border-ink bg-ink text-cream' : 'border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage'
+    on
+      ? 'border-ink bg-ink text-cream'
+      : 'border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage'
   }`;
 
 export function BlogList({
@@ -126,13 +149,21 @@ export function BlogList({
     );
   }
 
-  const catChips: BlogCategory[] = [{ key: 'all', label: labels.all }, ...categories];
-  const ageChips: BlogCategory[] = [{ key: 'all', label: labels.allAges ?? labels.all }, ...ages];
+  const catChips: BlogCategory[] = [
+    { key: 'all', label: labels.all },
+    ...categories,
+  ];
+  const ageChips: BlogCategory[] = [
+    { key: 'all', label: labels.allAges ?? labels.all },
+    ...ages,
+  ];
   const showAges = ages.length > 0;
   const filtered = posts.filter(
     (p) =>
       (active === 'all' || p.categoryKey === active) &&
-      (activeAge === 'all' || p.ageKeys.length === 0 || p.ageKeys.includes(activeAge)),
+      (activeAge === 'all' ||
+        p.ageKeys.length === 0 ||
+        p.ageKeys.includes(activeAge)),
   );
 
   return (
@@ -144,7 +175,11 @@ export function BlogList({
               {labels.categoryLabel}
             </p>
           )}
-          <div role="group" aria-label={labels.categoryLabel ?? labels.all} className="flex flex-wrap gap-2.5">
+          <div
+            role="group"
+            aria-label={labels.categoryLabel ?? labels.all}
+            className="flex flex-wrap gap-2.5"
+          >
             {catChips.map((c) => {
               const on = active === c.key;
               return (
@@ -170,7 +205,11 @@ export function BlogList({
               {labels.ageLabel}
             </p>
           )}
-          <div role="group" aria-label={labels.ageLabel ?? labels.allAges} className="flex flex-wrap gap-2.5">
+          <div
+            role="group"
+            aria-label={labels.ageLabel ?? labels.allAges}
+            className="flex flex-wrap gap-2.5"
+          >
             {ageChips.map((a) => {
               const on = activeAge === a.key;
               return (

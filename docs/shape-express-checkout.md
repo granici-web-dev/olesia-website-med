@@ -22,7 +22,7 @@ Six things found while reading. Three of them change the plan.
 1. **`PaymentsService.start()` takes an `amount`.** It is a plain number supplied by
    the caller (`StartPaymentInput.amount`). If a public route accepts that field from
    the request body, an 8 € consultation is bought for 1.01. The public entry point
-   must take a *descriptor* of the purchase and read the price server-side. This is the
+   must take a _descriptor_ of the purchase and read the price server-side. This is the
    single most expensive mistake available in this step.
 2. **`start()` has no guards at all.** No `amount > 1.00` (maib refuses below it), no
    E.164 normalisation of the phone (a non-E.164 phone fails the whole session with
@@ -73,7 +73,7 @@ died with the tab. The money is taken and the patient has nothing. Form-first ma
 worst case "a question we store for seven days and delete", which costs the patient
 nothing.
 
-The client's requirement — *pay before you get an answer* — is still met exactly: an
+The client's requirement — _pay before you get an answer_ — is still met exactly: an
 `awaiting_payment` ticket is not in the doctor's working list and has no answer box.
 The brief itself lists both orders (`docs/brief-changes-2026-06-24.md` §11.4b: "pay,
 then the question form (or the form, then a checkout that gates delivery)"). This picks
@@ -177,10 +177,10 @@ money lands.
 
 New routes:
 
-| Route | Access | Body / returns |
-|---|---|---|
-| `POST /leads/quick-question/checkout` | public, captcha + honeypot, 3/min | `{name, email, phone?, question, locale, termsAcceptedVersion, intentKey, company?}` → `{checkoutUrl, orderId}`. **No amount field.** |
-| `POST /payments/:id/resend-confirmation` | admin | → the payment DTO |
+| Route                                    | Access                            | Body / returns                                                                                                                        |
+| ---------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /leads/quick-question/checkout`    | public, captcha + honeypot, 3/min | `{name, email, phone?, question, locale, termsAcceptedVersion, intentKey, company?}` → `{checkoutUrl, orderId}`. **No amount field.** |
+| `POST /payments/:id/resend-confirmation` | admin                             | → the payment DTO                                                                                                                     |
 
 Changed payload: `GET /payment-status/:orderId` gains `targetType`, `description`,
 `paidAt`. Still no payer PII. `GET /contacts` gains the legal entity.
@@ -270,7 +270,7 @@ shape disagree, this section is the later word and wins.
    written before the redirect in the new `awaiting_payment` status and bound to its
    `Payment` row through `targetId`; the redirect to the bank comes after. The reason
    stands as argued above: pay-first has no recovery path for a closed tab while SMTP
-   does not exist, and the client's requirement — *pay before you get an answer* — is met
+   does not exist, and the client's requirement — _pay before you get an answer_ — is met
    by the unpaid ticket being invisible to the doctor, not by the order of the two steps.
    This knowingly contradicts the wording of `PLAN.md` 12a, and 12a now says so.
    Re-open if SMTP lands before this is built.

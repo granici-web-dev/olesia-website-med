@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Brand tokens */
 :root {
@@ -56,7 +56,11 @@ body {
   padding: 0;
   background: var(--cream);
   color: var(--ink);
-  font-family: var(--font-manrope), -apple-system, system-ui, sans-serif;
+  font-family:
+    var(--font-manrope),
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: 15px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;

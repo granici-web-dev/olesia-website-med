@@ -25,7 +25,9 @@ describe('PaginationQueryDto', () => {
   });
 
   it('parses the numbers out of a query string', () => {
-    expect(plainToInstance(PaginationQueryDto, { page: '3', pageSize: '50' })).toMatchObject({
+    expect(
+      plainToInstance(PaginationQueryDto, { page: '3', pageSize: '50' }),
+    ).toMatchObject({
       page: 3,
       pageSize: 50,
     });
@@ -51,7 +53,10 @@ describe('PaginationQueryDto', () => {
 
 describe('paginate', () => {
   it('echoes the page the caller asked for, not the one it got', () => {
-    const query = plainToInstance(PaginationQueryDto, { page: '7', pageSize: '5' });
+    const query = plainToInstance(PaginationQueryDto, {
+      page: '7',
+      pageSize: '5',
+    });
     // Page 7 of a 3-item table is empty; the envelope still has to say which
     // page was asked for, or the client cannot page back.
     expect(paginate([], 3, query)).toEqual({

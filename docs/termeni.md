@@ -16,12 +16,12 @@
 
 ## 1. Зачем сюда приходят (гипотезы → проверить)
 
-| Сегмент | JTBD |
-|---|---|
-| Перед оплатой | «На что соглашаюсь, какие правила» |
+| Сегмент                  | JTBD                                   |
+| ------------------------ | -------------------------------------- |
+| Перед оплатой            | «На что соглашаюсь, какие правила»     |
 | Хочет отменить/перенести | «Вернут ли деньги, можно ли перенести» |
-| Понять услугу | «Что получаю, каковы границы» |
-| Юридически грамотный | «Какие у меня права как потребителя» |
+| Понять услугу            | «Что получаю, каковы границы»          |
+| Юридически грамотный     | «Какие у меня права как потребителя»   |
 
 **UX-вывод:** Termeni плохо читаются. Делаем **двухслойно** (как GDPR): короткое резюме простым языком сверху (особенно отмена, оплата, «не для экстренных») + полный текст ниже.
 
@@ -62,6 +62,7 @@
 ## 4. Каркас текста (RO, ЧЕРНОВИК — требует юр. проверки)
 
 ### 1. Заголовок
+
 ```
 H1: Termeni și condiții
 Ultima actualizare: [data]
@@ -69,6 +70,7 @@ Furnizor: Dr. Olesea Jalba / [denumire juridică]      ⚠ юр. статус
 ```
 
 ### 2. Резюме простым языком
+
 ```
 Heading: Pe scurt
 • Acești termeni reglementează folosirea serviciilor noastre.
@@ -79,6 +81,7 @@ Heading: Pe scurt
 ```
 
 ### 3. Услуги
+
 ```
 Heading: Serviciile oferite
 Oferim consultații video (pediatrică, de nutriție, integrativă) și
@@ -87,6 +90,7 @@ Detaliile și duratele sunt descrise pe pagina Servicii.
 ```
 
 ### 4. Кто может пользоваться
+
 ```
 Heading: Cine poate folosi serviciile
 Pentru serviciile destinate copiilor, programarea și acceptarea acestor
@@ -95,6 +99,7 @@ că are dreptul să acționeze în numele copilului.       ⚠ юрист
 ```
 
 ### 5. Программирование и подтверждение
+
 ```
 Heading: Programare și confirmare
 Programarea consultațiilor video se face prin Calendly; vei primi o
@@ -103,6 +108,7 @@ solicitare sau o întrebare.
 ```
 
 ### 6. Оплата
+
 ```
 Heading: Plată
 Plata se face pe site cu cardul sau prin MIA (pagina securizată
@@ -113,14 +119,17 @@ Prețurile sunt afișate la fiecare serviciu.            ⚠ цены
 ```
 
 ### 7. Отмена, перенос, возврат
+
 ```
 Heading: Anulare, reprogramare și rambursare
 [Politica de anulare și reprogramare — termene și condiții.]   ⚠ ОПРЕДЕЛИТЬ
 [Condițiile de rambursare.]                                    ⚠
 ```
+
 > Самый практически важный раздел. Без него Termeni неполны. Должен совпадать с FAQ и страницами услуг.
 
 ### 8. Природа медуслуги и границы (ЯДРО)
+
 ```
 Heading: Natura serviciilor medicale și limitele lor
 
@@ -137,6 +146,7 @@ Heading: Natura serviciilor medicale și limitele lor
 ```
 
 ### 9. Обязанности пользователя
+
 ```
 Heading: Obligațiile tale
 Te angajezi să oferi informații corecte și complete despre starea de
@@ -144,12 +154,14 @@ sănătate și să folosești serviciile în mod adecvat.
 ```
 
 ### 10. Ограничение ответственности
+
 ```
 Heading: Limitarea răspunderii
 [În limitele permise de lege ...]                      ⚠ юрист (потреб. право ограничивает)
 ```
 
 ### 11. Интеллектуальная собственность
+
 ```
 Heading: Proprietate intelectuală
 Conținutul site-ului — texte, ghiduri, meniuri, articole — ne aparține
@@ -157,6 +169,7 @@ Conținutul site-ului — texte, ghiduri, meniuri, articole — ne aparține
 ```
 
 ### 12–15. Конфиденциальность / изменения / право / контакт
+
 ```
 Heading: Confidențialitate
 Prelucrarea datelor este descrisă în Politica de confidențialitate.
@@ -204,4 +217,7 @@ Meta description: Condițiile de utilizare a serviciilor de consultații
 6. Согласие родителя за ребёнка — формулировка.
 7. Применимое право, споры, права потребителя.
 8. Условия интеллектуальной собственности; приоритетная языковая версия.
+
+```
+
 ```

@@ -23,7 +23,10 @@ export async function FreeConsult({ locale }: { locale: string }) {
     locale === 'ru' ? ru : locale === 'en' ? en : ro;
   const services = await api.services();
   const freeConsult = services.find((s) => s.code === 'free_consult');
-  const duration = formatServiceDuration(locale, freeConsult?.durationMin ?? null);
+  const duration = formatServiceDuration(
+    locale,
+    freeConsult?.durationMin ?? null,
+  );
   const bookingUrl = calendlyUrlFor('free_consult', services);
   if (!bookingUrl) return null;
 
@@ -51,11 +54,23 @@ export async function FreeConsult({ locale }: { locale: string }) {
             )}
           </p>
         </Reveal>
-        <Reveal as="div" className="flex shrink-0 flex-wrap items-center gap-4" delay={120}>
+        <Reveal
+          as="div"
+          className="flex shrink-0 flex-wrap items-center gap-4"
+          delay={120}
+        >
           <CalendlyButton
             url={bookingUrl}
-            reason={t('Consultație gratuită', 'Free consultation', 'Бесплатная консультация')}
-            label={t('Programează discuția', 'Book the call', 'Записаться на разговор')}
+            reason={t(
+              'Consultație gratuită',
+              'Free consultation',
+              'Бесплатная консультация',
+            )}
+            label={t(
+              'Programează discuția',
+              'Book the call',
+              'Записаться на разговор',
+            )}
             withArrow={false}
             className={creamPill}
           />

@@ -243,5 +243,3 @@ export function CredentialsEditor({ form }: { form: Form }) {
     </BlockSection>
   );
 }
-
-

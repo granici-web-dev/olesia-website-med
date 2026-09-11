@@ -1,4 +1,10 @@
-import { IsEnum, IsISO8601, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 import { PatientEntryType } from '../../../generated/prisma/enums';
 

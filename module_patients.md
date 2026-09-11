@@ -5,6 +5,7 @@ keep their full medical history so the doctor can search by name and review
 quickly. Mirrors the conventions of `module_calendly.md`.
 
 ## Decisions (locked 2026-06-12)
+
 - **History shape:** a single chronological **timeline of entries** (types:
   `anamnesis` / `note` / `prescription` / `document`), surfaced via tabs.
 - **Access:** medical data visible to **admin + editor** (same as other
@@ -14,11 +15,13 @@ quickly. Mirrors the conventions of `module_calendly.md`.
   link instead of creating a duplicate.
 
 ## Domain
+
 Today `Appointment` / `Subscription` / `QuickQuestion` store `clientName` /
 `clientEmail` as denormalized strings (from Calendly). A `Patient` becomes the
 first-class person that ties these together plus the medical record.
 
 ### Prisma models
+
 ```
 model Patient {
   id            String          @id @default(uuid())
@@ -57,11 +60,14 @@ model PatientEntry {
   @@index([patientId, occurredAt])
 }
 ```
+
 Add nullable `patientId String?` + relation to `Appointment`, `Subscription`,
 `QuickQuestion` (so a patient's interaction history is queryable).
 
 ## API — module `patients`
+
 All endpoints `@Roles(admin, editor)` (no public access).
+
 - `GET /patients?search=&page=&pageSize=` — search by name/email, paginated.
 - `GET /patients/:id` — profile + linked interactions summary.
 - `POST /patients` — create.
@@ -75,7 +81,9 @@ All endpoints `@Roles(admin, editor)` (no public access).
   NOT served from the public `/uploads` static path.
 
 ## Back office — page "Pacienți"
+
 Sidebar item under **Administrare** (or its own group). Two screens:
+
 - **List:** search box (name/email) + paginated table → row = name, email,
   last interaction, #entries.
 - **Detail:** header (name, contact, consent badge) + tabs:
@@ -85,6 +93,7 @@ Sidebar item under **Administrare** (or its own group). Two screens:
   detail sheets → calls `POST /patients/from-lead` → links + opens the patient.
 
 ## GDPR / security (REQUIRED)
+
 - Medical attachments must use the **authenticated download endpoint**, never
   the public `/uploads/<uuid>` static route (storage abstraction must support a
   private bucket/path served only behind auth + role check).
@@ -94,6 +103,7 @@ Sidebar item under **Administrare** (or its own group). Two screens:
 - Bilingual UI strings stay RO-only (back office convention).
 
 ## Build order
+
 1. Prisma models + migration; nullable `patientId` on the 3 lead models.
 2. `packages/shared` DTOs/enums (PatientDto, PatientEntryDto, types).
 3. NestJS `patients` module (CRUD, search, timeline, from-lead, documents).

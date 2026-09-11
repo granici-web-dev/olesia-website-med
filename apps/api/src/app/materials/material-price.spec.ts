@@ -14,15 +14,15 @@ import { checkoutAmount } from '../payments/payments.service';
 
 describe('materialPrice', () => {
   it('refuses a free material offered for sale', () => {
-    expect(
-      materialPrice({ access: MaterialAccess.free, price: 9 }),
-    ).toEqual({ refusal: 'material_not_for_sale' });
+    expect(materialPrice({ access: MaterialAccess.free, price: 9 })).toEqual({
+      refusal: 'material_not_for_sale',
+    });
   });
 
   it('refuses a paid material with no price', () => {
-    expect(
-      materialPrice({ access: MaterialAccess.paid, price: null }),
-    ).toEqual({ refusal: 'price_on_request' });
+    expect(materialPrice({ access: MaterialAccess.paid, price: null })).toEqual(
+      { refusal: 'price_on_request' },
+    );
   });
 
   it('reads a price of zero as "on request", not as free', () => {

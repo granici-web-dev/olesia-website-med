@@ -129,10 +129,7 @@ async function resolveSummary(
     // checkout page for something with no price.
     if (!service) return null;
 
-    const turnaround = formatSlaInHours(
-      locale,
-      workingHours.expressSlaMinutes,
-    );
+    const turnaround = formatSlaInHours(locale, workingHours.expressSlaMinutes);
     return {
       target: { kind: 'express' },
       from: { label: lc(T.express), href: '/quick-question' },
@@ -183,12 +180,7 @@ async function resolveSummary(
       target: { kind: 'material', slug: material.slug },
       from: { label: lc(T.library), href: '/guides' },
       heading: lc(T.materialHeading),
-      title: loc(
-        locale,
-        material.titleRo,
-        material.titleEn,
-        material.titleRu,
-      ),
+      title: loc(locale, material.titleRo, material.titleEn, material.titleRu),
       detail: loc(
         locale,
         material.descriptionRo,

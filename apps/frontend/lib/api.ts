@@ -180,7 +180,10 @@ export const api = {
   services: () => getJson<PublicServiceDto[]>('/services', []),
   contacts: () => getJson<PublicContactDto[]>('/contacts', []),
   legalEntity: () =>
-    getRequired<LegalEntityDto>('/contacts/legal-entity', LEGAL_ENTITY_AT_BUILD),
+    getRequired<LegalEntityDto>(
+      '/contacts/legal-entity',
+      LEGAL_ENTITY_AT_BUILD,
+    ),
   about: () => getJson<AboutPageDto | null>('/about', null),
   workingHours: () =>
     getRequired<WorkingHoursDto>('/working-hours', WORKING_HOURS_AT_BUILD),

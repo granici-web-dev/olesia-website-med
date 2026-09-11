@@ -143,8 +143,8 @@
   .serviceRow {
     grid-template-columns: auto 1fr auto;
     grid-template-areas:
-      "num title meta"
-      "desc desc desc";
+      'num title meta'
+      'desc desc desc';
     column-gap: 32px;
     row-gap: 18px;
     align-items: start;
@@ -177,10 +177,10 @@
   .serviceRow {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "num"
-      "title"
-      "desc"
-      "meta";
+      'num'
+      'title'
+      'desc'
+      'meta';
     row-gap: 12px;
     padding: 36px 0;
   }

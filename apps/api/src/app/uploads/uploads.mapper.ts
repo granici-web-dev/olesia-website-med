@@ -13,7 +13,9 @@ import {
 } from '../storage/storage.service';
 import { UPLOAD_MAX_FILES } from './uploads.constants';
 
-export function toUploadedDocumentDto(d: UploadedDocument): UploadedDocumentDto {
+export function toUploadedDocumentDto(
+  d: UploadedDocument,
+): UploadedDocumentDto {
   return {
     id: d.id,
     fileName: d.fileName,

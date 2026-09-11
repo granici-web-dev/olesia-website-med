@@ -53,7 +53,6 @@ export async function generateMetadata({
   });
 }
 
-
 export default async function PricingPage({
   params,
 }: {
@@ -71,7 +70,11 @@ export default async function PricingPage({
 
   const t = {
     eyebrow: ru ? 'Цены' : en ? 'Pricing' : 'Tarife',
-    title: ru ? 'Прозрачные цены' : en ? 'Transparent pricing' : 'Tarife transparente',
+    title: ru
+      ? 'Прозрачные цены'
+      : en
+        ? 'Transparent pricing'
+        : 'Tarife transparente',
     intro: ru
       ? 'Без скрытых платежей. Оплату подтверждаем вручную после записи.'
       : en
@@ -90,7 +93,11 @@ export default async function PricingPage({
   const lc = biFor(locale);
   const td = {
     eyebrow: ru ? 'Продукты' : en ? 'Deliverables' : 'Livrabile',
-    title: ru ? 'Персональные продукты' : en ? 'Personalized products' : 'Produse personalizate',
+    title: ru
+      ? 'Персональные продукты'
+      : en
+        ? 'Personalized products'
+        : 'Produse personalizate',
     intro: ru
       ? 'Оплата → короткая форма → готовый результат в письменном виде. Оплата подтверждается вручную.'
       : en
@@ -120,46 +127,59 @@ export default async function PricingPage({
             <p className="max-w-[52ch] text-[1.05rem] leading-relaxed text-ink-soft text-pretty">
               {t.unavailable}
             </p>
-            <Link href={`/${locale}/contact`} className={`${serviceLink} mt-5 inline-flex`}>
+            <Link
+              href={`/${locale}/contact`}
+              className={`${serviceLink} mt-5 inline-flex`}
+            >
               {t.contact}
             </Link>
           </div>
         ) : (
-        <div className="mt-12">
-          {services.map((s, i) => (
-            <Reveal key={s.id} as="div" className={styles.serviceRow} delay={i * 70}>
-              <div className={styles.serviceNum}>
-                {String(i + 1).padStart(2, '0')}
-              </div>
-              <div>
-                <div className={styles.serviceTag}>{serviceTag(locale, s)}</div>
-                <h2 className={styles.serviceTitle}>
-                  {loc(locale, s.titleRo, s.titleEn, s.titleRu)}
-                </h2>
-              </div>
-              <div>
-                {serviceDescription(locale, s) && (
-                  <p className={styles.serviceDesc}>
-                    {serviceDescription(locale, s)}
-                  </p>
-                )}
-                {SERVICE_INCLUDED[s.code] && (
-                  <div className="mt-5">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
-                      {t.included}
+          <div className="mt-12">
+            {services.map((s, i) => (
+              <Reveal
+                key={s.id}
+                as="div"
+                className={styles.serviceRow}
+                delay={i * 70}
+              >
+                <div className={styles.serviceNum}>
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div>
+                  <div className={styles.serviceTag}>
+                    {serviceTag(locale, s)}
+                  </div>
+                  <h2 className={styles.serviceTitle}>
+                    {loc(locale, s.titleRo, s.titleEn, s.titleRu)}
+                  </h2>
+                </div>
+                <div>
+                  {serviceDescription(locale, s) && (
+                    <p className={styles.serviceDesc}>
+                      {serviceDescription(locale, s)}
                     </p>
-                    <ul className="mt-3 grid gap-2">
-                      {fillIncluded(
-                        locale === 'ru'
-                          ? SERVICE_INCLUDED[s.code].ru
-                          : locale === 'en'
-                            ? SERVICE_INCLUDED[s.code].en
-                            : SERVICE_INCLUDED[s.code].ro,
-                        {
-                          duration: formatServiceDuration(locale, s.durationMin),
-                          slaInHours,
-                        },
-                      ).map((item) => (
+                  )}
+                  {SERVICE_INCLUDED[s.code] && (
+                    <div className="mt-5">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
+                        {t.included}
+                      </p>
+                      <ul className="mt-3 grid gap-2">
+                        {fillIncluded(
+                          locale === 'ru'
+                            ? SERVICE_INCLUDED[s.code].ru
+                            : locale === 'en'
+                              ? SERVICE_INCLUDED[s.code].en
+                              : SERVICE_INCLUDED[s.code].ro,
+                          {
+                            duration: formatServiceDuration(
+                              locale,
+                              s.durationMin,
+                            ),
+                            slaInHours,
+                          },
+                        ).map((item) => (
                           <li
                             key={item}
                             className="grid grid-cols-[1.1em_1fr] gap-x-2 text-[0.9rem] leading-relaxed text-ink-soft"
@@ -170,44 +190,41 @@ export default async function PricingPage({
                             <span className="text-pretty">{item}</span>
                           </li>
                         ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-              <div className={styles.serviceMeta}>
-                <div className={styles.servicePrice}>
-                  {formatServicePrice(locale, s)}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                {formatServiceDuration(locale, s.durationMin) && (
-                  <div className={styles.serviceDuration}>
-                    {formatServiceDuration(locale, s.durationMin)}
+                <div className={styles.serviceMeta}>
+                  <div className={styles.servicePrice}>
+                    {formatServicePrice(locale, s)}
                   </div>
-                )}
-                {s.group === 'A_booking' && s.calendlySchedulingUrl ? (
-                  <CalendlyButton
-                    url={s.calendlySchedulingUrl}
-                    reason={loc(locale, s.titleRo, s.titleEn, s.titleRu)}
-                    label={t.book}
-                    className={serviceLink}
-                  />
-                ) : s.group === 'B_portal' ? (
-                  <BookGroupBButton
-                    service={s.code as LeadService}
-                    label={t.book}
-                    className={serviceLink}
-                  />
-                ) : (
-                  <Link
-                    href={`/${locale}/contact`}
-                    className={serviceLink}
-                  >
-                    {t.book}
-                  </Link>
-                )}
-              </div>
-            </Reveal>
-          ))}
-        </div>
+                  {formatServiceDuration(locale, s.durationMin) && (
+                    <div className={styles.serviceDuration}>
+                      {formatServiceDuration(locale, s.durationMin)}
+                    </div>
+                  )}
+                  {s.group === 'A_booking' && s.calendlySchedulingUrl ? (
+                    <CalendlyButton
+                      url={s.calendlySchedulingUrl}
+                      reason={loc(locale, s.titleRo, s.titleEn, s.titleRu)}
+                      label={t.book}
+                      className={serviceLink}
+                    />
+                  ) : s.group === 'B_portal' ? (
+                    <BookGroupBButton
+                      service={s.code as LeadService}
+                      label={t.book}
+                      className={serviceLink}
+                    />
+                  ) : (
+                    <Link href={`/${locale}/contact`} className={serviceLink}>
+                      {t.book}
+                    </Link>
+                  )}
+                </div>
+              </Reveal>
+            ))}
+          </div>
         )}
       </section>
 
@@ -225,34 +242,34 @@ export default async function PricingPage({
             {DELIVERABLE_CATALOG.map((entry, i) => {
               const copy = DELIVERABLE_COPY[entry.code];
               return (
-              <Reveal
-                key={entry.code}
-                as="div"
-                className="grid items-start gap-x-8 gap-y-3 border-b border-[var(--rule)] py-6 md:grid-cols-[1fr_1.3fr_auto] md:gap-x-12"
-                delay={i * 60}
-              >
-                <div>
-                  <div className="mono text-[11px] uppercase tracking-[0.14em] text-sage-text">
-                    {lc(copy.tag)}
+                <Reveal
+                  key={entry.code}
+                  as="div"
+                  className="grid items-start gap-x-8 gap-y-3 border-b border-[var(--rule)] py-6 md:grid-cols-[1fr_1.3fr_auto] md:gap-x-12"
+                  delay={i * 60}
+                >
+                  <div>
+                    <div className="mono text-[11px] uppercase tracking-[0.14em] text-sage-text">
+                      {lc(copy.tag)}
+                    </div>
+                    <h3 className="serif mt-1.5 text-[1.4rem] leading-snug text-pretty">
+                      {lc(copy.title)}
+                    </h3>
                   </div>
-                  <h3 className="serif mt-1.5 text-[1.4rem] leading-snug text-pretty">
-                    {lc(copy.title)}
-                  </h3>
-                </div>
-                <p className="text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
-                  {lc(copy.desc)}
-                </p>
-                <div className="flex items-center justify-between gap-6 md:flex-col md:items-end md:gap-2.5">
-                  <div className="serif text-[1.5rem] leading-none lining-nums">
-                    {formatEur(locale, entry.priceEur)}
+                  <p className="text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
+                    {lc(copy.desc)}
+                  </p>
+                  <div className="flex items-center justify-between gap-6 md:flex-col md:items-end md:gap-2.5">
+                    <div className="serif text-[1.5rem] leading-none lining-nums">
+                      {formatEur(locale, entry.priceEur)}
+                    </div>
+                    <OrderDeliverableButton
+                      code={entry.code}
+                      label={td.order}
+                      className="mono inline-flex cursor-pointer items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                    />
                   </div>
-                  <OrderDeliverableButton
-                    code={entry.code}
-                    label={td.order}
-                    className="mono inline-flex cursor-pointer items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
-                  />
-                </div>
-              </Reveal>
+                </Reveal>
               );
             })}
           </div>

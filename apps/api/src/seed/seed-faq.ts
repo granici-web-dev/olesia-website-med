@@ -169,7 +169,8 @@ export const FAQ_SECTIONS: SeedFaqCategory[] = [
         questionRu: 'Возможен ли возврат средств?',
         answerRo:
           'Da, dacă anulezi în timp util, conform politicii de anulare.',
-        answerEn: 'Yes, if you cancel in good time, per the cancellation policy.',
+        answerEn:
+          'Yes, if you cancel in good time, per the cancellation policy.',
         answerRu: 'Да, если отменить запись вовремя — по правилам отмены.',
       },
     ],

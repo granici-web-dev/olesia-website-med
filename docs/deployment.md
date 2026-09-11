@@ -117,19 +117,19 @@ Required with no default: `CADDY_API_HOST`, `CADDY_ADMIN_HOST`,
 
 Worth naming because they change behaviour rather than where things point:
 
-| Variable                                   | Notes                                                                                                                      |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Variable                                   | Notes                                                                                                                                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ACME_EMAIL`                               | **required** — the stack refuses to start without it. An address asks Let's Encrypt; the literal `internal` makes Caddy issue its own, which is right on a laptop and never on the server |
-| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | at least 32 characters, random, different from each other — the API exits at boot otherwise                                |
-| `LEADS_NOTIFY_EMAIL`                       | **required in production** — the API exits at boot without it. No default: it used to fall back to a developer's Gmail    |
-| `RECAPTCHA_SECRET`                         | **required in production** — the API exits at boot without it. Empty disables captcha verification entirely               |
-| `PRIVATE_UPLOADS_DIR`                      | **required in production** — the API exits at boot without it. Defaults to the working directory, which is ephemeral      |
-| `PUBLIC_API_URL`                           | **required in production** — the API exits at boot without it                                                              |
-| `COOKIE_SECURE`                            | defaults to `true`. Caddy terminates TLS in front, so it stays true                                                        |
-| `PUBLIC_SITE_URL`                          | the **site's** origin, not the API's: it builds the patient upload link                                                    |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD`           | read by the seed, not the API. `SEED_PROFILE=prod` refuses to run without them                                             |
-| `BACKUP_HOUR` / `BACKUP_TZ`                | the nightly run, default 03:00 Europe/Chișinău                                                                             |
-| `RCLONE_REMOTE`                            | empty skips the off-site copy and says so in the log                                                                       |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | at least 32 characters, random, different from each other — the API exits at boot otherwise                                                                                               |
+| `LEADS_NOTIFY_EMAIL`                       | **required in production** — the API exits at boot without it. No default: it used to fall back to a developer's Gmail                                                                    |
+| `RECAPTCHA_SECRET`                         | **required in production** — the API exits at boot without it. Empty disables captcha verification entirely                                                                               |
+| `PRIVATE_UPLOADS_DIR`                      | **required in production** — the API exits at boot without it. Defaults to the working directory, which is ephemeral                                                                      |
+| `PUBLIC_API_URL`                           | **required in production** — the API exits at boot without it                                                                                                                             |
+| `COOKIE_SECURE`                            | defaults to `true`. Caddy terminates TLS in front, so it stays true                                                                                                                       |
+| `PUBLIC_SITE_URL`                          | the **site's** origin, not the API's: it builds the patient upload link                                                                                                                   |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD`           | read by the seed, not the API. `SEED_PROFILE=prod` refuses to run without them                                                                                                            |
+| `BACKUP_HOUR` / `BACKUP_TZ`                | the nightly run, default 03:00 Europe/Chișinău                                                                                                                                            |
+| `RCLONE_REMOTE`                            | empty skips the off-site copy and says so in the log                                                                                                                                      |
 
 **Seven variables are checked at boot when `NODE_ENV=production`** and the API
 exits rather than start without them: `LEADS_NOTIFY_EMAIL`,
@@ -320,7 +320,6 @@ all.
 - **Against production: never.** Do it after the first deploy and after any
   Postgres major upgrade, and record the date here.
 
-
 ---
 
 ## Observability
@@ -332,17 +331,20 @@ server watches it.
 ### `/health`
 
 ```json
-{ "status": "ok", "checks": { "db": "pass", "storage": "pass", "backup": "pass" } }
+{
+  "status": "ok",
+  "checks": { "db": "pass", "storage": "pass", "backup": "pass" }
+}
 ```
 
 It answers **503** when any check fails, and each check is pass or fail and
 nothing more — the route is public, and which dependency is down is a useful
 thing for a stranger to learn.
 
-| Check     | What it does                                                                           |
-| --------- | -------------------------------------------------------------------------------------- |
-| `db`      | `SELECT 1` through Prisma                                                              |
-| `storage` | writes a byte into `PRIVATE_UPLOADS_DIR` and removes it                                |
+| Check     | What it does                                                                             |
+| --------- | ---------------------------------------------------------------------------------------- |
+| `db`      | `SELECT 1` through Prisma                                                                |
+| `storage` | writes a byte into `PRIVATE_UPLOADS_DIR` and removes it                                  |
 | `backup`  | reads `/backups/last-run.json`: fail if the last run said `ok: false` or is over 26h old |
 
 It used to be `return { status: 'ok' }`, so a container whose Postgres had died
@@ -403,10 +405,10 @@ answering at 02:00 on a Sunday has nothing at all to notice it.
 Set up an external check, from whichever service you like (UptimeRobot,
 Better Stack and Hetzner's own all have a free tier big enough for two checks):
 
-| URL                              | Expect                                   |
-| -------------------------------- | ---------------------------------------- |
-| `https://api.<domain>/health`    | 200, and the body containing `"status":"ok"` |
-| `https://admin.<domain>/`        | 200                                      |
+| URL                           | Expect                                       |
+| ----------------------------- | -------------------------------------------- |
+| `https://api.<domain>/health` | 200, and the body containing `"status":"ok"` |
+| `https://admin.<domain>/`     | 200                                          |
 
 Five-minute interval, alerts to an address somebody reads. The first URL is
 what turns a failed backup, a dead database and a full disk into a message;
@@ -459,7 +461,7 @@ reCAPTCHA variables. Redeploy, then confirm `/pricing` shows prices from the API
 rather than the notice.
 
 ⚠️ **A changed `API_URL` needs a rebuild, not a restart** (audit A7, F10).
-`next.config.ts` derives `images.remotePatterns` from it at *build* time, so the
+`next.config.ts` derives `images.remotePatterns` from it at _build_ time, so the
 allowed image host is compiled into the bundle. Change the variable without
 redeploying and every photo the client uploaded answers 400 from the image
 optimizer while the rest of the page renders normally — which is the hardest

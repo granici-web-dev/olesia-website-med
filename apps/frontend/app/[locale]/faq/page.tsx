@@ -141,7 +141,10 @@ export default async function FaqPage({
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+            <span
+              className="size-1.5 rounded-full bg-sage"
+              aria-hidden="true"
+            />
             {ru ? 'Частые вопросы' : en ? 'FAQ' : 'Întrebări frecvente'}
           </p>
           <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 lg:gap-20">
@@ -157,7 +160,8 @@ export default async function FaqPage({
                   </>
                 ) : (
                   <>
-                    Întrebări <span className="serif-it text-sage">frecvente</span>
+                    Întrebări{' '}
+                    <span className="serif-it text-sage">frecvente</span>
                   </>
                 )}
               </h1>
@@ -200,64 +204,91 @@ export default async function FaqPage({
           </Link>
         </section>
       ) : (
-      <section className="shell grid gap-12 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-24 lg:gap-24">
-        <nav aria-label={ru ? 'Категории вопросов' : en ? 'FAQ categories' : 'Categorii de întrebări'} className="min-w-0 md:sticky md:top-[133px] md:self-start">
-          <p className="eyebrow mb-4">{ru ? 'Категории' : en ? 'Categories' : 'Categorii'}</p>
-          <ul className="-mx-1 flex gap-2 overflow-x-auto pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:pb-0">
-            {CATEGORIES.map((c) => (
-              <li key={c.key} className="shrink-0 md:shrink">
-                <a
-                  href={`#${c.key}`}
-                  className="mono inline-block whitespace-nowrap rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage md:rounded-none md:border-0 md:border-l md:px-3 md:py-1.5 md:text-[12px] md:normal-case md:tracking-normal"
-                >
-                  {lc(c.title)}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <section className="shell grid gap-12 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-24 lg:gap-24">
+          <nav
+            aria-label={
+              ru
+                ? 'Категории вопросов'
+                : en
+                  ? 'FAQ categories'
+                  : 'Categorii de întrebări'
+            }
+            className="min-w-0 md:sticky md:top-[133px] md:self-start"
+          >
+            <p className="eyebrow mb-4">
+              {ru ? 'Категории' : en ? 'Categories' : 'Categorii'}
+            </p>
+            <ul className="-mx-1 flex gap-2 overflow-x-auto pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:pb-0">
+              {CATEGORIES.map((c) => (
+                <li key={c.key} className="shrink-0 md:shrink">
+                  <a
+                    href={`#${c.key}`}
+                    className="mono inline-block whitespace-nowrap rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage md:rounded-none md:border-0 md:border-l md:px-3 md:py-1.5 md:text-[12px] md:normal-case md:tracking-normal"
+                  >
+                    {lc(c.title)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        <div className="min-w-0">
-          {CATEGORIES.map((c) => (
-            <section key={c.key} id={c.key} className="scroll-mt-28 border-t border-[var(--rule)] pt-10 first:border-t-0 first:pt-0 [&:not(:first-child)]:mt-14">
-              <h2 className="serif text-[clamp(1.7rem,3vw,2.4rem)] leading-tight tracking-[-0.02em] text-balance">
-                {lc(c.title)}
-              </h2>
-              <div className="mt-6">
-                {c.items.map((it, i) => (
-                  <Reveal key={it.q.en} as="details" className="group border-t border-[var(--rule)] last:border-b" delay={i * 50}>
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
-                      <span className="serif text-[clamp(1.15rem,1.8vw,1.45rem)] leading-snug text-ink text-pretty">
-                        {lc(it.q)}
-                      </span>
-                      <span
-                        className="mono shrink-0 text-2xl text-sage transition-transform duration-300 group-open:rotate-45"
-                        aria-hidden="true"
-                      >
-                        +
-                      </span>
-                    </summary>
-                    <p className="max-w-[68ch] pb-6 text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-                      {lc(it.a)}
-                    </p>
-                  </Reveal>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </section>
+          <div className="min-w-0">
+            {CATEGORIES.map((c) => (
+              <section
+                key={c.key}
+                id={c.key}
+                className="scroll-mt-28 border-t border-[var(--rule)] pt-10 first:border-t-0 first:pt-0 [&:not(:first-child)]:mt-14"
+              >
+                <h2 className="serif text-[clamp(1.7rem,3vw,2.4rem)] leading-tight tracking-[-0.02em] text-balance">
+                  {lc(c.title)}
+                </h2>
+                <div className="mt-6">
+                  {c.items.map((it, i) => (
+                    <Reveal
+                      key={it.q.en}
+                      as="details"
+                      className="group border-t border-[var(--rule)] last:border-b"
+                      delay={i * 50}
+                    >
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
+                        <span className="serif text-[clamp(1.15rem,1.8vw,1.45rem)] leading-snug text-ink text-pretty">
+                          {lc(it.q)}
+                        </span>
+                        <span
+                          className="mono shrink-0 text-2xl text-sage transition-transform duration-300 group-open:rotate-45"
+                          aria-hidden="true"
+                        >
+                          +
+                        </span>
+                      </summary>
+                      <p className="max-w-[68ch] pb-6 text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
+                        {lc(it.a)}
+                      </p>
+                    </Reveal>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* 4 · Still have a question? */}
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-[1fr_1fr] md:gap-16 md:py-20">
           <div>
-            <p className="eyebrow mb-3">{ru ? 'Не нашли ответ?' : en ? 'Still stuck?' : 'Nu ai găsit răspunsul?'}</p>
+            <p className="eyebrow mb-3">
+              {ru
+                ? 'Не нашли ответ?'
+                : en
+                  ? 'Still stuck?'
+                  : 'Nu ai găsit răspunsul?'}
+            </p>
             <h2 className="serif text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-0.02em] text-balance">
               {ru ? (
                 <>
-                  Спросите нас <span className="serif-it text-sage">напрямую</span>
+                  Спросите нас{' '}
+                  <span className="serif-it text-sage">напрямую</span>
                 </>
               ) : en ? (
                 <>
@@ -272,20 +303,39 @@ export default async function FaqPage({
           </div>
           <ul className="grid gap-4 self-center">
             <li className="border-t border-[var(--rule)] pt-4">
-              <Link href="/contact" className="group flex items-baseline justify-between gap-4">
+              <Link
+                href="/contact"
+                className="group flex items-baseline justify-between gap-4"
+              >
                 <span className="text-[1.05rem] leading-snug text-ink text-pretty">
-                  {ru ? 'Общий вопрос' : en ? 'A general question' : 'O întrebare generală'}
+                  {ru
+                    ? 'Общий вопрос'
+                    : en
+                      ? 'A general question'
+                      : 'O întrebare generală'}
                 </span>
                 <span className="shrink-0 text-[13px] font-medium uppercase tracking-[0.06em] text-sage-text">
                   {ru ? 'Контакт' : en ? 'Contact' : 'Contact'}{' '}
-                  <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
+                  <span
+                    aria-hidden="true"
+                    className="inline-block transition-transform group-hover:translate-x-1"
+                  >
+                    →
+                  </span>
                 </span>
               </Link>
             </li>
             <li className="border-t border-[var(--rule)] pt-4">
-              <Link href="/quick-question" className="group flex items-baseline justify-between gap-4">
+              <Link
+                href="/quick-question"
+                className="group flex items-baseline justify-between gap-4"
+              >
                 <span className="text-[1.05rem] leading-snug text-ink text-pretty">
-                  {ru ? 'Медицинский вопрос' : en ? 'A medical question' : 'O întrebare medicală'}
+                  {ru
+                    ? 'Медицинский вопрос'
+                    : en
+                      ? 'A medical question'
+                      : 'O întrebare medicală'}
                 </span>
                 <span className="shrink-0 text-[13px] font-medium uppercase tracking-[0.06em] text-sage-text">
                   {ru
@@ -293,7 +343,12 @@ export default async function FaqPage({
                     : en
                       ? `Ask the doctor · ${sla}`
                       : `Întreabă medicul · ${sla}`}{' '}
-                  <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
+                  <span
+                    aria-hidden="true"
+                    className="inline-block transition-transform group-hover:translate-x-1"
+                  >
+                    →
+                  </span>
                 </span>
               </Link>
             </li>
@@ -309,21 +364,34 @@ export default async function FaqPage({
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
                 {ru ? (
                   <>
-                    Готовы <span className="serif-it text-[var(--sage-soft)]">начать?</span>
+                    Готовы{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      начать?
+                    </span>
                   </>
                 ) : en ? (
                   <>
-                    Ready to <span className="serif-it text-[var(--sage-soft)]">start?</span>
+                    Ready to{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      start?
+                    </span>
                   </>
                 ) : (
                   <>
-                    Gata să <span className="serif-it text-[var(--sage-soft)]">începi?</span>
+                    Gata să{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      începi?
+                    </span>
                   </>
                 )}
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/services" className={creamPill}>
-                  {ru ? 'Посмотреть услуги' : en ? 'See the services' : 'Vezi serviciile'}
+                  {ru
+                    ? 'Посмотреть услуги'
+                    : en
+                      ? 'See the services'
+                      : 'Vezi serviciile'}
                 </Link>
                 <Link href="/quick-question" className={creamUnderline}>
                   {ru

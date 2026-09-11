@@ -28,7 +28,10 @@ export const CLIENT_NAME_MAX = 200;
 export const REASON_MAX = 2000;
 
 /** Truncate to a column's ceiling; blank and missing both read as absent. */
-export function clampText(value: string | null | undefined, max: number): string | null {
+export function clampText(
+  value: string | null | undefined,
+  max: number,
+): string | null {
   const trimmed = value?.trim();
   if (!trimmed) return null;
   return trimmed.length > max ? trimmed.slice(0, max) : trimmed;
@@ -168,7 +171,9 @@ export class AppointmentsService {
   ) {}
 
   /** Paginated, filterable list for the back office (newest start first). */
-  async findAll(query: ListAppointmentsDto): Promise<Paginated<AppointmentDto>> {
+  async findAll(
+    query: ListAppointmentsDto,
+  ): Promise<Paginated<AppointmentDto>> {
     const where: Prisma.AppointmentWhereInput = {};
     if (query.status) where.status = query.status;
     if (query.serviceId) where.serviceId = query.serviceId;
@@ -269,7 +274,9 @@ export class AppointmentsService {
     const event = payload?.scheduled_event;
     const uri = event?.uri;
     if (!uri) {
-      this.logger.warn('Calendly webhook without scheduled_event.uri — ignored.');
+      this.logger.warn(
+        'Calendly webhook without scheduled_event.uri — ignored.',
+      );
       return;
     }
 
@@ -336,7 +343,9 @@ export class AppointmentsService {
         where: { calendlyEventUri: b.eventUri },
         data: fields,
       });
-      this.logger.log(`Appointment updated for ${service.code} (${b.eventUri}).`);
+      this.logger.log(
+        `Appointment updated for ${service.code} (${b.eventUri}).`,
+      );
       return 'updated';
     }
 
@@ -472,7 +481,9 @@ export class AppointmentsService {
       select: { status: true },
     });
     if (!existing) {
-      this.logger.warn(`No-show for unknown appointment ${eventUri} — ignored.`);
+      this.logger.warn(
+        `No-show for unknown appointment ${eventUri} — ignored.`,
+      );
       return;
     }
     if (existing.status === AppointmentStatus.no_show) return;

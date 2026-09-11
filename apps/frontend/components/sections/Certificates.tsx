@@ -70,7 +70,11 @@ export function Certificates({ locale }: { locale: string }) {
   const t = {
     eyebrow: ru ? 'Обучение' : en ? 'Training' : 'Formare',
     issuedBy: ru ? 'Выдан' : en ? 'Issued by' : 'Eliberat de',
-    view: ru ? 'Открыть сертификат' : en ? 'View certificate' : 'Vezi certificatul',
+    view: ru
+      ? 'Открыть сертификат'
+      : en
+        ? 'View certificate'
+        : 'Vezi certificatul',
     close: ru ? 'Закрыть' : en ? 'Close' : 'Închide',
     intro: ru
       ? 'Недавние курсы по трудностям кормления и питанию грудничков — то, с чем я работаю каждый день.'
@@ -91,7 +95,8 @@ export function Certificates({ locale }: { locale: string }) {
               </>
             ) : en ? (
               <>
-                Recent <span className="serif-it text-sage">certifications</span>
+                Recent{' '}
+                <span className="serif-it text-sage">certifications</span>
               </>
             ) : (
               <>
@@ -156,7 +161,11 @@ export function Certificates({ locale }: { locale: string }) {
         </ul>
       </div>
 
-      <Modal open={!!active} onClose={() => setActive(null)} labelledBy="cert-lightbox-title">
+      <Modal
+        open={!!active}
+        onClose={() => setActive(null)}
+        labelledBy="cert-lightbox-title"
+      >
         {active && (
           <div className={styles.lightbox}>
             <button

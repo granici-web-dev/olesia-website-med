@@ -1,7 +1,7 @@
 packages:
-  - "apps/*"
-  - "libs/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'libs/*'
+  - 'packages/*'
 
 allowBuilds:
   '@parcel/watcher': set this to true or false
@@ -10,5 +10,5 @@ allowBuilds:
 
 onlyBuiltDependencies:
   - sharp
-  - "@parcel/watcher"
-  - "@swc/core"
+  - '@parcel/watcher'
+  - '@swc/core'

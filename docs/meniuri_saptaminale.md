@@ -17,12 +17,12 @@
 
 ## 1. Зачем сюда приходят (гипотезы → проверить)
 
-| Сегмент | JTBD |
-|---|---|
-| «Что готовить ребёнку» | «Дай готовые идеи на неделю, не придумывать каждый день» |
-| Родитель мофтуна | «Идеи, чтобы разнообразить и накормить» |
-| Семья за здоровым питанием | «Сбалансированное меню на неделю» |
-| На этапе прикорма | «Что давать малышу» — ⚠ индивидуально, уводим в консультацию |
+| Сегмент                    | JTBD                                                          |
+| -------------------------- | ------------------------------------------------------------- |
+| «Что готовить ребёнку»     | «Дай готовые идеи на неделю, не придумывать каждый день»      |
+| Родитель мофтуна           | «Идеи, чтобы разнообразить и накормить»                       |
+| Семья за здоровым питанием | «Сбалансированное меню на неделю»                             |
+| На этапе прикорма          | «Что давать малышу» — ⚠ индивидуально, уводим в консультацию |
 
 **Вывод:** задача — снять родителю ментальную нагрузку готовыми идеями, подтвердить экспертизу и увести за персональным планом в консультацию. Не медицинский совет, а вдохновение.
 
@@ -62,6 +62,7 @@
 ## 4. Текст страницы (RO)
 
 ### 1. Hero
+
 ```
 Eyebrow:  Meniuri
 H1:       Meniuri săptămânale
@@ -71,6 +72,7 @@ Subhead:  Idei practice de meniuri pentru copii și familie, pregătite de
 ```
 
 ### 2. Выбор по возрасту (ядро)
+
 ```
 Heading: Alege în funcție de vârstă
 • Copii mici
@@ -82,11 +84,14 @@ consultație de nutriție în loc de un meniu general.    ⚠ грудничко
 ```
 
 ### 3. Сетка меню / пустое состояние
+
 ```
 Heading: Meniurile săptămânii
 [карточки — см. анатомию ниже]
 ```
+
 **Пустое состояние (вероятный старт):**
+
 ```
 Heading: Meniurile vin în curând
 Pregătim primele meniuri săptămânale. Între timp, pentru un plan
@@ -95,6 +100,7 @@ CTA: Consultație de nutriție
 ```
 
 ### 4. Как использовать
+
 ```
 Heading: Cum să folosești meniurile
 Acestea sunt idei generale, gândite să-ți ușureze planificarea
@@ -102,6 +108,7 @@ săptămânii. Adaptează-le la preferințele, vârsta și nevoile copilului tă
 ```
 
 ### 5. Когда нужен персональный план
+
 ```
 Heading: Când ai nevoie de un plan personalizat
 Un meniu general nu ține cont de situația specifică a copilului tău.
@@ -111,6 +118,7 @@ hrănire sau o afecțiune — programează o consultație de nutriție.
 ```
 
 ### 6. Безопасность (дисклеймер)
+
 ```
 Meniurile au scop informativ și nu înlocuiesc sfatul medical
 personalizat. Dacă copilul are alergii, intoleranțe sau o afecțiune,
@@ -119,6 +127,7 @@ diversificarea se stabilește individual.
 ```
 
 ### 7. Кто составляет
+
 ```
 Heading: Cine pregătește meniurile
 Meniurile sunt realizate de Dr. Olesea Jalba, medic pediatru cu master
@@ -127,6 +136,7 @@ Meniurile sunt realizate de Dr. Olesea Jalba, medic pediatru cu master
 ```
 
 ### 8. CTA конверсии
+
 ```
 Heading: Vrei un plan făcut pentru copilul tău?
 • Pentru un plan personalizat → Consultație de nutriție
@@ -145,6 +155,7 @@ Short description
 Format                    ← Vezi pe pagină · PDF printabil
 [ Vezi meniul ]  / [ Descarcă ]
 ```
+
 > Деталь меню (на странице или PDF) — сетка 7 дней × приёмы пищи (mic dejun · gustare · prânz · gustare · cină) с идеями блюд.
 
 ---
@@ -152,6 +163,7 @@ Format                    ← Vezi pe pagină · PDF printabil
 ## 6. Контент-правило (важно)
 
 Меню = **идеи блюд**, БЕЗ точных граммовок, калорий и предписанных порций. Это:
+
 - безопаснее (порции индивидуальны, особенно у детей),
 - не залезает на территорию персонального плана (= платная услуга).
   Точные количества — только в консультации.
@@ -216,4 +228,7 @@ menu:                     # сущность, повторяется
 4. Free или email-гейт.
 5. Формат: на странице, PDF, или оба.
 6. Есть ли готовые меню или старт с пустым состоянием; языки.
+
+```
+
 ```

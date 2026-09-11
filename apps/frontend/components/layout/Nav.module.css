@@ -57,7 +57,9 @@
   width: 11px;
   height: 11px;
   color: var(--ink-soft);
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 }
 
 .chevronOpen {
@@ -99,7 +101,9 @@
 .navLinks .dropdownItem {
   padding: 10px 14px;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .navLinks .dropdownItem:hover {
@@ -210,7 +214,9 @@
     width: 24px;
     height: 2px;
     background: var(--ink);
-    transition: transform 0.24s ease, opacity 0.2s ease;
+    transition:
+      transform 0.24s ease,
+      opacity 0.2s ease;
   }
 
   .burgerOpen span:nth-child(1) {

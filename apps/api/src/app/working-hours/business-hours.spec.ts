@@ -1,8 +1,4 @@
-import {
-  addWorkingMinutes,
-  isOpenAt,
-  type Schedule,
-} from './business-hours';
+import { addWorkingMinutes, isOpenAt, type Schedule } from './business-hours';
 
 /**
  * The EXPRESS deadline is the one number a patient is told to expect, so the
@@ -25,18 +21,20 @@ const MON_FRI_9_17: Schedule = {
 
 /** Format an instant back to Chisinau wall clock, for readable expectations. */
 function local(d: Date): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone: TZ,
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-    .format(d)
-    // ICU emits the weekday with or without a trailing comma by version.
-    .replace(/,/g, '');
+  return (
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: TZ,
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+      .format(d)
+      // ICU emits the weekday with or without a trailing comma by version.
+      .replace(/,/g, '')
+  );
 }
 
 /** Instant for a Chisinau wall-clock "YYYY-MM-DD HH:MM". */
@@ -74,28 +72,33 @@ function at(wallClock: string): Date {
 
 describe('addWorkingMinutes', () => {
   it('adds plain minutes inside the working day', () => {
-    expect(local(addWorkingMinutes(at('2026-08-04 10:00'), 60, MON_FRI_9_17)))
-      .toBe('Tue 04 Aug 11:00');
+    expect(
+      local(addWorkingMinutes(at('2026-08-04 10:00'), 60, MON_FRI_9_17)),
+    ).toBe('Tue 04 Aug 11:00');
   });
 
   it('carries the remainder into the next morning when the day closes', () => {
-    expect(local(addWorkingMinutes(at('2026-08-04 16:30'), 60, MON_FRI_9_17)))
-      .toBe('Wed 05 Aug 09:30');
+    expect(
+      local(addWorkingMinutes(at('2026-08-04 16:30'), 60, MON_FRI_9_17)),
+    ).toBe('Wed 05 Aug 09:30');
   });
 
   it('starts counting at opening time, not at arrival', () => {
-    expect(local(addWorkingMinutes(at('2026-08-04 07:15'), 60, MON_FRI_9_17)))
-      .toBe('Tue 04 Aug 10:00');
+    expect(
+      local(addWorkingMinutes(at('2026-08-04 07:15'), 60, MON_FRI_9_17)),
+    ).toBe('Tue 04 Aug 10:00');
   });
 
   it('skips the weekend — a Saturday-night question is due Monday', () => {
-    expect(local(addWorkingMinutes(at('2026-08-08 23:40'), 60, MON_FRI_9_17)))
-      .toBe('Mon 10 Aug 10:00');
+    expect(
+      local(addWorkingMinutes(at('2026-08-08 23:40'), 60, MON_FRI_9_17)),
+    ).toBe('Mon 10 Aug 10:00');
   });
 
   it('treats the closing instant as closed', () => {
-    expect(local(addWorkingMinutes(at('2026-08-04 17:00'), 60, MON_FRI_9_17)))
-      .toBe('Wed 05 Aug 10:00');
+    expect(
+      local(addWorkingMinutes(at('2026-08-04 17:00'), 60, MON_FRI_9_17)),
+    ).toBe('Wed 05 Aug 10:00');
   });
 
   it('spans several days for a long SLA', () => {
@@ -107,13 +110,15 @@ describe('addWorkingMinutes', () => {
   // The wall clock is what must be preserved across a DST change, not the UTC
   // offset — the practice opens at 09:00 by the clock on the wall either way.
   it('survives the spring-forward night', () => {
-    expect(local(addWorkingMinutes(at('2026-03-27 18:00'), 60, MON_FRI_9_17)))
-      .toBe('Mon 30 Mar 10:00');
+    expect(
+      local(addWorkingMinutes(at('2026-03-27 18:00'), 60, MON_FRI_9_17)),
+    ).toBe('Mon 30 Mar 10:00');
   });
 
   it('survives the fall-back night', () => {
-    expect(local(addWorkingMinutes(at('2026-10-23 18:00'), 60, MON_FRI_9_17)))
-      .toBe('Mon 26 Oct 10:00');
+    expect(
+      local(addWorkingMinutes(at('2026-10-23 18:00'), 60, MON_FRI_9_17)),
+    ).toBe('Mon 26 Oct 10:00');
   });
 
   // A schedule with nothing open must not hang or throw: the public intake

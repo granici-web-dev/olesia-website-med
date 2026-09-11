@@ -166,12 +166,16 @@ describe('the payment receipt', () => {
       downloads: 10,
     };
     expect(
-      render(PAYMENT_RECEIPT_TEMPLATES, 'en', { ...RECEIPT, nextStep: step })
-        .lines.join('\n'),
+      render(PAYMENT_RECEIPT_TEMPLATES, 'en', {
+        ...RECEIPT,
+        nextStep: step,
+      }).lines.join('\n'),
     ).toContain('downloads from here');
     expect(
-      render(PAYMENT_RECEIPT_TEMPLATES, 'ru', { ...RECEIPT, nextStep: step })
-        .lines.join('\n'),
+      render(PAYMENT_RECEIPT_TEMPLATES, 'ru', {
+        ...RECEIPT,
+        nextStep: step,
+      }).lines.join('\n'),
     ).toContain('скачать здесь');
   });
 });

@@ -40,13 +40,13 @@ export async function generateMetadata({
     title: ru
       ? 'Блог — здоровье и питание ребёнка | Dr. Olesea Jalba'
       : en
-      ? 'Blog — child health & nutrition | Dr. Olesea Jalba'
-      : 'Blog — sănătatea și nutriția copilului | Dr. Olesea Jalba',
+        ? 'Blog — child health & nutrition | Dr. Olesea Jalba'
+        : 'Blog — sănătatea și nutriția copilului | Dr. Olesea Jalba',
     description: ru
       ? 'Статьи о здоровье и питании ребёнка, написанные врачом-педиатром. Информация, которой можно доверять.'
       : en
-      ? 'Articles on your child’s health and nutrition, written by a pediatrician. Information you can trust.'
-      : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru. Informații în care poți avea încredere.',
+        ? 'Articles on your child’s health and nutrition, written by a pediatrician. Information you can trust.'
+        : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru. Informații în care poți avea încredere.',
   });
 }
 
@@ -70,8 +70,12 @@ export default async function ArticlesPage({
         }).format(new Date(iso))
       : '';
   const readMin = (content: string) =>
-    Math.max(1, Math.round(content.trim().split(/\s+/).filter(Boolean).length / 200));
-  const minLabel = (n: number) => `${n} ${ru ? 'мин чтения' : en ? 'min read' : 'min de citit'}`;
+    Math.max(
+      1,
+      Math.round(content.trim().split(/\s+/).filter(Boolean).length / 200),
+    );
+  const minLabel = (n: number) =>
+    `${n} ${ru ? 'мин чтения' : en ? 'min read' : 'min de citit'}`;
   const metaLine = (dateIso: string | null, minutes: number) =>
     [fmtDate(dateIso), minLabel(minutes)].filter(Boolean).join(' · ');
   const href = (slug: string) => `/${locale}/articles/${slug}`;
@@ -86,7 +90,12 @@ export default async function ArticlesPage({
     slug: p.slug,
     categoryKey: p.categories[0]?.slug ?? 'all',
     categoryLabel: p.categories[0]
-      ? loc(locale, p.categories[0].nameRo, p.categories[0].nameEn, p.categories[0].nameRu)
+      ? loc(
+          locale,
+          p.categories[0].nameRo,
+          p.categories[0].nameEn,
+          p.categories[0].nameRu,
+        )
       : '',
     ageKeys: p.ageKeys,
     title: loc(locale, p.titleRo, p.titleEn, p.titleRu),
@@ -113,13 +122,21 @@ export default async function ArticlesPage({
   // Both BlogList calls take the same empty-state copy: the second only ever
   // sees a non-empty list, but the labels are part of its contract.
   const emptyState = {
-    emptyTitle: ru ? 'Первые статьи скоро появятся' : en ? 'First articles are coming soon' : 'Primele articole vin în curând',
+    emptyTitle: ru
+      ? 'Первые статьи скоро появятся'
+      : en
+        ? 'First articles are coming soon'
+        : 'Primele articole vin în curând',
     emptyBody: ru
       ? 'Мы готовим первые статьи. А пока можно задать вопрос врачу напрямую.'
       : en
-      ? 'We’re working on the first articles. In the meantime, you can ask the doctor your question directly.'
-      : 'Lucrăm la primele articole. Între timp, dacă ai o întrebare, o poți adresa direct medicului.',
-    emptyCta: ru ? 'Спросить врача' : en ? 'Ask the doctor' : 'Întreabă medicul',
+        ? 'We’re working on the first articles. In the meantime, you can ask the doctor your question directly.'
+        : 'Lucrăm la primele articole. Între timp, dacă ai o întrebare, o poți adresa direct medicului.',
+    emptyCta: ru
+      ? 'Спросить врача'
+      : en
+        ? 'Ask the doctor'
+        : 'Întreabă medicul',
     emptyCtaHref: `/${locale}/quick-question`,
   };
 
@@ -129,7 +146,9 @@ export default async function ArticlesPage({
   // Age filter (brief §6/§8) — shared taxonomy with the digital library. Only
   // show ages actually present among the listed posts (untagged = all ages).
   const presentAges = new Set(rest.flatMap((i) => i.ageKeys));
-  const ages: BlogCategory[] = AGE_GROUPS.filter((a) => presentAges.has(a.key)).map((a) => ({
+  const ages: BlogCategory[] = AGE_GROUPS.filter((a) =>
+    presentAges.has(a.key),
+  ).map((a) => ({
     key: a.key,
     label: lc(a.label),
   }));
@@ -140,7 +159,10 @@ export default async function ArticlesPage({
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+            <span
+              className="size-1.5 rounded-full bg-sage"
+              aria-hidden="true"
+            />
             {en ? 'Blog' : 'Blog'}
           </p>
           <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 lg:gap-20">
@@ -152,8 +174,8 @@ export default async function ArticlesPage({
                 {ru
                   ? 'Статьи о здоровье и питании ребёнка, написанные врачом-педиатром.'
                   : en
-                  ? 'Articles on your child’s health and nutrition, written by a pediatrician.'
-                  : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru.'}
+                    ? 'Articles on your child’s health and nutrition, written by a pediatrician.'
+                    : 'Articole despre sănătatea și alimentația copilului, scrise de un medic pediatru.'}
               </p>
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
@@ -161,15 +183,15 @@ export default async function ArticlesPage({
                 {ru
                   ? 'Информация, которой можно доверять, — основанная на современных рекомендациях по педиатрии и нутрициологии, а не на слухах с форумов.'
                   : en
-                  ? 'Information you can trust — reviewed against current pediatric and nutrition guidance, not forum hearsay.'
-                  : 'Informații în care poți avea încredere — bazate pe recomandări actuale de pediatrie și nutriție, nu pe zvonuri de pe forumuri.'}
+                    ? 'Information you can trust — reviewed against current pediatric and nutrition guidance, not forum hearsay.'
+                    : 'Informații în care poți avea încredere — bazate pe recomandări actuale de pediatrie și nutriție, nu pe zvonuri de pe forumuri.'}
               </p>
               <p className="mono mt-8 border-t border-[var(--rule)] pt-6 text-[11px] uppercase tracking-[0.1em] leading-relaxed text-ink-soft">
                 {ru
                   ? 'Автор: Dr. Olesea Jalba · Врач-педиатр · MSc Нутрициология'
                   : en
-                  ? 'By Dr. Olesea Jalba · Pediatrician · MSc Human Nutrition'
-                  : 'De Dr. Olesea Jalba · Medic pediatru · MSc Nutriția Omului'}
+                    ? 'By Dr. Olesea Jalba · Pediatrician · MSc Human Nutrition'
+                    : 'De Dr. Olesea Jalba · Medic pediatru · MSc Nutriția Omului'}
               </p>
             </div>
           </div>
@@ -192,7 +214,9 @@ export default async function ArticlesPage({
           {/* 2 · Featured / latest post */}
           {featured && (
             <section className="shell py-16 md:py-20">
-              <p className="eyebrow mb-6">{ru ? 'Самое новое' : en ? 'Latest' : 'Cel mai recent'}</p>
+              <p className="eyebrow mb-6">
+                {ru ? 'Самое новое' : en ? 'Latest' : 'Cel mai recent'}
+              </p>
               <a
                 href={featured.href}
                 className="group grid items-stretch gap-8 md:grid-cols-2 md:gap-12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
@@ -206,9 +230,26 @@ export default async function ArticlesPage({
                       className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   ) : (
-                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" aria-hidden="true" className="transition-transform duration-500 group-hover:scale-110">
-                      <path d="M4 20h4l10-10-4-4L4 16v4Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-                      <path d="M13.5 6.5l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="48"
+                      height="48"
+                      fill="none"
+                      aria-hidden="true"
+                      className="transition-transform duration-500 group-hover:scale-110"
+                    >
+                      <path
+                        d="M4 20h4l10-10-4-4L4 16v4Z"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M13.5 6.5l4 4"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
                     </svg>
                   )}
                   <span className="mono absolute left-5 top-5 rounded-full border border-[var(--rule)] bg-paper/70 px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-sage-text">
@@ -228,8 +269,15 @@ export default async function ArticlesPage({
                     </p>
                   ) : null}
                   <span className="mt-7 inline-flex items-center gap-2 text-[13px] font-medium uppercase tracking-[0.04em] text-ink">
-                    {ru ? 'Читать статью' : en ? 'Read article' : 'Citește articolul'}
-                    <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
+                    {ru
+                      ? 'Читать статью'
+                      : en
+                        ? 'Read article'
+                        : 'Citește articolul'}
+                    <span
+                      aria-hidden="true"
+                      className="transition-transform group-hover:translate-x-1"
+                    >
                       →
                     </span>
                   </span>
@@ -240,48 +288,61 @@ export default async function ArticlesPage({
 
           {/* 3 · Categories filter + post grid */}
           {rest.length > 0 && (
-          <section className="bg-paper">
-            <div className="shell py-20 md:py-28">
-              <header className="mb-10 flex flex-col gap-4 md:flex-row md:items-baseline md:justify-between">
-                <h2 className="serif text-[clamp(2.2rem,4.5vw,4rem)] leading-[1.0] tracking-[-0.02em] text-balance">
-                  {ru ? (
-                    <>
-                      Все <span className="serif-it text-sage">статьи</span>
-                    </>
-                  ) : en ? (
-                    <>
-                      All <span className="serif-it text-sage">articles</span>
-                    </>
-                  ) : (
-                    <>
-                      Toate <span className="serif-it text-sage">articolele</span>
-                    </>
-                  )}
-                </h2>
-                <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">
-                  {ru ? 'Фильтр по категории и возрасту.' : en ? 'Filter by category and age.' : 'Filtrează după categorie și vârstă.'}
-                </p>
-              </header>
+            <section className="bg-paper">
+              <div className="shell py-20 md:py-28">
+                <header className="mb-10 flex flex-col gap-4 md:flex-row md:items-baseline md:justify-between">
+                  <h2 className="serif text-[clamp(2.2rem,4.5vw,4rem)] leading-[1.0] tracking-[-0.02em] text-balance">
+                    {ru ? (
+                      <>
+                        Все <span className="serif-it text-sage">статьи</span>
+                      </>
+                    ) : en ? (
+                      <>
+                        All <span className="serif-it text-sage">articles</span>
+                      </>
+                    ) : (
+                      <>
+                        Toate{' '}
+                        <span className="serif-it text-sage">articolele</span>
+                      </>
+                    )}
+                  </h2>
+                  <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">
+                    {ru
+                      ? 'Фильтр по категории и возрасту.'
+                      : en
+                        ? 'Filter by category and age.'
+                        : 'Filtrează după categorie și vârstă.'}
+                  </p>
+                </header>
 
-              <BlogList
-                posts={rest}
-                categories={categories}
-                ages={ages}
-                labels={{
-                  all: ru ? 'Все' : en ? 'All' : 'Toate',
-                  allAges: ru ? 'Все возрасты' : en ? 'All ages' : 'Toate vârstele',
-                  categoryLabel: ru ? 'Категория' : en ? 'Category' : 'Categorie',
-                  ageLabel: ru ? 'Возраст' : en ? 'Age' : 'Vârstă',
-                  noResults: ru
-                    ? 'Нет статей по выбранным фильтрам.'
-                    : en
-                      ? 'No articles match these filters.'
-                      : 'Niciun articol pentru filtrele selectate.',
-                  ...emptyState,
-                }}
-              />
-            </div>
-          </section>
+                <BlogList
+                  posts={rest}
+                  categories={categories}
+                  ages={ages}
+                  labels={{
+                    all: ru ? 'Все' : en ? 'All' : 'Toate',
+                    allAges: ru
+                      ? 'Все возрасты'
+                      : en
+                        ? 'All ages'
+                        : 'Toate vârstele',
+                    categoryLabel: ru
+                      ? 'Категория'
+                      : en
+                        ? 'Category'
+                        : 'Categorie',
+                    ageLabel: ru ? 'Возраст' : en ? 'Age' : 'Vârstă',
+                    noResults: ru
+                      ? 'Нет статей по выбранным фильтрам.'
+                      : en
+                        ? 'No articles match these filters.'
+                        : 'Niciun articol pentru filtrele selectate.',
+                    ...emptyState,
+                  }}
+                />
+              </div>
+            </section>
           )}
         </>
       )}
@@ -294,15 +355,24 @@ export default async function ArticlesPage({
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
                 {ru ? (
                   <>
-                    Нужен личный <span className="serif-it text-[var(--sage-soft)]">совет?</span>
+                    Нужен личный{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      совет?
+                    </span>
                   </>
                 ) : en ? (
                   <>
-                    Need personal <span className="serif-it text-[var(--sage-soft)]">advice?</span>
+                    Need personal{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      advice?
+                    </span>
                   </>
                 ) : (
                   <>
-                    Ai nevoie de un sfat <span className="serif-it text-[var(--sage-soft)]">personalizat?</span>
+                    Ai nevoie de un sfat{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      personalizat?
+                    </span>
                   </>
                 )}
               </h2>
@@ -315,7 +385,11 @@ export default async function ArticlesPage({
                       : `Întreabă medicul · ${sla}`}
                 </Link>
                 <Link href="/services" className={creamUnderline}>
-                  {ru ? 'Смотреть консультации →' : en ? 'See the consultations →' : 'Vezi consultațiile →'}
+                  {ru
+                    ? 'Смотреть консультации →'
+                    : en
+                      ? 'See the consultations →'
+                      : 'Vezi consultațiile →'}
                 </Link>
               </div>
             </div>
@@ -323,8 +397,8 @@ export default async function ArticlesPage({
               {ru
                 ? 'Статья — это отправная точка. Для вашего ребёнка консультация даёт больше.'
                 : en
-                ? 'An article is a starting point. For your child, a consultation goes further.'
-                : 'Un articol e un punct de plecare. Pentru copilul tău, o consultație merge mai departe.'}
+                  ? 'An article is a starting point. For your child, a consultation goes further.'
+                  : 'Un articol e un punct de plecare. Pentru copilul tău, o consultație merge mai departe.'}
             </p>
           </div>
         </div>

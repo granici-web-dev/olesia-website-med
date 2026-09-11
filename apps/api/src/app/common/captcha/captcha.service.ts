@@ -85,12 +85,15 @@ export class CaptchaService {
     if (!token) return false;
 
     try {
-      const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ secret: this.secret, response: token }),
-        signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
-      });
+      const res = await fetch(
+        'https://www.google.com/recaptcha/api/siteverify',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ secret: this.secret, response: token }),
+          signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
+        },
+      );
       const data = (await res.json()) as {
         success?: boolean;
         score?: number;
@@ -111,7 +114,9 @@ export class CaptchaService {
       // through: v3 always returns one, so its absence is not a normal case.
       const claimed = data.action ?? '';
       if (claimed !== action) {
-        this.logger.warn(`captcha action mismatch: expected ${action}, got ${claimed || '(none)'}`);
+        this.logger.warn(
+          `captcha action mismatch: expected ${action}, got ${claimed || '(none)'}`,
+        );
         return false;
       }
 
@@ -119,7 +124,9 @@ export class CaptchaService {
       // understand — not a clean pass. It used to default to 1.
       const score = data.score ?? 0;
       if (score < this.minScore) {
-        this.logger.warn(`captcha score ${score} < ${this.minScore} (action=${action})`);
+        this.logger.warn(
+          `captcha score ${score} < ${this.minScore} (action=${action})`,
+        );
         return false;
       }
 

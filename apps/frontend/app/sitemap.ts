@@ -47,7 +47,10 @@ function priorityFor(path: string): number {
 
 const { locales } = routing;
 
-function entry(path: string, lastModified?: Date): MetadataRoute.Sitemap[number] {
+function entry(
+  path: string,
+  lastModified?: Date,
+): MetadataRoute.Sitemap[number] {
   const base = siteUrl();
   return {
     url: `${base}/${routing.defaultLocale}${path}`,

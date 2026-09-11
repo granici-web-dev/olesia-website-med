@@ -10,40 +10,40 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 
 ## Choices
 
-| Area | Choice | Version |
-| --- | --- | --- |
-| Language | TypeScript, `strict` | `^5.9.3` |
-| Monorepo | Nx + pnpm workspaces | `nx 22.7.5`, `pnpm@9.15.9` |
-| API framework | NestJS on Express | `@nestjs/* ^11`, `express ^5.2.1` |
-| Database | PostgreSQL via Prisma with the pg driver adapter | `prisma ^7.8.0`, `@prisma/adapter-pg ^7.8.0` |
-| API auth | JWT access + refresh (sessions in `RefreshSession`), passport-jwt, argon2 hashing | `@nestjs/jwt ^11.0.2`, `argon2 ^0.44.0` |
-| API validation | class-validator + class-transformer DTOs | `^0.15.1` / `^0.5.1` |
-| API docs | Swagger at `/api/docs` | `@nestjs/swagger ^11.4.4` |
-| API hardening | helmet, @nestjs/throttler | `^8.3.0`, `^6.5.0` |
-| Error tracking | Sentry, one SDK per app, all behind a DSN that is currently empty | `@sentry/nestjs` / `@sentry/nextjs` / `@sentry/react` `10.74.0` |
-| Scheduled work | @nestjs/schedule | `^6.1.3` |
-| Mail | nodemailer | `^8.0.11` |
-| Images | sharp, in the API's storage pipeline | `^0.35.0` |
-| Uploads | multer, pinned across the tree by a pnpm override | `2.3.0` |
-| Second factor | otplib (TOTP + recovery codes), `TotpModule` under `auth` | `^13.4.1` |
-| Payments | maib e-Commerce Checkout, hand-written client | — |
-| Public site | Next.js App Router, React 19 | `next 16.3.4`, `react ^19` |
-| Public site i18n | next-intl, locales `ro` (default) / `en` / `ru` | — |
-| Public site styling | Tailwind v4 + CSS Modules, brand tokens as CSS variables | `tailwindcss ^4` |
-| Markdown | react-markdown + remark-gfm, in **both** front ends since audit A7 | `^10.1.0` / `^4.0.1` |
-| Back office | React 19 + Vite, react-router-dom | `vite ^8`, `react-router-dom 6.30.3` (exact) |
-| Back office UI | shadcn/ui over Radix primitives, CVA, tailwind-merge, lucide, sonner | — |
-| Back office data | TanStack Query over `features/<domain>/api.ts` — no mock layer | `^5.101.0` |
-| Back office forms | react-hook-form + zod | `^7.78.0`, `zod ^4.4.3` |
-| Shared types | `packages/shared` — DTOs and enums, built with `tsc` | workspace |
-| Formatter | Prettier, single option: `singleQuote` | `~3.6.2` |
-| Test runner (API) | Jest with `@swc/jest`, 368 tests in 41 suites | `jest ~30.3.0` |
-| Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only, 89 tests | `vitest ~4.1.0` |
-| Test runner (back office) | Vitest in `vite.config.mts`, 45 tests since audits A9 and A10 | `vitest ~4.1.0` |
-| CI | GitHub Actions: two typechecks, **all three test suites**, three builds, migration check, **the API Docker image** | — |
-| Deploy (site) | Vercel | — |
-| Deploy (API) | Docker Compose + Postgres, nightly backups | `docker-compose.prod.yml` |
-| Dependency updates | Dependabot, grouped | — |
+| Area                      | Choice                                                                                                             | Version                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| Language                  | TypeScript, `strict`                                                                                               | `^5.9.3`                                                        |
+| Monorepo                  | Nx + pnpm workspaces                                                                                               | `nx 22.7.5`, `pnpm@9.15.9`                                      |
+| API framework             | NestJS on Express                                                                                                  | `@nestjs/* ^11`, `express ^5.2.1`                               |
+| Database                  | PostgreSQL via Prisma with the pg driver adapter                                                                   | `prisma ^7.8.0`, `@prisma/adapter-pg ^7.8.0`                    |
+| API auth                  | JWT access + refresh (sessions in `RefreshSession`), passport-jwt, argon2 hashing                                  | `@nestjs/jwt ^11.0.2`, `argon2 ^0.44.0`                         |
+| API validation            | class-validator + class-transformer DTOs                                                                           | `^0.15.1` / `^0.5.1`                                            |
+| API docs                  | Swagger at `/api/docs`                                                                                             | `@nestjs/swagger ^11.4.4`                                       |
+| API hardening             | helmet, @nestjs/throttler                                                                                          | `^8.3.0`, `^6.5.0`                                              |
+| Error tracking            | Sentry, one SDK per app, all behind a DSN that is currently empty                                                  | `@sentry/nestjs` / `@sentry/nextjs` / `@sentry/react` `10.74.0` |
+| Scheduled work            | @nestjs/schedule                                                                                                   | `^6.1.3`                                                        |
+| Mail                      | nodemailer                                                                                                         | `^8.0.11`                                                       |
+| Images                    | sharp, in the API's storage pipeline                                                                               | `^0.35.0`                                                       |
+| Uploads                   | multer, pinned across the tree by a pnpm override                                                                  | `2.3.0`                                                         |
+| Second factor             | otplib (TOTP + recovery codes), `TotpModule` under `auth`                                                          | `^13.4.1`                                                       |
+| Payments                  | maib e-Commerce Checkout, hand-written client                                                                      | —                                                               |
+| Public site               | Next.js App Router, React 19                                                                                       | `next 16.3.4`, `react ^19`                                      |
+| Public site i18n          | next-intl, locales `ro` (default) / `en` / `ru`                                                                    | —                                                               |
+| Public site styling       | Tailwind v4 + CSS Modules, brand tokens as CSS variables                                                           | `tailwindcss ^4`                                                |
+| Markdown                  | react-markdown + remark-gfm, in **both** front ends since audit A7                                                 | `^10.1.0` / `^4.0.1`                                            |
+| Back office               | React 19 + Vite, react-router-dom                                                                                  | `vite ^8`, `react-router-dom 6.30.3` (exact)                    |
+| Back office UI            | shadcn/ui over Radix primitives, CVA, tailwind-merge, lucide, sonner                                               | —                                                               |
+| Back office data          | TanStack Query over `features/<domain>/api.ts` — no mock layer                                                     | `^5.101.0`                                                      |
+| Back office forms         | react-hook-form + zod                                                                                              | `^7.78.0`, `zod ^4.4.3`                                         |
+| Shared types              | `packages/shared` — DTOs and enums, built with `tsc`                                                               | workspace                                                       |
+| Formatter                 | Prettier, single option: `singleQuote`                                                                             | `~3.6.2`                                                        |
+| Test runner (API)         | Jest with `@swc/jest`, 368 tests in 41 suites                                                                      | `jest ~30.3.0`                                                  |
+| Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only, 89 tests                                          | `vitest ~4.1.0`                                                 |
+| Test runner (back office) | Vitest in `vite.config.mts`, 45 tests since audits A9 and A10                                                      | `vitest ~4.1.0`                                                 |
+| CI                        | GitHub Actions: two typechecks, **all three test suites**, three builds, migration check, **the API Docker image** | —                                                               |
+| Deploy (site)             | Vercel                                                                                                             | —                                                               |
+| Deploy (API)              | Docker Compose + Postgres, nightly backups                                                                         | `docker-compose.prod.yml`                                       |
+| Dependency updates        | Dependabot, grouped                                                                                                | —                                                               |
 
 ## Decisions
 
@@ -95,7 +95,7 @@ too — RO and EN required, `*Ru` nullable (added 2026-07-27, migration
 `20260727190927_content_ru_fields`), with readers falling back RU → RO through `loc()`,
 which treats an empty string as missing. An empty RU field is the client's to fill; we do
 not translate her content for her. The back office is Romanian-only, with every string in
-one dictionary (`src/i18n/ro.ts`). Page copy on the site is *not* in the JSON — see
+one dictionary (`src/i18n/ro.ts`). Page copy on the site is _not_ in the JSON — see
 `AGENTS.md` R3.
 
 **`apps/frontend/origin/` is a read-only reference design.** HTML and JSX prototypes that

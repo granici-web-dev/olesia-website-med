@@ -1239,5 +1239,4 @@ export class PaymentsService {
       data: { paymentStatus: PaymentStatus.confirmed, ...activation },
     });
   }
-
 }

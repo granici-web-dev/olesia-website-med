@@ -1,7 +1,9 @@
 import type { DeliverableOrderDto } from '@olesia/shared';
 import type { DeliverableOrder } from '../../generated/prisma/client';
 
-export function toDeliverableOrderDto(o: DeliverableOrder): DeliverableOrderDto {
+export function toDeliverableOrderDto(
+  o: DeliverableOrder,
+): DeliverableOrderDto {
   return {
     id: o.id,
     product: o.product as DeliverableOrderDto['product'],

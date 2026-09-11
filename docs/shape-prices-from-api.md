@@ -98,12 +98,12 @@ reach the doctor, and an empty price beats an invented one.
 
 ### 4. What gets deleted
 
-| Removed | Where | Lines |
-|---|---|---|
-| `SERVICE_PRICE_META` + its use | `lib/service-content.ts`, `pricing/page.tsx` | ~28 + ~15 |
-| `FALLBACK_SERVICES` | `pricing/page.tsx` | 55 |
-| `DELIVERABLES` price field | `pricing/page.tsx` | 5 figures |
-| `items.*.price`, `items.*.duration` | `i18n/messages/{ro,en,ru}.json` | 10 keys × 3 |
+| Removed                             | Where                                        | Lines       |
+| ----------------------------------- | -------------------------------------------- | ----------- |
+| `SERVICE_PRICE_META` + its use      | `lib/service-content.ts`, `pricing/page.tsx` | ~28 + ~15   |
+| `FALLBACK_SERVICES`                 | `pricing/page.tsx`                           | 55          |
+| `DELIVERABLES` price field          | `pricing/page.tsx`                           | 5 figures   |
+| `items.*.price`, `items.*.duration` | `i18n/messages/{ro,en,ru}.json`              | 10 keys × 3 |
 
 `SERVICE_DESCRIPTIONS` and `SERVICE_INCLUDED` stay — they are copy, not prices, and the
 client has no back-office field for them.
@@ -116,20 +116,20 @@ disagree. Making group C editable is deliberately still out of scope.
 
 ## Files
 
-| File | Change | ~Lines |
-|---|---|---|
-| `apps/frontend/lib/service-price.ts` | new — the formatter | +45 |
-| `apps/frontend/lib/service-price.spec.ts` | new — its tests | +70 |
-| `apps/frontend/vitest.config.mts` | new — test runner for the site | +12 |
-| `apps/frontend/components/sections/Services.tsx` | price/duration from the API, split rule | +30 / −4 |
-| `apps/frontend/app/[locale]/pricing/page.tsx` | drop both constants, use the formatter, empty state | +35 / −135 |
-| `apps/frontend/lib/service-content.ts` | drop `SERVICE_PRICE_META` | −28 |
-| `apps/frontend/i18n/messages/{ro,en,ru}.json` | drop 10 keys each | −30 |
-| `packages/shared/src/lib/service-catalog.ts` | correct the "fallback for the site" comment | ±3 |
-| `apps/api/prisma/seed.ts` | `quick_question.priceLabel*` → `null` | ±3 |
-| `PRINCIPLES.md` | drop the "prices are hardcoded" known-debt bullet | −6 |
-| `.github/workflows/ci.yml` | run both suites on every PR | +6 |
-| `STACK.md`, `TESTING.md` | record the site's test runner and that CI runs the tests | +12 |
+| File                                             | Change                                                   | ~Lines     |
+| ------------------------------------------------ | -------------------------------------------------------- | ---------- |
+| `apps/frontend/lib/service-price.ts`             | new — the formatter                                      | +45        |
+| `apps/frontend/lib/service-price.spec.ts`        | new — its tests                                          | +70        |
+| `apps/frontend/vitest.config.mts`                | new — test runner for the site                           | +12        |
+| `apps/frontend/components/sections/Services.tsx` | price/duration from the API, split rule                  | +30 / −4   |
+| `apps/frontend/app/[locale]/pricing/page.tsx`    | drop both constants, use the formatter, empty state      | +35 / −135 |
+| `apps/frontend/lib/service-content.ts`           | drop `SERVICE_PRICE_META`                                | −28        |
+| `apps/frontend/i18n/messages/{ro,en,ru}.json`    | drop 10 keys each                                        | −30        |
+| `packages/shared/src/lib/service-catalog.ts`     | correct the "fallback for the site" comment              | ±3         |
+| `apps/api/prisma/seed.ts`                        | `quick_question.priceLabel*` → `null`                    | ±3         |
+| `PRINCIPLES.md`                                  | drop the "prices are hardcoded" known-debt bullet        | −6         |
+| `.github/workflows/ci.yml`                       | run both suites on every PR                              | +6         |
+| `STACK.md`, `TESTING.md`                         | record the site's test runner and that CI runs the tests | +12        |
 
 Net: about 150 lines removed.
 

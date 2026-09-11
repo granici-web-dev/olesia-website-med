@@ -61,13 +61,13 @@ export async function generateMetadata({
     title: ru
       ? 'Политика конфиденциальности | Dr. Olesea Jalba'
       : en
-      ? 'Privacy Policy | Dr. Olesea Jalba'
-      : 'Politica de confidențialitate | Dr. Olesea Jalba',
+        ? 'Privacy Policy | Dr. Olesea Jalba'
+        : 'Politica de confidențialitate | Dr. Olesea Jalba',
     description: ru
       ? 'Как мы собираем, используем и защищаем ваши данные — в том числе данные о здоровье и о вашем ребёнке — и какие права у вас есть.'
       : en
-      ? 'How we collect, use, and protect your data — including health data and data about your child — and the rights you have.'
-      : 'Cum colectăm, folosim și protejăm datele tale, inclusiv datele despre sănătate și despre copil, și drepturile pe care le ai.',
+        ? 'How we collect, use, and protect your data — including health data and data about your child — and the rights you have.'
+        : 'Cum colectăm, folosim și protejăm datele tale, inclusiv datele despre sănătate și despre copil, și drepturile pe care le ai.',
   });
 }
 
@@ -80,13 +80,48 @@ interface TocItem {
 
 const TOC: TocItem[] = [
   { id: 'pe-scurt', ro: 'Pe scurt', en: 'In short', ru: 'Кратко' },
-  { id: 'date', ro: 'Ce date colectăm', en: 'What we collect', ru: 'Какие данные мы собираем' },
-  { id: 'temei', ro: 'Temeiul prelucrării', en: 'Why & legal basis', ru: 'Цели и правовое основание' },
-  { id: 'transfer', ro: 'Cui transmitem datele', en: 'Who we share with', ru: 'Кому мы передаём данные' },
-  { id: 'plati', ro: 'Plăți online', en: 'Online payments', ru: 'Онлайн-оплата' },
-  { id: 'pastrare', ro: 'Cât timp păstrăm', en: 'How long we keep it', ru: 'Сколько мы храним данные' },
-  { id: 'drepturi', ro: 'Drepturile tale', en: 'Your rights', ru: 'Ваши права' },
-  { id: 'copii', ro: 'Datele copiilor', en: 'Children’s data', ru: 'Данные детей' },
+  {
+    id: 'date',
+    ro: 'Ce date colectăm',
+    en: 'What we collect',
+    ru: 'Какие данные мы собираем',
+  },
+  {
+    id: 'temei',
+    ro: 'Temeiul prelucrării',
+    en: 'Why & legal basis',
+    ru: 'Цели и правовое основание',
+  },
+  {
+    id: 'transfer',
+    ro: 'Cui transmitem datele',
+    en: 'Who we share with',
+    ru: 'Кому мы передаём данные',
+  },
+  {
+    id: 'plati',
+    ro: 'Plăți online',
+    en: 'Online payments',
+    ru: 'Онлайн-оплата',
+  },
+  {
+    id: 'pastrare',
+    ro: 'Cât timp păstrăm',
+    en: 'How long we keep it',
+    ru: 'Сколько мы храним данные',
+  },
+  {
+    id: 'drepturi',
+    ro: 'Drepturile tale',
+    en: 'Your rights',
+    ru: 'Ваши права',
+  },
+  {
+    id: 'copii',
+    ro: 'Datele copiilor',
+    en: 'Children’s data',
+    ru: 'Данные детей',
+  },
   { id: 'securitate', ro: 'Securitate', en: 'Security', ru: 'Безопасность' },
   { id: 'cookies', ro: 'Cookie-uri', en: 'Cookies', ru: 'Файлы cookie' },
   { id: 'modificari', ro: 'Modificări', en: 'Changes', ru: 'Изменения' },
@@ -159,9 +194,15 @@ const SUMMARY: Bi[] = [
     ru: 'Вы вправе в любой момент получить к ним доступ, исправить или удалить их.',
   },
   {
-    ro: 'Pentru orice întrebare despre date, ne poți scrie la ' + META.email + '.',
+    ro:
+      'Pentru orice întrebare despre date, ne poți scrie la ' +
+      META.email +
+      '.',
     en: 'For any question about your data, write to us at ' + META.email + '.',
-    ru: 'По любым вопросам о ваших данных вы можете написать нам на ' + META.email + '.',
+    ru:
+      'По любым вопросам о ваших данных вы можете написать нам на ' +
+      META.email +
+      '.',
   },
 ];
 
@@ -179,7 +220,11 @@ const DATA: { term: Bi; desc: Bi }[] = [
     },
   },
   {
-    term: { ro: 'Date despre sănătate', en: 'Health data', ru: 'Данные о здоровье' },
+    term: {
+      ro: 'Date despre sănătate',
+      en: 'Health data',
+      ru: 'Данные о здоровье',
+    },
     desc: {
       ro: 'simptome, istoric, documente sau poze încărcate, conținutul consultațiilor și datele de monitorizare.',
       en: 'symptoms, history, uploaded documents or photos, the content of consultations, and monitoring data.',
@@ -187,7 +232,11 @@ const DATA: { term: Bi; desc: Bi }[] = [
     },
   },
   {
-    term: { ro: 'Date despre copil', en: 'Data about your child', ru: 'Данные о вашем ребёнке' },
+    term: {
+      ro: 'Date despre copil',
+      en: 'Data about your child',
+      ru: 'Данные о вашем ребёнке',
+    },
     desc: {
       ro: 'furnizate de părinte sau de reprezentantul legal.',
       en: 'provided by the parent or legal guardian.',
@@ -195,7 +244,11 @@ const DATA: { term: Bi; desc: Bi }[] = [
     },
   },
   {
-    term: { ro: 'Date de programare', en: 'Booking data', ru: 'Данные о записи' },
+    term: {
+      ro: 'Date de programare',
+      en: 'Booking data',
+      ru: 'Данные о записи',
+    },
     desc: {
       ro: 'gestionate prin Calendly, la rezervarea unei consultații video.',
       en: 'handled through Calendly when you book a video consultation.',
@@ -217,13 +270,26 @@ const DATA: { term: Bi; desc: Bi }[] = [
       ru: 'Адрес e-mail для новостей',
     },
     desc: {
-      ro: 'dacă te abonezi la newsletter sau descarci un material din bibliotecă, îți păstrăm adresa, limba paginii și momentul în care ți-ai dat acordul, pe serverul nostru. Materialul se descarcă pe loc — nu îl trimitem pe e-mail. Te poți dezabona oricând scriindu-ne la ' + META.email + '.',
-      en: 'if you subscribe to the newsletter or download a material from the library, we keep your address, the language of the page, and the moment you gave your consent, on our own server. The material downloads straight away — we do not email it to you. You can unsubscribe at any time by writing to us at ' + META.email + '.',
-      ru: 'если вы подписываетесь на рассылку или скачиваете материал из библиотеки, мы храним ваш адрес, язык страницы и момент вашего согласия на нашем сервере. Материал скачивается сразу — мы не отправляем его по почте. Отписаться можно в любой момент, написав нам на ' + META.email + '.',
+      ro:
+        'dacă te abonezi la newsletter sau descarci un material din bibliotecă, îți păstrăm adresa, limba paginii și momentul în care ți-ai dat acordul, pe serverul nostru. Materialul se descarcă pe loc — nu îl trimitem pe e-mail. Te poți dezabona oricând scriindu-ne la ' +
+        META.email +
+        '.',
+      en:
+        'if you subscribe to the newsletter or download a material from the library, we keep your address, the language of the page, and the moment you gave your consent, on our own server. The material downloads straight away — we do not email it to you. You can unsubscribe at any time by writing to us at ' +
+        META.email +
+        '.',
+      ru:
+        'если вы подписываетесь на рассылку или скачиваете материал из библиотеки, мы храним ваш адрес, язык страницы и момент вашего согласия на нашем сервере. Материал скачивается сразу — мы не отправляем его по почте. Отписаться можно в любой момент, написав нам на ' +
+        META.email +
+        '.',
     },
   },
   {
-    term: { ro: 'Date tehnice', en: 'Technical data', ru: 'Технические данные' },
+    term: {
+      ro: 'Date tehnice',
+      en: 'Technical data',
+      ru: 'Технические данные',
+    },
     desc: {
       ro: 'cookie-uri, adresă IP și statistici de utilizare a site-ului.',
       en: 'cookies, IP address, and site-usage statistics.',
@@ -314,7 +380,11 @@ const RIGHTS: { term: Bi; desc: Bi }[] = [
     },
   },
   {
-    term: { ro: 'Restricționare', en: 'Restriction', ru: 'Ограничение обработки' },
+    term: {
+      ro: 'Restricționare',
+      en: 'Restriction',
+      ru: 'Ограничение обработки',
+    },
     desc: {
       ro: 'să limitezi prelucrarea',
       en: 'limit how we process it',
@@ -338,7 +408,11 @@ const RIGHTS: { term: Bi; desc: Bi }[] = [
     },
   },
   {
-    term: { ro: 'Retragerea consimțământului', en: 'Withdraw consent', ru: 'Отзыв согласия' },
+    term: {
+      ro: 'Retragerea consimțământului',
+      en: 'Withdraw consent',
+      ru: 'Отзыв согласия',
+    },
     desc: {
       ro: 'oricând, fără a afecta prelucrarea anterioară',
       en: 'at any time, without affecting prior processing',
@@ -346,7 +420,6 @@ const RIGHTS: { term: Bi; desc: Bi }[] = [
     },
   },
 ];
-
 
 function Dot() {
   return (
@@ -376,21 +449,31 @@ export default async function GdprPage({
         className="shell pt-6 md:pt-8"
         items={[
           { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
-          { label: ru ? 'Конфиденциальность' : en ? 'Privacy' : 'Confidențialitate' },
+          {
+            label: ru
+              ? 'Конфиденциальность'
+              : en
+                ? 'Privacy'
+                : 'Confidențialitate',
+          },
         ]}
       />
       {/* 1 · Hero — title + operator meta */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+            <span
+              className="size-1.5 rounded-full bg-sage"
+              aria-hidden="true"
+            />
             {ru ? 'Конфиденциальность' : en ? 'Privacy' : 'Confidențialitate'}
           </p>
           <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 lg:gap-20">
             <h1 className="serif max-w-[15ch] text-[clamp(2.5rem,5.6vw,5rem)] leading-[1.04] tracking-[-0.015em] text-balance">
               {ru ? (
                 <>
-                  Ваша <span className="serif-it text-sage">конфиденциальность</span>
+                  Ваша{' '}
+                  <span className="serif-it text-sage">конфиденциальность</span>
                 </>
               ) : en ? (
                 <>
@@ -398,7 +481,8 @@ export default async function GdprPage({
                 </>
               ) : (
                 <>
-                  <span className="serif-it text-sage">Confidențialitatea</span> ta
+                  <span className="serif-it text-sage">Confidențialitatea</span>{' '}
+                  ta
                 </>
               )}
             </h1>
@@ -407,8 +491,8 @@ export default async function GdprPage({
                 {ru
                   ? 'Как мы собираем, используем и защищаем ваши данные — включая данные о здоровье и данные о вашем ребёнке.'
                   : en
-                  ? 'How we collect, use, and protect your data — including health data and data about your child.'
-                  : 'Cum colectăm, folosim și protejăm datele tale — inclusiv datele despre sănătate și despre copilul tău.'}
+                    ? 'How we collect, use, and protect your data — including health data and data about your child.'
+                    : 'Cum colectăm, folosim și protejăm datele tale — inclusiv datele despre sănătate și despre copilul tău.'}
               </p>
               <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-[0.9375rem]">
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
@@ -436,7 +520,9 @@ export default async function GdprPage({
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                   {ru ? 'Обновлено' : en ? 'Updated' : 'Actualizat'}
                 </dt>
-                <dd className="text-ink">{ru ? META.updatedRu : en ? META.updatedEn : META.updatedRo}</dd>
+                <dd className="text-ink">
+                  {ru ? META.updatedRu : en ? META.updatedEn : META.updatedRo}
+                </dd>
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                   {ru ? 'Контакты' : en ? 'Contact' : 'Contact'}
                 </dt>
@@ -455,7 +541,10 @@ export default async function GdprPage({
       </section>
 
       {/* 2 · TL;DR — plain-language summary */}
-      <section id="pe-scurt" className="scroll-mt-24 border-b border-[var(--rule)] bg-paper">
+      <section
+        id="pe-scurt"
+        className="scroll-mt-24 border-b border-[var(--rule)] bg-paper"
+      >
         <div className="shell grid gap-8 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-20">
           <h2 className="serif text-[clamp(1.9rem,3.4vw,2.7rem)] leading-tight tracking-[-0.02em] text-balance">
             {ru ? 'Кратко' : en ? 'In short' : 'Pe scurt'}
@@ -479,7 +568,9 @@ export default async function GdprPage({
           aria-label={ru ? 'Разделы' : en ? 'Sections' : 'Secțiuni'}
           className="min-w-0 md:sticky md:top-[133px] md:self-start"
         >
-          <p className="eyebrow mb-4">{ru ? 'Содержание' : en ? 'Contents' : 'Cuprins'}</p>
+          <p className="eyebrow mb-4">
+            {ru ? 'Содержание' : en ? 'Contents' : 'Cuprins'}
+          </p>
           <ul className="flex flex-wrap gap-2 md:flex-col md:flex-nowrap md:gap-1">
             {TOC.map((item) => (
               <li key={item.id}>
@@ -498,14 +589,20 @@ export default async function GdprPage({
           {/* Ce date colectăm */}
           <Section
             id="date"
-            title={ru ? 'Какие данные мы собираем' : en ? 'What we collect' : 'Ce date colectăm'}
+            title={
+              ru
+                ? 'Какие данные мы собираем'
+                : en
+                  ? 'What we collect'
+                  : 'Ce date colectăm'
+            }
           >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'В зависимости от того, как вы с нами взаимодействуете, мы можем собирать:'
                 : en
-                ? 'Depending on how you interact with us, we may collect:'
-                : 'În funcție de cum interacționezi cu noi, putem colecta:'}
+                  ? 'Depending on how you interact with us, we may collect:'
+                  : 'În funcție de cum interacționezi cu noi, putem colecta:'}
             </p>
             <ul className="mt-6 grid gap-4">
               {DATA.map((d) => (
@@ -523,15 +620,15 @@ export default async function GdprPage({
                 ru
                   ? 'Особая категория данных'
                   : en
-                  ? 'Special category'
-                  : 'Categorie specială de date'
+                    ? 'Special category'
+                    : 'Categorie specială de date'
               }
             >
               {ru
                 ? 'Данные о здоровье и данные детей относятся к особым категориям персональных данных и подлежат дополнительной защите. Мы обрабатываем их только на основании вашего явного согласия и для оказания медицинских услуг.'
                 : en
-                ? 'Health data and children’s data are special categories with extra protection. We process them only on the basis of your explicit consent and to provide healthcare services.'
-                : 'Datele despre sănătate și datele copiilor sunt categorii speciale, protejate suplimentar. Le prelucrăm doar pe baza consimțământului tău explicit și pentru a-ți oferi servicii de sănătate.'}
+                  ? 'Health data and children’s data are special categories with extra protection. We process them only on the basis of your explicit consent and to provide healthcare services.'
+                  : 'Datele despre sănătate și datele copiilor sunt categorii speciale, protejate suplimentar. Le prelucrăm doar pe baza consimțământului tău explicit și pentru a-ți oferi servicii de sănătate.'}
             </Callout>
           </Section>
 
@@ -542,8 +639,8 @@ export default async function GdprPage({
               ru
                 ? 'Зачем мы обрабатываем данные и на каком основании'
                 : en
-                ? 'Why we process data & on what basis'
-                : 'De ce prelucrăm datele și pe ce temei'
+                  ? 'Why we process data & on what basis'
+                  : 'De ce prelucrăm datele și pe ce temei'
             }
           >
             <ul className="mt-6 grid gap-4">
@@ -561,14 +658,20 @@ export default async function GdprPage({
           {/* Cui transmitem datele */}
           <Section
             id="transfer"
-            title={ru ? 'Кому мы передаём данные' : en ? 'Who we share data with' : 'Cui transmitem datele'}
+            title={
+              ru
+                ? 'Кому мы передаём данные'
+                : en
+                  ? 'Who we share data with'
+                  : 'Cui transmitem datele'
+            }
           >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Мы работаем с подрядчиками, которые помогают нам оказывать услугу:'
                 : en
-                ? 'We work with providers who help us deliver the service:'
-                : 'Lucrăm cu furnizori care ne ajută să oferim serviciul:'}
+                  ? 'We work with providers who help us deliver the service:'
+                  : 'Lucrăm cu furnizori care ne ajută să oferim serviciul:'}
             </p>
             <ul className="mt-6 grid gap-4">
               {SHARE.map((s) => (
@@ -584,8 +687,8 @@ export default async function GdprPage({
               {ru
                 ? 'Мы не продаём ваши данные и не передаём их для маркетинга третьих лиц. Иногда данные могут передаваться за пределы Молдовы; в таких случаях мы применяем меры защиты, предусмотренные законом.'
                 : en
-                ? 'We don’t sell your data and don’t pass it on for third parties’ marketing. Some transfers may take place outside Moldova; where they do, we apply the safeguards required by law.'
-                : 'Nu vindem datele tale și nu le transmitem în scopuri de marketing ale terților. Unele transferuri pot avea loc în afara Moldovei; atunci aplicăm garanțiile cerute de lege.'}
+                  ? 'We don’t sell your data and don’t pass it on for third parties’ marketing. Some transfers may take place outside Moldova; where they do, we apply the safeguards required by law.'
+                  : 'Nu vindem datele tale și nu le transmitem în scopuri de marketing ale terților. Unele transferuri pot avea loc în afara Moldovei; atunci aplicăm garanțiile cerute de lege.'}
             </p>
           </Section>
 
@@ -594,42 +697,50 @@ export default async function GdprPage({
               the acquirer review looks for exactly this. */}
           <Section
             id="plati"
-            title={ru ? 'Онлайн-оплата' : en ? 'Online payments' : 'Plăți online'}
+            title={
+              ru ? 'Онлайн-оплата' : en ? 'Online payments' : 'Plăți online'
+            }
           >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Онлайн-оплата проходит через BC «MAIB» S.A. Когда вы нажимаете «Оплатить», мы передаём банку сумму, валюту, номер заказа и ваши контактные данные, после чего вы переходите на защищённую страницу банка. Номер карты, срок действия и CVV вы вводите там — на наш сайт и на наши серверы они не попадают ни в каком виде.'
                 : en
-                ? 'Online payments are handled by BC “MAIB” S.A. When you press Pay, we pass the bank the amount, the currency, the order reference and your contact details, and you are taken to the bank’s secure page. You enter the card number, expiry date and CVV there — they never reach our website or our servers in any form.'
-                : 'Plățile online sunt procesate de BC „MAIB” S.A. Când apeși „Plătește”, transmitem băncii suma, moneda, referința comenzii și datele tale de contact, iar tu ești condus la pagina securizată a băncii. Numărul cardului, data expirării și codul CVV le introduci acolo — ele nu ajung pe site-ul nostru și nici pe serverele noastre, sub nicio formă.'}
+                  ? 'Online payments are handled by BC “MAIB” S.A. When you press Pay, we pass the bank the amount, the currency, the order reference and your contact details, and you are taken to the bank’s secure page. You enter the card number, expiry date and CVV there — they never reach our website or our servers in any form.'
+                  : 'Plățile online sunt procesate de BC „MAIB” S.A. Când apeși „Plătește”, transmitem băncii suma, moneda, referința comenzii și datele tale de contact, iar tu ești condus la pagina securizată a băncii. Numărul cardului, data expirării și codul CVV le introduci acolo — ele nu ajung pe site-ul nostru și nici pe serverele noastre, sub nicio formă.'}
             </p>
             <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Обратно от банка мы получаем только результат: прошёл платёж или нет, сумму, последние цифры карты и служебные коды операции. Этого достаточно, чтобы подтвердить оплату, найти платёж по вашему обращению и при необходимости вернуть деньги.'
                 : en
-                ? 'What comes back to us from the bank is only the outcome: whether the payment went through, the amount, the last digits of the card and the technical codes of the operation. That is enough to confirm the payment, to find it if you contact us, and to refund it if needed.'
-                : 'Înapoi, de la bancă, primim doar rezultatul: dacă plata a trecut sau nu, suma, ultimele cifre ale cardului și codurile tehnice ale operațiunii. Atât ne trebuie ca să confirmăm plata, să o găsim dacă ne scrii și să o rambursăm la nevoie.'}
+                  ? 'What comes back to us from the bank is only the outcome: whether the payment went through, the amount, the last digits of the card and the technical codes of the operation. That is enough to confirm the payment, to find it if you contact us, and to refund it if needed.'
+                  : 'Înapoi, de la bancă, primim doar rezultatul: dacă plata a trecut sau nu, suma, ultimele cifre ale cardului și codurile tehnice ale operațiunii. Atât ne trebuie ca să confirmăm plata, să o găsim dacă ne scrii și să o rambursăm la nevoie.'}
             </p>
             <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Мы не связываем оплату с содержанием консультации: платёжные документы хранятся отдельно от медицинских данных, и в бухгалтерских документах не указывается, о чём именно была консультация.'
                 : en
-                ? 'We do not tie a payment to what was discussed: payment records are kept separately from medical data, and the accounting documents never say what the consultation was about.'
-                : 'Nu legăm plata de conținutul consultației: documentele de plată sunt păstrate separat de datele medicale, iar documentele contabile nu spun despre ce a fost consultația.'}
+                  ? 'We do not tie a payment to what was discussed: payment records are kept separately from medical data, and the accounting documents never say what the consultation was about.'
+                  : 'Nu legăm plata de conținutul consultației: documentele de plată sunt păstrate separat de datele medicale, iar documentele contabile nu spun despre ce a fost consultația.'}
             </p>
           </Section>
 
           {/* Cât timp păstrăm */}
           <Section
             id="pastrare"
-            title={ru ? 'Сколько мы храним данные' : en ? 'How long we keep it' : 'Cât timp păstrăm datele'}
+            title={
+              ru
+                ? 'Сколько мы храним данные'
+                : en
+                  ? 'How long we keep it'
+                  : 'Cât timp păstrăm datele'
+            }
           >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Мы храним ваши данные только столько, сколько нужно для целей, описанных здесь, и в течение сроков, установленных законом для медицинской документации. После этого мы удаляем или обезличиваем их.'
                 : en
-                ? 'We keep your data only as long as needed for the purposes described here and for the periods required by law for medical records. After that, we delete or anonymise it.'
-                : 'Păstrăm datele doar atât timp cât este necesar pentru scopurile descrise aici și pentru termenele impuse de lege în cazul documentației medicale. După aceea, le ștergem sau le anonimizăm.'}
+                  ? 'We keep your data only as long as needed for the purposes described here and for the periods required by law for medical records. After that, we delete or anonymise it.'
+                  : 'Păstrăm datele doar atât timp cât este necesar pentru scopurile descrise aici și pentru termenele impuse de lege în cazul documentației medicale. După aceea, le ștergem sau le anonimizăm.'}
             </p>
             {/* Documents a patient sends through the pre-consultation upload
                 link (§11.14). Stated separately because it is the one category
@@ -638,8 +749,8 @@ export default async function GdprPage({
               {ru
                 ? 'Анализы и документы, присланные по персональной ссылке перед консультацией, хранятся отдельно, недоступны публично и удаляются автоматически по истечении срока хранения. Сама ссылка перестаёт работать раньше — примерно через месяц. Вы можете удалить любой файл сами, пока ссылка активна, или попросить нас об этом в любой момент.'
                 : en
-                ? 'Analyses and documents sent through the personal pre-consultation link are stored separately, are never publicly reachable, and are deleted automatically once the retention period ends. The link itself stops working sooner — about a month after it is issued. You can delete any file yourself while the link is active, or ask us to at any time.'
-                : 'Analizele și documentele trimise prin linkul personal dinaintea consultației sunt stocate separat, nu sunt accesibile public și se șterg automat la finalul perioadei de păstrare. Linkul în sine expiră mai devreme — la aproximativ o lună de la emitere. Poți șterge singur orice fișier cât timp linkul este activ sau ne poți cere oricând acest lucru.'}
+                  ? 'Analyses and documents sent through the personal pre-consultation link are stored separately, are never publicly reachable, and are deleted automatically once the retention period ends. The link itself stops working sooner — about a month after it is issued. You can delete any file yourself while the link is active, or ask us to at any time.'
+                  : 'Analizele și documentele trimise prin linkul personal dinaintea consultației sunt stocate separat, nu sunt accesibile public și se șterg automat la finalul perioadei de păstrare. Linkul în sine expiră mai devreme — la aproximativ o lună de la emitere. Poți șterge singur orice fișier cât timp linkul este activ sau ne poți cere oricând acest lucru.'}
             </p>
             {/* Payment records answer to accounting law, not to the medical
                 rule above, and they survive a deletion request for that
@@ -649,8 +760,8 @@ export default async function GdprPage({
               {ru
                 ? 'Документы об оплате мы храним столько, сколько требует бухгалтерское и налоговое законодательство. Этот срок действует и в том случае, если вы попросите удалить остальные ваши данные: закон обязывает нас сохранить сам факт и сумму оплаты, но не сведения о вашем здоровье.'
                 : en
-                ? 'Payment records are kept for as long as accounting and tax law requires. That period applies even if you ask us to delete the rest of your data: the law obliges us to keep the fact and the amount of the payment, but not anything about your health.'
-                : 'Documentele de plată le păstrăm atât timp cât cer legislația contabilă și cea fiscală. Termenul se aplică inclusiv dacă ne ceri ștergerea celorlalte date: legea ne obligă să păstrăm faptul și suma plății, dar nu și informații despre sănătatea ta.'}
+                  ? 'Payment records are kept for as long as accounting and tax law requires. That period applies even if you ask us to delete the rest of your data: the law obliges us to keep the fact and the amount of the payment, but not anything about your health.'
+                  : 'Documentele de plată le păstrăm atât timp cât cer legislația contabilă și cea fiscală. Termenul se aplică inclusiv dacă ne ceri ștergerea celorlalte date: legea ne obligă să păstrăm faptul și suma plății, dar nu și informații despre sănătatea ta.'}
             </p>
             {/* An EXPRESS question is written before it is paid for, so an
                 abandoned checkout leaves medical text nobody bought. Seven days
@@ -667,13 +778,23 @@ export default async function GdprPage({
           </Section>
 
           {/* Drepturile tale */}
-          <Section id="drepturi" title={ru ? 'Ваши права' : en ? 'Your rights' : 'Drepturile tale'}>
+          <Section
+            id="drepturi"
+            title={ru ? 'Ваши права' : en ? 'Your rights' : 'Drepturile tale'}
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
-              {ru ? 'Вы имеете право на:' : en ? 'You have the right to:' : 'Ai dreptul la:'}
+              {ru
+                ? 'Вы имеете право на:'
+                : en
+                  ? 'You have the right to:'
+                  : 'Ai dreptul la:'}
             </p>
             <dl className="mt-6 grid gap-x-10 gap-y-5 sm:grid-cols-2">
               {RIGHTS.map((r) => (
-                <div key={r.term.en} className="border-t border-[var(--rule)] pt-3">
+                <div
+                  key={r.term.en}
+                  className="border-t border-[var(--rule)] pt-3"
+                >
                   <dt className="serif text-[1.2rem] leading-snug text-ink">
                     {lc(r.term)}
                   </dt>
@@ -687,22 +808,26 @@ export default async function GdprPage({
               {ru
                 ? 'Вы также вправе подать жалобу в Национальный центр по защите персональных данных (CNPDCP).'
                 : en
-                ? 'You can also lodge a complaint with the National Centre for Personal Data Protection (CNPDCP).'
-                : 'Poți depune o plângere la Centrul Național pentru Protecția Datelor cu Caracter Personal (CNPDCP).'}
+                  ? 'You can also lodge a complaint with the National Centre for Personal Data Protection (CNPDCP).'
+                  : 'Poți depune o plângere la Centrul Național pentru Protecția Datelor cu Caracter Personal (CNPDCP).'}
             </p>
             <p className="mt-4 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink text-pretty">
               {ru
                 ? 'Чтобы реализовать свои права, напишите нам на '
                 : en
-                ? 'To exercise your rights, write to us at '
-                : 'Pentru a-ți exercita drepturile, scrie-ne la '}
+                  ? 'To exercise your rights, write to us at '
+                  : 'Pentru a-ți exercita drepturile, scrie-ne la '}
               <a
                 href={`mailto:${META.email}`}
                 className="text-sage-text underline decoration-[var(--sage-soft)] underline-offset-4 transition-colors hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage"
               >
                 {META.email}
               </a>
-              {ru ? ' или через страницу ' : en ? ' or via the ' : ' sau prin pagina de '}
+              {ru
+                ? ' или через страницу '
+                : en
+                  ? ' or via the '
+                  : ' sau prin pagina de '}
               <Link
                 href="/contact"
                 className="text-sage-text underline decoration-[var(--sage-soft)] underline-offset-4 transition-colors hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage"
@@ -714,21 +839,26 @@ export default async function GdprPage({
           </Section>
 
           {/* Datele copiilor — emphasised */}
-          <Section id="copii" title={ru ? 'Данные детей' : en ? 'Children’s data' : 'Datele copiilor'}>
+          <Section
+            id="copii"
+            title={
+              ru ? 'Данные детей' : en ? 'Children’s data' : 'Datele copiilor'
+            }
+          >
             <div className="mt-6 rounded-2xl border border-[var(--rule)] bg-paper p-6 md:p-8">
               <p className="mono mb-3 text-[11px] uppercase tracking-[0.12em] text-sage-text">
                 {ru
                   ? 'Обрабатываются с особой осторожностью'
                   : en
-                  ? 'Handled with special care'
-                  : 'Tratate cu grijă deosebită'}
+                    ? 'Handled with special care'
+                    : 'Tratate cu grijă deosebită'}
               </p>
               <p className="max-w-[64ch] text-[1.0625rem] leading-relaxed text-ink text-pretty">
                 {ru
                   ? 'Наши услуги нередко касаются детей. Данные о ребёнке передаёт родитель или законный представитель, подтверждая, что вправе это сделать. Мы используем эти данные только для консультации и дальнейшего наблюдения.'
                   : en
-                  ? 'Our services often concern children. Data about a child is provided by the parent or legal guardian, who confirms they have the right to provide it. We use this data only for the consultation and ongoing care.'
-                  : 'Serviciile noastre privesc adesea copii. Datele despre un copil sunt furnizate de părinte sau de reprezentantul legal, care confirmă că are dreptul să le ofere. Folosim aceste date doar pentru consultație și îngrijire.'}
+                    ? 'Our services often concern children. Data about a child is provided by the parent or legal guardian, who confirms they have the right to provide it. We use this data only for the consultation and ongoing care.'
+                    : 'Serviciile noastre privesc adesea copii. Datele despre un copil sunt furnizate de părinte sau de reprezentantul legal, care confirmă că are dreptul să le ofere. Folosim aceste date doar pentru consultație și îngrijire.'}
               </p>
             </div>
           </Section>
@@ -736,25 +866,34 @@ export default async function GdprPage({
           {/* Securitate */}
           <Section
             id="securitate"
-            title={ru ? 'Безопасность данных' : en ? 'Data security' : 'Securitatea datelor'}
+            title={
+              ru
+                ? 'Безопасность данных'
+                : en
+                  ? 'Data security'
+                  : 'Securitatea datelor'
+            }
           >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Мы применяем технические и организационные меры для защиты ваших данных: ограниченный доступ, безопасное хранение и шифрованную передачу. Ни одна система не идеальна, но защиту данных мы рассматриваем как приоритет.'
                 : en
-                ? 'We apply technical and organisational measures to protect your data: restricted access, secure storage, and encrypted transmission. No system is perfect, but we treat data protection as a priority.'
-                : 'Aplicăm măsuri tehnice și organizatorice pentru a-ți proteja datele: acces restricționat, stocare securizată și transmitere criptată. Niciun sistem nu este perfect, dar tratăm protecția datelor ca pe o prioritate.'}
+                  ? 'We apply technical and organisational measures to protect your data: restricted access, secure storage, and encrypted transmission. No system is perfect, but we treat data protection as a priority.'
+                  : 'Aplicăm măsuri tehnice și organizatorice pentru a-ți proteja datele: acces restricționat, stocare securizată și transmitere criptată. Niciun sistem nu este perfect, dar tratăm protecția datelor ca pe o prioritate.'}
             </p>
           </Section>
 
           {/* Cookie-uri */}
-          <Section id="cookies" title={ru ? 'Файлы cookie' : en ? 'Cookies' : 'Cookie-uri'}>
+          <Section
+            id="cookies"
+            title={ru ? 'Файлы cookie' : en ? 'Cookies' : 'Cookie-uri'}
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Мы используем файлы cookie для работы сайта и, с вашего согласия, для статистики использования. Вы можете управлять своими настройками в любое время.'
                 : en
-                ? 'We use cookies for the site to function and, if you accept, for usage statistics. You can manage your preferences at any time.'
-                : 'Folosim cookie-uri pentru funcționarea site-ului și, dacă accepți, pentru statistici de utilizare. Îți poți gestiona preferințele în orice moment.'}
+                  ? 'We use cookies for the site to function and, if you accept, for usage statistics. You can manage your preferences at any time.'
+                  : 'Folosim cookie-uri pentru funcționarea site-ului și, dacă accepți, pentru statistici de utilizare. Îți poți gestiona preferințele în orice moment.'}
             </p>
 
             {/* Category-by-category detail. Written by hand — the consent banner
@@ -783,30 +922,36 @@ export default async function GdprPage({
               {ru
                 ? 'Изменить или отозвать согласие можно в любой момент — ссылка «Настройки cookie» есть в подвале каждой страницы. Видео из телеэфиров на странице «СМИ» загружаются с YouTube и Facebook только после того, как вы нажмёте play: до этого запросы к ним не отправляются.'
                 : en
-                ? 'You can change or withdraw your consent at any time — the “Cookie settings” link sits in the footer of every page. The TV clips on the media page load from YouTube and Facebook only after you press play; until then those providers are never contacted.'
-                : 'Îți poți schimba sau retrage acordul oricând — linkul „Setări cookie” se află în subsolul fiecărei pagini. Materialele TV de pe pagina de media se încarcă de pe YouTube și Facebook doar după ce apeși play; până atunci acești furnizori nu sunt contactați.'}
+                  ? 'You can change or withdraw your consent at any time — the “Cookie settings” link sits in the footer of every page. The TV clips on the media page load from YouTube and Facebook only after you press play; until then those providers are never contacted.'
+                  : 'Îți poți schimba sau retrage acordul oricând — linkul „Setări cookie” se află în subsolul fiecărei pagini. Materialele TV de pe pagina de media se încarcă de pe YouTube și Facebook doar după ce apeși play; până atunci acești furnizori nu sunt contactați.'}
             </p>
           </Section>
 
           {/* Modificări */}
-          <Section id="modificari" title={ru ? 'Изменения' : en ? 'Changes' : 'Modificări'}>
+          <Section
+            id="modificari"
+            title={ru ? 'Изменения' : en ? 'Changes' : 'Modificări'}
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Мы можем обновлять настоящую политику. Дата последнего обновления указана в верхней части страницы.'
                 : en
-                ? 'We may update this policy. The date of the latest update is shown at the top of the page.'
-                : 'Putem actualiza această politică. Data ultimei actualizări este afișată în partea de sus a paginii.'}
+                  ? 'We may update this policy. The date of the latest update is shown at the top of the page.'
+                  : 'Putem actualiza această politică. Data ultimei actualizări este afișată în partea de sus a paginii.'}
             </p>
           </Section>
 
           {/* Contact */}
-          <Section id="contact" title={ru ? 'Контакты' : en ? 'Contact' : 'Contact'}>
+          <Section
+            id="contact"
+            title={ru ? 'Контакты' : en ? 'Contact' : 'Contact'}
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink text-pretty">
               {ru
                 ? 'По любым вопросам о ваших данных или для реализации своих прав напишите нам на '
                 : en
-                ? 'For any question about your data, or to exercise your rights, write to us at '
-                : 'Pentru orice întrebare despre datele tale sau pentru a-ți exercita drepturile, scrie-ne la '}
+                  ? 'For any question about your data, or to exercise your rights, write to us at '
+                  : 'Pentru orice întrebare despre datele tale sau pentru a-ți exercita drepturile, scrie-ne la '}
               <a
                 href={`mailto:${META.email}`}
                 className="text-sage-text underline decoration-[var(--sage-soft)] underline-offset-4 transition-colors hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage"
@@ -827,15 +972,24 @@ export default async function GdprPage({
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.04] tracking-[-0.02em] text-cream text-balance">
                 {ru ? (
                   <>
-                    Вопрос о <span className="serif-it text-[var(--sage-soft)]">ваших данных?</span>
+                    Вопрос о{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      ваших данных?
+                    </span>
                   </>
                 ) : en ? (
                   <>
-                    A question about <span className="serif-it text-[var(--sage-soft)]">your data?</span>
+                    A question about{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      your data?
+                    </span>
                   </>
                 ) : (
                   <>
-                    O întrebare despre <span className="serif-it text-[var(--sage-soft)]">datele tale?</span>
+                    O întrebare despre{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      datele tale?
+                    </span>
                   </>
                 )}
               </h2>
@@ -852,8 +1006,8 @@ export default async function GdprPage({
               {ru
                 ? 'Мы отвечаем на запросы по данным так быстро, как можем, в соответствии с законом.'
                 : en
-                ? 'We answer data requests as soon as we can, in line with the law.'
-                : 'Răspundem solicitărilor privind datele cât de repede putem, conform legii.'}
+                  ? 'We answer data requests as soon as we can, in line with the law.'
+                  : 'Răspundem solicitărilor privind datele cât de repede putem, conform legii.'}
             </p>
           </div>
         </div>

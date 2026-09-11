@@ -37,10 +37,25 @@ const SUBJECTS: {
   en: string;
   ru: string;
 }[] = [
-  { value: 'appointment', ro: 'Programare', en: 'Appointment', ru: 'Запись на приём' },
+  {
+    value: 'appointment',
+    ro: 'Programare',
+    en: 'Appointment',
+    ru: 'Запись на приём',
+  },
   { value: 'payment', ro: 'Plată', en: 'Payment', ru: 'Оплата' },
-  { value: 'how_it_works', ro: 'Cum funcționează', en: 'How it works', ru: 'Как это работает' },
-  { value: 'other', ro: 'Altă întrebare', en: 'Other question', ru: 'Другой вопрос' },
+  {
+    value: 'how_it_works',
+    ro: 'Cum funcționează',
+    en: 'How it works',
+    ru: 'Как это работает',
+  },
+  {
+    value: 'other',
+    ro: 'Altă întrebare',
+    en: 'Other question',
+    ru: 'Другой вопрос',
+  },
 ];
 
 const inputCls =
@@ -169,7 +184,10 @@ export function ContactForm({ locale }: { locale: string }) {
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-6">
       {/* Honeypot — visually hidden, off the tab order, ignored by humans. */}
-      <div aria-hidden="true" className="absolute left-[-9999px] h-px w-px overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="absolute left-[-9999px] h-px w-px overflow-hidden"
+      >
         <label htmlFor={fid('company')}>Company</label>
         <input
           id={fid('company')}
@@ -279,7 +297,11 @@ export function ContactForm({ locale }: { locale: string }) {
           className={`${inputCls} resize-y`}
           value={message}
           onChange={(ev) => setMessage(ev.target.value)}
-          placeholder={t('Cum te putem ajuta?', 'How can we help?', 'Чем мы можем помочь?')}
+          placeholder={t(
+            'Cum te putem ajuta?',
+            'How can we help?',
+            'Чем мы можем помочь?',
+          )}
           maxLength={FIELD_LIMITS.message}
           aria-invalid={!!errors.message}
           aria-describedby={errors.message ? fid('message-err') : undefined}
@@ -287,7 +309,10 @@ export function ContactForm({ locale }: { locale: string }) {
         {/* Only once it matters: a counter above an empty box is noise, and a
             box that silently stops accepting characters is worse. */}
         {message.length > FIELD_LIMITS.message * 0.8 && (
-          <span aria-live="polite" className="mono mt-2 block text-right text-[0.75rem] text-ink-soft">
+          <span
+            aria-live="polite"
+            className="mono mt-2 block text-right text-[0.75rem] text-ink-soft"
+          >
             {message.length} / {FIELD_LIMITS.message}
           </span>
         )}

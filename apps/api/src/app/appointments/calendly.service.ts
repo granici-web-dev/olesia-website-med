@@ -143,7 +143,10 @@ export class CalendlyService {
     if (!t || !v1) return false;
 
     const ageSeconds = Math.abs(Date.now() / 1000 - Number(t));
-    if (!Number.isFinite(ageSeconds) || ageSeconds > SIGNATURE_TOLERANCE_SECONDS) {
+    if (
+      !Number.isFinite(ageSeconds) ||
+      ageSeconds > SIGNATURE_TOLERANCE_SECONDS
+    ) {
       this.logger.warn(
         `Calendly webhook signature outside the tolerance window (t=${t}, age=${Math.round(ageSeconds)}s) — rejected.`,
       );

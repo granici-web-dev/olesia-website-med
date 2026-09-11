@@ -179,7 +179,11 @@ export class PatientsService {
     // the cascade removes the rows these file references live on.
     const [docs, plans, links] = await Promise.all([
       this.prisma.patientEntry.findMany({
-        where: { patientId: id, type: PatientEntryType.document, fileUrl: { not: null } },
+        where: {
+          patientId: id,
+          type: PatientEntryType.document,
+          fileUrl: { not: null },
+        },
         select: { fileUrl: true },
       }),
       this.prisma.appointment.findMany({
@@ -194,8 +198,11 @@ export class PatientsService {
 
     const tables = await this.prisma.$transaction(async (tx) => {
       const counted: PatientErasureTableResultDto[] = [];
-      const record = (table: string, action: PatientErasureTableResultDto['action'], rows: number) =>
-        counted.push({ table, action, rows });
+      const record = (
+        table: string,
+        action: PatientErasureTableResultDto['action'],
+        rows: number,
+      ) => counted.push({ table, action, rows });
 
       const removedLinks = await tx.uploadLink.deleteMany({
         where: { id: { in: links.map((l) => l.id) } },
@@ -211,60 +218,72 @@ export class PatientsService {
       record(
         'Appointment',
         'anonymize',
-        (await tx.appointment.updateMany({
-          where: appointment.where,
-          data: appointment.data,
-        })).count,
+        (
+          await tx.appointment.updateMany({
+            where: appointment.where,
+            data: appointment.data,
+          })
+        ).count,
       );
 
       const subscription = plan.subscription;
       record(
         'Subscription',
         'anonymize',
-        (await tx.subscription.updateMany({
-          where: subscription.where,
-          data: subscription.data,
-        })).count,
+        (
+          await tx.subscription.updateMany({
+            where: subscription.where,
+            data: subscription.data,
+          })
+        ).count,
       );
 
       const quickQuestion = plan.quickQuestion;
       record(
         'QuickQuestion',
         'anonymize',
-        (await tx.quickQuestion.updateMany({
-          where: quickQuestion.where,
-          data: quickQuestion.data,
-        })).count,
+        (
+          await tx.quickQuestion.updateMany({
+            where: quickQuestion.where,
+            data: quickQuestion.data,
+          })
+        ).count,
       );
 
       const deliverableOrder = plan.deliverableOrder;
       record(
         'DeliverableOrder',
         'anonymize',
-        (await tx.deliverableOrder.updateMany({
-          where: deliverableOrder.where,
-          data: deliverableOrder.data,
-        })).count,
+        (
+          await tx.deliverableOrder.updateMany({
+            where: deliverableOrder.where,
+            data: deliverableOrder.data,
+          })
+        ).count,
       );
 
       const contactMessage = plan.contactMessage;
       record(
         'ContactMessage',
         'anonymize',
-        (await tx.contactMessage.updateMany({
-          where: contactMessage.where,
-          data: contactMessage.data,
-        })).count,
+        (
+          await tx.contactMessage.updateMany({
+            where: contactMessage.where,
+            data: contactMessage.data,
+          })
+        ).count,
       );
 
       const payment = plan.payment;
       record(
         'Payment',
         'anonymize',
-        (await tx.payment.updateMany({
-          where: payment.where,
-          data: payment.data,
-        })).count,
+        (
+          await tx.payment.updateMany({
+            where: payment.where,
+            data: payment.data,
+          })
+        ).count,
       );
 
       record(
@@ -362,7 +381,11 @@ export class PatientsService {
     );
   }
 
-  async removeEntry(id: string, entryId: string, userId: string): Promise<void> {
+  async removeEntry(
+    id: string,
+    entryId: string,
+    userId: string,
+  ): Promise<void> {
     const e = await this.getEntryOrThrow(id, entryId);
     await this.prisma.patientEntry.delete({ where: { id: entryId } });
     this.audit('entry.delete', { patientId: id, entryId, userId });
@@ -460,7 +483,9 @@ export class PatientsService {
     this.logger.log(`audit ${action} ${detail}`);
   }
 
-  private async loadLead(dto: FromLeadDto): Promise<{ name: string; email: string }> {
+  private async loadLead(
+    dto: FromLeadDto,
+  ): Promise<{ name: string; email: string }> {
     const select = { clientName: true, clientEmail: true } as const;
     const id = dto.sourceId;
 
@@ -470,8 +495,14 @@ export class PatientsService {
         : dto.source === 'subscription'
           ? await this.prisma.subscription.findUnique({ where: { id }, select })
           : dto.source === 'quick_question'
-            ? await this.prisma.quickQuestion.findUnique({ where: { id }, select })
-            : await this.prisma.deliverableOrder.findUnique({ where: { id }, select });
+            ? await this.prisma.quickQuestion.findUnique({
+                where: { id },
+                select,
+              })
+            : await this.prisma.deliverableOrder.findUnique({
+                where: { id },
+                select,
+              });
 
     if (!row) throw new NotFoundException('lead_not_found');
     return { name: row.clientName, email: row.clientEmail };
@@ -503,7 +534,9 @@ export class PatientsService {
   }
 
   private async getEntryOrThrow(patientId: string, entryId: string) {
-    const e = await this.prisma.patientEntry.findUnique({ where: { id: entryId } });
+    const e = await this.prisma.patientEntry.findUnique({
+      where: { id: entryId },
+    });
     if (!e || e.patientId !== patientId) {
       throw new NotFoundException('entry_not_found');
     }

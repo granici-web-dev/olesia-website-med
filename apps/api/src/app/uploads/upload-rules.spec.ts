@@ -17,7 +17,9 @@ const days = (n: number) => new Date(NOW.getTime() + n * 24 * 60 * 60 * 1000);
 
 describe('isLinkUsable', () => {
   it('accepts a link that has not expired and was not revoked', () => {
-    expect(isLinkUsable({ expiresAt: days(1), revokedAt: null }, NOW)).toBe(true);
+    expect(isLinkUsable({ expiresAt: days(1), revokedAt: null }, NOW)).toBe(
+      true,
+    );
   });
 
   it('rejects an unknown token, which arrives as null', () => {
@@ -44,7 +46,9 @@ describe('isLinkUsable', () => {
 describe('retention', () => {
   it('counts a document older than the retention period as past it', () => {
     const uploadedAt = days(-181);
-    expect(uploadedAt.getTime()).toBeLessThan(retentionCutoff(NOW, 180).getTime());
+    expect(uploadedAt.getTime()).toBeLessThan(
+      retentionCutoff(NOW, 180).getTime(),
+    );
   });
 
   it('leaves a document inside the retention period alone', () => {

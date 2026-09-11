@@ -102,7 +102,9 @@ export class MailService {
         subject: mail.subject,
         text: mail.lines.join('\n'),
       });
-      this.logger.log(`Client mail sent → ${maskEmail(mail.to)} · ${mail.subject}`);
+      this.logger.log(
+        `Client mail sent → ${maskEmail(mail.to)} · ${mail.subject}`,
+      );
       return true;
     } catch (err) {
       this.logger.error(`Client email failed: ${transportFailure(err)}`);
@@ -123,7 +125,9 @@ export class MailService {
         subject: mail.subject,
         text: mail.lines.join('\n'),
       });
-      this.logger.log(`Lead notification sent → ${maskEmail(this.to)} · ${mail.subject}`);
+      this.logger.log(
+        `Lead notification sent → ${maskEmail(this.to)} · ${mail.subject}`,
+      );
     } catch (err) {
       // A failed email must not fail the lead submission — the record is saved.
       this.logger.error(`Lead email failed: ${transportFailure(err)}`);

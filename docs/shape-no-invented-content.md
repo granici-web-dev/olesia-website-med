@@ -19,7 +19,7 @@ Five things found while reading. Three of them change the plan.
 
 1. **`/menus` is linked from two places, not three.** `Footer.tsx:23` and
    `sitemap.ts:27`. The home page composes `Hero · HowItWorks · Services ·
-   Testimonials · About` and links no menus at all; `Nav.tsx` never did either.
+Testimonials · About` and links no menus at all; `Nav.tsx` never did either.
 2. **The sitemap and `/articles` are already on different sources**, and the
    sitemap is the honest one: it maps `api.posts()` (`sitemap.ts:71`), so today
    it declares zero articles while the page renders eight. After this change
@@ -27,7 +27,7 @@ Five things found while reading. Three of them change the plan.
    the `/menus` entries and the `/menus` static path come out.
 3. **The empty state already exists.** `BlogList` takes `emptyTitle`,
    `emptyBody`, `emptyCta`, `emptyCtaHref` and renders them when `posts.length
-   === 0` (`BlogList.tsx:110`). `articles/page.tsx` currently passes four empty
+=== 0` (`BlogList.tsx:110`). `articles/page.tsx` currently passes four empty
    strings. This is copy to write, not UI to build.
 4. **`Credentials.tsx` is imported by nothing.** `PLAN.md` 10a says "путь уже
    есть в `Credentials.tsx`" — the component exists (36 lines, olive band, it
@@ -71,7 +71,7 @@ Three independent edits, in the order they can be checked:
 - `apps/frontend/app/[locale]/articles/[slug]/page.tsx` — drop
   `findPlaceholderPost`, `placeholderCategoryLabel` and the synthetic `post`
   object built from them. `const post = await api.post(slug); if (!post)
-  notFound();` and the two `ph!` non-null assertions go with it. −28 / +3
+notFound();` and the two `ph!` non-null assertions go with it. −28 / +3
 - `apps/frontend/lib/placeholder-posts.ts` — **deleted**, 166 lines.
 
 **Menus**
@@ -142,7 +142,7 @@ out, and these are presentational.
    three render and the fourth does not, on the home page only — `Credentials.tsx`,
    when a page finally mounts it, still shows all four.
 8. `pnpm nx build @olesia/frontend` and both typechecks stay green — `next
-   build` runs `tsc`, which is what catches a missed import of a deleted file.
+build` runs `tsc`, which is what catches a missed import of a deleted file.
 
 ## Tradeoffs / alternatives considered
 

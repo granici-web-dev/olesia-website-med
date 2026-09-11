@@ -17,7 +17,9 @@ export function About() {
             page reads as (audit A7, F17). */}
         <h2 className={styles.title}>
           {t.rich('title', {
-            accent: (chunks) => <span className={styles.titleAccent}>{chunks}</span>,
+            accent: (chunks) => (
+              <span className={styles.titleAccent}>{chunks}</span>
+            ),
             br: () => <br />,
           })}
         </h2>
@@ -29,8 +31,12 @@ export function About() {
         <div className={styles.details}>
           {DETAIL_KEYS.map((key, i) => (
             <Reveal key={key} as="div" delay={i * 80}>
-              <div className={styles.detailLabel}>{t(`details.${key}.label`)}</div>
-              <div className={styles.detailBody}>{t(`details.${key}.body`)}</div>
+              <div className={styles.detailLabel}>
+                {t(`details.${key}.label`)}
+              </div>
+              <div className={styles.detailBody}>
+                {t(`details.${key}.body`)}
+              </div>
             </Reveal>
           ))}
         </div>

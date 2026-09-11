@@ -6,7 +6,13 @@ import type { UserDto } from '@olesia/shared';
 
 import { PageHeader } from '@/components/common/page-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -27,13 +33,18 @@ const t = ro.security;
 
 export function SecurityPage() {
   const qc = useQueryClient();
-  const me = useQuery({ queryKey: ['me'], queryFn: () => http.get<UserDto>('/auth/me') });
+  const me = useQuery({
+    queryKey: ['me'],
+    queryFn: () => http.get<UserDto>('/auth/me'),
+  });
 
   const [enrolment, setEnrolment] = React.useState<Awaited<
     ReturnType<typeof startTotpEnrolment>
   > | null>(null);
   const [code, setCode] = React.useState('');
-  const [recoveryCodes, setRecoveryCodes] = React.useState<string[] | null>(null);
+  const [recoveryCodes, setRecoveryCodes] = React.useState<string[] | null>(
+    null,
+  );
   const [copied, setCopied] = React.useState(false);
 
   const reset = () => {
@@ -93,10 +104,16 @@ export function SecurityPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2">
-                {enabled ? <ShieldCheck className="size-4" /> : <ShieldOff className="size-4" />}
+                {enabled ? (
+                  <ShieldCheck className="size-4" />
+                ) : (
+                  <ShieldOff className="size-4" />
+                )}
                 {t.cardTitle}
               </CardTitle>
-              <CardDescription className="text-pretty">{t.cardDescription}</CardDescription>
+              <CardDescription className="text-pretty">
+                {t.cardDescription}
+              </CardDescription>
             </div>
             <Badge variant={enabled ? 'default' : 'secondary'}>
               {enabled ? t.statusOn : t.statusOff}
@@ -111,13 +128,20 @@ export function SecurityPage() {
           {recoveryCodes && (
             <div className="rounded-md border border-dashed p-4">
               <p className="text-sm font-medium">{t.recoveryTitle}</p>
-              <p className="mt-1 text-xs text-muted-foreground text-pretty">{t.recoveryHint}</p>
+              <p className="mt-1 text-xs text-muted-foreground text-pretty">
+                {t.recoveryHint}
+              </p>
               <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 font-mono text-sm">
                 {recoveryCodes.map((c) => (
                   <li key={c}>{c}</li>
                 ))}
               </ul>
-              <Button variant="outline" size="sm" className="mt-4" onClick={copyCodes}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={copyCodes}
+              >
                 {copied ? <Check /> : <Copy />}
                 {copied ? t.copied : t.copy}
               </Button>
@@ -144,7 +168,9 @@ export function SecurityPage() {
                 />
                 <div className="space-y-2 text-sm">
                   <p className="text-pretty">{t.scanHint}</p>
-                  <p className="text-xs text-muted-foreground">{t.manualHint}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.manualHint}
+                  </p>
                   <code className="block rounded bg-muted px-2 py-1 font-mono text-xs break-all">
                     {enrolment.secret}
                   </code>
@@ -165,7 +191,10 @@ export function SecurityPage() {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                   />
-                  <Button onClick={() => enable.mutate()} disabled={busy || code.trim().length < 6}>
+                  <Button
+                    onClick={() => enable.mutate()}
+                    disabled={busy || code.trim().length < 6}
+                  >
                     {enable.isPending && <Loader2 className="animate-spin" />}
                     {t.confirmCta}
                   </Button>
@@ -200,7 +229,9 @@ export function SecurityPage() {
                   {t.disableCta}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground text-pretty">{t.disableHint}</p>
+              <p className="text-xs text-muted-foreground text-pretty">
+                {t.disableHint}
+              </p>
             </div>
           )}
         </CardContent>

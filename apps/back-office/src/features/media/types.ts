@@ -37,10 +37,7 @@ export interface MediaAppearance {
   active: boolean;
 }
 
-export type MediaAppearanceInput = Omit<
-  MediaAppearance,
-  'id' | 'sortOrder'
->;
+export type MediaAppearanceInput = Omit<MediaAppearance, 'id' | 'sortOrder'>;
 
 /** What the storage/thumbnail endpoints return. */
 export interface StoredImage {

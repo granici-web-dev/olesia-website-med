@@ -80,6 +80,7 @@
 `/rigorous harden apps/api/src/app/payments`.
 
 Что ожидать по итогам первичного разбора:
+
 - callback не сверяет сумму и валюту с записанной при создании сессии;
 - `orderId` генерируется через `Math.random`, а по нему работает публичный
   `/payment-status/:orderId`;
@@ -159,6 +160,7 @@
 открытыми DoS и без единого лимита в `FileInterceptor`.
 
 Решения:
+
 - в `harden`: лимиты `FileInterceptor` на всех шести маршрутах (1), `multer` 2.3.0
   через `pnpm.overrides` (2), удаление байтов при удалении заказа и сверка диска с
   базой (3), загрузки и ссылки в GDPR-стирании пациента (4), сниффинг сигнатуры
@@ -206,6 +208,7 @@ TOTP на 160 бит с хэшированными recovery-кодами, чис
 захардкоженные дефолты.
 
 Решения:
+
 - в `harden`: таблица refresh-сессий с ротацией, детекцией повторного использования
   и отзывом при logout и смене пароля (2, 3), `2fa/setup` требует код при включённой
   2FA (1), секреты JWT валидируются на старте без дефолтов (4), одинаковое время
@@ -266,6 +269,7 @@ diff` пустой, ветка удалена. Четыре миграции д�
 ### 6. `[x]` Синхронизировать документы с кодом
 
 Документы отстали от кода и дезинформируют следующего агента:
+
 - `CLAUDE.md`: шапка говорит «не начинать платежи» и «следующий шаг бэкенд», оба
   утверждения устарели; блок «Services (5)» и «Payments: out of scope» тоже;
 - `module_calendly.md`: «Payments: out of scope — manual»;
@@ -398,6 +402,7 @@ Railway, 5–15 €/мес) по `docker-compose.prod.yml` и `docs/deployment.m
 ### 8e. `[x]` Пакет развёртывания: всё, что можно сделать без сервера
 
 Инвентарь 2026-09-10 показал, что «залить» сегодня нельзя даже с сервером:
+
 - у бэк-офиса нет пути развёртывания: ни Dockerfile, ни сервиса в compose, ни
   строки в `docs/deployment.md`;
 - TLS и прокси «терминировать перед стеком», а на голом VPS перед стеком ничего
@@ -532,6 +537,7 @@ B портал, C deliverable). Новая услуга = правка кода 
 HTTPS (callback банка проверить нельзя без него).
 
 Порядок по `docs/payments-maib-checkout.md` §10:
+
 1. пре-чекаут: сводка заказа, чекбокс T&C, уведомление о конвертации валюты,
    данные плательщика, редирект на `checkoutUrl`;
 2. страницы `/[locale]/payment/success` и `/[locale]/payment/failed`, опрашивающие
@@ -562,6 +568,7 @@ HTTPS (callback банка проверить нельзя без него).
 и `harden` в тот же день закрывает список, пока контекст тёплый.
 
 Правила каждого прохода:
+
 1. `audit` только читает. Отчёт целиком передаётся консультанту, тот сверяет
    тяжёлые пункты с кодом и решает, что чинить, что отложить с записью, что
    спросить у клиента.
@@ -572,21 +579,21 @@ HTTPS (callback банка проверить нельзя без него).
 4. Находки, которые уже стоят в шагах 10–16, не переоткрываются, а закрываются:
    отчёт `audit` должен сослаться на них по номеру.
 
-| Проход | Команда и граница | Что обязательно проверить | Закрывает | Статус |
-|---|---|---|---|---|
-| A1 | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap | правда контента, см. 10a | 10a | `[x]` `3bb74a0` |
-| A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
-| A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[x]` `085a3d2`, `c0dd5f6` |
-| A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
-| A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
-| A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
-| A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
-| A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[x]` `1f31ba6`…`e345c72`, `4e9cb04`, `640a780`…`f13ffc5` |
-| A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[x]` `fb90486`, `57c96d9`, `3c7871a` |
-| A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[x]` `227c10e`, `3140447`, `f516c58` |
-| A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[>]` аудит 2026-09-11, 17 находок, harden в работе |
-| A12 | без аудита, механика: Dependabot по одному, тесты из списка 15 | зелёный CI после каждого слияния | 14, 15 | `[ ]` |
-| A13 | не `rigorous`: `impeccable` в браузере по сайту и бэк-офису, Lighthouse на проде после A7 | визуальная иерархия, состояния, мобильные, контраст, CWV | отдельный шаг | `[ ]` |
+| Проход | Команда и граница                                                                                                                                                                   | Что обязательно проверить                                                                                                                                                                                                                | Закрывает                              | Статус                                                      |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------- |
+| A1     | `shape` + `craft`, без аудита: `articles`, `menus`, hero, sitemap                                                                                                                   | правда контента, см. 10a                                                                                                                                                                                                                 | 10a                                    | `[x]` `3bb74a0`                                             |
+| A2     | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts`                                                                         | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах                                              | 11a (роли записей), 11d (Calendly)     | `[x]` `2396497`                                             |
+| A3     | `audit apps/api/src/app/patients` + `leads` + `mail`                                                                                                                                | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется                                       | 11c, 11d (почта)                       | `[x]` `085a3d2`, `c0dd5f6`                                  |
+| A4     | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog`                                                                                                   | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409                                                             | 11b, 11c (слаги)                       | `[x]` `22e0b86`                                             |
+| A5     | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders`                                                              | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod                                          | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58`                                  |
+| A6     | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env                                                                    | 10b, 10e (i18n)                        | `[x]` `f0e1c0d`, `2ca0dc6`                                  |
+| A7     | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib`                                                                                           | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand`                        | 10c, 10d, 10e                          | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
+| A8     | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b                                                                                               | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов                                                      | 12a, 12b, 12c                          | `[x]` `1f31ba6`…`e345c72`, `4e9cb04`, `640a780`…`f13ffc5`   |
+| A9     | `audit apps/back-office/src/features` + `pages` по состояниям и данным                                                                                                              | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках                                                    | 13a, 13b                               | `[x]` `fb90486`, `57c96d9`, `3c7871a`                       |
+| A10    | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features`                                                               | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e                          | `[x]` `227c10e`, `3140447`, `f516c58`                       |
+| A11    | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health`                                                                                        | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров                                                                                         | 16                                     | `[>]` аудит 2026-09-11, 17 находок, harden в работе         |
+| A12    | без аудита, механика: Dependabot по одному, тесты из списка 15                                                                                                                      | зелёный CI после каждого слияния                                                                                                                                                                                                         | 14, 15                                 | `[ ]`                                                       |
+| A13    | не `rigorous`: `impeccable` в браузере по сайту и бэк-офису, Lighthouse на проде после A7                                                                                           | визуальная иерархия, состояния, мобильные, контраст, CWV                                                                                                                                                                                 | отдельный шаг                          | `[ ]`                                                       |
 
 Оценка: A2–A5 по полдня-дню каждый, A6–A7 два дня, A8 четыре-пять дней (это
 чекаут), A9–A10 два-три дня, A11 день, A12 день с интервалами. Итого около трёх

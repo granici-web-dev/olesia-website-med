@@ -16,7 +16,9 @@ export function toPatientDto(
     consentAt: p.consentAt ? p.consentAt.toISOString() : null,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
-    ...(extra?.entryCount !== undefined ? { entryCount: extra.entryCount } : {}),
+    ...(extra?.entryCount !== undefined
+      ? { entryCount: extra.entryCount }
+      : {}),
   };
 }
 

@@ -53,7 +53,8 @@ async function bookingLink(): Promise<BookingTarget> {
   try {
     return await freeConsultBooking();
   } catch (e) {
-    if (e instanceof ApiUnavailableError) return { kind: 'page', href: '/services' };
+    if (e instanceof ApiUnavailableError)
+      return { kind: 'page', href: '/services' };
     throw e;
   }
 }

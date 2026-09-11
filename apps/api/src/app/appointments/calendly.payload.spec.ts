@@ -81,7 +81,9 @@ describe('CalendlyService.extractVideoUrl', () => {
   });
 
   it('refuses a link that is not https', () => {
-    expect(calendly.extractVideoUrl({ join_url: 'http://meet.example/x' })).toBeNull();
+    expect(
+      calendly.extractVideoUrl({ join_url: 'http://meet.example/x' }),
+    ).toBeNull();
     expect(
       calendly.extractVideoUrl({ join_url: 'javascript:alert(1)' }),
     ).toBeNull();
@@ -91,7 +93,9 @@ describe('CalendlyService.extractVideoUrl', () => {
     expect(
       calendly.extractVideoUrl({ location: 'https://evil.example/pay-here' }),
     ).toBeNull();
-    expect(calendly.extractVideoUrl({ location: 'Strada Mihai Eminescu 4' })).toBeNull();
+    expect(
+      calendly.extractVideoUrl({ location: 'Strada Mihai Eminescu 4' }),
+    ).toBeNull();
   });
 
   it('reads a conference still being provisioned as no link yet', () => {
@@ -156,7 +160,11 @@ describe('normalizeCalendlyBooking', () => {
       createdBody({
         name: 'M'.repeat(CLIENT_NAME_MAX + 50),
         questions_and_answers: [
-          { question: 'Motivul vizitei', answer: 'x'.repeat(REASON_MAX + 50), position: 0 },
+          {
+            question: 'Motivul vizitei',
+            answer: 'x'.repeat(REASON_MAX + 50),
+            position: 0,
+          },
         ],
       }),
       calendly,

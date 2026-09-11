@@ -104,7 +104,8 @@ export default async function LocaleLayout({
     // renders on the page that exists to report the outage, and must not take
     // it down.
     freeConsultBooking().catch((e: unknown): BookingTarget => {
-      if (e instanceof ApiUnavailableError) return { kind: 'page', href: '/services' };
+      if (e instanceof ApiUnavailableError)
+        return { kind: 'page', href: '/services' };
       throw e;
     }),
   ]);

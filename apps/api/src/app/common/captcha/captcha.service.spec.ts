@@ -7,12 +7,18 @@
  * did not, because Node's `fetch` has no default timeout, so every request to
  * the four public lead routes waited with it.
  */
-import { CaptchaService, DEFAULT_MIN_SCORE, readMinScore } from './captcha.service';
+import {
+  CaptchaService,
+  DEFAULT_MIN_SCORE,
+  readMinScore,
+} from './captcha.service';
 
 const REAL_FETCH = global.fetch;
 
 function respond(body: unknown): typeof global.fetch {
-  return (async () => ({ json: async () => body })) as unknown as typeof global.fetch;
+  return (async () => ({
+    json: async () => body,
+  })) as unknown as typeof global.fetch;
 }
 
 /**
@@ -22,7 +28,7 @@ function respond(body: unknown): typeof global.fetch {
  * switched the score check off and let every bot through (audit A5, F19).
  */
 describe('readMinScore', () => {
-  it('uses Google\'s default when the variable is unset', () => {
+  it("uses Google's default when the variable is unset", () => {
     expect(readMinScore(undefined)).toEqual({
       score: DEFAULT_MIN_SCORE,
       problem: null,
@@ -83,9 +89,12 @@ describe('CaptchaService', () => {
     // What `AbortSignal.timeout` raises once the deadline passes. Before the
     // fix there was no deadline, so this never happened and the request hung.
     global.fetch = (async () => {
-      throw Object.assign(new Error('The operation was aborted due to timeout'), {
-        name: 'TimeoutError',
-      });
+      throw Object.assign(
+        new Error('The operation was aborted due to timeout'),
+        {
+          name: 'TimeoutError',
+        },
+      );
     }) as unknown as typeof global.fetch;
 
     await expect(withSecret().verify('token', 'lead_contact')).resolves.toBe(
@@ -100,7 +109,11 @@ describe('CaptchaService', () => {
   });
 
   it('rejects a token minted for a different form', async () => {
-    global.fetch = respond({ success: true, score: 0.9, action: 'lead_contact' });
+    global.fetch = respond({
+      success: true,
+      score: 0.9,
+      action: 'lead_contact',
+    });
     await expect(
       withSecret().verify('token', 'lead_quick_question'),
     ).resolves.toBe(false);
@@ -114,22 +127,38 @@ describe('CaptchaService', () => {
   });
 
   it('rejects a score below the threshold, and accepts one above', async () => {
-    global.fetch = respond({ success: true, score: 0.1, action: 'lead_contact' });
+    global.fetch = respond({
+      success: true,
+      score: 0.1,
+      action: 'lead_contact',
+    });
     await expect(withSecret().verify('t', 'lead_contact')).resolves.toBe(false);
 
-    global.fetch = respond({ success: true, score: 0.9, action: 'lead_contact' });
+    global.fetch = respond({
+      success: true,
+      score: 0.9,
+      action: 'lead_contact',
+    });
     await expect(withSecret().verify('t', 'lead_contact')).resolves.toBe(true);
   });
 
   it('honours a threshold the operator raised', async () => {
     process.env.RECAPTCHA_MIN_SCORE = '0.7';
-    global.fetch = respond({ success: true, score: 0.6, action: 'lead_contact' });
+    global.fetch = respond({
+      success: true,
+      score: 0.6,
+      action: 'lead_contact',
+    });
     await expect(withSecret().verify('t', 'lead_contact')).resolves.toBe(false);
   });
 
   it('keeps filtering when the threshold is a typo', async () => {
     process.env.RECAPTCHA_MIN_SCORE = 'abc';
-    global.fetch = respond({ success: true, score: 0.1, action: 'lead_contact' });
+    global.fetch = respond({
+      success: true,
+      score: 0.1,
+      action: 'lead_contact',
+    });
     await expect(withSecret().verify('t', 'lead_contact')).resolves.toBe(false);
   });
 

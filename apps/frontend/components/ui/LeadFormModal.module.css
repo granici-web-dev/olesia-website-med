@@ -13,7 +13,9 @@
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .close:hover {
@@ -81,7 +83,9 @@
   border: 1px solid var(--rule);
   border-radius: 9px;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .textarea {
@@ -161,7 +165,9 @@
   border: none;
   border-radius: 9px;
   cursor: pointer;
-  transition: background 0.16s, transform 0.05s;
+  transition:
+    background 0.16s,
+    transform 0.05s;
 }
 
 .submit:hover {

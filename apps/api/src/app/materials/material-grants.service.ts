@@ -47,9 +47,10 @@ export function grantUsable(
  * same reason — two live tokens for one purchase is how the wrong one gets
  * sent.
  */
-export function extendGrant(
-  now: Date = new Date(),
-): { expiresAt: Date; downloadCount: number } {
+export function extendGrant(now: Date = new Date()): {
+  expiresAt: Date;
+  downloadCount: number;
+} {
   return {
     expiresAt: new Date(now.getTime() + GRANT_TTL_DAYS * DAY_MS),
     downloadCount: 0,
@@ -117,7 +118,9 @@ export class MaterialGrantsService {
     const payerEmail = input.payerEmail.toLowerCase();
     const now = new Date();
     const existing = await this.prisma.materialGrant.findUnique({
-      where: { materialId_payerEmail: { materialId: input.materialId, payerEmail } },
+      where: {
+        materialId_payerEmail: { materialId: input.materialId, payerEmail },
+      },
     });
 
     const grant = existing

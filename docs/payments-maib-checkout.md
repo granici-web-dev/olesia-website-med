@@ -23,27 +23,27 @@ the new open question.
 
 maib publishes four payment APIs. Two are candidates for us:
 
-| API | What it is | Methods | Currencies |
-| --- | --- | --- | --- |
-| **e-Commerce Checkout** (`/checkout`, v2) | **Hosted payment page.** We create a session, redirect the payer to maib, they pay there. | Card, Apple Pay, Google Pay, **MIA** | MDL + EUR per maib; ⚠️ our profile is **MDL-only until they enable EUR** (§7.1) |
-| **e-Commerce API** (`/e-commerce`, v1) | Merchant-controlled flow. Also has two-step (auth+capture), recurring, one-click saved cards. | Card, Apple Pay, Google Pay (no MIA) | **MDL / EUR / USD**, explicitly documented |
+| API                                       | What it is                                                                                    | Methods                              | Currencies                                                                      |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------- |
+| **e-Commerce Checkout** (`/checkout`, v2) | **Hosted payment page.** We create a session, redirect the payer to maib, they pay there.     | Card, Apple Pay, Google Pay, **MIA** | MDL + EUR per maib; ⚠️ our profile is **MDL-only until they enable EUR** (§7.1) |
+| **e-Commerce API** (`/e-commerce`, v1)    | Merchant-controlled flow. Also has two-step (auth+capture), recurring, one-click saved cards. | Card, Apple Pay, Google Pay (no MIA) | **MDL / EUR / USD**, explicitly documented                                      |
 
 **Recommendation: Checkout v2 — but see the caveat below.**
 
 - Card data never touches our servers → PCI scope is SAQ-A. (v1 also uses a bank-hosted
   card page, so this is not the deciding factor it first looks like.)
 - It is the only one of the two that carries **MIA**, which the client confirmed to the
-  bank she wants — *"dacă acesta poate fi oferit concomitent cu … card bancar"*, which is
+  bank she wants — _"dacă acesta poate fi oferit concomitent cu … card bancar"_, which is
   exactly what the v2 hosted page does.
 - It is a much smaller surface: 5 endpoints and one callback, versus v1's full transaction
   lifecycle.
 - Currency: maib confirmed **MDL and EUR both work**, with settlement always in MDL — so
   the EUR catalog survives, once they enable EUR on our profile (§7.1).
 
-⚠️ **The caveat: card saving.** The client also told the bank she wants *"soluția tehnică
+⚠️ **The caveat: card saving.** The client also told the bank she wants _"soluția tehnică
 aleasă să permită activarea ulterioară a salvării cardului … pentru plăți recurente sau
-abonamente"*. **Checkout v2 has no card saving, no recurring and no one-click** — those
-live only in v1. No single maib API covers MIA *and* saved cards today.
+abonamente"_. **Checkout v2 has no card saving, no recurring and no one-click** — those
+live only in v1. No single maib API covers MIA _and_ saved cards today.
 
 The three ways out, in order of preference:
 
@@ -63,10 +63,10 @@ open" may be worth exactly one question to maib and nothing more.
 
 ## 2. Environments and auth
 
-| Environment | Base URL |
-| --- | --- |
-| Sandbox | `https://sandbox.maibmerchants.md` |
-| Production | `https://api.maibmerchants.md` |
+| Environment | Base URL                           |
+| ----------- | ---------------------------------- |
+| Sandbox     | `https://sandbox.maibmerchants.md` |
+| Production  | `https://api.maibmerchants.md`     |
 
 Endpoints and payloads are identical across both; only the credentials differ.
 
@@ -83,23 +83,23 @@ The documented example shows `expiresIn: 300`; ✅ sandbox actually returns **18
 way, never hardcode it — cache the token in memory keyed off the returned `expiresIn` with
 a safety margin (refresh at ~80% of TTL) and re-mint on `401`.
 
-Every *successful* response carries a top-level `ok: true`. **Errors do not** — see §5.
+Every _successful_ response carries a top-level `ok: true`. **Errors do not** — see §5.
 So the check is `ok === true`, never `!errors` and never the HTTP status alone.
 
 ---
 
 ## 3. Endpoints
 
-| Endpoint | Method | Purpose |
-| --- | --- | --- |
-| `/v2/auth/token` | POST | Mint an access token |
-| `/v2/checkouts` | POST | Create a session → returns `checkoutId` + `checkoutUrl` |
-| `/v2/checkouts/{id}` | GET | Full session detail: status, order, payer, payment |
-| `/v2/checkouts` | GET | Paginated list, with filters |
-| `/v2/checkouts/{id}/cancel` | POST | Cancel a session that is not in a terminal state |
-| `/v2/payments/{payId}/refund` | POST | Refund a completed payment (`amount` + `reason`, both required) |
-| `/v2/payments/refunds/{id}` | GET | Refund detail |
-| `/v2/payments/{id}` | GET | Payment detail |
+| Endpoint                      | Method | Purpose                                                         |
+| ----------------------------- | ------ | --------------------------------------------------------------- |
+| `/v2/auth/token`              | POST   | Mint an access token                                            |
+| `/v2/checkouts`               | POST   | Create a session → returns `checkoutId` + `checkoutUrl`         |
+| `/v2/checkouts/{id}`          | GET    | Full session detail: status, order, payer, payment              |
+| `/v2/checkouts`               | GET    | Paginated list, with filters                                    |
+| `/v2/checkouts/{id}/cancel`   | POST   | Cancel a session that is not in a terminal state                |
+| `/v2/payments/{payId}/refund` | POST   | Refund a completed payment (`amount` + `reason`, both required) |
+| `/v2/payments/refunds/{id}`   | GET    | Refund detail                                                   |
+| `/v2/payments/{id}`           | GET    | Payment detail                                                  |
 
 There is **no capture/void** — Checkout v2 is single-step. Money moves at payment time,
 and the only reversal is a refund.
@@ -112,16 +112,16 @@ Authorization: Bearer {accessToken}
 Content-Type: application/json
 ```
 
-| Field | Required | Notes |
-| --- | --- | --- |
-| `amount` | yes | Major units, **must be > 1.00** |
-| `currency` | yes | ISO 4217 |
-| `language` | no | `ro` \| `ru` \| `en` — maps 1:1 onto our three locales |
-| `callbackUrl` | no | Back-channel notification target |
-| `successUrl` / `failUrl` | no | Browser redirect targets |
-| `orderInfo` | no | `id`, `description` (max 125 chars), `date`, `orderAmount`, `orderCurrency`, `deliveryAmount`, `deliveryCurrency`, `items[]` |
-| `orderInfo.items[]` | no | `externalId`, `title` (max 125), `amount`, `currency`, `quantity`, `displayOrder` |
-| `payerInfo` | no | `name`, `email`, `phone` (E.164), `ip`, `userAgent` |
+| Field                    | Required | Notes                                                                                                                        |
+| ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `amount`                 | yes      | Major units, **must be > 1.00**                                                                                              |
+| `currency`               | yes      | ISO 4217                                                                                                                     |
+| `language`               | no       | `ro` \| `ru` \| `en` — maps 1:1 onto our three locales                                                                       |
+| `callbackUrl`            | no       | Back-channel notification target                                                                                             |
+| `successUrl` / `failUrl` | no       | Browser redirect targets                                                                                                     |
+| `orderInfo`              | no       | `id`, `description` (max 125 chars), `date`, `orderAmount`, `orderCurrency`, `deliveryAmount`, `deliveryCurrency`, `items[]` |
+| `orderInfo.items[]`      | no       | `externalId`, `title` (max 125), `amount`, `currency`, `quantity`, `displayOrder`                                            |
+| `payerInfo`              | no       | `name`, `email`, `phone` (E.164), `ip`, `userAgent`                                                                          |
 
 Response: `result.checkoutId` (UUID) and `result.checkoutUrl` — the bank URL to redirect to.
 The session starts in `WaitingForInit`.
@@ -159,7 +159,7 @@ maib redirects the payer back to `successUrl`/`failUrl` with query params:
 `checkoutId`, `checkoutStatus` (`Completed` | `Failed`), `orderId`.
 
 **These are user-controllable and must never drive state.** The return page shows a
-neutral "checking your payment" state and asks *our* API for the authoritative status.
+neutral "checking your payment" state and asks _our_ API for the authoritative status.
 
 ### Back-channel callback (trusted, after signature check)
 
@@ -173,9 +173,9 @@ maib POSTs the full payment payload to `callbackUrl`. Notable fields: `checkoutI
 
 Headers:
 
-| Header | Value |
-| --- | --- |
-| `X-Signature` | `sha256=<base64 hmac>` |
+| Header                  | Value                       |
+| ----------------------- | --------------------------- |
+| `X-Signature`           | `sha256=<base64 hmac>`      |
 | `X-Signature-Timestamp` | Unix epoch **milliseconds** |
 
 Signature:
@@ -194,12 +194,12 @@ the sane default).
 > `apps/api/src/app/appointments/calendly.service.ts`, but the two differ in two ways
 > that will silently produce a valid-looking mismatch:
 >
-> | | Calendly | maib |
-> | --- | --- | --- |
+> |               | Calendly                        | maib                            |
+> | ------------- | ------------------------------- | ------------------------------- |
 > | message order | `` `${timestamp}.${rawBody}` `` | `` `${rawBody}.${timestamp}` `` |
-> | encoding | hex | **Base64** |
+> | encoding      | hex                             | **Base64**                      |
 >
-> The docs say hex *or* Base64 is acceptable "as long as all parties agree", but every
+> The docs say hex _or_ Base64 is acceptable "as long as all parties agree", but every
 > official sample (.NET, PHP, Node) and the worked example use Base64 — so Base64 it is,
 > and this is worth confirming with maib in writing before go-live.
 
@@ -210,7 +210,7 @@ available — no bootstrap change needed.
 
 The docs describe the back-channel callback as firing "after a successful payment" and do
 not promise one for every failure. Callbacks also get lost. So the callback is an
-*optimisation*, not the source of truth:
+_optimisation_, not the source of truth:
 
 1. Callback arrives → verify → apply (idempotent on `checkoutId` + `paymentId`).
 2. Return page → poll `GET /v2/checkouts/{id}` through our API.
@@ -227,9 +227,15 @@ Documented shape: `{ ok: false, errors: [{ errorCode, errorMessage, errorArgs }]
 **HTTP 200** with `{"errors":[…]}` and **no `ok` field at all**:
 
 ```json
-{"errors":[{"errorCode":"payments.acquiring.payments.app-0602003",
-            "errorMessage":"Payment profile … does not support currency == EUR",
-            "errorArgs":null}]}
+{
+  "errors": [
+    {
+      "errorCode": "payments.acquiring.payments.app-0602003",
+      "errorMessage": "Payment profile … does not support currency == EUR",
+      "errorArgs": null
+    }
+  ]
+}
 ```
 
 Two consequences for the client wrapper:
@@ -242,18 +248,18 @@ Two consequences for the client wrapper:
 
 Codes worth handling by name:
 
-| Code | Meaning | HTTP |
-| --- | --- | --- |
-| `maib.merchant.payments-42000` | Invalid currency | 400 |
-| `maib.merchant.payments-42001` | Amount must be > 0 | 400 |
-| `maib.merchant.payments-42004` | Unsupported language (RO/RU/EN only) | 400 |
-| `maib.merchant.payments-42006` | Required field missing | 400 |
-| `maib.merchant.payments-43001` | Checkout does not exist or expired | 404 |
-| `maib.merchant.payments-44000` | Merchant not active | 409 |
-| `maib.merchant.payments-44001` | No payment methods available for this checkout | 409 |
-| `maib.merchant.payments-44002` | Current status forbids the operation | 409 |
-| `maib.merchant.payments-44003` | Payment profile misconfigured | 409 |
-| `common.error-1` | Unexpected server error | 500 |
+| Code                           | Meaning                                        | HTTP |
+| ------------------------------ | ---------------------------------------------- | ---- |
+| `maib.merchant.payments-42000` | Invalid currency                               | 400  |
+| `maib.merchant.payments-42001` | Amount must be > 0                             | 400  |
+| `maib.merchant.payments-42004` | Unsupported language (RO/RU/EN only)           | 400  |
+| `maib.merchant.payments-42006` | Required field missing                         | 400  |
+| `maib.merchant.payments-43001` | Checkout does not exist or expired             | 404  |
+| `maib.merchant.payments-44000` | Merchant not active                            | 409  |
+| `maib.merchant.payments-44001` | No payment methods available for this checkout | 409  |
+| `maib.merchant.payments-44002` | Current status forbids the operation           | 409  |
+| `maib.merchant.payments-44003` | Payment profile misconfigured                  | 409  |
+| `common.error-1`               | Unexpected server error                        | 500  |
 
 `44000` / `44003` are configuration problems on maib's side — they must page us loudly
 rather than show the patient a generic failure.
@@ -281,14 +287,14 @@ client by hand, which is fine given the surface is seven endpoints.
 ### For maib (`ecom@maib.md`)
 
 1. ⚠️ **Enable EUR on our payment profile.** ✅ maib have confirmed in writing to the
-   client: *"Integrarea este posibila in ambele valute, insa decontarea finala va fi in
-   MDL"* — both currencies work, settlement is always MDL. But our profile is **not
+   client: _"Integrarea este posibila in ambele valute, insa decontarea finala va fi in
+   MDL"_ — both currencies work, settlement is always MDL. But our profile is **not
    enabled for EUR yet**; re-checked after their reply and still refused:
 
-   | Currency | Result |
-   | --- | --- |
-   | `MDL` | ✅ session created |
-   | `EUR` | ❌ `Payment profile 55c944fd-1792-4ac1-9cdd-5ebe786a5397 does not support currency == EUR` |
+   | Currency | Result                                                                                     |
+   | -------- | ------------------------------------------------------------------------------------------ |
+   | `MDL`    | ✅ session created                                                                         |
+   | `EUR`    | ❌ `Payment profile 55c944fd-1792-4ac1-9cdd-5ebe786a5397 does not support currency == EUR` |
 
    **This is now a concrete request, not an open question.** Write to `ecom@maib.md` quoting
    that profile id and error code, and ask for EUR to be enabled on the sandbox profile —
@@ -348,7 +354,7 @@ they become mandatory rather than optional:
       privacy policy, ordering and payment, delivery conditions, return policy, contacts.
       Ours exist but are marked **draft** pending the entity data and a lawyer.
 - [ ] **A T&C acceptance checkbox on the payment step.** Because the payment page is hosted
-      by maib, this checkbox has to live on *our* pre-redirect step. Nothing like it exists today.
+      by maib, this checkbox has to live on _our_ pre-redirect step. Nothing like it exists today.
 - [ ] **Payment confirmation email** to the patient with order number, company name, site
       name, amount, currency, date, and a description of what was bought. Needs the mail
       provider that is still unresolved (Brevo was proposed; no SMTP configured).
@@ -362,8 +368,8 @@ they become mandatory rather than optional:
 
 ## 9. Onboarding sequence (maib's own steps)
 
-1. Integrate and test against sandbox. Request test credentials (*Project ID / Project
-   Secret / Signature Key*) from `ecom@maib.md`, naming the site and integration type.
+1. Integrate and test against sandbox. Request test credentials (_Project ID / Project
+   Secret / Signature Key_) from `ecom@maib.md`, naming the site and integration type.
 2. Send successful test `payId`s + the site URL back to `ecom@maib.md` for review.
 3. Complete and submit the merchant questionnaire (downloadable from the steps page).
 4. Bank verifies the requirements in §8.
@@ -373,7 +379,7 @@ they become mandatory rather than optional:
 7. Activate the production project, fill Callback/Ok/Fail URLs, receive production
    credentials, and run one live transaction of ~10 MDL.
 
-**Note the ordering:** testing comes *first*, before the contract. We can build and prove
+**Note the ordering:** testing comes _first_, before the contract. We can build and prove
 the integration in sandbox while the entity and contract questions are still open — but we
 cannot take a single real lev until steps 2–6 are done, and those are on the client's
 calendar, not ours.
@@ -433,12 +439,12 @@ adds most of a day on its own.
 Verified with the sandbox credentials, `MAIB_BASE_URL=https://sandbox.maibmerchants.md`.
 Every one of these would have cost debugging time if we had trusted the docs.
 
-| # | Docs say | Sandbox does | Impact |
-| --- | --- | --- | --- |
-| 1 | `expiresIn: 300` | `1800` | Read the value, never hardcode the TTL. |
-| 2 | Errors are `{ ok: false, errors: [...] }` | HTTP **200**, `errors[]` present, **`ok` absent** | Success test must be `ok === true`, not "no errors" and not the status code. |
-| 3 | Error catalogue is `maib.merchant.payments-4xxxx` | Also `payments.acquiring.payments.app-0602003` | A second, undocumented namespace. Always keep a default branch. |
-| 4 | Status `WaitingForInit` | `Waitingforinit` | Normalise case before comparing; do not type the union off the docs. |
+| #   | Docs say                                          | Sandbox does                                      | Impact                                                                       |
+| --- | ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 1   | `expiresIn: 300`                                  | `1800`                                            | Read the value, never hardcode the TTL.                                      |
+| 2   | Errors are `{ ok: false, errors: [...] }`         | HTTP **200**, `errors[]` present, **`ok` absent** | Success test must be `ok === true`, not "no errors" and not the status code. |
+| 3   | Error catalogue is `maib.merchant.payments-4xxxx` | Also `payments.acquiring.payments.app-0602003`    | A second, undocumented namespace. Always keep a default branch.              |
+| 4   | Status `WaitingForInit`                           | `Waitingforinit`                                  | Normalise case before comparing; do not type the union off the docs.         |
 
 Also observed, and not in the docs at all:
 
@@ -452,7 +458,7 @@ Also observed, and not in the docs at all:
 ### What can be built now, before the client unblocks
 
 The sandbox works, so the API module and its sandbox proof (§10) can be built and tested
-today — maib's own onboarding puts testing *before* the contract. What still cannot happen
+today — maib's own onboarding puts testing _before_ the contract. What still cannot happen
 without the client: a public HTTPS callback URL (hosting), the legal entity, the
 questionnaire, the contract, and therefore any real payment.
 
@@ -463,16 +469,16 @@ questionnaire, the contract, and therefore any real payment.
 maib asked her for the standard onboarding questionnaire; her answers are now binding
 inputs for us, and three of them change things.
 
-| maib asked | She answered |
-| --- | --- |
-| Site URL | `https://dr.oleseajalba.md` — ⚠️ wrong, see §12.1 |
-| Test user | Not needed yet; the developer will supply one if required |
-| Platform | Custom, individually developed |
-| Activity | Medical & nutrition services: pediatrics, nutrition (children + adults), integrative consultations, monitoring and subscription packages, digital educational materials — deliverable online and payable on the site |
-| Transaction currency | **MDL** |
-| Integration type | **Standard payment, no card saving** — but the solution must allow enabling card saving later for recurring/subscriptions |
-| MIA | **Yes**, if it can run alongside card payment |
-| Technical contact | `granici.design@gmail.com` (Serghei) |
+| maib asked           | She answered                                                                                                                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Site URL             | `https://dr.oleseajalba.md` — ⚠️ wrong, see §12.1                                                                                                                                                                    |
+| Test user            | Not needed yet; the developer will supply one if required                                                                                                                                                            |
+| Platform             | Custom, individually developed                                                                                                                                                                                       |
+| Activity             | Medical & nutrition services: pediatrics, nutrition (children + adults), integrative consultations, monitoring and subscription packages, digital educational materials — deliverable online and payable on the site |
+| Transaction currency | **MDL**                                                                                                                                                                                                              |
+| Integration type     | **Standard payment, no card saving** — but the solution must allow enabling card saving later for recurring/subscriptions                                                                                            |
+| MIA                  | **Yes**, if it can run alongside card payment                                                                                                                                                                        |
+| Technical contact    | `granici.design@gmail.com` (Serghei)                                                                                                                                                                                 |
 
 Good news first: the activity description is on record and maib issued sandbox keys after
 reading it, so open question §7.4 (are medical consultations acceptable) is effectively
@@ -507,8 +513,8 @@ neither can the callback ever be delivered (§14).
 ### 12.2 Currency — resolved, mostly
 
 Her questionnaire said MDL, but she went back and asked maib whether both were possible.
-Their answer: *"Integrarea este posibila in ambele valute, insa decontarea finala va fi in
-MDL."*
+Their answer: _"Integrarea este posibila in ambele valute, insa decontarea finala va fi in
+MDL."_
 
 So **the EUR catalog can stay** — the earlier worry that we would have to re-price
 everything in MDL is off the table. Two things still need doing:
@@ -530,7 +536,7 @@ everything in MDL is off the table. Two things still need doing:
    `Int` columns today — adding a second currency is a schema change, not a config flag.
 
 3. ⚠️ **Disclose the conversion.** A patient paying EUR with an MDL card is converted by
-   *their* issuer, at a rate we do not control and often with a fee. Her own reference site
+   _their_ issuer, at a rate we do not control and often with a fee. Her own reference site
    carries exactly such a note. This belongs on the pre-payment step next to the T&C
    checkbox, in all three languages — and it is the kind of thing the bank looks for during
    the site review.
@@ -549,16 +555,16 @@ maib asked for two tests before issuing production access: one successful paymen
 refund of it, then a short written report. Both were run against sandbox with the official
 test card (`5102180060101124`, `06/28`, CVV `760`, cardholder `Test Test`).
 
-| | Value |
-| --- | --- |
-| `checkoutId` | `21e8f276-4ff5-49ff-829b-7faec3d49771` |
-| `orderId` | `VALIDARE-20260910-1042` |
-| Amount | 160.00 MDL |
-| **`payId`** | **`3a8b125b-165f-4fdb-b97c-51d1fb4d11ac`** |
-| RRN | `625308713525` |
-| Approval code | `413316` |
-| Terminal | `0149587` |
-| `refundId` | `67c9c205-3efd-4a36-ae75-01c83f8f2e38` |
+|               | Value                                      |
+| ------------- | ------------------------------------------ |
+| `checkoutId`  | `21e8f276-4ff5-49ff-829b-7faec3d49771`     |
+| `orderId`     | `VALIDARE-20260910-1042`                   |
+| Amount        | 160.00 MDL                                 |
+| **`payId`**   | **`3a8b125b-165f-4fdb-b97c-51d1fb4d11ac`** |
+| RRN           | `625308713525`                             |
+| Approval code | `413316`                                   |
+| Terminal      | `0149587`                                  |
+| `refundId`    | `67c9c205-3efd-4a36-ae75-01c83f8f2e38`     |
 
 Payment: checkout `Completed`, payment `Executed`. Refund: full, `Created` → `Accepted`,
 payment moved to `Refunded` with `refundedAmount: 160.0`.
@@ -608,10 +614,10 @@ So today, status checks go through the API — with a caveat:
 Both of them, on every call, with any combination of query parameters (none, `count`,
 `offset`, `orderId`, `status`, `createdAtFrom`, `sortBy`/`order`):
 
-| Endpoint | Response |
-| --- | --- |
+| Endpoint            | Response                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
 | `GET /v2/checkouts` | `maib.merchant.payments-1001` — "Technical error occurred in the system. Call system administrators." |
-| `GET /v2/payments` | `maib.common-2` — same message |
+| `GET /v2/payments`  | `maib.common-2` — same message                                                                        |
 
 Lookups **by id** work fine: `GET /v2/checkouts/{id}`, `GET /v2/payments/{id}`,
 `GET /v2/payments/refunds/{id}`.
@@ -661,7 +667,7 @@ row already carries the link.
 The linking rule is deliberately conservative. A payment is attached to a `Patient` only
 when one with that email **already exists** — paying for something does not silently create
 a medical record. `payerEmail` is always stored, and `historyForPatient()` matches on the
-link *or* the email, so promoting a payer to a patient later brings their whole history
+link _or_ the email, so promoting a payer to a patient later brings their whole history
 with them instead of starting it at zero.
 
 ### Schema
@@ -678,15 +684,15 @@ Migration `20260910120000_payments`, applied locally. Enums mirrored into
 
 ### Routes
 
-| Route | Access | Purpose |
-| --- | --- | --- |
-| `POST /payments/maib/callback` | public, HMAC-verified | The bank's notification |
-| `GET /payment-status/:orderId` | public, no PII | The return page asks us, not the redirect |
-| `GET /payments` | admin/editor | The ledger, filterable by state |
-| `GET /payments/patient/:patientId` | admin/editor | One person's history |
-| `GET /payments/:id` | admin/editor | Detail with refunds |
-| `POST /payments/:id/sync` | admin/editor | Re-ask the bank when a callback goes missing |
-| `POST /payments/:id/refund` | **admin only** | Refund, recorded with the author |
+| Route                              | Access                | Purpose                                      |
+| ---------------------------------- | --------------------- | -------------------------------------------- |
+| `POST /payments/maib/callback`     | public, HMAC-verified | The bank's notification                      |
+| `GET /payment-status/:orderId`     | public, no PII        | The return page asks us, not the redirect    |
+| `GET /payments`                    | admin/editor          | The ledger, filterable by state              |
+| `GET /payments/patient/:patientId` | admin/editor          | One person's history                         |
+| `GET /payments/:id`                | admin/editor          | Detail with refunds                          |
+| `POST /payments/:id/sync`          | admin/editor          | Re-ask the bank when a callback goes missing |
+| `POST /payments/:id/refund`        | **admin only**        | Refund, recorded with the author             |
 
 `GET /payment-status/:orderId` is a separate controller on its own path on purpose:
 `RolesGuard` reads class-level `@Roles` metadata and does **not** consult `@Public()`, so a
@@ -726,8 +732,8 @@ afterwards.
 
 ## 16. GDPR and the legal pages (2026-09-10)
 
-The privacy policy said, in three languages, *"we don't collect card data — there is no
-online payment"*, and the terms said payment was **exclusively** by bank transfer. True
+The privacy policy said, in three languages, _"we don't collect card data — there is no
+online payment"_, and the terms said payment was **exclusively** by bank transfer. True
 until now; false the moment maib goes live, and precisely the kind of claim an acquirer
 review reads closely. Both are updated.
 
@@ -744,7 +750,7 @@ review reads closely. Both are updated.
   record is an accounting and tax obligation.
 - **Recipients**: BC "MAIB" S.A. named, and described as **its own controller** under
   banking and payment-scheme rules — not as our processor. Calling an acquirer an
-  *împuternicit* would be wrong, and the lawyer will check that line first.
+  _împuternicit_ would be wrong, and the lawyer will check that line first.
 - **Retention** gained the payment paragraph, including the part people actually need to
   hear: payment records survive an erasure request, because the law requires the fact and
   the amount to be kept — but nothing about their health.
@@ -795,8 +801,8 @@ doctor talks to the patient, agrees a duration and a price, and today that ends 
 bank transfer she has to go and check. RTP is exactly that workflow, automated: she sets
 the price, sends the request, and the callback tells us it was paid.
 
-And it is the honest answer to the client's *"let us enable card saving later for
-subscriptions"* (§1, §12.3). Recurring billing needs the v1 API, which has no MIA, plus
+And it is the honest answer to the client's _"let us enable card saving later for
+subscriptions"_ (§1, §12.3). Recurring billing needs the v1 API, which has no MIA, plus
 stored-card exposure. RTP gets the same outcome — money arriving for an agreed subscription
 without re-entering card details — with no saved card, no PCI surface, and no second
 checkout integration.
@@ -810,7 +816,7 @@ maib.merchant.payments-14002 — MIA MCC is not set
 
 Not "no such endpoint", not "not authorised" — a **profile setting**. The same setting that
 is keeping MIA off the checkout page. So one configuration request to the bank plausibly
-unlocks MIA on Checkout *and* Request to Pay together; the feedback draft now asks whether
+unlocks MIA on Checkout _and_ Request to Pay together; the feedback draft now asks whether
 RTP needs a separate request.
 
 ### Free wins on the Checkout we already have
@@ -829,7 +835,7 @@ Static, dynamic and hybrid QR codes; static ones take a free or controlled amoun
 live on a sticker or poster. Genuinely useful if she ever takes payment in the cabinet.
 Note it supports **callbacks only — no redirect URLs**.
 
-We will likely touch this API anyway just to *test* MIA in sandbox (§6), but that is a test
+We will likely touch this API anyway just to _test_ MIA in sandbox (§6), but that is a test
 harness, not a product. **Recommend skipping** unless an in-person payment case actually
 exists — a second integration for a hypothetical is how scope explodes.
 
@@ -864,7 +870,7 @@ what the checkout step must add.
 ### Confirmed, no action
 
 - Signature: `HMAC_SHA256(key, "{rawBody}.{timestamp}")`, base64, `X-Signature:
-  sha256=…`, `X-Signature-Timestamp` in **milliseconds**, constant-time compare,
+sha256=…`, `X-Signature-Timestamp` in **milliseconds**, constant-time compare,
   freshness "less than N minutes" with N left to us. Matches `verifySignature()` and the
   5-minute window exactly. The Node sample on the "Signature Key Verification" page is
   the same algorithm.
@@ -875,7 +881,7 @@ what the checkout step must add.
   (`Completed`|`Failed`), `orderId`. Still untrusted; our `?order=` is appended before
   theirs and the return page asks `/payment-status/:orderId`.
 - Session statuses per docs: `WaitingForInit | Initialized | PaymentMethodSelected |
-  Completed | Expired | Abandoned | Cancelled | Failed`. Sandbox returns them in
+Completed | Expired | Abandoned | Cancelled | Failed`. Sandbox returns them in
   different casing (§11); `toPaymentState` lowercases, so both spellings work.
 - Error envelope `{ ok:false, errors:[{errorCode, errorMessage, errorArgs}] }` and the
   catalogue `42000–42007`, `43000–43001`, `44000–44003`, `common.error-1`. Two codes we

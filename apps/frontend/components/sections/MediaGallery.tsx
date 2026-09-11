@@ -111,7 +111,10 @@ export function MediaGallery({
                     className={styles.posterImg}
                   />
                   <span className={styles.scrim} aria-hidden="true" />
-                  <span className={`mono ${styles.chip} ${styles.chipOutlet}`} aria-hidden="true">
+                  <span
+                    className={`mono ${styles.chip} ${styles.chipOutlet}`}
+                    aria-hidden="true"
+                  >
                     {item.outlet}
                   </span>
                   {item.duration && (
@@ -123,7 +126,12 @@ export function MediaGallery({
                     </span>
                   )}
                   <span className={styles.play} aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                    >
                       <path d="M8.5 6.2v11.6a.6.6 0 0 0 .92.5l9.02-5.8a.6.6 0 0 0 0-1l-9.02-5.8a.6.6 0 0 0-.92.5Z" />
                     </svg>
                   </span>

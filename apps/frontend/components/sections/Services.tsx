@@ -8,10 +8,7 @@ import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import type { LeadService } from '@/lib/leads';
 import { SERVICE_INCLUDED, fillIncluded } from '@/lib/service-content';
 import { formatSlaInHours } from '@/lib/working-hours';
-import {
-  formatPriceRange,
-  formatServiceDuration,
-} from '@/lib/service-price';
+import { formatPriceRange, formatServiceDuration } from '@/lib/service-price';
 import { serviceLink } from '@/components/ui/cta';
 import styles from './Services.module.css';
 
@@ -35,13 +32,14 @@ const LEAD_SERVICE: Partial<Record<string, LeadService>> = {
  * stays single and offers both links — the same shape /nutrition already has.
  * The label keys live under `home.services.audience`.
  */
-const SPLIT_BOOKING: Partial<Record<string, { code: string; label: string }[]>> =
-  {
-    nutrition: [
-      { code: 'nutrition_copii', label: 'children' },
-      { code: 'nutrition_adulti', label: 'adults' },
-    ],
-  };
+const SPLIT_BOOKING: Partial<
+  Record<string, { code: string; label: string }[]>
+> = {
+  nutrition: [
+    { code: 'nutrition_copii', label: 'children' },
+    { code: 'nutrition_adulti', label: 'adults' },
+  ],
+};
 
 /** Homepage item keys → service `code` used by the shared content maps. */
 const CONTENT_CODE: Record<string, string> = {
@@ -64,7 +62,11 @@ export async function Services() {
   const locale = await getLocale();
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const includedLabel = ru ? 'Что входит' : en ? "What's included" : 'Ce include';
+  const includedLabel = ru
+    ? 'Что входит'
+    : en
+      ? "What's included"
+      : 'Ce include';
 
   // Group-A services (pediatric/nutrition/integrative) are calendar-backed —
   // book them through the Calendly popup using their per-service scheduling
@@ -88,7 +90,9 @@ export async function Services() {
           <div className={styles.eyebrow}>{t('eyebrow')}</div>
           <h2 className={styles.title}>
             {t.rich('title', {
-              accent: (chunks) => <span className={styles.titleAccent}>{chunks}</span>,
+              accent: (chunks) => (
+                <span className={styles.titleAccent}>{chunks}</span>
+              ),
               br: () => <br />,
             })}
           </h2>
@@ -145,7 +149,9 @@ export async function Services() {
               )}
             </div>
             <div className={styles.serviceMeta}>
-              {priceText && <div className={styles.servicePrice}>{priceText}</div>}
+              {priceText && (
+                <div className={styles.servicePrice}>{priceText}</div>
+              )}
               {durationText && (
                 <div className={styles.serviceDuration}>{durationText}</div>
               )}

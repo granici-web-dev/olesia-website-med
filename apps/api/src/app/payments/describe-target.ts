@@ -1,8 +1,5 @@
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  PaymentTargetType,
-  ServiceCode,
-} from '../../generated/prisma/enums';
+import { PaymentTargetType, ServiceCode } from '../../generated/prisma/enums';
 
 /**
  * What to call the thing a payment bought.

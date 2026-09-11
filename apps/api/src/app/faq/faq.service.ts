@@ -114,12 +114,15 @@ export class FaqService {
   /** Deleting a section takes its questions with it (cascade in the schema). */
   async removeCategory(id: string): Promise<void> {
     await this.categoryOrThrow(id);
-    await writeOrTranslate(() => this.prisma.faqCategory.delete({ where: { id } }));
+    await writeOrTranslate(() =>
+      this.prisma.faqCategory.delete({ where: { id } }),
+    );
   }
 
   async createItem(dto: CreateFaqItemDto): Promise<FaqItemDto> {
     await this.categoryOrThrow(dto.categoryId);
-    const sortOrder = dto.sortOrder ?? (await this.nextItemOrder(dto.categoryId));
+    const sortOrder =
+      dto.sortOrder ?? (await this.nextItemOrder(dto.categoryId));
     const created = await writeOrTranslate(() =>
       this.prisma.faqItem.create({
         data: {

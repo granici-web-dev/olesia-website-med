@@ -18,12 +18,12 @@
 
 ## 1. Зачем сюда приходят (гипотезы → проверить)
 
-| Сегмент | JTBD |
-|---|---|
-| Осторожный родитель | «Что вы делаете с данными моими и ребёнка?» |
-| Перед загрузкой фото/анализов | «Безопасно ли отправлять медицинское?» |
-| Хочет реализовать право | «Как удалить/получить мои данные» |
-| Проверка доверия | «Серьёзно ли они относятся к данным» |
+| Сегмент                       | JTBD                                        |
+| ----------------------------- | ------------------------------------------- |
+| Осторожный родитель           | «Что вы делаете с данными моими и ребёнка?» |
+| Перед загрузкой фото/анализов | «Безопасно ли отправлять медицинское?»      |
+| Хочет реализовать право       | «Как удалить/получить мои данные»           |
+| Проверка доверия              | «Серьёзно ли они относятся к данным»        |
 
 **UX-вывод:** юридический текст плохо читается. Поэтому — **двухслойно**: короткое резюме простым языком сверху + полные разделы ниже. Это и доверие, и реальная прозрачность.
 
@@ -59,6 +59,7 @@
 ## 4. Каркас текста (RO, ЧЕРНОВИК — требует юридической проверки)
 
 ### 1. Заголовок
+
 ```
 H1: Politica de confidențialitate
 Ultima actualizare: [data]
@@ -67,6 +68,7 @@ Contact pentru date: [email]                                   ⚠
 ```
 
 ### 2. Резюме простым языком (TL;DR)
+
 ```
 Heading: Pe scurt
 • Colectăm datele necesare pentru a-ți oferi consultații și a răspunde
@@ -79,6 +81,7 @@ Heading: Pe scurt
 ```
 
 ### 3. Какие данные собираем (бизнес-инвентаризация — РЕАЛЬНО под твой сайт)
+
 ```
 Heading: Ce date colectăm
 
@@ -97,6 +100,7 @@ Heading: Ce date colectăm
 ```
 
 ### 4. Зачем / правовое основание
+
 ```
 Heading: De ce prelucrăm datele și pe ce temei
 
@@ -110,6 +114,7 @@ Heading: De ce prelucrăm datele și pe ce temei
 ```
 
 ### 5. Кому передаём / процессоры
+
 ```
 Heading: Cui transmitem datele
 
@@ -125,9 +130,11 @@ Lucrăm cu furnizori care ne ajută să oferim serviciul:
 Nu vindem datele tale și nu le transmitem în scopuri de marketing
 ale terților.
 ```
+
 > Трансграничные передачи (Calendly = вне РМ/ЕС) — отдельный режим по 195/2024 и GDPR. ⚠ юрист.
 
 ### 6. Сколько храним
+
 ```
 Heading: Cât timp păstrăm datele
 Păstrăm datele doar atât cât este necesar [+ termenele legale pentru
@@ -135,6 +142,7 @@ documentația medicală].                                        ⚠ сроки 
 ```
 
 ### 7. Права
+
 ```
 Heading: Drepturile tale
 
@@ -148,6 +156,7 @@ Pentru a-ți exercita drepturile, scrie-ne la [contact].
 ```
 
 ### 8. Данные детей
+
 ```
 Heading: Datele copiilor
 Serviciile noastre privesc adesea copii. Datele despre copil sunt
@@ -156,12 +165,14 @@ dreptul să le ofere. Tratăm aceste date cu grijă deosebită.   ⚠ юрист
 ```
 
 ### 9. Безопасность
+
 ```
 Heading: Securitatea datelor
 Aplicăm măsuri tehnice și organizatorice pentru a proteja datele.  ⚠ конкретика
 ```
 
 ### 10. Cookies
+
 ```
 Heading: Cookie-uri
 Folosim cookie-uri pentru funcționarea site-ului [și statistici].
@@ -169,6 +180,7 @@ Vezi Politica de cookie-uri / gestionează preferințele.        ⚠ нужен 
 ```
 
 ### 11–12. Изменения + контакт
+
 ```
 Heading: Modificări
 Putem actualiza această politică; data ultimei actualizări este sus.
@@ -210,4 +222,7 @@ noindex? — обычно индексируется; решает [owner].
 6. Применяется ли GDPR (диаспора ЕС) и нужен ли представитель.
 7. Какая языковая версия приоритетна.
 8. Cookie-баннер + Cookie-политика.
+
+```
+
 ```

@@ -1,7 +1,4 @@
-import type {
-  AboutStat,
-  AboutCredential,
-} from '@olesia/shared';
+import type { AboutStat, AboutCredential } from '@olesia/shared';
 
 /**
  * "About us" — a singleton page with bilingual title + markdown content,
@@ -11,10 +8,7 @@ import type {
  * `features/testimonials`.
  */
 
-export type {
-  AboutStat,
-  AboutCredential,
-} from '@olesia/shared';
+export type { AboutStat, AboutCredential } from '@olesia/shared';
 
 export interface AboutPage {
   id: string;

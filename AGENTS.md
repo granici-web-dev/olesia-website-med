@@ -80,24 +80,24 @@ Rule of three: extract a helper or component only when it appears in 3+ places. 
 
 ## §2 Glossary
 
-| Term | Meaning |
-|------|---------|
-| **Section** | A full-width page section (Hero, HowItWorks, Services, About). Lives in `components/sections/`. |
+| Term                 | Meaning                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| **Section**          | A full-width page section (Hero, HowItWorks, Services, About). Lives in `components/sections/`.    |
 | **Layout component** | Nav, Footer — rendered in the locale layout, present on every page. Lives in `components/layout/`. |
-| **UI primitive** | Small reusable element (Button, Badge, Tag). Lives in `components/ui/`. |
-| **Origin** | `apps/frontend/origin/` — read-only reference design prototypes. |
-| **Locale layout** | `app/[locale]/layout.tsx` — wraps every page with Nav, Footer, fonts, i18n provider. |
-| **Shape** | A planning doc in `docs/shape-<slug>.md` written before implementing non-trivial work. |
+| **UI primitive**     | Small reusable element (Button, Badge, Tag). Lives in `components/ui/`.                            |
+| **Origin**           | `apps/frontend/origin/` — read-only reference design prototypes.                                   |
+| **Locale layout**    | `app/[locale]/layout.tsx` — wraps every page with Nav, Footer, fonts, i18n provider.               |
+| **Shape**            | A planning doc in `docs/shape-<slug>.md` written before implementing non-trivial work.             |
 
 ## §3 File naming
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Section component | `PascalCase.tsx` + `PascalCase.module.css` | `Hero.tsx`, `Hero.module.css` |
-| Layout component | `PascalCase.tsx` + `PascalCase.module.css` | `Nav.tsx`, `Nav.module.css` |
-| UI primitive | `PascalCase.tsx` + `PascalCase.module.css` | `Button.tsx`, `Button.module.css` |
-| Page | `page.tsx` (Next.js convention) | `app/[locale]/about/page.tsx` |
-| Shape doc | `docs/shape-<slug>.md` | `docs/shape-booking-form.md` |
+| Type              | Pattern                                    | Example                           |
+| ----------------- | ------------------------------------------ | --------------------------------- |
+| Section component | `PascalCase.tsx` + `PascalCase.module.css` | `Hero.tsx`, `Hero.module.css`     |
+| Layout component  | `PascalCase.tsx` + `PascalCase.module.css` | `Nav.tsx`, `Nav.module.css`       |
+| UI primitive      | `PascalCase.tsx` + `PascalCase.module.css` | `Button.tsx`, `Button.module.css` |
+| Page              | `page.tsx` (Next.js convention)            | `app/[locale]/about/page.tsx`     |
+| Shape doc         | `docs/shape-<slug>.md`                     | `docs/shape-booking-form.md`      |
 
 ## §4 Component structure
 

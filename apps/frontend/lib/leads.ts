@@ -130,7 +130,9 @@ export async function postLead<T = void>(
   return (await res.json().catch(() => undefined)) as T;
 }
 
-export function submitMonitoringLead(input: MonitoringLeadInput): Promise<void> {
+export function submitMonitoringLead(
+  input: MonitoringLeadInput,
+): Promise<void> {
   return postLead('/leads/monitoring', input, 'lead_monitoring');
 }
 
@@ -140,7 +142,8 @@ export function submitQuickQuestionLead(
   return postLead('/leads/quick-question', input, 'lead_quick_question');
 }
 
-export function submitContactMessage(input: ContactMessageInput): Promise<void> {
+export function submitContactMessage(
+  input: ContactMessageInput,
+): Promise<void> {
   return postLead('/leads/contact', input, 'lead_contact');
 }
-

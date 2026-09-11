@@ -58,7 +58,8 @@ interface EventType {
 
 async function getContext() {
   const me = await api<Me>('/users/me');
-  const orgUri = process.env.CALENDLY_ORG_URI || me.resource.current_organization;
+  const orgUri =
+    process.env.CALENDLY_ORG_URI || me.resource.current_organization;
   return { userUri: me.resource.uri, orgUri };
 }
 
@@ -84,7 +85,9 @@ async function syncEventTypes() {
 
   let matched = 0;
   for (const et of collection) {
-    const svc = services.find((s) => s.calendlySchedulingUrl === et.scheduling_url);
+    const svc = services.find(
+      (s) => s.calendlySchedulingUrl === et.scheduling_url,
+    );
     const tag = svc ? `→ ${svc.code}` : '(no service)';
     console.log(`${et.name} [${et.duration}m] ${et.scheduling_url} ${tag}`);
     if (svc) {
@@ -115,7 +118,9 @@ async function createWebhook(callbackUrl: string) {
     },
   );
   console.log('✓ Webhook subscription created:', resource.uri);
-  console.log('\nSet in apps/api/.env (and the compose host env), then restart:');
+  console.log(
+    '\nSet in apps/api/.env (and the compose host env), then restart:',
+  );
   console.log(`CALENDLY_WEBHOOK_SIGNING_KEY=${signingKey}`);
 }
 
@@ -131,7 +136,9 @@ async function main() {
       if (!arg) throw new Error('Usage: create-webhook <callbackUrl>');
       return createWebhook(arg);
     default:
-      console.log('Commands: info | sync-event-types | create-webhook <callbackUrl>');
+      console.log(
+        'Commands: info | sync-event-types | create-webhook <callbackUrl>',
+      );
   }
 }
 

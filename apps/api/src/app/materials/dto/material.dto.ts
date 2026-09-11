@@ -15,10 +15,7 @@ import {
 import { SLUG_PATTERN } from '@olesia/shared';
 
 import { IsUploadedFileUrl } from '../../common/uploaded-file-url';
-import {
-  MaterialAccess,
-  MaterialFlag,
-} from '../../../generated/prisma/enums';
+import { MaterialAccess, MaterialFlag } from '../../../generated/prisma/enums';
 
 /** Age-taxonomy keys accepted on a material (mirrors `lib/age-taxonomy.ts`). */
 export const AGE_KEYS = [

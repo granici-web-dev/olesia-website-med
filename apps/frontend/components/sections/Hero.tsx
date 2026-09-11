@@ -35,7 +35,9 @@ export async function Hero() {
 
         <h1 className={styles.headline}>
           {t.rich('headline', {
-            accent: (chunks) => <span className={styles.headlineAccent}>{chunks}</span>,
+            accent: (chunks) => (
+              <span className={styles.headlineAccent}>{chunks}</span>
+            ),
             br: () => <br />,
           })}
         </h1>

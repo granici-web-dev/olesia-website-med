@@ -1,6 +1,7 @@
 import { generateStarterPassword } from './starter-password';
 
-const ALPHABET = /^[abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789]+$/;
+const ALPHABET =
+  /^[abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789]+$/;
 
 describe('generateStarterPassword', () => {
   it('is twelve characters from the unambiguous alphabet', () => {

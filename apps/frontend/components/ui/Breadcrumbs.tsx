@@ -39,7 +39,10 @@ export async function Breadcrumbs({
           {items.map((c, i) => {
             const last = i === items.length - 1;
             return (
-              <li key={`${c.label}-${i}`} className="flex items-center gap-x-2.5">
+              <li
+                key={`${c.label}-${i}`}
+                className="flex items-center gap-x-2.5"
+              >
                 {c.href && !last ? (
                   <Link
                     href={c.href}

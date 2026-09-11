@@ -94,7 +94,9 @@ export class CheckoutController {
 
   private refuseBots(company: string | undefined, route: string): void {
     if (!company) return;
-    this.logger.warn(`Checkout dropped on /${route}/checkout (honeypot tripped).`);
+    this.logger.warn(
+      `Checkout dropped on /${route}/checkout (honeypot tripped).`,
+    );
     throw new BadRequestException('checkout_failed');
   }
 }

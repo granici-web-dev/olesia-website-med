@@ -60,7 +60,9 @@ export class FulfilmentService {
    * The per-purchase half. Returns what to tell the buyer they can do now, or
    * null when there is nothing beyond the receipt.
    */
-  private async deliver(paymentRowId: string): Promise<PurchaseNextStepDto | null> {
+  private async deliver(
+    paymentRowId: string,
+  ): Promise<PurchaseNextStepDto | null> {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentRowId },
       select: {
@@ -107,7 +109,9 @@ export class FulfilmentService {
    * wrong in six months. `linkForOrder` re-issues rather than duplicating, so
    * a redelivered callback extends the one link.
    */
-  private async issueOrderUploadLink(orderId: string): Promise<PurchaseNextStepDto> {
+  private async issueOrderUploadLink(
+    orderId: string,
+  ): Promise<PurchaseNextStepDto> {
     const link = await this.uploads.linkForOrder(orderId);
     return {
       kind: 'order_documents',
@@ -123,7 +127,11 @@ export class FulfilmentService {
     payerEmail: string,
     paymentRowId: string,
   ): Promise<PurchaseNextStepDto> {
-    return this.grants.issue({ materialId, payerEmail, paymentId: paymentRowId });
+    return this.grants.issue({
+      materialId,
+      payerEmail,
+      paymentId: paymentRowId,
+    });
   }
 
   /**
@@ -324,7 +332,4 @@ export class FulfilmentService {
     // the whole record — so the receipt is Romanian, like every other fallback.
     return null;
   }
-
 }
-
-

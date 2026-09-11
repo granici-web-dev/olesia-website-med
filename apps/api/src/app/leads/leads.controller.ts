@@ -3,7 +3,10 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../common/decorators/public.decorator';
-import { CaptchaGuard, CaptchaProtected } from '../common/captcha/captcha.guard';
+import {
+  CaptchaGuard,
+  CaptchaProtected,
+} from '../common/captcha/captcha.guard';
 import { LeadsService } from './leads.service';
 import {
   ContactMessageDto,
@@ -43,7 +46,8 @@ const DROPPED = { ok: true } as const;
 @ApiHeader({
   name: 'x-captcha-token',
   required: false,
-  description: 'reCAPTCHA v3 token; required once RECAPTCHA_SECRET is configured.',
+  description:
+    'reCAPTCHA v3 token; required once RECAPTCHA_SECRET is configured.',
 })
 @UseGuards(CaptchaGuard)
 @Controller('leads')

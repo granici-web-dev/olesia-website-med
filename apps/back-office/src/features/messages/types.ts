@@ -8,7 +8,11 @@
  */
 
 export type MessageStatus = 'new' | 'read' | 'replied';
-export type MessageSubject = 'appointment' | 'payment' | 'how_it_works' | 'other';
+export type MessageSubject =
+  | 'appointment'
+  | 'payment'
+  | 'how_it_works'
+  | 'other';
 
 export interface Message {
   id: string;

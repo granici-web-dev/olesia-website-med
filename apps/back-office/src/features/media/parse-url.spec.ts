@@ -19,18 +19,22 @@ describe('parsePublicationUrl', () => {
     expect(
       parsePublicationUrl('https://www.youtube.com/watch?v=abc123&t=42s'),
     ).toEqual({ provider: 'youtube', ref: 'abc123' });
-    expect(parsePublicationUrl('https://m.youtube.com/watch?v=abc123')).toEqual({
-      provider: 'youtube',
-      ref: 'abc123',
-    });
+    expect(parsePublicationUrl('https://m.youtube.com/watch?v=abc123')).toEqual(
+      {
+        provider: 'youtube',
+        ref: 'abc123',
+      },
+    );
   });
 
   it('reads the embed, shorts and live paths', () => {
     for (const path of ['embed', 'shorts', 'live']) {
-      expect(parsePublicationUrl(`https://youtube.com/${path}/xyz789`)).toEqual({
-        provider: 'youtube',
-        ref: 'xyz789',
-      });
+      expect(parsePublicationUrl(`https://youtube.com/${path}/xyz789`)).toEqual(
+        {
+          provider: 'youtube',
+          ref: 'xyz789',
+        },
+      );
     }
   });
 

@@ -22,7 +22,11 @@ export interface DeliverableCopy {
 export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   menu_7: {
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: { ro: 'Meniu personalizat · 7 zile', en: 'Personalized menu · 7 days', ru: 'Персональное меню · 7 дней' },
+    title: {
+      ro: 'Meniu personalizat · 7 zile',
+      en: 'Personalized menu · 7 days',
+      ru: 'Персональное меню · 7 дней',
+    },
     desc: {
       ro: 'Plan alimentar personalizat pe 7 zile, livrat în scris după un formular scurt.',
       en: 'A personalized 7-day meal plan, delivered in writing after a short form.',
@@ -31,7 +35,11 @@ export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   },
   menu_14: {
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: { ro: 'Meniu personalizat · 14 zile', en: 'Personalized menu · 14 days', ru: 'Персональное меню · 14 дней' },
+    title: {
+      ro: 'Meniu personalizat · 14 zile',
+      en: 'Personalized menu · 14 days',
+      ru: 'Персональное меню · 14 дней',
+    },
     desc: {
       ro: 'Plan alimentar personalizat pe 14 zile, cu variație și liste de cumpărături.',
       en: 'A personalized 14-day meal plan, with variety and shopping lists.',
@@ -40,7 +48,11 @@ export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   },
   menu_30: {
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: { ro: 'Meniu personalizat · 30 zile', en: 'Personalized menu · 30 days', ru: 'Персональное меню · 30 дней' },
+    title: {
+      ro: 'Meniu personalizat · 30 zile',
+      en: 'Personalized menu · 30 days',
+      ru: 'Персональное меню · 30 дней',
+    },
     desc: {
       ro: 'Plan alimentar personalizat pe 30 de zile, pentru obiective de durată.',
       en: 'A personalized 30-day meal plan, for longer-term goals.',

@@ -19,12 +19,12 @@
 
 Рамка `user-research` / JTBD. Гипотезы, не данные исследования.
 
-| Сегмент | JTBD |
-|---|---|
-| Родитель ищет ответы | «Разобраться в теме сам, бесплатно и быстро» |
-| Перед записью | «Почитаю её материалы — пойму, можно ли доверять» |
+| Сегмент                 | JTBD                                                     |
+| ----------------------- | -------------------------------------------------------- |
+| Родитель ищет ответы    | «Разобраться в теме сам, бесплатно и быстро»             |
+| Перед записью           | «Почитаю её материалы — пойму, можно ли доверять»        |
 | Не готов платить сейчас | «Возьму бесплатный гайд, вернусь под консультацию позже» |
-| Тревожный родитель | «Нужна надёжная информация, не форумы» |
+| Тревожный родитель      | «Нужна надёжная информация, не форумы»                   |
 
 **Вывод:** задача страницы — лёгкий доступ к гайдам, подтверждение авторитета и мягкий переход в услуги. Не продажа, а доверие.
 
@@ -32,13 +32,13 @@
 
 ## 2. Центральное решение: бесплатно или с email-гейтом
 
-| | Бесплатно | С email-гейтом |
-|---|---|---|
-| Трение | нет | есть (форма) |
-| Охват / SEO | максимум | ниже |
-| База для рассылки | нет | да |
-| Данные/комплаенс | просто | согласие + хранение лидов (закон РМ) |
-| Доставка | отдать PDF | механизм отправки на email |
+|                   | Бесплатно  | С email-гейтом                       |
+| ----------------- | ---------- | ------------------------------------ |
+| Трение            | нет        | есть (форма)                         |
+| Охват / SEO       | максимум   | ниже                                 |
+| База для рассылки | нет        | да                                   |
+| Данные/комплаенс  | просто     | согласие + хранение лидов (закон РМ) |
+| Доставка          | отдать PDF | механизм отправки на email           |
 
 **Рекомендация:** стартовать **бесплатно** (меньше трения, быстрее доверие, ноль оверхеда по данным). Гейт добавить позже, если появится email-маркетинг. ⚠ решение за тобой — структура поддерживает оба.
 
@@ -62,6 +62,7 @@
 ## 4. Текст страницы (RO)
 
 ### 1. Hero
+
 ```
 Eyebrow:  Ghiduri
 H1:       Ghiduri descărcabile
@@ -70,29 +71,35 @@ Subhead:  Materiale practice despre sănătatea și alimentația copilului,
 ```
 
 ### 2. Сетка гайдов / пустое состояние
+
 ```
 Heading: Alege un ghid
 [карточки — см. анатомию ниже]
 ```
 
 **Пустое состояние (если гайдов ещё нет):**
+
 ```
 Heading: Ghidurile vin în curând
 Lucrăm la primele ghiduri. Între timp, dacă ai o întrebare, o poți
 adresa direct medicului.
 CTA: Întreabă medicul
 ```
+
 > Заложить обязательно — вероятен запуск без гайдов.
 
 ### 4. Как работает
+
 ```
 Heading: Cum funcționează
 Alegi ghidul, apeși „Descarcă" și primești fișierul PDF.
 Fără cont, fără cost.                                   ⚠ если free/без регистрации
 ```
-*(вариант с гейтом: «Lasă-ți adresa de email și îți trimitem ghidul.»)*
+
+_(вариант с гейтом: «Lasă-ți adresa de email și îți trimitem ghidul.»)_
 
 ### 5. Кто пишет
+
 ```
 Heading: Cine scrie ghidurile
 Ghidurile sunt realizate de Dr. Olesea Jalba, medic pediatru cu master
@@ -101,12 +108,14 @@ Ghidurile sunt realizate de Dr. Olesea Jalba, medic pediatru cu master
 ```
 
 ### 6. Дисклеймер
+
 ```
 Ghidurile au scop informativ și nu înlocuiesc o consultație medicală.
 Pentru situația specifică a copilului tău, programează o consultație.
 ```
 
 ### 7. CTA конверсии
+
 ```
 Heading: Ai nevoie de un sfat personalizat?
 • Pentru o întrebare punctuală → Întreabă medicul (răspuns în 48h)
@@ -114,6 +123,7 @@ Heading: Ai nevoie de un sfat personalizat?
 ```
 
 ### 8. (опционально) Рассылка
+
 ```
 Heading: Primește ghiduri noi pe email
 [email] [ ] Sunt de acord cu prelucrarea datelor
@@ -138,6 +148,7 @@ PDF · [X] pagini · RO     ← формат + объём + язык
 ## 6. Бэклог тем (предложение, на базе CV — НЕ существующие гайды)
 
 Темы, подкреплённые её экспертизой:
+
 ```
 • Diversificarea alimentației — primii pași           (нутрициология младенцев)
 • Copilul mofturos: dificultăți de hrănire             (программа 2026)
@@ -146,6 +157,7 @@ PDF · [X] pagini · RO     ← формат + объём + язык
 • Alergiile la copii: ce trebuie să știi               (статья по аллергии)
 • Dezvoltarea copilului pe etape                       (серт UNICEF)
 ```
+
 > Это приоритезированный бэклог, а не утверждение, что гайды готовы. ⚠ согласуй темы.
 
 ---
@@ -170,6 +182,7 @@ Meta description: Ghiduri practice gratuite scrise de un medic pediatru:
 Ключевые фразы:   ghid alimentația copilului · diversificare ·
                   copil frecvent bolnav · sfaturi pediatru
 ```
+
 > Самый SEO-ценный тип страницы — темы совпадают с родительскими поисковыми запросами.
 
 ---
@@ -207,4 +220,7 @@ guide:                    # сущность, повторяется
 4. Бэклог тем и приоритет.
 5. Языки файлов: только RO или RO+RU+EN.
 6. Нужна ли email-рассылка (и инфраструктура под неё).
+
+```
+
 ```

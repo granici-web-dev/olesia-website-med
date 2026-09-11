@@ -1,4 +1,11 @@
-import { Equals, IsEmail, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  Equals,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 import { Locale, SubscriberSource } from '../../../generated/prisma/enums';
 

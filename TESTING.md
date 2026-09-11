@@ -13,11 +13,11 @@ and the defaults for adding to it.
 
 ## Three runners
 
-| Runner | Where | Tests | Files |
-| --- | --- | ---: | ---: |
-| Jest + `@swc/jest` | `apps/api` — and, through its roots, `packages/shared` | 368 | 41 |
-| Vitest | `apps/frontend`, config `vitest.config.mts`, environment `node` | 89 | 9 |
-| Vitest | `apps/back-office`, `test` block in `vite.config.mts`, environment `jsdom` | 45 | 8 |
+| Runner             | Where                                                                      | Tests | Files |
+| ------------------ | -------------------------------------------------------------------------- | ----: | ----: |
+| Jest + `@swc/jest` | `apps/api` — and, through its roots, `packages/shared`                     |   368 |    41 |
+| Vitest             | `apps/frontend`, config `vitest.config.mts`, environment `node`            |    89 |     9 |
+| Vitest             | `apps/back-office`, `test` block in `vite.config.mts`, environment `jsdom` |    45 |     8 |
 
 All three are unit tests over pure functions: no database, no Nest test module, no rendered
 component. Together they take about four seconds.
@@ -31,106 +31,106 @@ it.
 
 **Money and the bank.**
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `payments/payments.state.spec.ts` | 27 | The bank's status strings mapped to our `PaymentState`, including the refund and partial-refund cases the sandbox spells differently from its own documentation. |
-| `payments/maib.signature.spec.ts` | 12 | Callback signature verification against recorded bodies. maib hashes `{rawBody}.{timestamp}` and base64-encodes it — the opposite order and a different encoding from the Calendly webhook, which is exactly the kind of mismatch that fails silently. |
-| `payments/start-guards.spec.ts` | 10 | `checkoutAmount` and `resolveIntent`: a service priced 0 is "on request" rather than free, maib refuses 1.00 or less, and a repeat submit must neither charge twice nor strand a declined card. |
-| `payments/maib.checkout-normalize.spec.ts` | 6 | The two spellings maib uses for `completedAt` / `paymentId`. Reading one of them gives a payment marked paid with no date, or one that cannot be refunded. |
-| `payments/mirror-status.spec.ts` | 6 | `paymentStatus` as a mirror of the `Payment` row, including the direction that used to be wrong — a payment that stops being paid. |
-| `payments/sla-clock.spec.ts` | 4 | Where the EXPRESS clock starts: the bank's moment, not the moment the sweep noticed. |
-| `materials/material-price.spec.ts` | 6 | What a paid material costs, and its composition with `checkoutAmount`. |
-| `shared/phone.spec.ts` | 8 | E.164 normalisation. maib refuses a whole checkout with error 42005 over a payer phone, so this function decides whether a sale happens. |
+| Suite                                      | Tests | What it pins                                                                                                                                                                                                                                           |
+| ------------------------------------------ | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `payments/payments.state.spec.ts`          |    27 | The bank's status strings mapped to our `PaymentState`, including the refund and partial-refund cases the sandbox spells differently from its own documentation.                                                                                       |
+| `payments/maib.signature.spec.ts`          |    12 | Callback signature verification against recorded bodies. maib hashes `{rawBody}.{timestamp}` and base64-encodes it — the opposite order and a different encoding from the Calendly webhook, which is exactly the kind of mismatch that fails silently. |
+| `payments/start-guards.spec.ts`            |    10 | `checkoutAmount` and `resolveIntent`: a service priced 0 is "on request" rather than free, maib refuses 1.00 or less, and a repeat submit must neither charge twice nor strand a declined card.                                                        |
+| `payments/maib.checkout-normalize.spec.ts` |     6 | The two spellings maib uses for `completedAt` / `paymentId`. Reading one of them gives a payment marked paid with no date, or one that cannot be refunded.                                                                                             |
+| `payments/mirror-status.spec.ts`           |     6 | `paymentStatus` as a mirror of the `Payment` row, including the direction that used to be wrong — a payment that stops being paid.                                                                                                                     |
+| `payments/sla-clock.spec.ts`               |     4 | Where the EXPRESS clock starts: the bank's moment, not the moment the sweep noticed.                                                                                                                                                                   |
+| `materials/material-price.spec.ts`         |     6 | What a paid material costs, and its composition with `checkoutAmount`.                                                                                                                                                                                 |
+| `shared/phone.spec.ts`                     |     8 | E.164 normalisation. maib refuses a whole checkout with error 42005 over a payer phone, so this function decides whether a sale happens.                                                                                                               |
 
 **Dates, deadlines and the promise to a patient.**
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `working-hours/business-hours.spec.ts` | 15 | `addWorkingMinutes` and `isOpenAt` against a declared schedule: crossing midnight, weekends, both nights a year Moldova changes its clocks, an all-days-closed schedule, a closes-before-opens typo. |
-| `working-hours/normalize-days.spec.ts` | 7 | What the `Json` schedule column becomes when it does not hold a schedule. Every way of being wrong fails the same way — a day read as closed pushes an EXPRESS deadline into next week. |
-| `working-hours/update-working-hours.dto.spec.ts` | 4 | The timezone field. `Intl.DateTimeFormat` throws a `RangeError` on an unknown zone, and a typo saved here used to turn every EXPRESS submission into a 500. |
-| `quick-questions/ticket-activation.spec.ts` | 4 | Paying does not touch a ticket that is not `awaiting_payment`. The bank redelivers and the sweep writes the same transition from the other side. |
-| `deliverable-orders/order-activation.spec.ts` | 5 | The same rule for a group-C order: paying twice must not walk a finished one backwards. |
+| Suite                                            | Tests | What it pins                                                                                                                                                                                         |
+| ------------------------------------------------ | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `working-hours/business-hours.spec.ts`           |    15 | `addWorkingMinutes` and `isOpenAt` against a declared schedule: crossing midnight, weekends, both nights a year Moldova changes its clocks, an all-days-closed schedule, a closes-before-opens typo. |
+| `working-hours/normalize-days.spec.ts`           |     7 | What the `Json` schedule column becomes when it does not hold a schedule. Every way of being wrong fails the same way — a day read as closed pushes an EXPRESS deadline into next week.              |
+| `working-hours/update-working-hours.dto.spec.ts` |     4 | The timezone field. `Intl.DateTimeFormat` throws a `RangeError` on an unknown zone, and a typo saved here used to turn every EXPRESS submission into a 500.                                          |
+| `quick-questions/ticket-activation.spec.ts`      |     4 | Paying does not touch a ticket that is not `awaiting_payment`. The bank redelivers and the sweep writes the same transition from the other side.                                                     |
+| `deliverable-orders/order-activation.spec.ts`    |     5 | The same rule for a group-C order: paying twice must not walk a finished one backwards.                                                                                                              |
 
 **Access, sessions and the second factor.**
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `auth/refresh-rules.spec.ts` | 13 | Refresh-session validity: revoked, expired, rotated, reused. |
-| `auth/totp-code.spec.ts` | 7 | The TOTP acceptance window — wide enough for a phone with a slow clock, no wider. |
-| `auth/totp-lockout.spec.ts` | 4 | The per-account brake on guessing: doubling from one minute to a ceiling of fifteen, and clearing itself. |
-| `auth/totp-login-order.spec.ts` | 4 | The lock is reported **before** a code is asked for. The other order answered `totp_required`, so the panel opened an empty field with no timer and every guess typed into it pushed the lock further out. |
-| `auth/guards/roles.guard.spec.ts` | 6 | Deny by default. The guard used to allow a route that carried no `@Roles`, so "somebody forgot the decorator" and "everyone with a token may do this" were the same thing to read. |
-| `auth/guards/must-change-password.guard.spec.ts` | 4 | The three routes an account still on its starter password may reach, named here rather than re-read off the controllers. |
-| `users/last-admin.spec.ts` | 10 | The practice keeps an administrator. The single admin account could demote or deactivate itself, and the way back is a psql prompt on the production host. |
-| `users/starter-password.spec.ts` | 2 |  |
-| `seed/profile.spec.ts` | 6 | The seed refuses to give production an administrator with a password nobody chose. |
+| Suite                                            | Tests | What it pins                                                                                                                                                                                               |
+| ------------------------------------------------ | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth/refresh-rules.spec.ts`                     |    13 | Refresh-session validity: revoked, expired, rotated, reused.                                                                                                                                               |
+| `auth/totp-code.spec.ts`                         |     7 | The TOTP acceptance window — wide enough for a phone with a slow clock, no wider.                                                                                                                          |
+| `auth/totp-lockout.spec.ts`                      |     4 | The per-account brake on guessing: doubling from one minute to a ceiling of fifteen, and clearing itself.                                                                                                  |
+| `auth/totp-login-order.spec.ts`                  |     4 | The lock is reported **before** a code is asked for. The other order answered `totp_required`, so the panel opened an empty field with no timer and every guess typed into it pushed the lock further out. |
+| `auth/guards/roles.guard.spec.ts`                |     6 | Deny by default. The guard used to allow a route that carried no `@Roles`, so "somebody forgot the decorator" and "everyone with a token may do this" were the same thing to read.                         |
+| `auth/guards/must-change-password.guard.spec.ts` |     4 | The three routes an account still on its starter password may reach, named here rather than re-read off the controllers.                                                                                   |
+| `users/last-admin.spec.ts`                       |    10 | The practice keeps an administrator. The single admin account could demote or deactivate itself, and the way back is a psql prompt on the production host.                                                 |
+| `users/starter-password.spec.ts`                 |     2 |                                                                                                                                                                                                            |
+| `seed/profile.spec.ts`                           |     6 | The seed refuses to give production an administrator with a password nobody chose.                                                                                                                         |
 
 **Files, uploads and what leaves the server.**
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `storage/file-signature.spec.ts` | 17 | The magic-byte sniffer. A declared MIME type is what the uploader claims; the first bytes are what the file is. |
-| `uploads/upload-rules.spec.ts` | 16 | Which files a patient upload link accepts, and the token rules: unknown, expired and revoked must be indistinguishable. |
-| `materials/grant-rules.spec.ts` | 14 | Who may have a paid material's file and for how long: a grant that outlives its purchase, a repeat purchase invalidating a link already sent, a capability check that can be guessed. |
-| `materials/materials.mapper.spec.ts` | 9 | What the storefront is allowed to know about a material — neither `fileUrl` nor `fileKey`, and `hasFile` decides whether a card sells at all. |
-| `common/uploaded-file-url.spec.ts` | 10 | `fileUrl` and `coverImageUrl` are an anchor and an `<img>` on the public site. The rule is the path, deliberately not the host. |
+| Suite                                | Tests | What it pins                                                                                                                                                                          |
+| ------------------------------------ | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `storage/file-signature.spec.ts`     |    17 | The magic-byte sniffer. A declared MIME type is what the uploader claims; the first bytes are what the file is.                                                                       |
+| `uploads/upload-rules.spec.ts`       |    16 | Which files a patient upload link accepts, and the token rules: unknown, expired and revoked must be indistinguishable.                                                               |
+| `materials/grant-rules.spec.ts`      |    14 | Who may have a paid material's file and for how long: a grant that outlives its purchase, a repeat purchase invalidating a link already sent, a capability check that can be guessed. |
+| `materials/materials.mapper.spec.ts` |     9 | What the storefront is allowed to know about a material — neither `fileUrl` nor `fileKey`, and `hasFile` decides whether a card sells at all.                                         |
+| `common/uploaded-file-url.spec.ts`   |    10 | `fileUrl` and `coverImageUrl` are an anchor and an `<img>` on the public site. The rule is the path, deliberately not the host.                                                       |
 
 **Patient data and GDPR.**
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `patients/erasure-targets.spec.ts` | 8 | The erasure plan against one row per table, including the four rows an audit found surviving it. |
-| `patients/interactions.spec.ts` | 5 | Which branch each lead kind takes into the dossier timeline; group-C orders had none. |
-| `common/patient-email.spec.ts` | 5 | The dedup key for a medical record — the cases that used to merge two people. |
-| `common/mask-email.spec.ts` | 5 |  |
-| `mail/patient-templates.spec.ts` | 12 | Which language a patient is written to in, and the fallback for every row predating the `locale` column. |
+| Suite                              | Tests | What it pins                                                                                             |
+| ---------------------------------- | ----: | -------------------------------------------------------------------------------------------------------- |
+| `patients/erasure-targets.spec.ts` |     8 | The erasure plan against one row per table, including the four rows an audit found surviving it.         |
+| `patients/interactions.spec.ts`    |     5 | Which branch each lead kind takes into the dossier timeline; group-C orders had none.                    |
+| `common/patient-email.spec.ts`     |     5 | The dedup key for a medical record — the cases that used to merge two people.                            |
+| `common/mask-email.spec.ts`        |     5 |                                                                                                          |
+| `mail/patient-templates.spec.ts`   |    12 | Which language a patient is written to in, and the fallback for every row predating the `locale` column. |
 
 **What leaves the building.**
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `shared/sentry-scrub.spec.ts` | 9 | The filter every Sentry report passes through: no request body, no query string, no `Authorization` or `Cookie`, and the segment after `/incarcare/`, `/uploads/` and `/download/` redacted — that one is a patient's whole credential for their upload link. The failure mode is silent by construction, because the report goes to a third party and nobody here ever sees what was in it. |
-| `health/backup-status.spec.ts` | 7 | What `/health` makes of `last-run.json`: a failed run, a stale one, a file it cannot parse, and a `"false"` that is a string. It is the only thing standing between a backup that stopped running and nobody noticing for a fortnight. |
+| Suite                          | Tests | What it pins                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------ | ----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/sentry-scrub.spec.ts`  |     9 | The filter every Sentry report passes through: no request body, no query string, no `Authorization` or `Cookie`, and the segment after `/incarcare/`, `/uploads/` and `/download/` redacted — that one is a patient's whole credential for their upload link. The failure mode is silent by construction, because the report goes to a third party and nobody here ever sees what was in it. |
+| `health/backup-status.spec.ts` |     7 | What `/health` makes of `last-run.json`: a failed run, a stale one, a file it cannot parse, and a `"false"` that is a string. It is the only thing standing between a backup that stopped running and nobody noticing for a fortnight.                                                                                                                                                       |
 
 **Boundaries and plumbing.**
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `appointments/calendly.payload.spec.ts` | 20 | What we keep from a Calendly payload and what we refuse to keep, including the reschedule link the free test account cannot reproduce live. |
-| `appointments/calendly.signature.spec.ts` | 13 | Calendly's webhook signature, against recorded bodies. |
-| `common/prisma-errors.spec.ts` | 14 | Four writes that answered 500 — a taken slug, a taken event type, a service still carrying appointments, a post pointing at a deleted category. |
-| `common/captcha/captcha.service.spec.ts` | 13 | The captcha is fail-open by design, and a _hanging_ Google has to fail open too: Node's `fetch` has no default timeout. |
-| `common/slugify.spec.ts` | 8 | One `slugify` in `packages/shared`, after three copies disagreed about the cedilla. |
-| `common/dto/pagination.spec.ts` | 7 | The envelope and its ceiling; `page` becomes an SQL OFFSET. |
-| `blog/post-visibility.spec.ts` | 6 | Deferred publication, boundary included. An article dated next spring used to be live and sorted to the top. |
+| Suite                                     | Tests | What it pins                                                                                                                                    |
+| ----------------------------------------- | ----: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appointments/calendly.payload.spec.ts`   |    20 | What we keep from a Calendly payload and what we refuse to keep, including the reschedule link the free test account cannot reproduce live.     |
+| `appointments/calendly.signature.spec.ts` |    13 | Calendly's webhook signature, against recorded bodies.                                                                                          |
+| `common/prisma-errors.spec.ts`            |    14 | Four writes that answered 500 — a taken slug, a taken event type, a service still carrying appointments, a post pointing at a deleted category. |
+| `common/captcha/captcha.service.spec.ts`  |    13 | The captcha is fail-open by design, and a _hanging_ Google has to fail open too: Node's `fetch` has no default timeout.                         |
+| `common/slugify.spec.ts`                  |     8 | One `slugify` in `packages/shared`, after three copies disagreed about the cedilla.                                                             |
+| `common/dto/pagination.spec.ts`           |     7 | The envelope and its ceiling; `page` becomes an SQL OFFSET.                                                                                     |
+| `blog/post-visibility.spec.ts`            |     6 | Deferred publication, boundary included. An article dated next spring used to be live and sorted to the top.                                    |
 
 **The public site** (`apps/frontend`, Vitest) — all of it under `lib/`.
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `lib/form-errors.spec.ts` | 17 | The four failures a visitor can act on stay distinguishable, in all three languages. |
-| `lib/service-price.spec.ts` | 16 | Every price and duration string the site renders, in all three locales: the client's `priceLabel` beating a compiled-in one, the RU → RO fallback, `price: 0` reading as "on request". |
-| `lib/api.spec.ts` | 14 | `serviceTag` in three languages, and `getJson`'s two branches — emptiness at build time, an outage at runtime. |
-| `lib/working-hours.spec.ts` | 14 | The opening hours and the EXPRESS promise, read correctly in all three languages. |
-| `lib/validation.spec.ts` | 7 | The one anchored email regex, against the cases the four unanchored ones got wrong. |
-| `lib/calendly.spec.ts` | 6 | The **absence** of a fallback: a service with no scheduling URL gets `null` and renders no button, rather than booking a stranger's calendar. |
-| `lib/contacts.spec.ts` | 6 | A phone number is written for a human and dialled by a machine. |
-| `lib/service-content.spec.ts` | 5 | An untranslated field reads as Romanian; an empty one renders nothing. |
-| `lib/markdown.spec.tsx` | 4 | GFM tables survive, and an outbound link carries `rel="noopener"`. |
+| Suite                         | Tests | What it pins                                                                                                                                                                           |
+| ----------------------------- | ----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/form-errors.spec.ts`     |    17 | The four failures a visitor can act on stay distinguishable, in all three languages.                                                                                                   |
+| `lib/service-price.spec.ts`   |    16 | Every price and duration string the site renders, in all three locales: the client's `priceLabel` beating a compiled-in one, the RU → RO fallback, `price: 0` reading as "on request". |
+| `lib/api.spec.ts`             |    14 | `serviceTag` in three languages, and `getJson`'s two branches — emptiness at build time, an outage at runtime.                                                                         |
+| `lib/working-hours.spec.ts`   |    14 | The opening hours and the EXPRESS promise, read correctly in all three languages.                                                                                                      |
+| `lib/validation.spec.ts`      |     7 | The one anchored email regex, against the cases the four unanchored ones got wrong.                                                                                                    |
+| `lib/calendly.spec.ts`        |     6 | The **absence** of a fallback: a service with no scheduling URL gets `null` and renders no button, rather than booking a stranger's calendar.                                          |
+| `lib/contacts.spec.ts`        |     6 | A phone number is written for a human and dialled by a machine.                                                                                                                        |
+| `lib/service-content.spec.ts` |     5 | An untranslated field reads as Romanian; an empty one renders nothing.                                                                                                                 |
+| `lib/markdown.spec.tsx`       |     4 | GFM tables survive, and an outbound link carries `rel="noopener"`.                                                                                                                     |
 
 **The back office** (`apps/back-office`, Vitest).
 
-| Suite | Tests | What it pins |
-| --- | ---: | --- |
-| `auth/session-rules.spec.ts` | 8 | `totpLockSeconds` reading the API's 429, and the return path that used to drop its query string. |
-| `api/http.spec.ts` | 6 | What the HTTP client makes of an answer that is not a 200 with JSON — a 2FA switch reporting "Cod invalid" after it had already turned the factor off, a stopped API leaving spinners running. |
-| `features/media/parse-url.spec.ts` | 7 | Every shape of media link the doctor might paste; the wrong one shows a blank player to visitors. |
-| `features/payments/format.spec.ts` | 6 | The receipt pasted into her own mail client while there is no SMTP, and money typed on a Romanian keyboard. |
-| `features/about/form-schema.spec.ts` | 5 | Only the Romanian title is required — a page held back until three translations exist is a page that never ships. |
-| `features/quick-questions/format.spec.ts` | 5 | The EXPRESS countdown: two units, never seconds. |
-| `features/working-hours/sla.spec.ts` | 5 | How any SLA value the client types reads in Romanian. |
-| `features/dashboard/format.spec.ts` | 3 |  |
+| Suite                                     | Tests | What it pins                                                                                                                                                                                   |
+| ----------------------------------------- | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth/session-rules.spec.ts`              |     8 | `totpLockSeconds` reading the API's 429, and the return path that used to drop its query string.                                                                                               |
+| `api/http.spec.ts`                        |     6 | What the HTTP client makes of an answer that is not a 200 with JSON — a 2FA switch reporting "Cod invalid" after it had already turned the factor off, a stopped API leaving spinners running. |
+| `features/media/parse-url.spec.ts`        |     7 | Every shape of media link the doctor might paste; the wrong one shows a blank player to visitors.                                                                                              |
+| `features/payments/format.spec.ts`        |     6 | The receipt pasted into her own mail client while there is no SMTP, and money typed on a Romanian keyboard.                                                                                    |
+| `features/about/form-schema.spec.ts`      |     5 | Only the Romanian title is required — a page held back until three translations exist is a page that never ships.                                                                              |
+| `features/quick-questions/format.spec.ts` |     5 | The EXPRESS countdown: two units, never seconds.                                                                                                                                               |
+| `features/working-hours/sla.spec.ts`      |     5 | How any SLA value the client types reads in Romanian.                                                                                                                                          |
+| `features/dashboard/format.spec.ts`       |     3 |                                                                                                                                                                                                |
 
 `business-hours.spec.ts` is still the model to copy: a pure function, a declared fixture,
 no database, no mocks, no Nest test module, and a header comment saying why the file exists
@@ -172,7 +172,7 @@ A third job, added 2026-09-11 (audit A11, M9), builds the API image with buildx 
 not push it. The image had broken twice and both times it was found at deploy time.
 
 **What CI still does not tell you:** whether a page renders correctly, whether Calendly or
-the bank works end to end, and whether the *stack* comes up — `docker-compose.prod.yml`,
+the bank works end to end, and whether the _stack_ comes up — `docker-compose.prod.yml`,
 the Caddyfile and the two shell scripts are exercised by hand, on a laptop, which is what
 the acceptance runs recorded in `docs/deployment.md` are.
 

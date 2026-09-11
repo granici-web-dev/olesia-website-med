@@ -31,10 +31,22 @@
       "title": "Four steps<accent>.</accent><br></br><accent>No commute.</accent>",
       "subtitle": "From booking to the written plan, everything happens in one place — at your own pace.",
       "steps": {
-        "booking": { "title": "Booking", "description": "Choose a slot from the calendar and fill in a short form with the reason for your visit." },
-        "preparation": { "title": "Preparation", "description": "24h before, you receive instructions and a list of useful information (tests, food diary, etc.)." },
-        "consultation": { "title": "Consultation", "description": "We meet on Google Meet — the link comes with your confirmation. Duration varies between 30–90 min depending on the type of consultation." },
-        "plan": { "title": "Written plan", "description": "Within 24h you receive a document with recommendations, meal plan (if applicable) and next steps." }
+        "booking": {
+          "title": "Booking",
+          "description": "Choose a slot from the calendar and fill in a short form with the reason for your visit."
+        },
+        "preparation": {
+          "title": "Preparation",
+          "description": "24h before, you receive instructions and a list of useful information (tests, food diary, etc.)."
+        },
+        "consultation": {
+          "title": "Consultation",
+          "description": "We meet on Google Meet — the link comes with your confirmation. Duration varies between 30–90 min depending on the type of consultation."
+        },
+        "plan": {
+          "title": "Written plan",
+          "description": "Within 24h you receive a document with recommendations, meal plan (if applicable) and next steps."
+        }
       },
       "footerNote": "The video platform, the form and the written plan — all managed in a single portal.",
       "cta": "See the calendar →"
@@ -78,8 +90,14 @@
       "title": "Two specializations,<br></br><accent>a single goal</accent>",
       "body": "I am a pediatrician and a nutritionist. The two roles complement each other naturally: I understand a child's body in motion, but also what builds it at the table. I work exclusively online, so that distance is no longer a problem — families from across the country and the diaspora.",
       "details": {
-        "studies": { "label": "Education", "body": "USMF \"N. Testemițanu\"\nPediatrics residency\nClinical nutrition training" },
-        "specializations": { "label": "Specializations", "body": "Pediatric nutrition\nInfant feeding\nBLW weaning" }
+        "studies": {
+          "label": "Education",
+          "body": "USMF \"N. Testemițanu\"\nPediatrics residency\nClinical nutrition training"
+        },
+        "specializations": {
+          "label": "Specializations",
+          "body": "Pediatric nutrition\nInfant feeding\nBLW weaning"
+        }
       },
       "link": "Read the full bio →"
     }

@@ -63,15 +63,15 @@ describe('detectSignature', () => {
   });
 
   it('refuses HTML, whatever it claims to be', () => {
-    expect(detectSignature(ascii('<!doctype html><script>alert(1)</script>'))).toBe(
-      null,
-    );
+    expect(
+      detectSignature(ascii('<!doctype html><script>alert(1)</script>')),
+    ).toBe(null);
   });
 
   it('refuses an SVG, which is markup and not in the allowlist', () => {
-    expect(detectSignature(ascii('<svg xmlns="http://www.w3.org/2000/svg">'))).toBe(
-      null,
-    );
+    expect(
+      detectSignature(ascii('<svg xmlns="http://www.w3.org/2000/svg">')),
+    ).toBe(null);
   });
 
   /**

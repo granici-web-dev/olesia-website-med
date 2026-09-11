@@ -44,9 +44,7 @@ export class RolesGuard implements CanActivate {
     ]);
     if (!required || required.length === 0) throw new ForbiddenException();
 
-    const user: AuthUser | undefined = context
-      .switchToHttp()
-      .getRequest().user;
+    const user: AuthUser | undefined = context.switchToHttp().getRequest().user;
     if (!user || !required.includes(user.role)) {
       throw new ForbiddenException();
     }

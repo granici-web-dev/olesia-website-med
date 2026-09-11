@@ -12,8 +12,16 @@ import { resolvePaymentState, toPaymentState } from './payments.service';
 describe('toPaymentState', () => {
   const cases: [string, Parameters<typeof toPaymentState>, PaymentState][] = [
     // The casing the sandbox actually returns, not the documented spelling.
-    ['sandbox casing of a fresh session', ['Waitingforinit'], PaymentState.created],
-    ['documented casing of a fresh session', ['WaitingForInit'], PaymentState.created],
+    [
+      'sandbox casing of a fresh session',
+      ['Waitingforinit'],
+      PaymentState.created,
+    ],
+    [
+      'documented casing of a fresh session',
+      ['WaitingForInit'],
+      PaymentState.created,
+    ],
     ['payer opened the link', ['Initialized'], PaymentState.pending],
     ['payer picked a method', ['PaymentMethodSelected'], PaymentState.pending],
     ['completed checkout, no payment yet', ['Completed'], PaymentState.paid],
@@ -24,10 +32,18 @@ describe('toPaymentState', () => {
     ['failed checkout', ['Failed'], PaymentState.failed],
 
     ['executed payment', ['Completed', 'Executed'], PaymentState.paid],
-    ['failed payment beats the checkout status', ['Completed', 'Failed'], PaymentState.failed],
+    [
+      'failed payment beats the checkout status',
+      ['Completed', 'Failed'],
+      PaymentState.failed,
+    ],
 
     // `Refunded` is not in the documented payment-status enum.
-    ['undocumented Refunded status', ['Completed', 'Refunded'], PaymentState.refunded],
+    [
+      'undocumented Refunded status',
+      ['Completed', 'Refunded'],
+      PaymentState.refunded,
+    ],
     [
       'fully refunded by amount',
       ['Completed', 'Executed', 160, 160],
@@ -94,14 +110,17 @@ describe('resolvePaymentState', () => {
 
   it('lets a partial refund become a full one', () => {
     expect(
-      resolvePaymentState(PaymentState.partially_refunded, PaymentState.refunded),
+      resolvePaymentState(
+        PaymentState.partially_refunded,
+        PaymentState.refunded,
+      ),
     ).toBe(PaymentState.refunded);
   });
 
   it('lets an open session progress and fail', () => {
-    expect(resolvePaymentState(PaymentState.created, PaymentState.pending)).toBe(
-      PaymentState.pending,
-    );
+    expect(
+      resolvePaymentState(PaymentState.created, PaymentState.pending),
+    ).toBe(PaymentState.pending);
     expect(resolvePaymentState(PaymentState.pending, PaymentState.paid)).toBe(
       PaymentState.paid,
     );

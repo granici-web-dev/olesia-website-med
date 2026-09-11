@@ -59,7 +59,10 @@ export class SubscriptionsService {
     await this.getOrThrow(id);
 
     const { count } = await this.prisma.subscription.updateMany({
-      where: { id, videoQuotaUsed: { lt: this.prisma.subscription.fields.videoQuotaTotal } },
+      where: {
+        id,
+        videoQuotaUsed: { lt: this.prisma.subscription.fields.videoQuotaTotal },
+      },
       data: { videoQuotaUsed: { increment: 1 } },
     });
     if (count === 0) throw new ConflictException('no_quota');

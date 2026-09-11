@@ -18,10 +18,9 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * all "no" — the caller answers all three with the same 404, so that a wrong
  * token cannot be told apart from a dead one.
  */
-export function isLinkUsable<T extends { expiresAt: Date; revokedAt: Date | null }>(
-  link: T | null,
-  now: Date,
-): link is T {
+export function isLinkUsable<
+  T extends { expiresAt: Date; revokedAt: Date | null },
+>(link: T | null, now: Date): link is T {
   return (
     link !== null &&
     link.revokedAt === null &&

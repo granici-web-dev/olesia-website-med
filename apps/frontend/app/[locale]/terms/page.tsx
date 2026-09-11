@@ -79,19 +79,69 @@ interface TocItem {
 
 const TOC: TocItem[] = [
   { id: 'pe-scurt', ro: 'Pe scurt', en: 'In short', ru: 'Коротко' },
-  { id: 'servicii', ro: 'Serviciile oferite', en: 'The services', ru: 'Услуги' },
-  { id: 'utilizatori', ro: 'Cine poate folosi', en: 'Who can use them', ru: 'Кто может пользоваться' },
+  {
+    id: 'servicii',
+    ro: 'Serviciile oferite',
+    en: 'The services',
+    ru: 'Услуги',
+  },
+  {
+    id: 'utilizatori',
+    ro: 'Cine poate folosi',
+    en: 'Who can use them',
+    ru: 'Кто может пользоваться',
+  },
   { id: 'programare', ro: 'Programare', en: 'Booking', ru: 'Запись' },
   { id: 'plata', ro: 'Plată', en: 'Payment', ru: 'Оплата' },
-  { id: 'anulare', ro: 'Anulare și rambursare', en: 'Cancellation & refunds', ru: 'Отмена и возврат' },
-  { id: 'rambursare', ro: 'Rambursarea, pe tipuri', en: 'Refunds by purchase', ru: 'Возврат по видам' },
-  { id: 'natura', ro: 'Natura serviciilor', en: 'Nature of the services', ru: 'Характер услуг' },
-  { id: 'obligatii', ro: 'Obligațiile tale', en: 'Your obligations', ru: 'Ваши обязанности' },
-  { id: 'raspundere', ro: 'Răspundere', en: 'Liability', ru: 'Ответственность' },
-  { id: 'proprietate', ro: 'Proprietate intelectuală', en: 'Intellectual property', ru: 'Интеллектуальная собственность' },
-  { id: 'confidentialitate', ro: 'Confidențialitate', en: 'Privacy', ru: 'Конфиденциальность' },
+  {
+    id: 'anulare',
+    ro: 'Anulare și rambursare',
+    en: 'Cancellation & refunds',
+    ru: 'Отмена и возврат',
+  },
+  {
+    id: 'rambursare',
+    ro: 'Rambursarea, pe tipuri',
+    en: 'Refunds by purchase',
+    ru: 'Возврат по видам',
+  },
+  {
+    id: 'natura',
+    ro: 'Natura serviciilor',
+    en: 'Nature of the services',
+    ru: 'Характер услуг',
+  },
+  {
+    id: 'obligatii',
+    ro: 'Obligațiile tale',
+    en: 'Your obligations',
+    ru: 'Ваши обязанности',
+  },
+  {
+    id: 'raspundere',
+    ro: 'Răspundere',
+    en: 'Liability',
+    ru: 'Ответственность',
+  },
+  {
+    id: 'proprietate',
+    ro: 'Proprietate intelectuală',
+    en: 'Intellectual property',
+    ru: 'Интеллектуальная собственность',
+  },
+  {
+    id: 'confidentialitate',
+    ro: 'Confidențialitate',
+    en: 'Privacy',
+    ru: 'Конфиденциальность',
+  },
   { id: 'modificari', ro: 'Modificări', en: 'Changes', ru: 'Изменения' },
-  { id: 'lege', ro: 'Legea aplicabilă', en: 'Governing law', ru: 'Применимое право' },
+  {
+    id: 'lege',
+    ro: 'Legea aplicabilă',
+    en: 'Governing law',
+    ru: 'Применимое право',
+  },
   { id: 'contact', ro: 'Contact', en: 'Contact', ru: 'Контакты' },
 ];
 
@@ -227,22 +277,28 @@ export default async function TermsPage({
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+            <span
+              className="size-1.5 rounded-full bg-sage"
+              aria-hidden="true"
+            />
             {ru ? 'Условия' : en ? 'Terms' : 'Termeni'}
           </p>
           <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 lg:gap-20">
             <h1 className="serif max-w-[15ch] text-[clamp(2.5rem,5.6vw,5rem)] leading-[1.04] tracking-[-0.015em] text-balance">
               {ru ? (
                 <>
-                  Условия <span className="serif-it text-sage">использования</span>
+                  Условия{' '}
+                  <span className="serif-it text-sage">использования</span>
                 </>
               ) : en ? (
                 <>
-                  Terms &amp; <span className="serif-it text-sage">conditions</span>
+                  Terms &amp;{' '}
+                  <span className="serif-it text-sage">conditions</span>
                 </>
               ) : (
                 <>
-                  Termeni și <span className="serif-it text-sage">condiții</span>
+                  Termeni și{' '}
+                  <span className="serif-it text-sage">condiții</span>
                 </>
               )}
             </h1>
@@ -280,7 +336,9 @@ export default async function TermsPage({
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                   {ru ? 'Обновлено' : en ? 'Updated' : 'Actualizat'}
                 </dt>
-                <dd className="text-ink">{ru ? META.updatedRu : en ? META.updatedEn : META.updatedRo}</dd>
+                <dd className="text-ink">
+                  {ru ? META.updatedRu : en ? META.updatedEn : META.updatedRo}
+                </dd>
                 <dt className="mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">
                   {ru ? 'Контакты' : en ? 'Contact' : 'Contact'}
                 </dt>
@@ -296,7 +354,10 @@ export default async function TermsPage({
       </section>
 
       {/* 2 · TL;DR — plain-language summary */}
-      <section id="pe-scurt" className="scroll-mt-24 border-b border-[var(--rule)] bg-paper">
+      <section
+        id="pe-scurt"
+        className="scroll-mt-24 border-b border-[var(--rule)] bg-paper"
+      >
         <div className="shell grid gap-8 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-20">
           <h2 className="serif text-[clamp(1.9rem,3.4vw,2.7rem)] leading-tight tracking-[-0.02em] text-balance">
             {ru ? 'Коротко' : en ? 'In short' : 'Pe scurt'}
@@ -320,7 +381,9 @@ export default async function TermsPage({
           aria-label={ru ? 'Разделы' : en ? 'Sections' : 'Secțiuni'}
           className="min-w-0 md:sticky md:top-[133px] md:self-start"
         >
-          <p className="eyebrow mb-4">{ru ? 'Содержание' : en ? 'Contents' : 'Cuprins'}</p>
+          <p className="eyebrow mb-4">
+            {ru ? 'Содержание' : en ? 'Contents' : 'Cuprins'}
+          </p>
           <ul className="flex flex-wrap gap-2 md:flex-col md:flex-nowrap md:gap-1">
             {TOC.map((item) => (
               <li key={item.id}>
@@ -337,14 +400,23 @@ export default async function TermsPage({
 
         <div className="min-w-0">
           {/* Serviciile oferite */}
-          <Section id="servicii" title={ru ? 'Предлагаемые услуги' : en ? 'The services we offer' : 'Serviciile oferite'}>
+          <Section
+            id="servicii"
+            title={
+              ru
+                ? 'Предлагаемые услуги'
+                : en
+                  ? 'The services we offer'
+                  : 'Serviciile oferite'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru ? (
                 <>
                   Мы предлагаем видеоконсультации — педиатрические, по питанию и
-                  интегративные — а также услуги через портал: «Спросите врача» и
-                  наблюдение с абонементами. Детали и продолжительность каждой услуги описаны
-                  на странице{' '}
+                  интегративные — а также услуги через портал: «Спросите врача»
+                  и наблюдение с абонементами. Детали и продолжительность каждой
+                  услуги описаны на странице{' '}
                   <Link href="/services" className={inlineLink}>
                     Услуги
                   </Link>
@@ -352,9 +424,10 @@ export default async function TermsPage({
                 </>
               ) : en ? (
                 <>
-                  We offer video consultations — pediatric, nutrition, and integrative —
-                  and portal-based services: “Ask the doctor” and monitoring subscriptions. The
-                  details and duration of each service are described on the{' '}
+                  We offer video consultations — pediatric, nutrition, and
+                  integrative — and portal-based services: “Ask the doctor” and
+                  monitoring subscriptions. The details and duration of each
+                  service are described on the{' '}
                   <Link href="/services" className={inlineLink}>
                     Services
                   </Link>{' '}
@@ -362,9 +435,10 @@ export default async function TermsPage({
                 </>
               ) : (
                 <>
-                  Oferim consultații video — pediatrică, de nutriție și integrativă — și
-                  servicii prin portal: „Întreabă medicul” și monitorizare cu abonamente.
-                  Detaliile și durata fiecărui serviciu sunt descrise pe pagina{' '}
+                  Oferim consultații video — pediatrică, de nutriție și
+                  integrativă — și servicii prin portal: „Întreabă medicul” și
+                  monitorizare cu abonamente. Detaliile și durata fiecărui
+                  serviciu sunt descrise pe pagina{' '}
                   <Link href="/services" className={inlineLink}>
                     Servicii
                   </Link>
@@ -375,7 +449,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Cine poate folosi serviciile */}
-          <Section id="utilizatori" title={ru ? 'Кто может пользоваться услугами' : en ? 'Who can use the services' : 'Cine poate folosi serviciile'}>
+          <Section
+            id="utilizatori"
+            title={
+              ru
+                ? 'Кто может пользоваться услугами'
+                : en
+                  ? 'Who can use the services'
+                  : 'Cine poate folosi serviciile'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Если услуга предназначена для ребёнка, запись оформляет и настоящие Условия принимает родитель или законный представитель, который подтверждает своё право действовать от имени ребёнка.'
@@ -386,7 +469,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Programare și confirmare */}
-          <Section id="programare" title={ru ? 'Запись и подтверждение' : en ? 'Booking & confirmation' : 'Programare și confirmare'}>
+          <Section
+            id="programare"
+            title={
+              ru
+                ? 'Запись и подтверждение'
+                : en
+                  ? 'Booking & confirmation'
+                  : 'Programare și confirmare'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'На видеоконсультации вы записываетесь через Calendly и получаете подтверждение выбранного времени. Для услуг через портал — отправляете заявку или вопрос.'
@@ -401,10 +493,11 @@ export default async function TermsPage({
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru ? (
                 <>
-                  Оплатить можно на сайте картой или через MIA — платёж проходит на
-                  защищённой странице BC «MAIB» S.A. — либо банковским переводом. Оплата
-                  вносится до консультации, после того как запись подтверждена.
-                  Цены указаны для каждой услуги и на странице{' '}
+                  Оплатить можно на сайте картой или через MIA — платёж проходит
+                  на защищённой странице BC «MAIB» S.A. — либо банковским
+                  переводом. Оплата вносится до консультации, после того как
+                  запись подтверждена. Цены указаны для каждой услуги и на
+                  странице{' '}
                   <Link href="/pricing" className={inlineLink}>
                     Тарифы
                   </Link>
@@ -412,10 +505,11 @@ export default async function TermsPage({
                 </>
               ) : en ? (
                 <>
-                  You can pay on the site by card or through MIA — the payment takes place
-                  on the secure page of BC “MAIB” S.A. — or by bank transfer. Payment is due
-                  before the consultation, once the booking is confirmed. Prices
-                  are shown for each service and on the{' '}
+                  You can pay on the site by card or through MIA — the payment
+                  takes place on the secure page of BC “MAIB” S.A. — or by bank
+                  transfer. Payment is due before the consultation, once the
+                  booking is confirmed. Prices are shown for each service and on
+                  the{' '}
                   <Link href="/pricing" className={inlineLink}>
                     Pricing
                   </Link>{' '}
@@ -423,10 +517,11 @@ export default async function TermsPage({
                 </>
               ) : (
                 <>
-                  Poți plăti pe site cu cardul sau prin MIA — plata are loc pe pagina
-                  securizată a BC „MAIB” S.A. — ori prin transfer bancar. Plata se achită
-                  înainte de consultație, după confirmarea programării. Prețurile sunt
-                  afișate la fiecare serviciu și pe pagina{' '}
+                  Poți plăti pe site cu cardul sau prin MIA — plata are loc pe
+                  pagina securizată a BC „MAIB” S.A. — ori prin transfer bancar.
+                  Plata se achită înainte de consultație, după confirmarea
+                  programării. Prețurile sunt afișate la fiecare serviciu și pe
+                  pagina{' '}
                   <Link href="/pricing" className={inlineLink}>
                     Tarife
                   </Link>
@@ -439,7 +534,13 @@ export default async function TermsPage({
           {/* Anulare, reprogramare și rambursare */}
           <Section
             id="anulare"
-            title={ru ? 'Отмена, перенос и возврат средств' : en ? 'Cancellation, rescheduling & refunds' : 'Anulare, reprogramare și rambursare'}
+            title={
+              ru
+                ? 'Отмена, перенос и возврат средств'
+                : en
+                  ? 'Cancellation, rescheduling & refunds'
+                  : 'Anulare, reprogramare și rambursare'
+            }
           >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
@@ -483,11 +584,23 @@ export default async function TermsPage({
           {/* Natura serviciilor medicale și limitele lor — CORE */}
           <Section
             id="natura"
-            title={ru ? 'Характер медицинских услуг и их ограничения' : en ? 'The nature of the medical services & their limits' : 'Natura serviciilor medicale și limitele lor'}
+            title={
+              ru
+                ? 'Характер медицинских услуг и их ограничения'
+                : en
+                  ? 'The nature of the medical services & their limits'
+                  : 'Natura serviciilor medicale și limitele lor'
+            }
           >
             <Callout
               tone="danger"
-              label={ru ? 'Не для экстренных случаев' : en ? 'Not for emergencies' : 'Nu pentru urgențe'}
+              label={
+                ru
+                  ? 'Не для экстренных случаев'
+                  : en
+                    ? 'Not for emergencies'
+                    : 'Nu pentru urgențe'
+              }
             >
               {ru
                 ? 'Услуги не предназначены для экстренной медицинской помощи. В неотложной ситуации звоните 112 или обратитесь в ближайшую службу экстренной помощи.'
@@ -508,7 +621,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Obligațiile tale */}
-          <Section id="obligatii" title={ru ? 'Ваши обязанности' : en ? 'Your obligations' : 'Obligațiile tale'}>
+          <Section
+            id="obligatii"
+            title={
+              ru
+                ? 'Ваши обязанности'
+                : en
+                  ? 'Your obligations'
+                  : 'Obligațiile tale'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Вы обязуетесь предоставлять точную и полную информацию о состоянии здоровья и пользоваться услугами добросовестно, в соответствии с настоящими Условиями.'
@@ -519,7 +641,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Limitarea răspunderii */}
-          <Section id="raspundere" title={ru ? 'Ограничение ответственности' : en ? 'Limitation of liability' : 'Limitarea răspunderii'}>
+          <Section
+            id="raspundere"
+            title={
+              ru
+                ? 'Ограничение ответственности'
+                : en
+                  ? 'Limitation of liability'
+                  : 'Limitarea răspunderii'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'В пределах, допускаемых законом, наша ответственность ограничивается оказанием описанных здесь услуг. Настоящие Условия не ограничивают ваши права как потребителя.'
@@ -530,7 +661,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Proprietate intelectuală */}
-          <Section id="proprietate" title={ru ? 'Интеллектуальная собственность' : en ? 'Intellectual property' : 'Proprietate intelectuală'}>
+          <Section
+            id="proprietate"
+            title={
+              ru
+                ? 'Интеллектуальная собственность'
+                : en
+                  ? 'Intellectual property'
+                  : 'Proprietate intelectuală'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Содержимое сайта — тексты, руководства, меню и статьи — принадлежит нам и не может быть воспроизведено или распространено без нашего согласия.'
@@ -541,7 +681,12 @@ export default async function TermsPage({
           </Section>
 
           {/* Confidențialitate */}
-          <Section id="confidentialitate" title={ru ? 'Конфиденциальность' : en ? 'Privacy' : 'Confidențialitate'}>
+          <Section
+            id="confidentialitate"
+            title={
+              ru ? 'Конфиденциальность' : en ? 'Privacy' : 'Confidențialitate'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru ? (
                 <>
@@ -572,7 +717,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Modificarea termenilor */}
-          <Section id="modificari" title={ru ? 'Изменение условий' : en ? 'Changes to these terms' : 'Modificarea termenilor'}>
+          <Section
+            id="modificari"
+            title={
+              ru
+                ? 'Изменение условий'
+                : en
+                  ? 'Changes to these terms'
+                  : 'Modificarea termenilor'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Мы можем обновлять настоящие Условия. Дата последнего обновления указана в верхней части страницы.'
@@ -583,7 +737,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Legea aplicabilă */}
-          <Section id="lege" title={ru ? 'Применимое право' : en ? 'Governing law' : 'Legea aplicabilă'}>
+          <Section
+            id="lege"
+            title={
+              ru
+                ? 'Применимое право'
+                : en
+                  ? 'Governing law'
+                  : 'Legea aplicabilă'
+            }
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft text-pretty">
               {ru
                 ? 'Настоящие Условия регулируются законодательством Республики Молдова. Возможные споры разрешаются согласно закону, без ущемления ваших прав как потребителя.'
@@ -594,9 +757,16 @@ export default async function TermsPage({
           </Section>
 
           {/* Contact */}
-          <Section id="contact" title={ru ? 'Контакты' : en ? 'Contact' : 'Contact'}>
+          <Section
+            id="contact"
+            title={ru ? 'Контакты' : en ? 'Contact' : 'Contact'}
+          >
             <p className="mt-5 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink text-pretty">
-              {ru ? 'По вопросам, связанным с настоящими Условиями, напишите нам на ' : en ? 'For questions about these terms, write to us at ' : 'Pentru întrebări despre acești termeni, scrie-ne la '}
+              {ru
+                ? 'По вопросам, связанным с настоящими Условиями, напишите нам на '
+                : en
+                  ? 'For questions about these terms, write to us at '
+                  : 'Pentru întrebări despre acești termeni, scrie-ne la '}
               <a href={`mailto:${META.email}`} className={inlineLink}>
                 {META.email}
               </a>
@@ -614,15 +784,24 @@ export default async function TermsPage({
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.04] tracking-[-0.02em] text-cream text-balance">
                 {ru ? (
                   <>
-                    Вопрос об <span className="serif-it text-[var(--sage-soft)]">условиях?</span>
+                    Вопрос об{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      условиях?
+                    </span>
                   </>
                 ) : en ? (
                   <>
-                    A question about <span className="serif-it text-[var(--sage-soft)]">the terms?</span>
+                    A question about{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      the terms?
+                    </span>
                   </>
                 ) : (
                   <>
-                    O întrebare despre <span className="serif-it text-[var(--sage-soft)]">condiții?</span>
+                    O întrebare despre{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      condiții?
+                    </span>
                   </>
                 )}
               </h2>
@@ -631,7 +810,11 @@ export default async function TermsPage({
                   {ru ? 'Напишите нам' : en ? 'Contact us' : 'Scrie-ne'}
                 </Link>
                 <Link href="/gdpr" className={creamUnderline}>
-                  {ru ? 'Читать политику конфиденциальности →' : en ? 'Read the privacy policy →' : 'Vezi politica de confidențialitate →'}
+                  {ru
+                    ? 'Читать политику конфиденциальности →'
+                    : en
+                      ? 'Read the privacy policy →'
+                      : 'Vezi politica de confidențialitate →'}
                 </Link>
               </div>
             </div>
@@ -682,10 +865,13 @@ function Callout({
   tone?: 'sage' | 'danger';
   children: React.ReactNode;
 }) {
-  const labelColor = tone === 'danger' ? 'text-[var(--danger)]' : 'text-sage-text';
+  const labelColor =
+    tone === 'danger' ? 'text-[var(--danger)]' : 'text-sage-text';
   return (
     <div className="mt-6 rounded-2xl border border-[var(--rule)] bg-paper p-6 md:p-8">
-      <p className={`mono mb-3 text-[11px] uppercase tracking-[0.12em] ${labelColor}`}>
+      <p
+        className={`mono mb-3 text-[11px] uppercase tracking-[0.12em] ${labelColor}`}
+      >
         {label}
       </p>
       <p className="max-w-[64ch] text-[1.0625rem] leading-relaxed text-ink text-pretty">

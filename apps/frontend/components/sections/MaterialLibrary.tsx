@@ -32,7 +32,11 @@ import { biFor, type Bi } from '@/lib/i18n-types';
 
 type Locale = 'ro' | 'en' | 'ru';
 const T: Record<string, Bi> = {
-  searchPlaceholder: { ro: 'Caută în bibliotecă…', en: 'Search the library…', ru: 'Поиск по библиотеке…' },
+  searchPlaceholder: {
+    ro: 'Caută în bibliotecă…',
+    en: 'Search the library…',
+    ru: 'Поиск по библиотеке…',
+  },
   all: { ro: 'Toate', en: 'All', ru: 'Все' },
   allAges: { ro: 'Toate vârstele', en: 'All ages', ru: 'Все возрасты' },
   category: { ro: 'Categorie', en: 'Category', ru: 'Категория' },
@@ -42,18 +46,54 @@ const T: Record<string, Bi> = {
   buy: { ro: 'Cumpără', en: 'Buy', ru: 'Купить' },
   soon: { ro: 'În curând', en: 'Coming soon', ru: 'Скоро' },
   count: { ro: 'materiale', en: 'materials', ru: 'материалов' },
-  emptyTitle: { ro: 'Niciun material găsit', en: 'No materials found', ru: 'Ничего не найдено' },
-  emptyBody: { ro: 'Încearcă altă categorie, vârstă sau termen de căutare.', en: 'Try another category, age, or search term.', ru: 'Попробуйте другую категорию, возраст или запрос.' },
-  reset: { ro: 'Resetează filtrele', en: 'Reset filters', ru: 'Сбросить фильтры' },
-  gateTitle: { ro: 'Descarcă gratuit', en: 'Free download', ru: 'Бесплатное скачивание' },
-  gateBody: { ro: 'Lasă-ți adresa și descarcă materialul. Te poți abona și la noutăți.', en: 'Leave your address and download the material. You can also subscribe to updates.', ru: 'Оставьте адрес и скачайте материал. Можно также подписаться на новости.' },
+  emptyTitle: {
+    ro: 'Niciun material găsit',
+    en: 'No materials found',
+    ru: 'Ничего не найдено',
+  },
+  emptyBody: {
+    ro: 'Încearcă altă categorie, vârstă sau termen de căutare.',
+    en: 'Try another category, age, or search term.',
+    ru: 'Попробуйте другую категорию, возраст или запрос.',
+  },
+  reset: {
+    ro: 'Resetează filtrele',
+    en: 'Reset filters',
+    ru: 'Сбросить фильтры',
+  },
+  gateTitle: {
+    ro: 'Descarcă gratuit',
+    en: 'Free download',
+    ru: 'Бесплатное скачивание',
+  },
+  gateBody: {
+    ro: 'Lasă-ți adresa și descarcă materialul. Te poți abona și la noutăți.',
+    en: 'Leave your address and download the material. You can also subscribe to updates.',
+    ru: 'Оставьте адрес и скачайте материал. Можно также подписаться на новости.',
+  },
   email: { ro: 'Email', en: 'Email', ru: 'Email' },
-  emailPlaceholder: { ro: 'email@exemplu.md', en: 'email@example.com', ru: 'email@example.com' },
-  consent: { ro: 'Sunt de acord să primesc noutăți pe email și ca adresa mea să fie păstrată în acest scop.', en: 'I agree to receive updates by email and to my address being kept for that purpose.', ru: 'Согласен(на) получать новости по email и на хранение моего адреса для этой цели.' },
-  getIt: { ro: 'Descarcă materialul', en: 'Download the material', ru: 'Скачать материал' },
+  emailPlaceholder: {
+    ro: 'email@exemplu.md',
+    en: 'email@example.com',
+    ru: 'email@example.com',
+  },
+  consent: {
+    ro: 'Sunt de acord să primesc noutăți pe email și ca adresa mea să fie păstrată în acest scop.',
+    en: 'I agree to receive updates by email and to my address being kept for that purpose.',
+    ru: 'Согласен(на) получать новости по email и на хранение моего адреса для этой цели.',
+  },
+  getIt: {
+    ro: 'Descarcă materialul',
+    en: 'Download the material',
+    ru: 'Скачать материал',
+  },
   sending: { ro: 'Se salvează…', en: 'Saving…', ru: 'Сохранение…' },
   cancel: { ro: 'Anulează', en: 'Cancel', ru: 'Отмена' },
-  ready: { ro: 'Gata! Descărcarea ta este pregătită.', en: 'Done! Your download is ready.', ru: 'Готово! Файл готов к скачиванию.' },
+  ready: {
+    ro: 'Gata! Descărcarea ta este pregătită.',
+    en: 'Done! Your download is ready.',
+    ru: 'Готово! Файл готов к скачиванию.',
+  },
   flagRecommended: { ro: 'Recomandat', en: 'Recommended', ru: 'Рекомендуем' },
   flagPopular: { ro: 'Popular', en: 'Popular', ru: 'Популярное' },
   flagNew: { ro: 'Nou', en: 'New', ru: 'Новое' },
@@ -67,10 +107,32 @@ const FLAG_LABEL: Record<string, Bi> = {
 
 function DocIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="34" height="34" fill="none" aria-hidden="true">
-      <path d="M6 3.5h7L18 8v12.5H6V3.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M13 3.5V8h5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M12 11v5m0 0 2-2m-2 2-2-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 24 24"
+      width="34"
+      height="34"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M6 3.5h7L18 8v12.5H6V3.5Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13 3.5V8h5"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 11v5m0 0 2-2m-2 2-2-2"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -81,7 +143,8 @@ function DocIcon() {
 const chip = (on: boolean, tone: 'ink' | 'sage' = 'ink') => {
   const base =
     'cursor-pointer rounded-full border px-3.5 py-1.5 text-[12px] font-medium uppercase tracking-[0.07em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage';
-  if (!on) return `${base} border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage`;
+  if (!on)
+    return `${base} border-[var(--rule)] text-ink-soft hover:border-sage hover:text-sage`;
   return tone === 'sage'
     ? `${base} border-sage bg-sage/15 text-sage-deep`
     : `${base} border-ink bg-ink text-cream`;
@@ -91,17 +154,45 @@ const chip = (on: boolean, tone: 'ink' | 'sage' = 'ink') => {
    floating eyebrow). Different glyph per axis reinforces topic vs. audience. */
 function TagIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-      <path d="M4 4h7l9 9-7 7-9-9V4Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 4h7l9 9-7 7-9-9V4Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
       <circle cx="8.4" cy="8.4" r="1.3" fill="currentColor" />
     </svg>
   );
 }
 function AgeIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-      <circle cx="12" cy="7.2" r="3.2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="7.2"
+        r="3.2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -158,7 +249,8 @@ export function MaterialLibrary({
     const q = query.trim().toLowerCase();
     return materials.filter((m) => {
       if (cat !== 'all' && m.categorySlug !== cat) return false;
-      if (age !== 'all' && m.ageKeys.length > 0 && !m.ageKeys.includes(age)) return false;
+      if (age !== 'all' && m.ageKeys.length > 0 && !m.ageKeys.includes(age))
+        return false;
       if (q) {
         const hay = `${title(m)} ${summary(m)}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -173,7 +265,8 @@ export function MaterialLibrary({
     setAge('all');
   };
 
-  const unlock = (slug: string) => setUnlocked((prev) => new Set(prev).add(slug));
+  const unlock = (slug: string) =>
+    setUnlocked((prev) => new Set(prev).add(slug));
 
   return (
     <div>
@@ -187,7 +280,10 @@ export function MaterialLibrary({
           aria-label={lc(T.searchPlaceholder)}
           className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 pr-8 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-text"
         />
-        <span aria-hidden="true" className="mono pointer-events-none absolute right-1 top-2.5 text-ink-soft">
+        <span
+          aria-hidden="true"
+          className="mono pointer-events-none absolute right-1 top-2.5 text-ink-soft"
+        >
           ⌕
         </span>
       </div>
@@ -204,12 +300,27 @@ export function MaterialLibrary({
             </span>
             {lc(T.category)}
           </span>
-          <div role="group" aria-label={lc(T.category)} className="flex flex-wrap gap-2">
-            <button type="button" aria-pressed={cat === 'all'} onClick={() => setCat('all')} className={chip(cat === 'all', 'ink')}>
+          <div
+            role="group"
+            aria-label={lc(T.category)}
+            className="flex flex-wrap gap-2"
+          >
+            <button
+              type="button"
+              aria-pressed={cat === 'all'}
+              onClick={() => setCat('all')}
+              className={chip(cat === 'all', 'ink')}
+            >
               {lc(T.all)}
             </button>
             {categories.map((c) => (
-              <button key={c.slug} type="button" aria-pressed={cat === c.slug} onClick={() => setCat(c.slug)} className={chip(cat === c.slug, 'ink')}>
+              <button
+                key={c.slug}
+                type="button"
+                aria-pressed={cat === c.slug}
+                onClick={() => setCat(c.slug)}
+                className={chip(cat === c.slug, 'ink')}
+              >
                 {tri(c.nameRo, c.nameEn, c.nameRu)}
               </button>
             ))}
@@ -224,12 +335,27 @@ export function MaterialLibrary({
             </span>
             {lc(T.age)}
           </span>
-          <div role="group" aria-label={lc(T.age)} className="flex flex-wrap gap-2">
-            <button type="button" aria-pressed={age === 'all'} onClick={() => setAge('all')} className={`${chip(age === 'all', 'sage')} mono`}>
+          <div
+            role="group"
+            aria-label={lc(T.age)}
+            className="flex flex-wrap gap-2"
+          >
+            <button
+              type="button"
+              aria-pressed={age === 'all'}
+              onClick={() => setAge('all')}
+              className={`${chip(age === 'all', 'sage')} mono`}
+            >
               {lc(T.allAges)}
             </button>
             {ages.map((a) => (
-              <button key={a.key} type="button" aria-pressed={age === a.key} onClick={() => setAge(a.key)} className={`${chip(age === a.key, 'sage')} mono tabular-nums`}>
+              <button
+                key={a.key}
+                type="button"
+                aria-pressed={age === a.key}
+                onClick={() => setAge(a.key)}
+                className={`${chip(age === a.key, 'sage')} mono tabular-nums`}
+              >
                 {lc(a.label)}
               </button>
             ))}
@@ -237,7 +363,10 @@ export function MaterialLibrary({
         </div>
       </div>
 
-      <p aria-live="polite" className="mono mt-8 text-[11px] uppercase tracking-[0.1em] text-ink-soft">
+      <p
+        aria-live="polite"
+        className="mono mt-8 text-[11px] uppercase tracking-[0.1em] text-ink-soft"
+      >
         {filtered.length} {lc(T.count)}
       </p>
 
@@ -247,7 +376,9 @@ export function MaterialLibrary({
           <h3 className="serif text-[clamp(1.6rem,3vw,2.2rem)] leading-tight tracking-[-0.02em] text-balance">
             {lc(T.emptyTitle)}
           </h3>
-          <p className="mx-auto mt-3 max-w-[44ch] leading-relaxed text-ink-soft text-pretty">{lc(T.emptyBody)}</p>
+          <p className="mx-auto mt-3 max-w-[44ch] leading-relaxed text-ink-soft text-pretty">
+            {lc(T.emptyBody)}
+          </p>
           <button
             type="button"
             onClick={reset}
@@ -273,7 +404,9 @@ export function MaterialLibrary({
                     </span>
                     <span
                       className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
-                        m.access === 'free' ? 'bg-sage/15 text-sage-text' : 'bg-ink text-cream'
+                        m.access === 'free'
+                          ? 'bg-sage/15 text-sage-text'
+                          : 'bg-ink text-cream'
                       }`}
                     >
                       {m.access === 'free' ? lc(T.free) : priceLabel(m)}
@@ -299,7 +432,9 @@ export function MaterialLibrary({
                     <h3 className="serif text-[1.3rem] leading-snug tracking-[-0.01em] text-ink text-pretty">
                       {title(m)}
                     </h3>
-                    <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{summary(m)}</p>
+                    <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
+                      {summary(m)}
+                    </p>
                     {formatLine(m) && (
                       <p className="mono mt-4 text-[11px] uppercase tracking-[0.08em] text-ink-soft">
                         {formatLine(m)}
@@ -322,8 +457,7 @@ export function MaterialLibrary({
                         >
                           {lc(T.buy)} · {priceLabel(m)}
                         </a>
-                      ) : (
-                        isUnlocked ? (
+                      ) : isUnlocked ? (
                         <a
                           href={m.fileUrl ?? '#'}
                           download
@@ -337,9 +471,14 @@ export function MaterialLibrary({
                           onClick={() => setGate(m)}
                           className={cardCta}
                         >
-                          {lc(T.download)} <span aria-hidden="true" className="transition-transform group-hover:translate-y-0.5">↓</span>
+                          {lc(T.download)}{' '}
+                          <span
+                            aria-hidden="true"
+                            className="transition-transform group-hover:translate-y-0.5"
+                          >
+                            ↓
+                          </span>
                         </button>
-                        )
                       )}
                     </div>
                   </div>
@@ -421,14 +560,21 @@ function EmailGate({
   return (
     <Modal open onClose={onClose} labelledBy={titleId}>
       <div className="p-7">
-        <p className="mono text-[10px] uppercase tracking-[0.16em] text-sage-text">{lc(T.gateTitle)}</p>
-        <h3 id={titleId} className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty">
+        <p className="mono text-[10px] uppercase tracking-[0.16em] text-sage-text">
+          {lc(T.gateTitle)}
+        </p>
+        <h3
+          id={titleId}
+          className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty"
+        >
           {materialTitle}
         </h3>
 
         {status === 'ready' ? (
           <div className="mt-4">
-            <p className="text-[0.95rem] leading-relaxed text-ink text-pretty">{lc(T.ready)}</p>
+            <p className="text-[0.95rem] leading-relaxed text-ink text-pretty">
+              {lc(T.ready)}
+            </p>
             <div className="mt-6 flex items-center gap-4">
               <a
                 href={fileUrl}
@@ -448,10 +594,15 @@ function EmailGate({
           </div>
         ) : (
           <>
-            <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(T.gateBody)}</p>
+            <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
+              {lc(T.gateBody)}
+            </p>
 
             <form className="mt-6" onSubmit={onSubmit}>
-              <label htmlFor={emailId} className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text">
+              <label
+                htmlFor={emailId}
+                className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text"
+              >
                 {lc(T.email)}
               </label>
               <input
@@ -475,7 +626,10 @@ function EmailGate({
               </label>
 
               {error && (
-                <p role="alert" className="mt-4 text-[0.85rem] leading-relaxed text-[var(--walnut,#8a5a3a)]">
+                <p
+                  role="alert"
+                  className="mt-4 text-[0.85rem] leading-relaxed text-[var(--walnut,#8a5a3a)]"
+                >
                   {error}
                 </p>
               )}

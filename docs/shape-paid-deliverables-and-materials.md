@@ -24,7 +24,7 @@ Five things found while reading. Three of them change the plan.
 1. **The paid PDFs are on the public route.** `toPublicMaterialDto` withholds
    `fileUrl` for a paid material, and the mapper's own comment says why that is a
    stopgap: the file is in the same public `/uploads` directory as the free ones,
-   so the URL *is* the file. Withholding a URL is not access control, it is
+   so the URL _is_ the file. Withholding a URL is not access control, it is
    obscurity with a comment apologising for itself. All four paid materials
    currently have `fileUrl: null`, so nothing is exposed today — the fix is
    cheap now and expensive the week after the client uploads a file.
@@ -228,14 +228,14 @@ grant, an expired one and an unknown token all answer **404**, per
 
 New routes:
 
-| Route | Access | Body / returns |
-|---|---|---|
-| `POST /leads/deliverable/checkout` | public, captcha + honeypot, 3/min | `{product, name, email, phone?, message?, locale, termsAcceptedVersion, intentKey, company?}` → `{checkoutUrl, orderId}`. **No amount.** |
-| `POST /leads/material/checkout` | public, captcha + honeypot, 3/min | `{slug, name, email, phone?, locale, termsAcceptedVersion, intentKey, company?}` → `{checkoutUrl, orderId}`. **No amount.** |
-| `POST /materials/grant` | public, 10/min | `{orderId, intentKey}` → `{downloadUrl, expiresAt, downloadsLeft}`. 404 for a wrong key, a payment that is not `paid`, or a target that is not a material. |
-| `GET /materials/download/:token` | public, 30/min | Streams the file. 404 for unknown, expired and exhausted alike. |
-| `POST /materials/file/private` | admin / editor | The paid-material upload → `{key, name}`. |
-| `GET /deliverable-orders?status=…` | admin / editor | The `Neachitate` tab. |
+| Route                              | Access                            | Body / returns                                                                                                                                             |
+| ---------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /leads/deliverable/checkout` | public, captcha + honeypot, 3/min | `{product, name, email, phone?, message?, locale, termsAcceptedVersion, intentKey, company?}` → `{checkoutUrl, orderId}`. **No amount.**                   |
+| `POST /leads/material/checkout`    | public, captcha + honeypot, 3/min | `{slug, name, email, phone?, locale, termsAcceptedVersion, intentKey, company?}` → `{checkoutUrl, orderId}`. **No amount.**                                |
+| `POST /materials/grant`            | public, 10/min                    | `{orderId, intentKey}` → `{downloadUrl, expiresAt, downloadsLeft}`. 404 for a wrong key, a payment that is not `paid`, or a target that is not a material. |
+| `GET /materials/download/:token`   | public, 30/min                    | Streams the file. 404 for unknown, expired and exhausted alike.                                                                                            |
+| `POST /materials/file/private`     | admin / editor                    | The paid-material upload → `{key, name}`.                                                                                                                  |
+| `GET /deliverable-orders?status=…` | admin / editor                    | The `Neachitate` tab.                                                                                                                                      |
 
 **Deleted:** `POST /leads/deliverable`.
 

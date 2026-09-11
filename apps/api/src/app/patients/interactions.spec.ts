@@ -49,7 +49,9 @@ const rows = {
 
 describe('toInteractions', () => {
   it('gives a group-C order its own branch, labelled with the product ordered', () => {
-    const order = toInteractions(rows).find((i) => i.source === 'deliverable_order');
+    const order = toInteractions(rows).find(
+      (i) => i.source === 'deliverable_order',
+    );
 
     expect(order).toEqual({
       source: 'deliverable_order',
@@ -63,7 +65,9 @@ describe('toInteractions', () => {
   });
 
   it('dates each kind by the moment that matters to the doctor', () => {
-    const byId = new Map(toInteractions(rows).map((i) => [i.sourceId, i.occurredAt]));
+    const byId = new Map(
+      toInteractions(rows).map((i) => [i.sourceId, i.occurredAt]),
+    );
 
     // The appointment by when it happens, the subscription by when it starts,
     // and the two requests by when they came in.

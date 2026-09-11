@@ -1,9 +1,7 @@
 import type { MediaAppearanceDto } from '@olesia/shared';
 import type { MediaAppearance } from '../../generated/prisma/client';
 
-export function toMediaAppearanceDto(
-  m: MediaAppearance,
-): MediaAppearanceDto {
+export function toMediaAppearanceDto(m: MediaAppearance): MediaAppearanceDto {
   return {
     id: m.id,
     kind: m.kind as MediaAppearanceDto['kind'],

@@ -75,7 +75,11 @@ export class TotpService {
     }
 
     const secret = generateSecret();
-    const otpauthUrl = generateURI({ issuer: ISSUER, label: user.email, secret });
+    const otpauthUrl = generateURI({
+      issuer: ISSUER,
+      label: user.email,
+      secret,
+    });
 
     await this.prisma.user.update({
       where: { id: userId },
@@ -84,7 +88,11 @@ export class TotpService {
       data: { totpSecret: secret, totpEnabled: false, totpRecoveryCodes: [] },
     });
 
-    return { secret, otpauthUrl, qrDataUrl: await QRCode.toDataURL(otpauthUrl) };
+    return {
+      secret,
+      otpauthUrl,
+      qrDataUrl: await QRCode.toDataURL(otpauthUrl),
+    };
   }
 
   /**
@@ -204,7 +212,13 @@ export class TotpService {
   private async recordAttempt(userId: string, success: boolean): Promise<void> {
     if (success) {
       await this.prisma.user.updateMany({
-        where: { id: userId, OR: [{ totpFailedCount: { gt: 0 } }, { totpLockedUntil: { not: null } }] },
+        where: {
+          id: userId,
+          OR: [
+            { totpFailedCount: { gt: 0 } },
+            { totpLockedUntil: { not: null } },
+          ],
+        },
         data: { totpFailedCount: 0, totpLockedUntil: null },
       });
       return;
@@ -249,7 +263,11 @@ export class TotpService {
     const retryAfterSeconds = this.lockRemainingSeconds(user);
     if (retryAfterSeconds === 0) return;
     throw new HttpException(
-      { statusCode: HttpStatus.TOO_MANY_REQUESTS, message: 'totp_locked', retryAfterSeconds },
+      {
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
+        message: 'totp_locked',
+        retryAfterSeconds,
+      },
       HttpStatus.TOO_MANY_REQUESTS,
     );
   }

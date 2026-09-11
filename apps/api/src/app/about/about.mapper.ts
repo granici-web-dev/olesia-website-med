@@ -1,8 +1,4 @@
-import type {
-  AboutPageDto,
-  AboutStat,
-  AboutCredential,
-} from '@olesia/shared';
+import type { AboutPageDto, AboutStat, AboutCredential } from '@olesia/shared';
 import type { AboutPage } from '../../generated/prisma/client';
 
 /** Prisma `Json?` columns come back as `unknown`; coerce to a typed array. */

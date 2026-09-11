@@ -268,7 +268,10 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
         // that hand something over: the key is the capability, and the whole
         // point of using it rather than the order reference is that it never
         // left this tab.
-        if (body.state === 'paid' && HANDS_SOMETHING_OVER.includes(body.targetType)) {
+        if (
+          body.state === 'paid' &&
+          HANDS_SOMETHING_OVER.includes(body.targetType)
+        ) {
           setNextStep(await claimNextStep(orderId, checkoutIntentKey()));
         }
         // The purchase is finished either way. Releasing the intent key means
@@ -358,23 +361,23 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
           {paid && handsOver && nextStep !== undefined && (
             <NextStep step={nextStep} locale={locale} />
           )}
-        <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-[0.9375rem]">
-          <Row label={t('order')}>
-            <span className="mono text-[0.875rem]">{payment.orderId}</span>
-          </Row>
-          <Row label={t('service')}>{payment.description}</Row>
-          <Row label={t('amount')}>
-            {formatMoney(locale, payment.amount, payment.currency)}
-          </Row>
-          {payment.paidAt && (
-            <Row label={t('paidAt')}>
-              {new Date(payment.paidAt).toLocaleString(INTL_LOCALE[locale], {
-                dateStyle: 'long',
-                timeStyle: 'short',
-              })}
+          <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-[0.9375rem]">
+            <Row label={t('order')}>
+              <span className="mono text-[0.875rem]">{payment.orderId}</span>
             </Row>
-          )}
-        </dl>
+            <Row label={t('service')}>{payment.description}</Row>
+            <Row label={t('amount')}>
+              {formatMoney(locale, payment.amount, payment.currency)}
+            </Row>
+            {payment.paidAt && (
+              <Row label={t('paidAt')}>
+                {new Date(payment.paidAt).toLocaleString(INTL_LOCALE[locale], {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
+                })}
+              </Row>
+            )}
+          </dl>
         </>
       }
     />
@@ -423,7 +426,9 @@ function NextStep({
         href={step.url}
         className="inline-flex items-center bg-ink px-[22px] py-[13px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage"
       >
-        {step.kind === 'material_download' ? t('downloadLink') : t('uploadLink')}
+        {step.kind === 'material_download'
+          ? t('downloadLink')
+          : t('uploadLink')}
       </a>
       <p className="mt-4 text-[0.82rem] leading-relaxed text-ink-soft text-pretty">
         {t('linkGoodUntil')} {until}

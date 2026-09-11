@@ -10,7 +10,12 @@ import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { calendlyUrlFor } from '@/lib/calendly';
 import { formatServiceDuration } from '@/lib/service-price';
 import { Reveal } from '@/components/ui/Reveal';
-import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
+import {
+  btnDark,
+  underlineLg,
+  creamPill,
+  creamUnderline,
+} from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
 import { biFor, type Bi } from '@/lib/i18n-types';
 
@@ -57,17 +62,49 @@ export async function generateMetadata({
 }
 
 const CHOOSE_WHEN: Bi[] = [
-  { ro: 'Situația este complexă sau durează de mai mult timp.', en: 'The situation is complex or has been going on for a while.', ru: 'Ситуация сложная или тянется уже давно.' },
-  { ro: 'Ai mai multe preocupări deodată — sănătate și alimentație împreună.', en: 'You have several concerns at once — health and nutrition together.', ru: 'Сразу несколько вопросов — и здоровье, и питание.' },
-  { ro: 'Vrei o evaluare aprofundată, cu mai mult timp de discuție.', en: 'You want an in-depth assessment, with more time to talk.', ru: 'Нужна углублённая оценка и время, чтобы всё обсудить.' },
-  { ro: 'Ai nevoie nu doar de un sfat unic, ci de urmărire în timp.', en: 'You need not just one-off advice, but follow-up over time.', ru: 'Нужен не разовый совет, а наблюдение со временем.' },
+  {
+    ro: 'Situația este complexă sau durează de mai mult timp.',
+    en: 'The situation is complex or has been going on for a while.',
+    ru: 'Ситуация сложная или тянется уже давно.',
+  },
+  {
+    ro: 'Ai mai multe preocupări deodată — sănătate și alimentație împreună.',
+    en: 'You have several concerns at once — health and nutrition together.',
+    ru: 'Сразу несколько вопросов — и здоровье, и питание.',
+  },
+  {
+    ro: 'Vrei o evaluare aprofundată, cu mai mult timp de discuție.',
+    en: 'You want an in-depth assessment, with more time to talk.',
+    ru: 'Нужна углублённая оценка и время, чтобы всё обсудить.',
+  },
+  {
+    ro: 'Ai nevoie nu doar de un sfat unic, ci de urmărire în timp.',
+    en: 'You need not just one-off advice, but follow-up over time.',
+    ru: 'Нужен не разовый совет, а наблюдение со временем.',
+  },
 ];
 
 const INCLUDES: Bi[] = [
-  { ro: 'Apel video aprofundat', en: 'An in-depth video call', ru: 'Углублённый видеозвонок' },
-  { ro: 'Evaluare combinată: pediatrică și nutrițională', en: 'Combined assessment: pediatric and nutrition', ru: 'Комплексная оценка: педиатрия и питание' },
-  { ro: 'Un plan de acțiune personalizat', en: 'A personalized action plan', ru: 'Персональный план действий' },
-  { ro: 'Îndrumare inițială de monitorizare și urmărire', en: 'Initial monitoring and follow-up guidance', ru: 'Первые рекомендации по наблюдению' },
+  {
+    ro: 'Apel video aprofundat',
+    en: 'An in-depth video call',
+    ru: 'Углублённый видеозвонок',
+  },
+  {
+    ro: 'Evaluare combinată: pediatrică și nutrițională',
+    en: 'Combined assessment: pediatric and nutrition',
+    ru: 'Комплексная оценка: педиатрия и питание',
+  },
+  {
+    ro: 'Un plan de acțiune personalizat',
+    en: 'A personalized action plan',
+    ru: 'Персональный план действий',
+  },
+  {
+    ro: 'Îndrumare inițială de monitorizare și urmărire',
+    en: 'Initial monitoring and follow-up guidance',
+    ru: 'Первые рекомендации по наблюдению',
+  },
 ];
 
 const STEPS: { title: Bi; text: Bi }[] = [
@@ -114,17 +151,37 @@ const STEPS: { title: Bi; text: Bi }[] = [
 const COMPARE: { code: string; title: Bi; text: Bi; current?: boolean }[] = [
   {
     code: 'pediatric',
-    title: { ro: 'Consultație pediatrică', en: 'Pediatric consultation', ru: 'Педиатрическая консультация' },
-    text: { ro: 'O problemă de sănătate, evaluare focusată.', en: 'One health issue, a focused assessment.', ru: 'Одна проблема со здоровьем, точечная оценка.' },
+    title: {
+      ro: 'Consultație pediatrică',
+      en: 'Pediatric consultation',
+      ru: 'Педиатрическая консультация',
+    },
+    text: {
+      ro: 'O problemă de sănătate, evaluare focusată.',
+      en: 'One health issue, a focused assessment.',
+      ru: 'Одна проблема со здоровьем, точечная оценка.',
+    },
   },
   {
     code: 'nutrition_copii',
-    title: { ro: 'Consultație de nutriție', en: 'Nutrition consultation', ru: 'Консультация по питанию' },
-    text: { ro: 'Alimentație și hrănire.', en: 'Feeding and nutrition.', ru: 'Питание и кормление.' },
+    title: {
+      ro: 'Consultație de nutriție',
+      en: 'Nutrition consultation',
+      ru: 'Консультация по питанию',
+    },
+    text: {
+      ro: 'Alimentație și hrănire.',
+      en: 'Feeding and nutrition.',
+      ru: 'Питание и кормление.',
+    },
   },
   {
     code: 'integrative',
-    title: { ro: 'Consultație integrativă', en: 'Integrative consultation', ru: 'Интегративная консультация' },
+    title: {
+      ro: 'Consultație integrativă',
+      en: 'Integrative consultation',
+      ru: 'Интегративная консультация',
+    },
     text: {
       ro: 'Situații complexe care îmbină sănătatea și nutriția, cu mai mult timp și cu monitorizare.',
       en: 'Complex situations combining health and nutrition, with more time and monitoring.',
@@ -136,7 +193,11 @@ const COMPARE: { code: string; title: Bi; text: Bi; current?: boolean }[] = [
 
 const FAQ: { q: Bi; a: Bi }[] = [
   {
-    q: { ro: 'Ce include monitorizarea?', en: 'What does the monitoring include?', ru: 'Что включает наблюдение?' },
+    q: {
+      ro: 'Ce include monitorizarea?',
+      en: 'What does the monitoring include?',
+      ru: 'Что включает наблюдение?',
+    },
     a: {
       ro: 'O îndrumare inițială de urmărire după consultație — verificăm progresul și ajustăm planul. Pentru urmărire continuă pe mai multe luni există abonamentele de monitorizare (1–6 luni).',
       en: 'Initial follow-up guidance after the consultation — we check progress and adjust the plan. For continuous, multi-month follow-up there are the monitoring subscriptions (1–6 months).',
@@ -144,7 +205,11 @@ const FAQ: { q: Bi; a: Bi }[] = [
     },
   },
   {
-    q: { ro: 'Cât durează urmărirea după consultație?', en: 'How long does follow-up last?', ru: 'Сколько длится наблюдение после консультации?' },
+    q: {
+      ro: 'Cât durează urmărirea după consultație?',
+      en: 'How long does follow-up last?',
+      ru: 'Сколько длится наблюдение после консультации?',
+    },
     a: {
       ro: 'Urmărirea inițială este inclusă imediat după consultație; pentru o perioadă mai lungă, vezi Monitorizare și abonamente.',
       en: 'Initial follow-up is included right after the consultation; for a longer period, see Monitoring & subscriptions.',
@@ -152,15 +217,35 @@ const FAQ: { q: Bi; a: Bi }[] = [
     },
   },
   {
-    q: { ro: 'Este pentru copii sau și pentru adulți?', en: 'Is it for children or adults too?', ru: 'Это для детей или для взрослых тоже?' },
-    a: { ro: 'Pentru copii și adulți.', en: 'For children and adults.', ru: 'Для детей и взрослых.' },
+    q: {
+      ro: 'Este pentru copii sau și pentru adulți?',
+      en: 'Is it for children or adults too?',
+      ru: 'Это для детей или для взрослых тоже?',
+    },
+    a: {
+      ro: 'Pentru copii și adulți.',
+      en: 'For children and adults.',
+      ru: 'Для детей и взрослых.',
+    },
   },
   {
-    q: { ro: 'În ce limbi pot discuta?', en: 'Which languages can I speak in?', ru: 'На каких языках можно общаться?' },
-    a: { ro: 'Română, rusă și engleză.', en: 'Romanian, Russian, and English.', ru: 'На румынском, русском и английском.' },
+    q: {
+      ro: 'În ce limbi pot discuta?',
+      en: 'Which languages can I speak in?',
+      ru: 'На каких языках можно общаться?',
+    },
+    a: {
+      ro: 'Română, rusă și engleză.',
+      en: 'Romanian, Russian, and English.',
+      ru: 'На румынском, русском и английском.',
+    },
   },
   {
-    q: { ro: 'Cum se face plata?', en: 'How do I pay?', ru: 'Как происходит оплата?' },
+    q: {
+      ro: 'Cum se face plata?',
+      en: 'How do I pay?',
+      ru: 'Как происходит оплата?',
+    },
     a: {
       ro: 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după confirmarea programării.',
       en: 'By bank transfer (no online payment for now). You’ll get the details once your booking is confirmed.',
@@ -168,7 +253,11 @@ const FAQ: { q: Bi; a: Bi }[] = [
     },
   },
   {
-    q: { ro: 'Pot reprograma sau anula?', en: 'Can I reschedule or cancel?', ru: 'Можно ли перенести или отменить?' },
+    q: {
+      ro: 'Pot reprograma sau anula?',
+      en: 'Can I reschedule or cancel?',
+      ru: 'Можно ли перенести или отменить?',
+    },
     a: {
       ro: 'Da, din linkul de confirmare, cu cel puțin 24 de ore înainte.',
       en: 'Yes, from your confirmation link at least 24 hours ahead.',
@@ -200,11 +289,27 @@ export default async function IntegrativePage({
     );
   const duration = durationFor('integrative');
 
-  const bookReason = ru ? 'Интегративная консультация' : en ? 'Integrative consultation' : 'Consultație integrativă';
+  const bookReason = ru
+    ? 'Интегративная консультация'
+    : en
+      ? 'Integrative consultation'
+      : 'Consultație integrativă';
 
-  const BookPrimary = ({ className, label }: { className: string; label: string }) =>
+  const BookPrimary = ({
+    className,
+    label,
+  }: {
+    className: string;
+    label: string;
+  }) =>
     integrativeUrl ? (
-      <CalendlyButton url={integrativeUrl} reason={bookReason} label={label} withArrow={false} className={className} />
+      <CalendlyButton
+        url={integrativeUrl}
+        reason={bookReason}
+        label={label}
+        withArrow={false}
+        className={className}
+      />
     ) : (
       <Link href="/contact" className={className}>
         {label}
@@ -217,31 +322,51 @@ export default async function IntegrativePage({
         className="shell pt-6 md:pt-8"
         items={[
           { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
-          { label: ru ? 'Услуги' : en ? 'Services' : 'Servicii', href: '/services' },
-          { label: ru ? 'Интегративная консультация' : en ? 'Integrative consultation' : 'Consultație integrativă' },
+          {
+            label: ru ? 'Услуги' : en ? 'Services' : 'Servicii',
+            href: '/services',
+          },
+          {
+            label: ru
+              ? 'Интегративная консультация'
+              : en
+                ? 'Integrative consultation'
+                : 'Consultație integrativă',
+          },
         ]}
       />
       {/* 1 · Hero — editorial split: statement left, description right (no photo) */}
       <section className="border-b border-[var(--rule)]">
         <div className="shell py-20 md:py-28">
           <p className="mb-10 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-            <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
-            {ru ? 'Интегративная · Видеоконсультация' : en ? 'Integrative · Video consultation' : 'Integrativă · Consultație video'}
+            <span
+              className="size-1.5 rounded-full bg-sage"
+              aria-hidden="true"
+            />
+            {ru
+              ? 'Интегративная · Видеоконсультация'
+              : en
+                ? 'Integrative · Video consultation'
+                : 'Integrativă · Consultație video'}
           </p>
           <div className="grid items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 lg:gap-20">
             <div>
               <h1 className="serif max-w-[16ch] text-[clamp(2.4rem,5.4vw,4.8rem)] leading-[1.05] tracking-[-0.015em] text-balance">
                 {ru ? (
                   <>
-                    <span className="serif-it text-sage">Интегративная</span> консультация и наблюдение
+                    <span className="serif-it text-sage">Интегративная</span>{' '}
+                    консультация и наблюдение
                   </>
                 ) : en ? (
                   <>
-                    <span className="serif-it text-sage">Integrative</span> consultation & monitoring
+                    <span className="serif-it text-sage">Integrative</span>{' '}
+                    consultation & monitoring
                   </>
                 ) : (
                   <>
-                    Consultație <span className="serif-it text-sage">integrativă</span> și monitorizare
+                    Consultație{' '}
+                    <span className="serif-it text-sage">integrativă</span> și
+                    monitorizare
                   </>
                 )}
               </h1>
@@ -255,10 +380,17 @@ export default async function IntegrativePage({
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <BookPrimary
                   className={btnDark}
-                  label={ru ? 'Записаться на консультацию' : en ? 'Book a consultation' : 'Programează o consultație'}
+                  label={
+                    ru
+                      ? 'Записаться на консультацию'
+                      : en
+                        ? 'Book a consultation'
+                        : 'Programează o consultație'
+                  }
                 />
                 <Link href="/pricing" className={underlineLg}>
-                  {ru ? 'Смотреть цены' : en ? 'See pricing' : 'Vezi tarifele'} →
+                  {ru ? 'Смотреть цены' : en ? 'See pricing' : 'Vezi tarifele'}{' '}
+                  →
                 </Link>
               </div>
             </div>
@@ -294,24 +426,37 @@ export default async function IntegrativePage({
       {/* 2 · When to choose this (differentiation core) */}
       <section className="shell py-20 md:py-28">
         <header className="max-w-[40rem]">
-          <p className="eyebrow mb-3">{ru ? 'Подходит ли вам?' : en ? 'Is it for you?' : 'Ți se potrivește?'}</p>
+          <p className="eyebrow mb-3">
+            {ru
+              ? 'Подходит ли вам?'
+              : en
+                ? 'Is it for you?'
+                : 'Ți se potrivește?'}
+          </p>
           <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-pretty">
             {ru ? (
               <>
-                Когда <span className="serif-it text-sage">выбрать</span> эту консультацию
+                Когда <span className="serif-it text-sage">выбрать</span> эту
+                консультацию
               </>
             ) : en ? (
               <>
-                When to <span className="serif-it text-sage">choose</span> this consultation
+                When to <span className="serif-it text-sage">choose</span> this
+                consultation
               </>
             ) : (
               <>
-                Când să <span className="serif-it text-sage">alegi</span> această consultație
+                Când să <span className="serif-it text-sage">alegi</span>{' '}
+                această consultație
               </>
             )}
           </h2>
           <p className="mt-5 text-[1.0625rem] leading-relaxed text-ink-soft">
-            {ru ? 'Выбирайте интегративную консультацию, если:' : en ? 'Choose the integrative consultation if:' : 'Alege consultația integrativă dacă:'}
+            {ru
+              ? 'Выбирайте интегративную консультацию, если:'
+              : en
+                ? 'Choose the integrative consultation if:'
+                : 'Alege consultația integrativă dacă:'}
           </p>
         </header>
         <div className="mt-10 grid gap-x-16 gap-y-9 sm:grid-cols-2">
@@ -321,10 +466,15 @@ export default async function IntegrativePage({
               delay={(i % 2) * 70}
               className="grid grid-cols-[1.6em_1fr] gap-x-3 border-t border-[var(--rule)] pt-6"
             >
-              <span aria-hidden="true" className="serif text-[1.4rem] italic leading-none text-sage">
+              <span
+                aria-hidden="true"
+                className="serif text-[1.4rem] italic leading-none text-sage"
+              >
                 {i + 1}
               </span>
-              <p className="text-[1.15rem] leading-relaxed text-ink text-pretty">{lc(it)}</p>
+              <p className="text-[1.15rem] leading-relaxed text-ink text-pretty">
+                {lc(it)}
+              </p>
             </Reveal>
           ))}
         </div>
@@ -334,7 +484,9 @@ export default async function IntegrativePage({
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-[1fr_1.3fr] md:gap-20 md:py-24">
           <div>
-            <p className="eyebrow mb-3">{ru ? 'В пакете' : en ? 'In the package' : 'În pachet'}</p>
+            <p className="eyebrow mb-3">
+              {ru ? 'В пакете' : en ? 'In the package' : 'În pachet'}
+            </p>
             <h2 className="serif text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.05] tracking-[-0.02em] text-balance">
               {ru ? (
                 <>
@@ -376,15 +528,22 @@ export default async function IntegrativePage({
           <h2 className="serif text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.0] tracking-[-0.02em] text-cream text-balance">
             {ru ? (
               <>
-                Как это <span className="serif-it text-[var(--sage-soft)]">проходит</span>
+                Как это{' '}
+                <span className="serif-it text-[var(--sage-soft)]">
+                  проходит
+                </span>
               </>
             ) : en ? (
               <>
-                How it <span className="serif-it text-[var(--sage-soft)]">works</span>
+                How it{' '}
+                <span className="serif-it text-[var(--sage-soft)]">works</span>
               </>
             ) : (
               <>
-                Cum <span className="serif-it text-[var(--sage-soft)]">decurge</span>
+                Cum{' '}
+                <span className="serif-it text-[var(--sage-soft)]">
+                  decurge
+                </span>
               </>
             )}
           </h2>
@@ -404,7 +563,9 @@ export default async function IntegrativePage({
                     {i + 1}
                   </span>
                 </span>
-                <h3 className="serif text-[1.6rem] leading-snug text-cream">{lc(step.title)}</h3>
+                <h3 className="serif text-[1.6rem] leading-snug text-cream">
+                  {lc(step.title)}
+                </h3>
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-cream/80 text-pretty">
                   {lc(step.text)}
                 </p>
@@ -417,19 +578,24 @@ export default async function IntegrativePage({
       {/* 5 · How it differs (3-way mini comparison) */}
       <section className="shell py-20 md:py-28">
         <div className="mb-12 md:mb-16 max-w-[40rem]">
-          <p className="eyebrow mb-3">{ru ? 'Кратко' : en ? 'Side by side' : 'Pe scurt'}</p>
+          <p className="eyebrow mb-3">
+            {ru ? 'Кратко' : en ? 'Side by side' : 'Pe scurt'}
+          </p>
           <h2 className="serif text-[clamp(2rem,3.6vw,3.2rem)] leading-[1.03] tracking-[-0.02em] text-pretty">
             {ru ? (
               <>
-                Чем она <span className="serif-it text-sage">отличается</span> от остальных
+                Чем она <span className="serif-it text-sage">отличается</span>{' '}
+                от остальных
               </>
             ) : en ? (
               <>
-                How it <span className="serif-it text-sage">differs</span> from the others
+                How it <span className="serif-it text-sage">differs</span> from
+                the others
               </>
             ) : (
               <>
-                Prin ce <span className="serif-it text-sage">diferă</span> de celelalte consultații
+                Prin ce <span className="serif-it text-sage">diferă</span> de
+                celelalte consultații
               </>
             )}
           </h2>
@@ -472,7 +638,9 @@ export default async function IntegrativePage({
       {/* 6 · About the doctor — content left, portrait right */}
       <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
         <div className="md:sticky md:top-[133px] md:self-start">
-          <p className="eyebrow mb-4">{ru ? 'О враче' : en ? 'About the doctor' : 'Despre medic'}</p>
+          <p className="eyebrow mb-4">
+            {ru ? 'О враче' : en ? 'About the doctor' : 'Despre medic'}
+          </p>
           <h2 className="serif text-[clamp(1.9rem,3.6vw,3rem)] leading-[1.06] tracking-[-0.02em] text-balance">
             {ru ? (
               <>
@@ -495,11 +663,21 @@ export default async function IntegrativePage({
                 ? 'Dr. Olesea Jalba is a pediatrician with a Master’s in Public Health – Human Nutrition. It’s exactly this dual expertise that makes an integrative consultation possible — an assessment that sees the child (or adult) as a whole, not in pieces.'
                 : 'Dr. Olesea Jalba este medic pediatru cu master în Sănătate Publică – Nutriție Umană. Tocmai această dublă expertiză face posibilă o consultație integrativă — o evaluare care privește copilul (sau adultul) ca pe un întreg, nu pe bucăți.'}
           </p>
-          <p className="eyebrow mt-9 mb-3">{ru ? 'Двойная экспертиза' : en ? 'Dual expertise' : 'Dublă expertiză'}</p>
+          <p className="eyebrow mt-9 mb-3">
+            {ru
+              ? 'Двойная экспертиза'
+              : en
+                ? 'Dual expertise'
+                : 'Dublă expertiză'}
+          </p>
           <ul className="grid gap-2.5 sm:grid-cols-2">
             {[
               { ro: 'Medic pediatru', en: 'Pediatrician', ru: 'Врач-педиатр' },
-              { ro: 'Master în Nutriție Umană (USMF)', en: 'MSc in Human Nutrition (USMF)', ru: 'Магистр нутрициологии человека (USMF)' },
+              {
+                ro: 'Master în Nutriție Umană (USMF)',
+                en: 'MSc in Human Nutrition (USMF)',
+                ru: 'Магистр нутрициологии человека (USMF)',
+              },
             ].map((f) => (
               <li
                 key={f.en}
@@ -513,7 +691,12 @@ export default async function IntegrativePage({
             ))}
           </ul>
           <Link href="/about" className={`mt-9 ${underlineLg}`}>
-            {ru ? 'Полный профиль' : en ? 'See full profile' : 'Vezi profilul complet'} →
+            {ru
+              ? 'Полный профиль'
+              : en
+                ? 'See full profile'
+                : 'Vezi profilul complet'}{' '}
+            →
           </Link>
         </div>
 
@@ -540,9 +723,19 @@ export default async function IntegrativePage({
       <section className="bg-paper">
         <div className="shell grid gap-10 py-16 md:grid-cols-2 md:gap-20 md:py-20">
           <div>
-            <p className="eyebrow mb-3">{ru ? 'Нужна поддержка дольше?' : en ? 'Longer support?' : 'Sprijin mai lung?'}</p>
+            <p className="eyebrow mb-3">
+              {ru
+                ? 'Нужна поддержка дольше?'
+                : en
+                  ? 'Longer support?'
+                  : 'Sprijin mai lung?'}
+            </p>
             <h3 className="serif text-[clamp(1.5rem,2.6vw,2.2rem)] leading-snug tracking-[-0.01em] text-balance">
-              {ru ? 'Нужна поддержка на несколько месяцев?' : en ? 'Need support over several months?' : 'Ai nevoie de sprijin pe termen mai lung?'}
+              {ru
+                ? 'Нужна поддержка на несколько месяцев?'
+                : en
+                  ? 'Need support over several months?'
+                  : 'Ai nevoie de sprijin pe termen mai lung?'}
             </h3>
             <p className="mt-4 max-w-[48ch] leading-relaxed text-ink-soft text-pretty">
               {ru
@@ -552,35 +745,44 @@ export default async function IntegrativePage({
                   : 'Dacă vrei urmărire continuă timp de mai multe luni, vezi monitorizare și abonamente (1–6 luni).'}
             </p>
             <Link href="/monitoring" className={`mt-6 ${underlineLg}`}>
-              {ru ? 'Наблюдение и абонементы' : en ? 'Monitoring & subscriptions' : 'Monitorizare și abonamente'} →
+              {ru
+                ? 'Наблюдение и абонементы'
+                : en
+                  ? 'Monitoring & subscriptions'
+                  : 'Monitorizare și abonamente'}{' '}
+              →
             </Link>
           </div>
           <div>
-            <p className="eyebrow mb-3">{ru ? 'Важно' : en ? 'Important' : 'Important'}</p>
+            <p className="eyebrow mb-3">
+              {ru ? 'Важно' : en ? 'Important' : 'Important'}
+            </p>
             <p className="max-w-[56ch] leading-relaxed text-ink-soft text-pretty">
               {ru ? (
                 <>
-                  Интегративная онлайн-консультация — не для экстренных случаев. Если состояние
-                  тяжёлое или быстро ухудшается, звоните{' '}
-                  <span className="font-medium text-ink">112</span> или поезжайте в ближайшее
-                  отделение неотложной помощи. Иногда нужен очный осмотр или обследования — об этом
-                  мы скажем вам прямо.
+                  Интегративная онлайн-консультация — не для экстренных случаев.
+                  Если состояние тяжёлое или быстро ухудшается, звоните{' '}
+                  <span className="font-medium text-ink">112</span> или
+                  поезжайте в ближайшее отделение неотложной помощи. Иногда
+                  нужен очный осмотр или обследования — об этом мы скажем вам
+                  прямо.
                 </>
               ) : en ? (
                 <>
-                  An online integrative consultation isn’t for medical emergencies. If the
-                  condition is serious or worsening fast, call{' '}
-                  <span className="font-medium text-ink">112</span> or go to the nearest emergency
-                  service. Some situations may need a physical exam or tests — we’ll tell you
-                  clearly.
+                  An online integrative consultation isn’t for medical
+                  emergencies. If the condition is serious or worsening fast,
+                  call <span className="font-medium text-ink">112</span> or go
+                  to the nearest emergency service. Some situations may need a
+                  physical exam or tests — we’ll tell you clearly.
                 </>
               ) : (
                 <>
-                  Consultația integrativă online nu este pentru urgențe medicale. Dacă starea este
-                  gravă sau se agravează rapid, sună la{' '}
-                  <span className="font-medium text-ink">112</span> sau mergi la cel mai apropiat
-                  serviciu de urgență. Unele situații pot necesita o examinare fizică sau
-                  investigații — îți vom spune clar.
+                  Consultația integrativă online nu este pentru urgențe
+                  medicale. Dacă starea este gravă sau se agravează rapid, sună
+                  la <span className="font-medium text-ink">112</span> sau mergi
+                  la cel mai apropiat serviciu de urgență. Unele situații pot
+                  necesita o examinare fizică sau investigații — îți vom spune
+                  clar.
                 </>
               )}
             </p>
@@ -591,7 +793,9 @@ export default async function IntegrativePage({
       {/* 8 · FAQ — centered */}
       <section className="shell py-20 md:py-28">
         <div className="mx-auto max-w-[820px] text-center">
-          <p className="eyebrow mb-3">{ru ? 'Полезно знать' : en ? 'Good to know' : 'Bine de știut'}</p>
+          <p className="eyebrow mb-3">
+            {ru ? 'Полезно знать' : en ? 'Good to know' : 'Bine de știut'}
+          </p>
           <h2 className="serif text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.0] tracking-[-0.02em] text-balance">
             {ru ? (
               <>
@@ -610,7 +814,10 @@ export default async function IntegrativePage({
         </div>
         <div className="mx-auto mt-12 max-w-[760px]">
           {FAQ.map((it) => (
-            <details key={it.q.en} className="group border-t border-[var(--rule)] last:border-b">
+            <details
+              key={it.q.en}
+              className="group border-t border-[var(--rule)] last:border-b"
+            >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage [&::-webkit-details-marker]:hidden">
                 <span className="serif text-[clamp(1.2rem,2vw,1.6rem)] leading-snug text-ink">
                   {lc(it.q)}
@@ -638,15 +845,24 @@ export default async function IntegrativePage({
               <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
                 {ru ? (
                   <>
-                    Записаться на интегративную <span className="serif-it text-[var(--sage-soft)]">консультацию</span>
+                    Записаться на интегративную{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      консультацию
+                    </span>
                   </>
                 ) : en ? (
                   <>
-                    Book an integrative <span className="serif-it text-[var(--sage-soft)]">consultation</span>
+                    Book an integrative{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      consultation
+                    </span>
                   </>
                 ) : (
                   <>
-                    Programează o consultație <span className="serif-it text-[var(--sage-soft)]">integrativă</span>
+                    Programează o consultație{' '}
+                    <span className="serif-it text-[var(--sage-soft)]">
+                      integrativă
+                    </span>
                   </>
                 )}
               </h2>
@@ -662,9 +878,17 @@ export default async function IntegrativePage({
                   }
                 />
                 <span className="text-sm text-[var(--sage-soft)]">
-                  {ru ? 'Не уверены, что подходит? ' : en ? 'Not sure what fits? ' : 'Nu ești sigur ce ți se potrivește? '}
+                  {ru
+                    ? 'Не уверены, что подходит? '
+                    : en
+                      ? 'Not sure what fits? '
+                      : 'Nu ești sigur ce ți se potrivește? '}
                   <Link href="/services" className={creamUnderline}>
-                    {ru ? 'Все услуги →' : en ? 'See all services →' : 'Vezi toate serviciile →'}
+                    {ru
+                      ? 'Все услуги →'
+                      : en
+                        ? 'See all services →'
+                        : 'Vezi toate serviciile →'}
                   </Link>
                 </span>
               </div>
@@ -677,17 +901,29 @@ export default async function IntegrativePage({
               <ul className="grid gap-3 text-[1.05rem]">
                 <li>
                   <Link href="/pediatrics" className={creamUnderline}>
-                    {ru ? 'Только проблема со здоровьем? → Педиатрическая консультация' : en ? 'Just a health issue? → Pediatric consultation' : 'Doar o problemă de sănătate? → Consultație pediatrică'}
+                    {ru
+                      ? 'Только проблема со здоровьем? → Педиатрическая консультация'
+                      : en
+                        ? 'Just a health issue? → Pediatric consultation'
+                        : 'Doar o problemă de sănătate? → Consultație pediatrică'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/nutrition" className={creamUnderline}>
-                    {ru ? 'Только питание? → Консультация по питанию' : en ? 'Just nutrition? → Nutrition consultation' : 'Doar alimentație? → Consultație de nutriție'}
+                    {ru
+                      ? 'Только питание? → Консультация по питанию'
+                      : en
+                        ? 'Just nutrition? → Nutrition consultation'
+                        : 'Doar alimentație? → Consultație de nutriție'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/monitoring" className={creamUnderline}>
-                    {ru ? 'Поддержка на месяцы? → Наблюдение и абонементы' : en ? 'Support over months? → Monitoring & subscriptions' : 'Sprijin pe mai multe luni? → Monitorizare și abonamente'}
+                    {ru
+                      ? 'Поддержка на месяцы? → Наблюдение и абонементы'
+                      : en
+                        ? 'Support over months? → Monitoring & subscriptions'
+                        : 'Sprijin pe mai multe luni? → Monitorizare și abonamente'}
                   </Link>
                 </li>
               </ul>

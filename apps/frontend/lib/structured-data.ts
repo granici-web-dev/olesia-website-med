@@ -101,10 +101,7 @@ export function physicianJsonLd({
   };
 }
 
-export function articleJsonLd(
-  locale: string,
-  post: PublicPostDto,
-): object {
+export function articleJsonLd(locale: string, post: PublicPostDto): object {
   const headline = loc(locale, post.titleRo, post.titleEn, post.titleRu);
   const description = loc(
     locale,

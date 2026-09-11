@@ -353,7 +353,8 @@ export class LeadsService {
     // the content moves onto the order the live session actually pays for, and
     // the empty one goes.
     if (started.reused) {
-      if (started.targetId) await this.rewriteUnpaidOrder(started.targetId, dto);
+      if (started.targetId)
+        await this.rewriteUnpaidOrder(started.targetId, dto);
       await this.prisma.deliverableOrder.delete({ where: { id: order.id } });
     }
 

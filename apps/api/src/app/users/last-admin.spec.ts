@@ -10,9 +10,17 @@ import { Role } from '../../generated/prisma/enums';
 import { refuseAccountChange, type AccountState } from './last-admin';
 
 const ADMIN: AccountState = { id: 'a1', role: Role.admin, isActive: true };
-const OTHER_ADMIN: AccountState = { id: 'a2', role: Role.admin, isActive: true };
+const OTHER_ADMIN: AccountState = {
+  id: 'a2',
+  role: Role.admin,
+  isActive: true,
+};
 const EDITOR: AccountState = { id: 'e1', role: Role.editor, isActive: true };
-const RETIRED_ADMIN: AccountState = { id: 'a3', role: Role.admin, isActive: false };
+const RETIRED_ADMIN: AccountState = {
+  id: 'a3',
+  role: Role.admin,
+  isActive: false,
+};
 
 describe('refuseAccountChange', () => {
   it('lets an ordinary edit through', () => {
@@ -23,19 +31,27 @@ describe('refuseAccountChange', () => {
 
   it('refuses an admin demoting herself, even with another admin around', () => {
     expect(
-      refuseAccountChange('a1', 'a1', { role: Role.editor }, [ADMIN, OTHER_ADMIN]),
+      refuseAccountChange('a1', 'a1', { role: Role.editor }, [
+        ADMIN,
+        OTHER_ADMIN,
+      ]),
     ).toBe('cannot_demote_self');
   });
 
   it('refuses an admin deactivating herself, even with another admin around', () => {
     expect(
-      refuseAccountChange('a1', 'a1', { isActive: false }, [ADMIN, OTHER_ADMIN]),
+      refuseAccountChange('a1', 'a1', { isActive: false }, [
+        ADMIN,
+        OTHER_ADMIN,
+      ]),
     ).toBe('cannot_deactivate_self');
   });
 
   it('lets an admin edit her own name and reassert her own role', () => {
     expect(
-      refuseAccountChange('a1', 'a1', { role: Role.admin, isActive: true }, [ADMIN]),
+      refuseAccountChange('a1', 'a1', { role: Role.admin, isActive: true }, [
+        ADMIN,
+      ]),
     ).toBeNull();
   });
 
@@ -53,7 +69,10 @@ describe('refuseAccountChange', () => {
 
   it('allows demoting an admin while another active one remains', () => {
     expect(
-      refuseAccountChange('a2', 'a1', { role: Role.editor }, [ADMIN, OTHER_ADMIN]),
+      refuseAccountChange('a2', 'a1', { role: Role.editor }, [
+        ADMIN,
+        OTHER_ADMIN,
+      ]),
     ).toBeNull();
   });
 
@@ -61,7 +80,10 @@ describe('refuseAccountChange', () => {
     // The account exists and says `admin`, and it cannot log in. Counting it
     // would leave the practice locked out while the list looked fine.
     expect(
-      refuseAccountChange('a3', 'a1', { role: Role.editor }, [ADMIN, RETIRED_ADMIN]),
+      refuseAccountChange('a3', 'a1', { role: Role.editor }, [
+        ADMIN,
+        RETIRED_ADMIN,
+      ]),
     ).toBe('last_admin');
   });
 
@@ -73,6 +95,8 @@ describe('refuseAccountChange', () => {
 
   it('says nothing about an account that is not there', () => {
     // The caller has already answered 404; this must not shadow it with a 409.
-    expect(refuseAccountChange('a1', 'gone', { role: Role.editor }, [ADMIN])).toBeNull();
+    expect(
+      refuseAccountChange('a1', 'gone', { role: Role.editor }, [ADMIN]),
+    ).toBeNull();
   });
 });

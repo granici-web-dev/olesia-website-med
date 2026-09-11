@@ -51,7 +51,9 @@ describe('contactHref', () => {
 
 describe('socialNetwork', () => {
   it('reads the network from the URL, not from the label', () => {
-    expect(socialNetwork('https://www.instagram.com/dr.olesea')).toBe('instagram');
+    expect(socialNetwork('https://www.instagram.com/dr.olesea')).toBe(
+      'instagram',
+    );
     expect(socialNetwork('https://www.facebook.com/olesea')).toBe('facebook');
     expect(socialNetwork('https://t.me/olesea')).toBe('telegram');
     expect(socialNetwork('https://example.com/olesea')).toBe('other');

@@ -1,7 +1,4 @@
-import type {
-  PaymentDto,
-  PurchaseNextStepDto,
-} from '@olesia/shared';
+import type { PaymentDto, PurchaseNextStepDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
 import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';

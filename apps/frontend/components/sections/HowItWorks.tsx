@@ -20,7 +20,9 @@ export function HowItWorks() {
           <div className={styles.eyebrow}>{t('eyebrow')}</div>
           <h2 className={styles.title}>
             {t.rich('title', {
-              accent: (chunks) => <span className={styles.titleAccent}>{chunks}</span>,
+              accent: (chunks) => (
+                <span className={styles.titleAccent}>{chunks}</span>
+              ),
               br: () => <br />,
             })}
           </h2>

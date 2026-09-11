@@ -18,7 +18,9 @@ function monday(days: ReturnType<typeof normalizeDays>) {
 
 describe('normalizeDays', () => {
   it('always returns the seven days, Monday first', () => {
-    expect(normalizeDays([]).map((d) => d.weekday)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(normalizeDays([]).map((d) => d.weekday)).toEqual([
+      1, 2, 3, 4, 5, 6, 7,
+    ]);
   });
 
   it('falls back whole when the column holds something that is not a list', () => {
@@ -28,7 +30,9 @@ describe('normalizeDays', () => {
   });
 
   it('fills in a weekday the stored schedule never mentions', () => {
-    const stored = [{ weekday: MONDAY, closed: false, opensAt: '08:00', closesAt: '16:00' }];
+    const stored = [
+      { weekday: MONDAY, closed: false, opensAt: '08:00', closesAt: '16:00' },
+    ];
     const days = normalizeDays(stored);
 
     expect(monday(days)).toEqual(stored[0]);
@@ -40,8 +44,10 @@ describe('normalizeDays', () => {
 
   it('rejects a time that is not HH:MM and keeps the placeholder hour', () => {
     for (const opensAt of ['9:00', '25:00', '09:60', '09h00', '', 900, null]) {
-      expect(monday(normalizeDays([{ weekday: MONDAY, closed: false, opensAt }])).opensAt)
-        .toBe('09:00');
+      expect(
+        monday(normalizeDays([{ weekday: MONDAY, closed: false, opensAt }]))
+          .opensAt,
+      ).toBe('09:00');
     }
   });
 
@@ -53,10 +59,14 @@ describe('normalizeDays', () => {
   });
 
   it('takes `closed` only when it is really a boolean', () => {
-    expect(monday(normalizeDays([{ weekday: MONDAY, closed: true }])).closed).toBe(true);
+    expect(
+      monday(normalizeDays([{ weekday: MONDAY, closed: true }])).closed,
+    ).toBe(true);
     // `Boolean('false')` is true, which is how a string in this column used to
     // close a day that the client had opened.
-    expect(monday(normalizeDays([{ weekday: MONDAY, closed: 'false' }])).closed).toBe(false);
+    expect(
+      monday(normalizeDays([{ weekday: MONDAY, closed: 'false' }])).closed,
+    ).toBe(false);
   });
 
   it('matches a weekday written as a string, as older rows have it', () => {

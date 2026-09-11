@@ -87,7 +87,11 @@ describe('erasureTargets', () => {
     // The arm this model did not have until A5 (F12): an order linked to the
     // dossier whose client has since changed the address on it.
     expect(
-      matches(where, { id: 'order-2', patientId: PATIENT_ID, clientEmail: 'nou@y.md' }),
+      matches(where, {
+        id: 'order-2',
+        patientId: PATIENT_ID,
+        clientEmail: 'nou@y.md',
+      }),
     ).toBe(true);
     expect(
       matches(where, { id: 'order-3', patientId: null, clientEmail: 'x@y.md' }),
@@ -128,9 +132,9 @@ describe('erasureTargets', () => {
   it('reaches an upload link through its own address or its appointment', () => {
     const where = plan.uploadLink.where as Clause;
     // The link for a group-C order: no appointment behind it at all.
-    expect(matches(where, { id: 'l1', clientEmail: EMAIL, appointment: null })).toBe(
-      true,
-    );
+    expect(
+      matches(where, { id: 'l1', clientEmail: EMAIL, appointment: null }),
+    ).toBe(true);
     // The link for a Calendly booking that carried no address.
     expect(
       matches(where, {

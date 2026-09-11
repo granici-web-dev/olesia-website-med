@@ -16,7 +16,8 @@ export const CAPTCHA_ACTION = 'captchaAction';
  * have been minted for (the frontend passes the same name), so a token taken
  * from one form cannot be replayed against another.
  */
-export const CaptchaProtected = (action: string) => SetMetadata(CAPTCHA_ACTION, action);
+export const CaptchaProtected = (action: string) =>
+  SetMetadata(CAPTCHA_ACTION, action);
 
 @Injectable()
 export class CaptchaGuard implements CanActivate {

@@ -92,7 +92,8 @@ export const ro = {
     copied: 'Copiate',
     disableLabel: 'Introdu un cod pentru a dezactiva',
     disableCta: 'Dezactivează',
-    disableHint: 'Cerem un cod valid și la dezactivare, ca o sesiune furată să nu fie suficientă.',
+    disableHint:
+      'Cerem un cod valid și la dezactivare, ca o sesiune furată să nu fie suficientă.',
     enabledToast: 'Autentificarea în doi pași este activă.',
     disabledToast: 'Autentificarea în doi pași a fost dezactivată.',
     invalidCode: 'Cod incorect. Mai încearcă o dată.',
@@ -462,7 +463,8 @@ export const ro = {
       calendlyHint:
         'Doar grupul cu programare — sursa de adevăr pentru mapare. Completat automat dacă alegi evenimentul mai sus.',
       calendlyUrl: 'Link Calendly de rezervare',
-      calendlyUrlHint: 'Link public deschis în embed-ul de pe site (ex. calendly.com/cont/serviciu).',
+      calendlyUrlHint:
+        'Link public deschis în embed-ul de pe site (ex. calendly.com/cont/serviciu).',
       sortOrder: 'Ordine pe site',
       activeField: 'Afișat pe site',
       activeHint: 'Serviciile inactive nu apar public.',
@@ -776,7 +778,8 @@ export const ro = {
     timeline: {
       title: 'Istoric medical',
       empty: 'Niciun istoric încă',
-      emptyBody: 'Anamnezele, notele, rețetele și documentele apar aici, în ordine cronologică.',
+      emptyBody:
+        'Anamnezele, notele, rețetele și documentele apar aici, în ordine cronologică.',
       addEntry: 'Adaugă înregistrare',
       loadErrorTitle: 'Istoricul nu a putut fi încărcat',
       loadErrorBody:
@@ -797,16 +800,19 @@ export const ro = {
 
     documents: {
       empty: 'Niciun document',
-      emptyBody: 'Încarcă analize, scrisori medicale sau alte documente (PDF, DOC).',
+      emptyBody:
+        'Încarcă analize, scrisori medicale sau alte documente (PDF, DOC).',
       upload: 'Încarcă document',
       uploading: 'Se încarcă…',
       download: 'Descarcă',
-      private: 'Documentele medicale sunt private și accesibile doar autentificat.',
+      private:
+        'Documentele medicale sunt private și accesibile doar autentificat.',
     },
 
     interactions: {
       empty: 'Nicio interacțiune',
-      emptyBody: 'Programările, abonamentele și întrebările legate de acest pacient apar aici.',
+      emptyBody:
+        'Programările, abonamentele și întrebările legate de acest pacient apar aici.',
       source: {
         appointment: 'Programare',
         subscription: 'Abonament',
@@ -1242,7 +1248,8 @@ export const ro = {
       amount: 'Sumă',
       max: 'Maxim disponibil:',
       reason: 'Motiv',
-      reasonPlaceholder: 'De ce se face rambursarea — clientul vede acest text pe extras.',
+      reasonPlaceholder:
+        'De ce se face rambursarea — clientul vede acest text pe extras.',
       submit: 'Confirmă rambursarea de',
       amountError: 'Suma trebuie să fie între 0 și maximul disponibil.',
       reasonError: 'Motivul este obligatoriu.',
@@ -1272,7 +1279,8 @@ export const ro = {
       amountHint: 'Suma încasată, în',
       amountError: 'Suma trebuie să fie mai mare decât zero.',
       note: 'Notă',
-      notePlaceholder: 'Cum au venit banii — „numerar la cabinet", „transfer 12.09".',
+      notePlaceholder:
+        'Cum au venit banii — „numerar la cabinet", „transfer 12.09".',
       submit: 'Înregistrează',
       cancel: 'Renunță',
       manualBadge: 'Manuală',
@@ -1790,7 +1798,8 @@ export const ro = {
       anchorHint:
         'Ancora din adresă se generează din titlul în română la creare și rămâne neschimbată după redenumire, ca linkurile deja trimise să funcționeze.',
       activeField: 'Vizibilă pe site',
-      activeHint: 'Ascunsă, secțiunea rămâne aici, dar nu apare pe pagina publică.',
+      activeHint:
+        'Ascunsă, secțiunea rămâne aici, dar nu apare pe pagina publică.',
       required: 'Câmp obligatoriu',
       save: 'Salvează',
       saving: 'Se salvează…',
@@ -1810,9 +1819,11 @@ export const ro = {
       answerPlaceholderEn: 'Răspunsul în engleză…',
       answerPlaceholderRu: 'Răspunsul în rusă…',
       activeField: 'Vizibilă pe site',
-      activeHint: 'Ascunsă, întrebarea rămâne aici, dar nu apare pe pagina publică.',
+      activeHint:
+        'Ascunsă, întrebarea rămâne aici, dar nu apare pe pagina publică.',
       required: 'Câmp obligatoriu',
-      missingRequired: 'Completează întrebarea și răspunsul în română și engleză.',
+      missingRequired:
+        'Completează întrebarea și răspunsul în română și engleză.',
       save: 'Salvează',
       saving: 'Se salvează…',
     },
@@ -1979,7 +1990,8 @@ export const ro = {
     },
     form: {
       createTitle: 'Apariție nouă',
-      createSubtitle: 'Începe cu linkul publicării — restul se completează aici.',
+      createSubtitle:
+        'Începe cu linkul publicării — restul se completează aici.',
       editTitle: 'Editează apariția',
       editSubtitle: 'Datele apariției, în cele trei limbi ale site-ului.',
       url: 'Linkul publicării',
@@ -2127,8 +2139,7 @@ export const ro = {
         'Deocamdată plata nu se face pe site: butonul duce clientul la pagina de contact.',
       flags: 'Etichete',
       activeField: 'Vizibil pe site',
-      activeHint:
-        'Ascuns, materialul rămâne aici, dar nu apare în bibliotecă.',
+      activeHint: 'Ascuns, materialul rămâne aici, dar nu apare în bibliotecă.',
       required: 'Câmp obligatoriu',
       missingRequired:
         'Completează adresa, titlul și descrierea în română și engleză.',
@@ -2137,8 +2148,7 @@ export const ro = {
     },
     categoryForm: {
       title: 'Categoriile bibliotecii',
-      subtitle:
-        'Grupele după care se filtrează materialele pe pagina publică.',
+      subtitle: 'Grupele după care se filtrează materialele pe pagina publică.',
       nameRo: 'Nume (RO)',
       nameEn: 'Nume (EN)',
       nameRu: 'Nume (RU)',
@@ -2147,8 +2157,7 @@ export const ro = {
       rename: 'Redenumește',
       renameSave: 'Salvează numele',
       renameCancel: 'Renunță',
-      count: (n: number) =>
-        n === 1 ? 'un material' : `${n} materiale`,
+      count: (n: number) => (n === 1 ? 'un material' : `${n} materiale`),
       empty: 'Nicio categorie încă.',
       required: 'Câmp obligatoriu',
       close: 'Închide',

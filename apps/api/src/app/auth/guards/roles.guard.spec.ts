@@ -22,13 +22,21 @@ import type { AuthUser } from '../jwt.types';
 import { RolesGuard } from './roles.guard';
 
 const ADMIN: AuthUser = { id: 'u1', email: 'a@example.com', role: Role.admin };
-const EDITOR: AuthUser = { id: 'u2', email: 'e@example.com', role: Role.editor };
+const EDITOR: AuthUser = {
+  id: 'u2',
+  email: 'e@example.com',
+  role: Role.editor,
+};
 
 /** Metadata a route declares, plus whoever the JWT guard put on the request. */
 function guardFor(metadata: { public?: boolean; roles?: Role[] }) {
   const reflector = {
     getAllAndOverride: (key: string) =>
-      key === IS_PUBLIC_KEY ? metadata.public : key === ROLES_KEY ? metadata.roles : undefined,
+      key === IS_PUBLIC_KEY
+        ? metadata.public
+        : key === ROLES_KEY
+          ? metadata.roles
+          : undefined,
   } as unknown as Reflector;
   return new RolesGuard(reflector);
 }
@@ -49,9 +57,9 @@ describe('RolesGuard', () => {
   });
 
   it('refuses a route whose roles list is empty', () => {
-    expect(() => guardFor({ roles: [] }).canActivate(contextFor(ADMIN))).toThrow(
-      ForbiddenException,
-    );
+    expect(() =>
+      guardFor({ roles: [] }).canActivate(contextFor(ADMIN)),
+    ).toThrow(ForbiddenException);
   });
 
   it('lets a public route through before it looks at roles', () => {
@@ -63,7 +71,9 @@ describe('RolesGuard', () => {
 
   it('lets a matching role through', () => {
     expect(
-      guardFor({ roles: [Role.admin, Role.editor] }).canActivate(contextFor(EDITOR)),
+      guardFor({ roles: [Role.admin, Role.editor] }).canActivate(
+        contextFor(EDITOR),
+      ),
     ).toBe(true);
   });
 

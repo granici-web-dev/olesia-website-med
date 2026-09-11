@@ -51,42 +51,75 @@ export async function generateMetadata({
 }
 
 const FOCUS: Bi[] = [
-  { ro: 'Probleme digestive la copii — un domeniu cu care lucrez încă de la începutul carierei.', en: 'Digestive issues in children — an area I’ve worked in since the start of my career.', ru: 'Проблемы пищеварения у детей — направление, с которым я работаю с самого начала карьеры.' },
-  { ro: 'Nutriția și dificultățile de hrănire — inclusiv refuzul mâncării și diversificarea.', en: 'Nutrition and feeding difficulties — including food refusal and starting solids.', ru: 'Питание и трудности с кормлением — отказ от еды, введение прикорма.' },
-  { ro: 'Copilul care se îmbolnăvește des.', en: 'The often-ill child.', ru: 'Часто болеющий ребёнок.' },
-  { ro: 'Alergologie pediatrică.', en: 'Pediatric allergology.', ru: 'Детская аллергология.' },
-  { ro: 'Creșterea și dezvoltarea copilului.', en: 'Child growth and development.', ru: 'Рост и развитие ребёнка.' },
+  {
+    ro: 'Probleme digestive la copii — un domeniu cu care lucrez încă de la începutul carierei.',
+    en: 'Digestive issues in children — an area I’ve worked in since the start of my career.',
+    ru: 'Проблемы пищеварения у детей — направление, с которым я работаю с самого начала карьеры.',
+  },
+  {
+    ro: 'Nutriția și dificultățile de hrănire — inclusiv refuzul mâncării și diversificarea.',
+    en: 'Nutrition and feeding difficulties — including food refusal and starting solids.',
+    ru: 'Питание и трудности с кормлением — отказ от еды, введение прикорма.',
+  },
+  {
+    ro: 'Copilul care se îmbolnăvește des.',
+    en: 'The often-ill child.',
+    ru: 'Часто болеющий ребёнок.',
+  },
+  {
+    ro: 'Alergologie pediatrică.',
+    en: 'Pediatric allergology.',
+    ru: 'Детская аллергология.',
+  },
+  {
+    ro: 'Creșterea și dezvoltarea copilului.',
+    en: 'Child growth and development.',
+    ru: 'Рост и развитие ребёнка.',
+  },
 ];
 
-const ADVANTAGES: { key: 'whole' | 'one' | 'evidence'; title: Bi; text: Bi }[] = [
-  {
-    key: 'whole',
-    title: { ro: 'O privire de ansamblu', en: 'A whole-picture view', ru: 'Взгляд на всю картину' },
-    text: {
-      ro: 'Sănătatea și alimentația, evaluate împreună — nu pe bucăți.',
-      en: 'Health and nutrition, assessed together — not in pieces.',
-      ru: 'Оцениваю здоровье и питание вместе, а не по частям.',
+const ADVANTAGES: { key: 'whole' | 'one' | 'evidence'; title: Bi; text: Bi }[] =
+  [
+    {
+      key: 'whole',
+      title: {
+        ro: 'O privire de ansamblu',
+        en: 'A whole-picture view',
+        ru: 'Взгляд на всю картину',
+      },
+      text: {
+        ro: 'Sănătatea și alimentația, evaluate împreună — nu pe bucăți.',
+        en: 'Health and nutrition, assessed together — not in pieces.',
+        ru: 'Оцениваю здоровье и питание вместе, а не по частям.',
+      },
     },
-  },
-  {
-    key: 'one',
-    title: { ro: 'Un singur specialist', en: 'One specialist', ru: 'Один специалист' },
-    text: {
-      ro: 'Nu mai mergi de la un medic la altul pentru sănătate și nutriție.',
-      en: 'No going from one doctor to another for health and nutrition.',
-      ru: 'Не нужно ходить от врача к врачу ради здоровья и питания.',
+    {
+      key: 'one',
+      title: {
+        ro: 'Un singur specialist',
+        en: 'One specialist',
+        ru: 'Один специалист',
+      },
+      text: {
+        ro: 'Nu mai mergi de la un medic la altul pentru sănătate și nutriție.',
+        en: 'No going from one doctor to another for health and nutrition.',
+        ru: 'Не нужно ходить от врача к врачу ради здоровья и питания.',
+      },
     },
-  },
-  {
-    key: 'evidence',
-    title: { ro: 'Plan pe bază de dovezi', en: 'An evidence-based plan', ru: 'Доказательный подход' },
-    text: {
-      ro: 'Recomandări fundamentate pe pregătire pediatrică și nutrițională.',
-      en: 'Recommendations grounded in pediatric and nutrition training.',
-      ru: 'Рекомендации опираются на педиатрическую и нутрициологическую подготовку.',
+    {
+      key: 'evidence',
+      title: {
+        ro: 'Plan pe bază de dovezi',
+        en: 'An evidence-based plan',
+        ru: 'Доказательный подход',
+      },
+      text: {
+        ro: 'Recomandări fundamentate pe pregătire pediatrică și nutrițională.',
+        en: 'Recommendations grounded in pediatric and nutrition training.',
+        ru: 'Рекомендации опираются на педиатрическую и нутрициологическую подготовку.',
+      },
     },
-  },
-];
+  ];
 
 /** Line icons for the advantages band (sage-soft on olive). */
 function AdvIcon({ k }: { k: 'whole' | 'one' | 'evidence' }) {
@@ -220,14 +253,21 @@ export default async function AboutPage({
         <div className="shell grid items-start gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
           <div className="md:sticky md:top-[133px] md:self-start">
             <p className="mb-7 inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-              <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+              <span
+                className="size-1.5 rounded-full bg-sage"
+                aria-hidden="true"
+              />
               {ru ? 'Обо мне' : en ? 'About' : 'Despre'}
             </p>
             <h1 className="serif text-[clamp(2.8rem,6vw,5.4rem)] leading-[1.02] tracking-[-0.015em] text-balance">
               Dr. Olesea <span className="serif-it text-sage">Jalba</span>
             </h1>
             <p className="mono mt-5 text-[12px] uppercase tracking-[0.12em] text-ink-soft">
-              {ru ? 'Врач-педиатр · Магистр питания человека' : en ? 'Pediatrician · MSc in Human Nutrition' : 'Medic pediatru · Master în Nutriție Umană'}
+              {ru
+                ? 'Врач-педиатр · Магистр питания человека'
+                : en
+                  ? 'Pediatrician · MSc in Human Nutrition'
+                  : 'Medic pediatru · Master în Nutriție Umană'}
             </p>
             <p className="mt-7 max-w-[42ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
               {ru
@@ -238,7 +278,11 @@ export default async function AboutPage({
             </p>
             <div className="mt-9">
               <Link href="/services" className={btnDark}>
-                {ru ? 'Посмотреть услуги' : en ? 'See the services' : 'Vezi serviciile'}
+                {ru
+                  ? 'Посмотреть услуги'
+                  : en
+                    ? 'See the services'
+                    : 'Vezi serviciile'}
               </Link>
             </div>
           </div>
@@ -262,7 +306,13 @@ export default async function AboutPage({
             </div>
             <div className="mono mt-4 flex justify-between text-[11px] uppercase tracking-[0.08em] text-ink-soft">
               <span>Dr. Olesea Jalba</span>
-              <span>{ru ? 'Онлайн · Где угодно' : en ? 'Online · Anywhere' : 'Online · Oriunde'}</span>
+              <span>
+                {ru
+                  ? 'Онлайн · Где угодно'
+                  : en
+                    ? 'Online · Anywhere'
+                    : 'Online · Oriunde'}
+              </span>
             </div>
           </div>
         </div>
@@ -272,22 +322,27 @@ export default async function AboutPage({
       <section className="shell py-20 md:py-28">
         <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16 lg:gap-24">
           <div>
-            <p className="eyebrow mb-4">{ru ? 'Кратко' : en ? 'In short' : 'Pe scurt'}</p>
+            <p className="eyebrow mb-4">
+              {ru ? 'Кратко' : en ? 'In short' : 'Pe scurt'}
+            </p>
             <h2 className="serif text-[clamp(1.8rem,3vw,2.6rem)] leading-[1.12] tracking-[-0.02em] text-balance">
               {ru ? (
                 <>
-                  Педиатр и <span className="serif-it text-sage">нутрициолог</span>, в одном
-                  человеке
+                  Педиатр и{' '}
+                  <span className="serif-it text-sage">нутрициолог</span>, в
+                  одном человеке
                 </>
               ) : en ? (
                 <>
-                  Pediatrician and <span className="serif-it text-sage">nutritionist</span>, in one
-                  person
+                  Pediatrician and{' '}
+                  <span className="serif-it text-sage">nutritionist</span>, in
+                  one person
                 </>
               ) : (
                 <>
-                  Pediatru și <span className="serif-it text-sage">nutriționist</span>, într-o
-                  persoană
+                  Pediatru și{' '}
+                  <span className="serif-it text-sage">nutriționist</span>,
+                  într-o persoană
                 </>
               )}
             </h2>
@@ -302,9 +357,21 @@ export default async function AboutPage({
             </p>
             <div className="mt-8 flex flex-wrap gap-2.5">
               {[
-                { ro: 'Medic pediatru', en: 'Pediatrician', ru: 'Врач-педиатр' },
-                { ro: 'Master în nutriție umană', en: 'MSc Human Nutrition', ru: 'Магистр питания человека' },
-                { ro: 'Gastroenterologie pediatrică', en: 'Pediatric gastroenterology', ru: 'Детская гастроэнтерология' },
+                {
+                  ro: 'Medic pediatru',
+                  en: 'Pediatrician',
+                  ru: 'Врач-педиатр',
+                },
+                {
+                  ro: 'Master în nutriție umană',
+                  en: 'MSc Human Nutrition',
+                  ru: 'Магистр питания человека',
+                },
+                {
+                  ro: 'Gastroenterologie pediatrică',
+                  en: 'Pediatric gastroenterology',
+                  ru: 'Детская гастроэнтерология',
+                },
               ].map((f) => (
                 <span
                   key={f.en}
@@ -322,7 +389,9 @@ export default async function AboutPage({
       <section className="border-y border-[var(--rule)] bg-paper">
         <div className="shell py-20 md:py-28">
           <figure className="mx-auto max-w-[60ch] text-center">
-            <p className="eyebrow mb-8">{ru ? 'Подход' : en ? 'Approach' : 'Abordare'}</p>
+            <p className="eyebrow mb-8">
+              {ru ? 'Подход' : en ? 'Approach' : 'Abordare'}
+            </p>
             <blockquote className="serif-it text-[clamp(1.5rem,3.2vw,2.4rem)] leading-[1.3] tracking-[-0.01em] text-ink text-balance">
               „{lc(QUOTE_PHILOSOPHY)}”
             </blockquote>
@@ -334,7 +403,11 @@ export default async function AboutPage({
       <section className="bg-sage-deep text-cream">
         <div className="shell py-20 md:py-28">
           <p className="mb-12 text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--sage-soft)] md:mb-16">
-            {ru ? 'Что это значит для вас' : en ? 'What it means for you' : 'Ce înseamnă asta pentru tine'}
+            {ru
+              ? 'Что это значит для вас'
+              : en
+                ? 'What it means for you'
+                : 'Ce înseamnă asta pentru tine'}
           </p>
           <div className="grid gap-x-12 gap-y-12 md:grid-cols-3">
             {ADVANTAGES.map((a, i) => (
@@ -345,7 +418,9 @@ export default async function AboutPage({
                 >
                   <AdvIcon k={a.key} />
                 </span>
-                <h3 className="serif mt-6 text-[1.6rem] leading-snug text-cream">{lc(a.title)}</h3>
+                <h3 className="serif mt-6 text-[1.6rem] leading-snug text-cream">
+                  {lc(a.title)}
+                </h3>
                 <p className="mt-2 max-w-[34ch] text-[0.95rem] leading-relaxed text-cream/80 text-pretty">
                   {lc(a.text)}
                 </p>
@@ -359,11 +434,14 @@ export default async function AboutPage({
       <section className="shell py-20 md:py-28">
         <div className="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
           <div>
-            <p className="eyebrow mb-3">{ru ? 'Почему я' : en ? 'Why me' : 'De ce eu'}</p>
+            <p className="eyebrow mb-3">
+              {ru ? 'Почему я' : en ? 'Why me' : 'De ce eu'}
+            </p>
             <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
               {ru ? (
                 <>
-                  Почему стоит <span className="serif-it text-sage">работать со мной</span>
+                  Почему стоит{' '}
+                  <span className="serif-it text-sage">работать со мной</span>
                 </>
               ) : en ? (
                 <>
@@ -371,12 +449,15 @@ export default async function AboutPage({
                 </>
               ) : (
                 <>
-                  De ce să lucrezi <span className="serif-it text-sage">cu mine</span>
+                  De ce să lucrezi{' '}
+                  <span className="serif-it text-sage">cu mine</span>
                 </>
               )}
             </h2>
           </div>
-          <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">{lc(WHY_INTRO)}</p>
+          <p className="max-w-[320px] text-sm leading-[1.7] text-ink-soft">
+            {lc(WHY_INTRO)}
+          </p>
         </div>
         <ul className="mt-10 grid gap-x-12 border-t border-[var(--rule)] pt-8 sm:grid-cols-2">
           {WHY.map((r, i) => (
@@ -389,7 +470,9 @@ export default async function AboutPage({
               <span className="serif text-[1.1rem] italic leading-none text-sage-text lining-nums tabular-nums">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <span className="text-[1.05rem] leading-relaxed text-ink text-pretty">{lc(r)}</span>
+              <span className="text-[1.05rem] leading-relaxed text-ink text-pretty">
+                {lc(r)}
+              </span>
             </Reveal>
           ))}
         </ul>
@@ -398,7 +481,13 @@ export default async function AboutPage({
       {/* 4 · Focus areas */}
       <section className="shell py-20 md:py-28">
         <header className="max-w-[40rem]">
-          <p className="eyebrow mb-3">{ru ? 'С чем я работаю' : en ? 'What I work with' : 'Domenii de focus'}</p>
+          <p className="eyebrow mb-3">
+            {ru
+              ? 'С чем я работаю'
+              : en
+                ? 'What I work with'
+                : 'Domenii de focus'}
+          </p>
           <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
             {ru ? (
               <>
@@ -428,7 +517,9 @@ export default async function AboutPage({
               >
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <p className="mt-5 text-[1.05rem] leading-relaxed text-ink text-pretty">{lc(it)}</p>
+              <p className="mt-5 text-[1.05rem] leading-relaxed text-ink text-pretty">
+                {lc(it)}
+              </p>
             </Reveal>
           ))}
         </div>
@@ -439,7 +530,9 @@ export default async function AboutPage({
         <section className="bg-paper">
           <div className="shell py-20 md:py-28">
             <header className="mx-auto mb-12 max-w-[820px] text-center md:mb-16">
-              <p className="eyebrow mb-3">{ru ? 'Путь' : en ? 'The record' : 'Parcurs'}</p>
+              <p className="eyebrow mb-3">
+                {ru ? 'Путь' : en ? 'The record' : 'Parcurs'}
+              </p>
               <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
                 {loc(locale, about.titleRo, about.titleEn, about.titleRu)}
               </h2>
@@ -499,7 +592,9 @@ export default async function AboutPage({
       <section className="border-t border-[var(--rule)]">
         <div className="shell flex flex-col gap-6 py-14 md:flex-row md:items-center md:justify-between md:py-16">
           <div>
-            <p className="eyebrow mb-3">{ru ? 'СМИ' : en ? 'In the media' : 'Apariții media'}</p>
+            <p className="eyebrow mb-3">
+              {ru ? 'СМИ' : en ? 'In the media' : 'Apariții media'}
+            </p>
             <p className="serif max-w-[34ch] text-[clamp(1.4rem,2.4vw,2rem)] leading-[1.15] tracking-[-0.01em] text-balance">
               {ru
                 ? 'Гостья программ Moldova 1, TVR Moldova и Canal 2'
@@ -512,7 +607,11 @@ export default async function AboutPage({
             href="/media"
             className="inline-flex shrink-0 items-center gap-2 border-b border-ink pb-0.5 text-[0.95rem] text-ink transition-colors hover:border-sage hover:text-sage"
           >
-            {ru ? 'Смотреть выпуски' : en ? 'See the appearances' : 'Vezi aparițiile'}
+            {ru
+              ? 'Смотреть выпуски'
+              : en
+                ? 'See the appearances'
+                : 'Vezi aparițiile'}
             <span aria-hidden="true">→</span>
           </Link>
         </div>
@@ -522,7 +621,9 @@ export default async function AboutPage({
       <section className="shell border-t border-[var(--rule)] py-20 md:py-28">
         <div className="grid gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16 lg:gap-24">
           <div>
-            <p className="eyebrow mb-4">{ru ? 'Ценности' : en ? 'Values' : 'Valori'}</p>
+            <p className="eyebrow mb-4">
+              {ru ? 'Ценности' : en ? 'Values' : 'Valori'}
+            </p>
             <h2 className="serif text-[clamp(1.8rem,3vw,2.6rem)] leading-[1.12] tracking-[-0.02em] text-balance">
               {ru ? (
                 <>
@@ -557,22 +658,35 @@ export default async function AboutPage({
             <h2 className="serif text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-cream text-balance">
               {ru ? (
                 <>
-                  Записаться на <span className="serif-it text-[var(--sage-soft)]">консультацию</span>
+                  Записаться на{' '}
+                  <span className="serif-it text-[var(--sage-soft)]">
+                    консультацию
+                  </span>
                 </>
               ) : en ? (
                 <>
-                  Book a <span className="serif-it text-[var(--sage-soft)]">consultation</span>
+                  Book a{' '}
+                  <span className="serif-it text-[var(--sage-soft)]">
+                    consultation
+                  </span>
                 </>
               ) : (
                 <>
-                  Programează o <span className="serif-it text-[var(--sage-soft)]">consultație</span>
+                  Programează o{' '}
+                  <span className="serif-it text-[var(--sage-soft)]">
+                    consultație
+                  </span>
                 </>
               )}
             </h2>
           </div>
           <div>
             <Link href="/services" className={creamPill}>
-              {ru ? 'Посмотреть услуги' : en ? 'See the services' : 'Vezi serviciile'}
+              {ru
+                ? 'Посмотреть услуги'
+                : en
+                  ? 'See the services'
+                  : 'Vezi serviciile'}
             </Link>
           </div>
         </div>

@@ -11,8 +11,7 @@ import { serviceTag } from './api';
 const service = (
   code: PublicServiceDto['code'],
   group: PublicServiceDto['group'] = 'A_booking',
-): PublicServiceDto =>
-  ({ code, group }) as PublicServiceDto;
+): PublicServiceDto => ({ code, group }) as PublicServiceDto;
 
 describe('serviceTag', () => {
   const CODES: PublicServiceDto['code'][] = [

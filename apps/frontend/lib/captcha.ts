@@ -16,7 +16,8 @@
  * and would be a drop-in replacement here; the client named reCAPTCHA.
  */
 
-export const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? '';
+export const RECAPTCHA_SITE_KEY =
+  process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? '';
 
 /** True when the client's site key is configured. */
 export const captchaEnabled = Boolean(RECAPTCHA_SITE_KEY);
@@ -67,7 +68,9 @@ function loadScript(): Promise<void> {
  * never be the reason a parent cannot send a medical question, and the server
  * still rejects bad scores.
  */
-export async function getCaptchaToken(action: CaptchaAction): Promise<string | null> {
+export async function getCaptchaToken(
+  action: CaptchaAction,
+): Promise<string | null> {
   if (!captchaEnabled || typeof window === 'undefined') return null;
 
   try {

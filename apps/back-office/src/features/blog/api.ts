@@ -85,7 +85,9 @@ export async function deletePost(id: string): Promise<void> {
 
 export async function fetchCategories(): Promise<Category[]> {
   const list = await http.get<CategoryDto[]>('/blog/categories');
-  return list.map(categoryToView).sort((a, b) => a.nameRo.localeCompare(b.nameRo));
+  return list
+    .map(categoryToView)
+    .sort((a, b) => a.nameRo.localeCompare(b.nameRo));
 }
 
 export async function createCategory(input: CategoryInput): Promise<Category> {

@@ -75,10 +75,7 @@ async function parse(res: Response): Promise<UploadSession> {
 }
 
 /** `fetch` rejects only when the request never happened: offline, DNS, CORS. */
-async function send(
-  path: string,
-  init?: RequestInit,
-): Promise<UploadSession> {
+async function send(path: string, init?: RequestInit): Promise<UploadSession> {
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${path}`, init);

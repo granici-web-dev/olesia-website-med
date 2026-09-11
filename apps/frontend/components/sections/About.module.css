@@ -68,7 +68,9 @@
   border-bottom: 1px solid var(--ink);
   padding-bottom: 4px;
   text-decoration: none;
-  transition: color 0.15s, border-color 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .link:hover {

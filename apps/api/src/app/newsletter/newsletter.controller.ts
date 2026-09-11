@@ -14,7 +14,10 @@ import { Throttle } from '@nestjs/throttler';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
-import { CaptchaGuard, CaptchaProtected } from '../common/captcha/captcha.guard';
+import {
+  CaptchaGuard,
+  CaptchaProtected,
+} from '../common/captcha/captcha.guard';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { NewsletterService } from './newsletter.service';
 import { SubscribeDto } from './dto/subscribe.dto';
@@ -44,7 +47,8 @@ export class NewsletterController {
   @ApiHeader({
     name: 'x-captcha-token',
     required: false,
-    description: 'reCAPTCHA v3 token; required once RECAPTCHA_SECRET is configured.',
+    description:
+      'reCAPTCHA v3 token; required once RECAPTCHA_SECRET is configured.',
   })
   @Throttle({ default: { ttl: 60_000, limit: 3 } })
   @Post('subscribe')

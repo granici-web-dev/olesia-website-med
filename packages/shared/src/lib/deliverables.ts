@@ -22,9 +22,21 @@ export interface DeliverableCatalogEntry {
 }
 
 export const DELIVERABLE_CATALOG: readonly DeliverableCatalogEntry[] = [
-  { code: DeliverableProduct.Menu7, priceEur: 28, titleRo: 'Meniu personalizat · 7 zile' },
-  { code: DeliverableProduct.Menu14, priceEur: 48, titleRo: 'Meniu personalizat · 14 zile' },
-  { code: DeliverableProduct.Menu30, priceEur: 88, titleRo: 'Meniu personalizat · 30 zile' },
+  {
+    code: DeliverableProduct.Menu7,
+    priceEur: 28,
+    titleRo: 'Meniu personalizat · 7 zile',
+  },
+  {
+    code: DeliverableProduct.Menu14,
+    priceEur: 48,
+    titleRo: 'Meniu personalizat · 14 zile',
+  },
+  {
+    code: DeliverableProduct.Menu30,
+    priceEur: 88,
+    titleRo: 'Meniu personalizat · 30 zile',
+  },
   {
     code: DeliverableProduct.ProtocolPedNutri,
     priceEur: 98,

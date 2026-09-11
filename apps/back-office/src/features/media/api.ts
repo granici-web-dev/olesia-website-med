@@ -42,7 +42,9 @@ export async function fetchMedia(): Promise<MediaAppearance[]> {
 export async function createMedia(
   input: MediaAppearanceInput,
 ): Promise<MediaAppearance> {
-  return toView(await http.post<MediaAppearanceDto>('/media-appearances', input));
+  return toView(
+    await http.post<MediaAppearanceDto>('/media-appearances', input),
+  );
 }
 
 export async function updateMedia(

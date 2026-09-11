@@ -45,7 +45,8 @@ if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
   process.exit(1);
 }
 
-const MODEL = process.env.GATEWAY_IMAGE_MODEL || 'google/gemini-3.1-flash-image-preview';
+const MODEL =
+  process.env.GATEWAY_IMAGE_MODEL || 'google/gemini-3.1-flash-image-preview';
 const FORCE = process.argv.includes('--force');
 const publicDir = join(here, '../public/assets');
 
@@ -90,9 +91,14 @@ async function generate(prompt: string, ratio: string, outPath: string) {
   const fullPrompt = `${prompt}\n\n${STYLE}\nComposition: ${ratio} aspect ratio.`;
   try {
     const result = await generateText({ model: MODEL, prompt: fullPrompt });
-    const file = (result.files ?? []).find((f) => f.mediaType?.startsWith('image/'));
+    const file = (result.files ?? []).find((f) =>
+      f.mediaType?.startsWith('image/'),
+    );
     if (!file) {
-      console.error('✖ no image returned for', outPath.replace(publicDir, 'assets'));
+      console.error(
+        '✖ no image returned for',
+        outPath.replace(publicDir, 'assets'),
+      );
       return;
     }
     const bytes = file.uint8Array ?? Buffer.from(file.base64, 'base64');
@@ -100,21 +106,32 @@ async function generate(prompt: string, ratio: string, outPath: string) {
     writeFileSync(outPath, bytes);
     console.log('✓ saved:', outPath.replace(publicDir, 'assets'));
   } catch (err) {
-    console.error('✖ failed for', outPath.replace(publicDir, 'assets'), '—', (err as Error).message);
+    console.error(
+      '✖ failed for',
+      outPath.replace(publicDir, 'assets'),
+      '—',
+      (err as Error).message,
+    );
   }
 }
 
 async function main() {
-  console.log(`Generating via AI Gateway with ${MODEL}${FORCE ? ' (force)' : ''}…\n`);
+  console.log(
+    `Generating via AI Gateway with ${MODEL}${FORCE ? ' (force)' : ''}…\n`,
+  );
   for (const p of PLACEHOLDER_POSTS) {
-    const prompt = BLOG_PROMPTS[p.slug] ?? `Editorial image about: ${p.title.en}.`;
+    const prompt =
+      BLOG_PROMPTS[p.slug] ?? `Editorial image about: ${p.title.en}.`;
     await generate(prompt, '16:9', join(publicDir, 'blog', `${p.slug}.png`));
   }
   for (const m of PLACEHOLDER_MENUS) {
-    const prompt = MENU_PROMPTS[m.slug] ?? `Appetizing food photo: ${m.title.en}.`;
+    const prompt =
+      MENU_PROMPTS[m.slug] ?? `Appetizing food photo: ${m.title.en}.`;
     await generate(prompt, '4:3', join(publicDir, 'menus', `${m.slug}.png`));
   }
-  console.log('\nDone. Review public/assets/{blog,menus}/ then commit the PNGs.');
+  console.log(
+    '\nDone. Review public/assets/{blog,menus}/ then commit the PNGs.',
+  );
 }
 
 main();

@@ -17,13 +17,13 @@
 
 Рамка из `user-research` / Jobs-to-be-Done. Это **не данные исследования**, а гипотезы, обоснованные профилем врача. Они объясняют, почему страница устроена именно так.
 
-| Сегмент | Что им нужно (JTBD) | Куда ведём |
-|---|---|---|
-| Родители малышей 0–3 лет | «Почему ребёнок плохо ест / часто болеет — без записи в клинику на 3 недели» | Pediatric / Nutrition |
-| Родители детей постарше | «Получить экспертное мнение / второе мнение онлайн» | Pediatric |
-| Взрослые по питанию | «Нужен персональный план питания на доказательной базе» | Nutrition |
-| Семьи со сложным/длительным случаем | «Хочу, чтобы врач вёл нас, а не один разовый приём» | Integrative / 3-month |
-| Один конкретный вопрос | «У меня всего один вопрос, нужен быстрый надёжный ответ» | Quick question |
+| Сегмент                             | Что им нужно (JTBD)                                                          | Куда ведём            |
+| ----------------------------------- | ---------------------------------------------------------------------------- | --------------------- |
+| Родители малышей 0–3 лет            | «Почему ребёнок плохо ест / часто болеет — без записи в клинику на 3 недели» | Pediatric / Nutrition |
+| Родители детей постарше             | «Получить экспертное мнение / второе мнение онлайн»                          | Pediatric             |
+| Взрослые по питанию                 | «Нужен персональный план питания на доказательной базе»                      | Nutrition             |
+| Семьи со сложным/длительным случаем | «Хочу, чтобы врач вёл нас, а не один разовый приём»                          | Integrative / 3-month |
+| Один конкретный вопрос              | «У меня всего один вопрос, нужен быстрый надёжный ответ»                     | Quick question        |
 
 **Вывод для IA:** услуги различаются не темой, а **форматом и уровнем вовлечённости** — это и есть главная ось группировки.
 
@@ -34,11 +34,13 @@
 5 услуг делятся на 2 понятных группы (совпадает с архитектурой: Calendly vs портал):
 
 **Группа A — Видеоконсультации** (разовые, живые, бронь через Calendly)
+
 - Pediatric consultation — 50 мин
 - Nutrition consultation — 60 мин
 - Integrative consultation & monitoring — 90 мин
 
 **Группа B — Сопровождение и быстрая поддержка** (через портал)
+
 - 3-month monitoring — абонемент
 - Quick question — ответ за 48 ч
 
@@ -59,6 +61,7 @@
 ```
 
 ### 1. Hero
+
 ```
 Eyebrow:   Services
 H1:        Pediatric & nutrition care, online
@@ -68,7 +71,9 @@ Trust line: Pediatrician · MSc in Human Nutrition · member of pediatric societ
 ```
 
 ### 2. Помощник выбора (блок «Which service fits?»)
+
 Короткий гид на 2–3 строки или мини-таблица. Снимает главный страх — «а мне какую?».
+
 ```
 Heading:  Not sure which one you need?
 - One specific question → Quick question
@@ -78,6 +83,7 @@ Heading:  Not sure which one you need?
 ```
 
 ### 6. Как это работает (2 дорожки)
+
 ```
 Video consultations:
 1. Choose a service & time   2. Pay by transfer & confirm
@@ -89,6 +95,7 @@ Portal services:
 ```
 
 ### 7. О враче (из CV, кратко)
+
 ```
 Olesea Jalba, pediatrician with an MSc in Human Nutrition (USMF
 "Nicolae Testemițanu"). Focus areas: child nutrition and feeding
@@ -97,6 +104,7 @@ Society of Pediatrics. → See full profile
 ```
 
 ### 9. Финальный CTA
+
 ```
 Heading: Ready to start?
 Primary: Book a consultation
@@ -126,6 +134,7 @@ Price                                ← + пометка про оплату п
 ## 5. Текст для каждой услуги (EN, готов к локализации)
 
 ### A1 · Pediatric consultation — 50 min · video
+
 ```
 Value:    A focused video visit for your child's health — symptoms,
           growth, development, or a second opinion.
@@ -138,6 +147,7 @@ CTA:      Book a time
 ```
 
 ### A2 · Nutrition consultation — 60 min · video
+
 ```
 Value:    A personalized, evidence-based look at feeding and nutrition —
           for children or adults.
@@ -149,9 +159,11 @@ Included: • 60-minute video call
           • Written recommendations after the call
 CTA:      Book a time
 ```
+
 > Сильный угол: у врача отдельная подготовка по трудностям кормления и «bottle aversion» — это стоит явно упомянуть как преимущество для родителей малышей.
 
 ### A3 · Integrative consultation & monitoring — 90 min · video
+
 ```
 Value:    An in-depth visit that combines pediatric and nutrition
           expertise, with a plan to follow over time.
@@ -165,6 +177,7 @@ CTA:      Book a time
 ```
 
 ### B1 · 3-month monitoring — subscription · portal
+
 ```
 Value:    Continuous guidance over three months — the doctor follows
           your progress between consultations.
@@ -177,6 +190,7 @@ CTA:      Request a place
 ```
 
 ### B2 · Quick question — 48h reply · portal
+
 ```
 Value:    Have one question? Get a written answer from the doctor
           within 48 hours.
@@ -193,14 +207,14 @@ CTA:      Ask your question
 
 ## 6. Сравнительная таблица (блок на странице)
 
-| | Pediatric | Nutrition | Integrative | 3-month | Quick question |
-|---|---|---|---|---|---|
-| **Format** | Video | Video | Video | Portal | Portal |
-| **Duration** | 50 min | 60 min | 90 min | 3 months | 48h reply |
-| **For** | Child health | Feeding / diet | Complex / ongoing | Continuous support | One question |
-| **Output** | Summary | Nutrition plan | Action plan | Ongoing plan | Written answer |
-| **Price** | ⚠ | ⚠ | ⚠ | ⚠ | ⚠ |
-| **Action** | Book a time | Book a time | Book a time | Request a place | Ask your question |
+|              | Pediatric    | Nutrition      | Integrative       | 3-month            | Quick question    |
+| ------------ | ------------ | -------------- | ----------------- | ------------------ | ----------------- |
+| **Format**   | Video        | Video          | Video             | Portal             | Portal            |
+| **Duration** | 50 min       | 60 min         | 90 min            | 3 months           | 48h reply         |
+| **For**      | Child health | Feeding / diet | Complex / ongoing | Continuous support | One question      |
+| **Output**   | Summary      | Nutrition plan | Action plan       | Ongoing plan       | Written answer    |
+| **Price**    | ⚠           | ⚠             | ⚠                | ⚠                 | ⚠                |
+| **Action**   | Book a time  | Book a time    | Book a time       | Request a place    | Ask your question |
 
 ---
 
@@ -208,7 +222,7 @@ CTA:      Ask your question
 
 - **How do video consultations work?** — браузер/ссылка, без установки (зависит от инструмента).
 - **Which languages?** — Romanian, Russian, English.
-- **How do I pay?** — Bank transfer only (в этой версии онлайн-оплаты нет). *(из архитектуры)*
+- **How do I pay?** — Bank transfer only (в этой версии онлайн-оплаты нет). _(из архитектуры)_
 - **Can I reschedule or cancel?** — по правилам Calendly. ⚠ задать политику.
 - **Is this for emergencies?** — No. Важно указать явно (медико-правовой момент).
 - **Will I get a prescription?** — ⚠ уточнить (зависит от регуляторики РМ для телемедицины).
@@ -247,4 +261,7 @@ service:
 4. Политика отмены/переноса для видеоконсультаций.
 5. Рецепты — выдаются ли при телеконсультации (регуляторика РМ).
 6. Язык страницы: оставляем EN-копию или сразу делать RO как основную?
+
+```
+
 ```

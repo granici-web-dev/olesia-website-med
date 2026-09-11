@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { ComponentPropsWithoutRef, CSSProperties, ElementType, Ref } from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ElementType,
+  Ref,
+} from 'react';
 
 type RevealProps = {
   /** Rendered element (keeps list/section semantics, e.g. "li" / "article"). */
@@ -19,7 +24,14 @@ type RevealProps = {
  * scroll-driven animations (`animation-timeline: view()`), which Safari and
  * Firefox don't fully support.
  */
-export function Reveal({ as, delay = 0, className, children, style, ...rest }: RevealProps) {
+export function Reveal({
+  as,
+  delay = 0,
+  className,
+  children,
+  style,
+  ...rest
+}: RevealProps) {
   const Tag = (as ?? 'div') as ElementType;
   const ref = useRef<HTMLElement | null>(null);
   const [armed, setArmed] = useState(false);

@@ -75,7 +75,10 @@ export default async function ArticlePage({
           className="mb-10 md:mb-12"
           items={[
             { label: ru ? 'Главная' : en ? 'Home' : 'Acasă', href: '/' },
-            { label: ru ? 'Статьи' : en ? 'Articles' : 'Articole', href: '/articles' },
+            {
+              label: ru ? 'Статьи' : en ? 'Articles' : 'Articole',
+              href: '/articles',
+            },
             { label: title },
           ]}
         />
@@ -86,7 +89,9 @@ export default async function ArticlePage({
               {loc(locale, c.nameRo, c.nameEn, c.nameRu)}
             </span>
           ))}
-          {date ? <span className="mono text-xs text-ink-soft">{date}</span> : null}
+          {date ? (
+            <span className="mono text-xs text-ink-soft">{date}</span>
+          ) : null}
         </div>
 
         <h1 className="serif mt-3 text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.08] tracking-[-0.02em] text-balance">
@@ -103,7 +108,9 @@ export default async function ArticlePage({
         ) : null}
 
         <div className="mt-10 text-[1.08rem]">
-          {renderMarkdown(loc(locale, post.contentRo, post.contentEn, post.contentRu))}
+          {renderMarkdown(
+            loc(locale, post.contentRo, post.contentEn, post.contentRu),
+          )}
         </div>
       </article>
     </main>

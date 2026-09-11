@@ -17,7 +17,12 @@ import {
  */
 
 const week = (
-  days: { weekday: number; closed?: boolean; opensAt?: string; closesAt?: string }[],
+  days: {
+    weekday: number;
+    closed?: boolean;
+    opensAt?: string;
+    closesAt?: string;
+  }[],
   extra: Partial<WorkingHoursDto> = {},
 ): WorkingHoursDto => ({
   timezone: 'Europe/Chisinau',
@@ -161,7 +166,11 @@ describe('withSla', () => {
 
   it('fills a named slot and leaves the others alone', () => {
     expect(
-      withSla('{slaInHours} · {sla}', '~1 oră în programul de lucru', 'slaInHours'),
+      withSla(
+        '{slaInHours} · {sla}',
+        '~1 oră în programul de lucru',
+        'slaInHours',
+      ),
     ).toBe('~1 oră în programul de lucru · {sla}');
   });
 });

@@ -17,18 +17,11 @@ import * as argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
 import { PLACEHOLDER_DAYS } from '../app/working-hours/business-hours';
-import {
-  resolveSeedProfile,
-  SeedConfigError,
-  type SeedAdmin,
-} from './profile';
+import { resolveSeedProfile, SeedConfigError, type SeedAdmin } from './profile';
 import { FAQ_SECTIONS } from './seed-faq';
 import { TESTIMONIALS } from './seed-testimonials';
 import { MEDIA_APPEARANCES } from './seed-media';
-import {
-  MATERIAL_CATEGORIES,
-  MATERIALS,
-} from './seed-materials';
+import { MATERIAL_CATEGORIES, MATERIALS } from './seed-materials';
 
 /** Both singletons live under this fixed primary key. See the schema. */
 const SINGLETON_ID = 'singleton';
@@ -91,9 +84,11 @@ const SERVICES = [
     titleRo: 'Consultație nutrițională pentru adulți',
     titleEn: 'Nutrition consultation for adults',
     titleRu: 'Консультация по питанию для взрослых',
-    descriptionRo: 'Plan alimentar personalizat, pe bază de dovezi, pentru adulți.',
+    descriptionRo:
+      'Plan alimentar personalizat, pe bază de dovezi, pentru adulți.',
     descriptionEn: 'A personalized, evidence-based meal plan for adults.',
-    descriptionRu: 'Персональный план питания для взрослых на основе доказательной медицины.',
+    descriptionRu:
+      'Персональный план питания для взрослых на основе доказательной медицины.',
     durationMin: 60,
     price: 38,
     priceLabelRo: null,
@@ -152,8 +147,10 @@ const SERVICES = [
     titleRo: 'Întrebare EXPRESS',
     titleEn: 'Express question',
     titleRu: 'Вопрос EXPRESS',
-    descriptionRo: 'Răspuns scris la o întrebare punctuală, în ~1 oră în timpul programului de lucru.',
-    descriptionEn: 'A written answer to a specific question, within ~1 hour during working hours.',
+    descriptionRo:
+      'Răspuns scris la o întrebare punctuală, în ~1 oră în timpul programului de lucru.',
+    descriptionEn:
+      'A written answer to a specific question, within ~1 hour during working hours.',
     descriptionRu:
       'Письменный ответ на конкретный вопрос примерно за 1 час в рабочее время.',
     durationMin: null,
@@ -428,7 +425,8 @@ async function seedAbout() {
   // Rows seeded before the RU locale existed keep their RO/EN text but have no
   // Russian at all — backfill each field on its own, so a partially translated
   // page never loses the half the client already wrote.
-  if (!patch.titleRu && !existing.titleRu?.trim()) patch.titleRu = ABOUT.titleRu;
+  if (!patch.titleRu && !existing.titleRu?.trim())
+    patch.titleRu = ABOUT.titleRu;
   if (!patch.contentRu && !existing.contentRu?.trim())
     patch.contentRu = ABOUT.contentRu;
   if (len(existing.stats) === 0) patch.stats = ABOUT.stats;
@@ -481,7 +479,9 @@ async function seedFaq() {
  */
 async function seedTestimonials() {
   if ((await prisma.testimonial.count()) > 0) {
-    console.log('• testimonials already present — skipped (edit in back office)');
+    console.log(
+      '• testimonials already present — skipped (edit in back office)',
+    );
     return;
   }
   await prisma.testimonial.createMany({
@@ -495,7 +495,9 @@ async function seedTestimonials() {
  */
 async function seedMedia() {
   if ((await prisma.mediaAppearance.count()) > 0) {
-    console.log('• media appearances already present — skipped (edit in back office)');
+    console.log(
+      '• media appearances already present — skipped (edit in back office)',
+    );
     return;
   }
   await prisma.mediaAppearance.createMany({
@@ -554,7 +556,9 @@ async function seedMaterials() {
  */
 async function seedWorkingHours() {
   if ((await prisma.workingHours.count()) > 0) {
-    console.log('• working hours already present — skipped (edit in back office)');
+    console.log(
+      '• working hours already present — skipped (edit in back office)',
+    );
     return;
   }
   await prisma.workingHours.create({
@@ -589,7 +593,9 @@ async function seedAdmin(admin: SeedAdmin, mustChangePassword: boolean) {
 
 async function seedServices() {
   for (const s of SERVICES) {
-    const existing = await prisma.service.findUnique({ where: { code: s.code } });
+    const existing = await prisma.service.findUnique({
+      where: { code: s.code },
+    });
     if (!existing) {
       await prisma.service.create({ data: s });
       continue;
@@ -630,7 +636,9 @@ async function main() {
   await seedWorkingHours();
 
   if (profile === 'prod') {
-    console.log('• about, faq and library skipped — drafted copy, not client-approved');
+    console.log(
+      '• about, faq and library skipped — drafted copy, not client-approved',
+    );
     return;
   }
 

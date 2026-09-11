@@ -119,7 +119,11 @@ const T = {
     ru: 'Вы пока не отправили ни одного документа.',
   },
   remove: { ro: 'Șterge', en: 'Remove', ru: 'Удалить' },
-  removed: { ro: 'Documentul a fost șters.', en: 'Document removed.', ru: 'Документ удалён.' },
+  removed: {
+    ro: 'Documentul a fost șters.',
+    en: 'Document removed.',
+    ru: 'Документ удалён.',
+  },
 
   privacy: {
     ro: 'Documentele sunt stocate securizat, nu sunt publice și nu sunt accesibile prin niciun link. Le poate vedea doar medicul.',
@@ -137,7 +141,9 @@ function explain(e: unknown, locale: string): string {
 
 function humanSize(bytes: number): string {
   const mb = bytes / (1024 * 1024);
-  return mb >= 1 ? `${mb.toFixed(mb < 10 ? 1 : 0)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return mb >= 1
+    ? `${mb.toFixed(mb < 10 ? 1 : 0)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
 export function PatientUpload({
@@ -279,7 +285,8 @@ export function PatientUpload({
             {t(T.intro)}
           </p>
           <p className="mt-6 text-[0.95rem] text-ink">
-            {t(T.greeting)}, <span className="font-semibold">{session.greetingName}</span>.{' '}
+            {t(T.greeting)},{' '}
+            <span className="font-semibold">{session.greetingName}</span>.{' '}
             <span className="text-ink-soft">
               {t(T.expires)} {expires}.
             </span>
@@ -371,7 +378,9 @@ export function PatientUpload({
                   className="flex items-start justify-between gap-4 border-b border-[var(--rule)] pb-4"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-[0.95rem] text-ink">{d.fileName}</p>
+                    <p className="truncate text-[0.95rem] text-ink">
+                      {d.fileName}
+                    </p>
                     <p className="mt-1 text-[0.8rem] text-ink-soft">
                       {humanSize(d.sizeBytes)}
                       {d.note ? ` · ${d.note}` : ''}
@@ -381,7 +390,9 @@ export function PatientUpload({
                     type="button"
                     className={`${underline} shrink-0`}
                     disabled={busy}
-                    onClick={() => void run(() => deletePatientFile(token, d.id))}
+                    onClick={() =>
+                      void run(() => deletePatientFile(token, d.id))
+                    }
                   >
                     {t(T.remove)}
                   </button>

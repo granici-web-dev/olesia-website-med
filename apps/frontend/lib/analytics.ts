@@ -45,7 +45,10 @@ declare global {
  * it no-ops when nothing is initialised (no consent / no IDs). Pushes to the
  * GTM dataLayer, GA4 (gtag), and the Meta Pixel (custom event).
  */
-export function track(name: string, params: Record<string, unknown> = {}): void {
+export function track(
+  name: string,
+  params: Record<string, unknown> = {},
+): void {
   if (typeof window === 'undefined') return;
   window.dataLayer?.push({ event: name, ...params });
   window.gtag?.('event', name, params);

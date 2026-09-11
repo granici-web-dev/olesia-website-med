@@ -15,7 +15,11 @@ const service = (ro: string, en: string, ru: string | null) => ({
 });
 
 describe('serviceDescription', () => {
-  const full = service('Consultație video.', 'Video consultation.', 'Видеоконсультация.');
+  const full = service(
+    'Consultație video.',
+    'Video consultation.',
+    'Видеоконсультация.',
+  );
 
   it('picks the reader’s language', () => {
     expect(serviceDescription('ro', full)).toBe('Consultație video.');
@@ -24,15 +28,18 @@ describe('serviceDescription', () => {
   });
 
   it('falls back to Romanian when Russian was never written', () => {
-    expect(serviceDescription('ru', service('Consultație video.', 'Video.', null)))
-      .toBe('Consultație video.');
+    expect(
+      serviceDescription('ru', service('Consultație video.', 'Video.', null)),
+    ).toBe('Consultație video.');
   });
 
   it('treats a cleared field as missing, the way the back office writes it', () => {
-    expect(serviceDescription('ru', service('Consultație video.', 'Video.', '   ')))
-      .toBe('Consultație video.');
-    expect(serviceDescription('en', service('Consultație video.', '', null)))
-      .toBe('Consultație video.');
+    expect(
+      serviceDescription('ru', service('Consultație video.', 'Video.', '   ')),
+    ).toBe('Consultație video.');
+    expect(
+      serviceDescription('en', service('Consultație video.', '', null)),
+    ).toBe('Consultație video.');
   });
 
   it('says nothing when there is nothing to say', () => {

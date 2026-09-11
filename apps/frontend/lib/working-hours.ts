@@ -66,10 +66,7 @@ export function formatWorkingWeek(
       pick(DAY_NAMES[d.weekday - 1] ?? DAY_NAMES[0], locale);
 
     rows.push({
-      days:
-        last === i
-          ? name(days[i])
-          : `${name(days[i])}–${name(days[last])}`,
+      days: last === i ? name(days[i]) : `${name(days[i])}–${name(days[last])}`,
       hours: days[i].closed
         ? pick(CLOSED, locale)
         : `${days[i].opensAt}–${days[i].closesAt}`,
@@ -101,7 +98,8 @@ export function formatSla(locale: string, minutes: number): string {
     return `~${minutes} ${pick(['min', 'min', 'мин'], locale)}`;
   }
   const h = minutes / 60;
-  if (locale === 'ru') return `~${h} ${h === 1 ? 'час' : h < 5 ? 'часа' : 'часов'}`;
+  if (locale === 'ru')
+    return `~${h} ${h === 1 ? 'час' : h < 5 ? 'часа' : 'часов'}`;
   if (locale === 'en') return `~${h} ${h === 1 ? 'hour' : 'hours'}`;
   return `~${h} ${h === 1 ? 'oră' : 'ore'}`;
 }

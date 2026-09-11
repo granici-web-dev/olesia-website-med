@@ -16,12 +16,12 @@
 
 ## 1. Зачем сюда приходят (гипотезы → проверить)
 
-| Сегмент | JTBD |
-|---|---|
+| Сегмент                      | JTBD                                |
+| ---------------------------- | ----------------------------------- |
 | Перед записью, есть сомнения | «Сниму вопросы, прежде чем платить» |
-| Не понимает онлайн-формат | «Как это вообще проходит» |
-| Сравнивает услуги | «Какую выбрать / в чём разница» |
-| Беспокоится об оплате/данных | «Как платить, безопасно ли» |
+| Не понимает онлайн-формат    | «Как это вообще проходит»           |
+| Сравнивает услуги            | «Какую выбрать / в чём разница»     |
+| Беспокоится об оплате/данных | «Как платить, безопасно ли»         |
 
 **Вывод:** задача FAQ — снять трение и возражения до конверсии, разгрузить поддержку и правильно маршрутизировать (112, Quick question).
 
@@ -51,6 +51,7 @@
 ## 4. Текст страницы (RO)
 
 ### Hero
+
 ```
 Eyebrow:  Întrebări frecvente
 H1:       Întrebări frecvente
@@ -59,6 +60,7 @@ Subhead:  Răspunsuri la cele mai des întâlnite întrebări despre
 ```
 
 ### Категория 1 — Consultații online
+
 ```
 • Cum decurge o consultație online?
   → Consultația are loc prin apel video, la ora programată.    ⚠ инструмент/детали
@@ -75,6 +77,7 @@ Subhead:  Răspunsuri la cele mai des întâlnite întrebări despre
 ```
 
 ### Категория 2 — Programare, anulare, reprogramare
+
 ```
 • Cum programez o consultație?
   → Alegi serviciul din „Servicii" și selectezi o oră liberă.  ✓
@@ -85,6 +88,7 @@ Subhead:  Răspunsuri la cele mai des întâlnite întrebări despre
 ```
 
 ### Категория 3 — Plată
+
 ```
 • Cum se face plata?
   → Prin transfer bancar (deocamdată fără plată online).       ✓
@@ -97,6 +101,7 @@ Subhead:  Răspunsuri la cele mai des întâlnite întrebări despre
 ```
 
 ### Категория 4 — Servicii
+
 ```
 • Care este diferența dintre consultații?
   → Pediatrică (sănătate, 50 min) · Nutriție (alimentație,
@@ -113,6 +118,7 @@ Subhead:  Răspunsuri la cele mai des întâlnite întrebări despre
 ```
 
 ### Категория 5 — Servicii prin portal
+
 ```
 • Cum funcționează „Întreabă medicul"?
   → Scrii întrebarea, achiți prin transfer și primești un
@@ -126,6 +132,7 @@ Subhead:  Răspunsuri la cele mai des întâlnite întrebări despre
 ```
 
 ### Категория 6 — Confidențialitate și urgențe
+
 ```
 • Datele mele sunt în siguranță?
   → [политика обработки + ссылка на Politica de confidențialitate] ⚠ заполнить
@@ -137,6 +144,7 @@ Subhead:  Răspunsuri la cele mai des întâlnite întrebări despre
 ```
 
 ### «Остался вопрос?»
+
 ```
 Heading: Nu ai găsit răspunsul?
 • Pentru o întrebare generală → Contact
@@ -152,6 +160,7 @@ Heading: Nu ai găsit răspunsul?
 • Meta title / description
 • Якоря на категории (deep links)
 ```
+
 ```
 Meta title:       Întrebări frecvente | Dr. Olesea Jalba
 Meta description: Răspunsuri despre consultațiile online, programare,
@@ -191,6 +200,7 @@ faq_item:                 # сущность, повторяется; источ
 ## 8. Что подтвердить (= закрывает открытые вопросы всего сайта)
 
 Заполнение этих ответов закрывает большинство `⚠` по проекту:
+
 1. Отмена / перенос / опоздание.
 2. Оплата: когда, фактура, возврат.
 3. Рецепты (регуляторика РМ).
@@ -200,4 +210,7 @@ faq_item:                 # сущность, повторяется; источ
 7. Приватность данных + наличие «Politica de confidențialitate».
 8. Вложения в «Întreabă medicul» + их безопасное хранение.
 9. Деталь онлайн-формата (инструмент видеозвонка).
+
+```
+
 ```
