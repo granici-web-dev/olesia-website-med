@@ -582,7 +582,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[x]` `1f31ba6`…`e345c72`, `4e9cb04`, `640a780`…`f13ffc5` |
-| A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
+| A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[>]` аудит 2026-09-11, 26 находок, harden в работе |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
 | A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[ ]` |
 | A12 | без аудита, механика: Dependabot по одному, тесты из списка 15 | зелёный CI после каждого слияния | 14, 15 | `[ ]` |
@@ -1101,6 +1101,30 @@ refresh-обёртки. Кнопка «Ai uitat parola?» без обработ�
 копии, `section-stub.tsx` без импортов, 12 мёртвых ключей `ro.ts`, `mailto` с
 именем врача в коде (`order-detail-sheet.tsx:66`), `agentation` в `dependencies`
 вместо `devDependencies`.
+
+Аудит A9 (2026-09-11, 26 находок, 5 high) подтвердил 13a и 13b и добавил:
+редактор статьи и страница «О враче» при упавшем запросе показывают пустую
+форму с живой кнопкой, и сохранение стирает статью или страницу целиком;
+панель grant при ошибке говорит покупателю «ссылки нет, купите заново»; девять
+`asList` выбрасывают `total`, а `pageSize=200` это потолок API, не запас;
+серверный `?search=` реализован и не вызывается; двадцать форматтеров живут в
+`mock.ts` и попадают в прод через `export *` (в бандле фикстур нет, но это
+случайность tree-shaking); четыре отказа API по пользователям и три 409 по
+слагам и Calendly превращаются в «A apărut o eroare»; загрузка документа
+пациента без лимита на клиенте и без ветки 413; «Plăți în așteptare» на
+дашборде считает одну таблицу из пяти, а бейдж «30 дней» относится к одному
+счётчику из четырёх; два независимых запроса списка могут вернуть один заказ
+дважды; буфер обмена без обработки ошибки, включая коды восстановления 2FA;
+теста ни одного, конфига Vitest нет. Решения: ветки ошибки с повтором на пяти
+экранах, 500 отдельно от 404; диалоги на удалении документа и категории,
+`ConfirmAction` один с `pending`; коды 409 и отказов пользователей в поля и
+тосты; лимит и 413 на загрузке документа, API отвечает кодом, не английской
+прозой; общий `asList` с `total`, пагинация и «N din M», серверный поиск с
+debounce; форматтеры в `lib/format.ts` и `features/*/format.ts`, явные
+реэкспорты вместо `export *`; дашборд считает ожидающие по реестру `Payment`
+для всех типов и применяет период ко всем счётчикам, «Activitate» удаляется;
+подпись письма из `user.name`; лимиты загрузок из `packages/shared`; Vitest
+для бэк-офиса с семью первыми тестами.
 
 Проходы программы аудита: A9 (13a, 13b), A10 (13c, 13d, 13e). В A9 первым
 делом Vitest-конфиг бэк-офиса и тесты на `deadlineMs`/`slaMet`,
