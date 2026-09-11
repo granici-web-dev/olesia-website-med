@@ -36,7 +36,7 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Back office forms | react-hook-form + zod | `^7.78.0`, `zod ^4.4.3` |
 | Shared types | `packages/shared` — DTOs and enums, built with `tsc` | workspace |
 | Formatter | Prettier, single option: `singleQuote` | `~3.6.2` |
-| Test runner (API) | Jest with `@swc/jest`, 348 tests in 38 suites | `jest ~30.3.0` |
+| Test runner (API) | Jest with `@swc/jest`, 352 tests in 39 suites | `jest ~30.3.0` |
 | Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only, 89 tests | `vitest ~4.1.0` |
 | Test runner (back office) | Vitest in `vite.config.mts`, 45 tests since audits A9 and A10 | `vitest ~4.1.0` |
 | CI | GitHub Actions: two typechecks, **all three test suites**, three builds, migration check | — |

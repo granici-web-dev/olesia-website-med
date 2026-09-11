@@ -145,13 +145,7 @@ export class TotpService {
    * arrived at login or at the 2FA settings page.
    */
   async verify(user: User, code: string): Promise<boolean> {
-    const locked = this.lockRemainingSeconds(user);
-    if (locked > 0) {
-      throw new HttpException(
-        { statusCode: HttpStatus.TOO_MANY_REQUESTS, message: 'totp_locked', retryAfterSeconds: locked },
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
+    this.assertNotLocked(user);
     if (!user.totpSecret) return false;
 
     const candidate = code.replace(/\s+/g, '');
@@ -229,11 +223,34 @@ export class TotpService {
     }
   }
 
-  /** Guard helper for the login flow. */
+  /**
+   * Guard helper for the login flow.
+   *
+   * The lock is tested before the code is asked for. The other order answered a
+   * locked account `totp_required`, so the panel opened an empty code field
+   * with no timer and the doctor typed fresh codes into a form that could not
+   * accept one — and every one of those attempts pushed the lock further out
+   * (corrected 2026-09-11).
+   */
   async assertCode(user: User, code: string | undefined): Promise<void> {
+    this.assertNotLocked(user);
     if (!code) throw new UnauthorizedException('totp_required');
     if (!(await this.verify(user, code))) {
       throw new UnauthorizedException('totp_invalid_code');
     }
+  }
+
+  /**
+   * 429 with the time the account has left to serve, or nothing when it may
+   * try now. The status and the `retryAfterSeconds` field are what the panel
+   * reads to show a counting-down timer instead of "wrong code".
+   */
+  private assertNotLocked(user: Pick<User, 'totpLockedUntil'>): void {
+    const retryAfterSeconds = this.lockRemainingSeconds(user);
+    if (retryAfterSeconds === 0) return;
+    throw new HttpException(
+      { statusCode: HttpStatus.TOO_MANY_REQUESTS, message: 'totp_locked', retryAfterSeconds },
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
   }
 }

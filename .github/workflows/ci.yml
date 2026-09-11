@@ -5,9 +5,10 @@
 # merging blind or checking out every branch locally. A green tick here means
 # the types still line up and all three apps still build on that branch.
 #
-# It also runs both unit suites and applies every migration to a clean Postgres.
-# What it still does NOT tell you: whether a page renders correctly, or whether
-# an integration with Calendly or the bank actually works end to end.
+# It also runs all three unit suites and applies every migration to a clean
+# Postgres. What it still does NOT tell you: whether a page renders correctly,
+# whether an integration with Calendly or the bank actually works end to end, or
+# whether the Docker image still builds — no job here touches `docker/`.
 
 name: CI
 
@@ -60,11 +61,11 @@ jobs:
       - name: Typecheck back office
         run: pnpm exec tsc -p apps/back-office/tsconfig.app.json --noEmit
 
-      # All three suites are unit tests over pure functions and finish in
-      # about a second between them. They ran only on a developer's laptop
-      # until 2026-09-10, which is a strange thing to say about the tests that
-      # cover the money, the dates and the webhook signatures. The back office
-      # joined them on 2026-09-11 with the first seven specs it has ever had.
+      # All three suites are unit tests over pure functions and finish in a few
+      # seconds between them. They ran only on a developer's laptop until
+      # 2026-09-10, which is a strange thing to say about the tests that cover
+      # the money, the dates and the webhook signatures. The back office joined
+      # them on 2026-09-11 with the first specs it has ever had.
       - name: Test API
         run: pnpm nx test api
 

@@ -41,7 +41,7 @@ export default defineConfig(() => ({
   /**
    * Vitest. `jsdom` rather than `node` because this is a React application and
    * a test that needs to render a component should not have to add the
-   * environment first; the seven specs here are pure functions and would run
+   * environment first; the specs here are pure functions and would run
    * either way.
    */
   test: {
