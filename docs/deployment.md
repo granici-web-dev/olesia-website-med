@@ -291,6 +291,17 @@ redeploying and every photo the client uploaded answers 400 from the image
 optimizer while the rest of the page renders normally — which is the hardest
 kind of breakage to attribute. Redeploy after any change to it.
 
+📌 **If the API is unreachable while the site builds, the pages are built
+empty** — the build does not fail. `next build` prerenders every route, and an
+outage used to throw out of `lib/api.ts` and abort the whole deployment, so
+nothing shipped, not even the pages that read no content. From this release a
+network error or a 5xx during `phase-production-build` is rendered as "the
+client has not filled this in", with one line per route in the build log. The
+first request after the API is answering again revalidates the page within a
+minute, so a site built against a dead API repairs itself without a redeploy.
+This is build time only: an outage seen by a live visitor is still an error
+page, not an empty one.
+
 ⚠️ `NEXT_PUBLIC_SITE_URL`, `API_URL` and `NEXT_PUBLIC_API_URL` are all
 **required** from this release on: the production build fails rather than
 shipping a `robots.txt`, a sitemap and canonical links pointing at `localhost`

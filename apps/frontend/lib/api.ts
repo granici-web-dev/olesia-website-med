@@ -66,6 +66,32 @@ export class ApiUnavailableError extends Error {
 }
 
 /**
+ * `next build` prerenders every page, so an API that is down at build time
+ * turned an outage into a *failed deployment*: nothing shipped at all, not even
+ * the pages that need no API. The site is deployed before its API has a host,
+ * and CI has no API, so this was every build.
+ *
+ * During the production build an outage is therefore treated as emptiness: the
+ * page is prerendered with nothing in it and revalidates within a minute of the
+ * first request that finds the API answering. At runtime nothing changes — an
+ * outage is thrown and answered by `app/[locale]/error.tsx`, because a live
+ * visitor must not be shown a confident, empty version of the site.
+ */
+const isBuild = (): boolean =>
+  process.env.NEXT_PHASE === 'phase-production-build';
+
+/**
+ * One line per failed route, so a build that ships empty pages says so.
+ * The host is left out: it is an env value and build logs are public.
+ */
+function warnAtBuild(path: string, status: number): void {
+  console.warn(
+    `[api] ${path} unavailable at build time (${status || 'network'}); ` +
+      'prerendering it empty, ISR will fill it in',
+  );
+}
+
+/**
  * @param empty what "the client has not filled this in" looks like.
  *
  * A 4xx is the API answering, and the only 4xx these routes produce is the 404
@@ -76,9 +102,19 @@ async function getJson<T>(path: string, empty: T): Promise<T> {
   try {
     res = await fetch(`${API_URL}${path}`, { next: { revalidate: 60 } });
   } catch {
+    if (isBuild()) {
+      warnAtBuild(path, 0);
+      return empty;
+    }
     throw new ApiUnavailableError(path, 0);
   }
-  if (res.status >= 500) throw new ApiUnavailableError(path, res.status);
+  if (res.status >= 500) {
+    if (isBuild()) {
+      warnAtBuild(path, res.status);
+      return empty;
+    }
+    throw new ApiUnavailableError(path, res.status);
+  }
   if (!res.ok) return empty;
   return (await res.json()) as T;
 }
@@ -86,23 +122,52 @@ async function getJson<T>(path: string, empty: T): Promise<T> {
 /**
  * A singleton the API creates on first read, so there is no "not there yet"
  * state to render: anything other than the row is the API failing.
+ *
+ * @param atBuild the row the API would create on its own first read, used only
+ * while prerendering — see `isBuild`. There is no empty rendering of a
+ * singleton, so the build needs something shaped like the row.
  */
-async function getRequired<T>(path: string): Promise<T> {
+async function getRequired<T>(path: string, atBuild: T): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, { next: { revalidate: 60 } });
   } catch {
+    if (isBuild()) {
+      warnAtBuild(path, 0);
+      return atBuild;
+    }
     throw new ApiUnavailableError(path, 0);
   }
-  if (!res.ok) throw new ApiUnavailableError(path, res.status);
+  if (!res.ok) {
+    if (isBuild()) {
+      warnAtBuild(path, res.status);
+      return atBuild;
+    }
+    throw new ApiUnavailableError(path, res.status);
+  }
   return (await res.json()) as T;
 }
+
+/**
+ * What `GET /working-hours` answers before anyone has edited it: the Prisma
+ * defaults of the singleton (`schema.prisma`, `WorkingHours`), with no days
+ * filled in. `isPlaceholder` makes the page print its "provisional hours" note
+ * rather than state a schedule we do not have.
+ */
+const WORKING_HOURS_AT_BUILD: WorkingHoursDto = {
+  timezone: 'Europe/Chisinau',
+  days: [],
+  expressSlaMinutes: 60,
+  isPlaceholder: true,
+  updatedAt: new Date(0).toISOString(),
+};
 
 export const api = {
   services: () => getJson<PublicServiceDto[]>('/services', []),
   contacts: () => getJson<PublicContactDto[]>('/contacts', []),
   about: () => getJson<AboutPageDto | null>('/about', null),
-  workingHours: () => getRequired<WorkingHoursDto>('/working-hours'),
+  workingHours: () =>
+    getRequired<WorkingHoursDto>('/working-hours', WORKING_HOURS_AT_BUILD),
   faq: () => getJson<FaqCategoryDto[]>('/faq', []),
   testimonials: () => getJson<TestimonialDto[]>('/testimonials', []),
   mediaAppearances: () =>
