@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { api } from '@/lib/api';
+import { ApiUnavailableError, api } from '@/lib/api';
 import { routing } from '@/i18n/routing';
 import { siteUrl } from '@/lib/site-url';
 
@@ -60,13 +60,18 @@ function entry(path: string, lastModified?: Date): MetadataRoute.Sitemap[number]
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // A sitemap that fails to build takes the whole route with it, and the API is
-  // the one part of this that can be down. An incomplete sitemap is a far
-  // smaller problem than a 500 where crawlers expect XML, so posts are
-  // best-effort — `api.posts()` already swallows its own errors and returns [].
-  const posts = await api.posts();
-
-  const published = posts.filter((p) => p.publishedAt);
+  // A sitemap that fails takes the whole route with it, and this one is
+  // prerendered — so an unreachable API would fail the *build*, not just a
+  // request. An incomplete sitemap is a far smaller problem than a deploy that
+  // cannot happen while the API restarts, so the posts are best-effort. This is
+  // the one place that catches `ApiUnavailableError` instead of letting it
+  // reach `error.tsx`: there is no page here to show it on.
+  let published: Awaited<ReturnType<typeof api.posts>> = [];
+  try {
+    published = (await api.posts()).filter((p) => p.publishedAt);
+  } catch (e) {
+    if (!(e instanceof ApiUnavailableError)) throw e;
+  }
 
   return [
     ...STATIC_PATHS.map((p) => entry(p)),

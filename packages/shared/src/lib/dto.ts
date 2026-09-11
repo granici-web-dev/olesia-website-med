@@ -721,3 +721,57 @@ export interface PaymentDto {
   createdAt: string;
   refunds: PaymentRefundDto[];
 }
+
+// --- The public site's surface ---
+//
+// The shapes below are what `apps/frontend` reads. They lived in the API's
+// mappers until 2026-09-11, where the site could not import them — so
+// `apps/frontend/lib/api.ts` carried nine hand-written copies, and a field
+// added on one side was a silent mismatch on the other (audit A6, F8).
+//
+// Two things separate them from the back office's shapes above. Some withhold
+// a field that had no business on an unauthenticated route (audit A4, F5/F7).
+// And every enum becomes its string-literal union: JSON carries `"tv"`, not a
+// TypeScript enum member, and the site writes and compares plain strings. An
+// enum member still satisfies its own literal union, so the API's mappers keep
+// typechecking unchanged.
+
+/**
+ * A service as the public catalog serves it.
+ *
+ * `calendlyEventTypeUri` is the webhook's mapping key, and `active` is a flag
+ * every reader had to remember to filter on; the endpoint filters instead.
+ */
+export type PublicServiceDto = Omit<
+  ServiceDto,
+  'calendlyEventTypeUri' | 'active' | 'code' | 'group'
+> & {
+  code: `${ServiceCode}`;
+  group: `${ServiceGroup}`;
+};
+
+/** A published post. `authorId` is an internal `User` id and stays internal. */
+export type PublicPostDto = Omit<PostDto, 'authorId' | 'status'> & {
+  status: `${PostStatus}`;
+};
+
+/**
+ * A material as the storefront sees it. A paid one arrives with
+ * `fileUrl: null`, because on a public endpoint the URL *is* the file.
+ */
+export type PublicMaterialDto = Omit<MaterialDto, 'access' | 'flags'> & {
+  access: `${MaterialAccess}`;
+  flags: `${MaterialFlag}`[];
+};
+
+export type PublicMediaAppearanceDto = Omit<
+  MediaAppearanceDto,
+  'kind' | 'embedProvider'
+> & {
+  kind: `${MediaKind}`;
+  embedProvider: `${MediaEmbedProvider}`;
+};
+
+export type PublicContactDto = Omit<ContactDto, 'type'> & {
+  type: `${ContactType}`;
+};

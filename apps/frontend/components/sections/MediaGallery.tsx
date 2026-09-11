@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import { Reveal } from '@/components/ui/Reveal';
 import { track } from '@/lib/analytics';
-import type { MediaAppearanceDto } from '@/lib/api';
+import type { PublicMediaAppearanceDto } from '@/lib/api';
 import styles from './MediaGallery.module.css';
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ import styles from './MediaGallery.module.css';
 
 type Locale = 'ro' | 'en' | 'ru';
 
-function embedSrc(item: MediaAppearanceDto): string {
+function embedSrc(item: PublicMediaAppearanceDto): string {
   if (item.embedProvider === 'youtube') {
     return `https://www.youtube-nocookie.com/embed/${item.embedRef}?autoplay=1&rel=0`;
   }
@@ -52,7 +52,7 @@ export function MediaGallery({
   items,
 }: {
   locale: Locale;
-  items: MediaAppearanceDto[];
+  items: PublicMediaAppearanceDto[];
 }) {
   const en = locale === 'en';
   const ru = locale === 'ru';
@@ -67,7 +67,7 @@ export function MediaGallery({
     watchOn: ru ? 'Открыть на' : en ? 'Watch on' : 'Vezi pe',
   };
 
-  const providerName = (item: MediaAppearanceDto) =>
+  const providerName = (item: PublicMediaAppearanceDto) =>
     item.embedProvider === 'youtube' ? 'YouTube' : 'Facebook';
 
   return (

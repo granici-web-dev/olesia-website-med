@@ -123,8 +123,29 @@ the code here.
   mirror of the seed that `/pricing` served whenever the API was unreachable — a
   complete, authoritative-looking tariff table compiled into the bundle. It is gone, and
   nothing replaced it: `formatServicePrice` returns `null` when there is nothing to say
-  and every caller renders nothing. ISR already keeps the last good page for the case
-  that matters; inventing a number covers only the case where we would be lying.
+  and every caller renders nothing. The same sweep removed the FAQ's 200-line fallback,
+  `SERVICE_DESCRIPTIONS`, the hardcoded contacts and the hardcoded CV (audit A6, 2026-09-11).
+- **An empty answer and no answer are different things, and the site says which.**
+  `getJson` used to turn every failure into its fallback value, so an unreachable API
+  produced a complete, confident, empty page — and cached it. It now throws
+  `ApiUnavailableError` on a network failure or a 5xx, and returns the empty value only
+  for what the API actually said: a 200 with `[]`, or the 404 of a slug that does not
+  exist. `app/[locale]/error.tsx` answers the first case in three languages.
+  Two readers deliberately swallow it, each for a stated reason: `app/sitemap.ts`, which
+  is prerendered and would otherwise fail the *build* while the API restarts, and the
+  `Footer`, which renders on every page including the one that reports the outage.
+- **What the cache actually covers, measured on 2026-09-11.** The earlier note here
+  said "ISR already keeps the last good page", which was true of the case it was written
+  about and wrong as a general claim. Measured against a production build with the API
+  killed: a route that has been rendered once while the API was reachable keeps serving
+  that HTML — verified 150 seconds after a `revalidate = 60` entry went stale, with no
+  re-render attempted. A route rendered for the first time while the API is down answers
+  500 and the error page. Two details decide which you get. The data cache is keyed by
+  request URL and shared across routes, so one page's fetch keeps another page working;
+  and `<Link>` prefetching renders routes nobody visited, which is why the net is wider
+  than the pages anyone actually opened. None of it survives a deploy: the cache starts
+  empty, so the first visitor after a release meets the API directly. Treat the cache as
+  what covers a restart, not as what covers an outage.
 
 ## Sensitive data
 

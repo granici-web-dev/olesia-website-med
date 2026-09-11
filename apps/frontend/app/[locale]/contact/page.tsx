@@ -1,9 +1,12 @@
-import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { ContactForm } from '@/components/ui/ContactForm';
 import { Reveal } from '@/components/ui/Reveal';
+import { SocialIcon } from '@/components/ui/SocialIcon';
 import { underlineLg } from '@/components/ui/cta';
+import { api, loc } from '@/lib/api';
+import { contactHref, groupContacts, socialNetwork } from '@/lib/contacts';
+import { formatWorkingWeek, provisionalNote } from '@/lib/working-hours';
 
 export const revalidate = 60;
 
@@ -14,8 +17,12 @@ export const revalidate = 60;
    works); medical questions are routed to "Întreabă medicul" by design — that's
    UX, business-model protection, and GDPR (consent + boundaries) at once.
    Visual language mirrors the service pages: editorial-split hero, hairline
-   rules, mono micro-labels, big serif with italic sage accents. Bilingual
-   (RO default · EN).
+   rules, mono micro-labels, big serif with italic sage accents. Trilingual
+   (RO default · EN · RU).
+   The channels and the opening hours come from `GET /contacts` and
+   `GET /working-hours`. They were string constants here while the back office
+   edited tables nothing rendered (audit A6, F12); a kind the client has not
+   entered is simply not shown.
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -74,41 +81,6 @@ const TRIAGE: { situation: Bi; route: Bi; href: string; anchor?: boolean }[] = [
   },
 ];
 
-/* Direct contact details. */
-const EMAIL = 'oleseajalba@gmail.com';
-const PHONE_DISPLAY = '+373 68837774';
-const PHONE_HREF = 'tel:+37368837774';
-
-const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
-  {
-    name: 'Instagram',
-    href: 'https://www.instagram.com/dr.olesea_jalba_pediatru',
-    icon: (
-      <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
-        <path d="M12 2c-2.7 0-3 0-4.1.1-1 .1-1.8.2-2.4.5-.7.3-1.2.6-1.8 1.2S2.7 5 2.5 5.5c-.2.6-.4 1.4-.4 2.4C2 9 2 9.3 2 12s0 3 .1 4.1c0 1 .2 1.8.4 2.4.3.7.6 1.2 1.2 1.8s1.1.9 1.8 1.2c.6.2 1.4.4 2.4.4C9 22 9.3 22 12 22s3 0 4.1-.1c1 0 1.8-.2 2.4-.4.7-.3 1.2-.6 1.8-1.2s.9-1.1 1.2-1.8c.2-.6.4-1.4.4-2.4.1-1.1.1-1.4.1-4.1s0-3-.1-4.1c0-1-.2-1.8-.4-2.4-.3-.7-.6-1.2-1.2-1.8S19 2.7 18.5 2.5c-.6-.2-1.4-.4-2.4-.4C15 2 14.7 2 12 2zm0 1.8c2.7 0 3 0 4 .1.9 0 1.5.2 1.8.3.5.2.8.4 1.1.7.3.3.6.6.7 1.1.1.3.3.9.3 1.8.1 1 .1 1.3.1 4s0 3-.1 4c0 .9-.2 1.5-.3 1.8-.2.5-.4.8-.7 1.1-.3.3-.6.6-1.1.7-.3.1-.9.3-1.8.3-1 .1-1.3.1-4 .1s-3 0-4-.1c-.9 0-1.5-.2-1.8-.3-.5-.2-.8-.4-1.1-.7-.3-.3-.6-.6-.7-1.1-.1-.3-.3-.9-.3-1.8-.1-1-.1-1.3-.1-4s0-3 .1-4c0-.9.2-1.5.3-1.8.2-.5.4-.8.7-1.1.3-.3.6-.6 1.1-.7.3-.1.9-.3 1.8-.3 1-.1 1.3-.1 4-.1zm0 3.1a5.1 5.1 0 1 0 0 10.2 5.1 5.1 0 0 0 0-10.2zm0 1.8a3.3 3.3 0 1 1 0 6.6 3.3 3.3 0 0 1 0-6.6zm5.3-3.2a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Facebook',
-    href: 'https://www.facebook.com/olesea.jalba.2025',
-    icon: (
-      <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
-        <path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.7-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.5 2.9h-2.3v7A10 10 0 0 0 22 12z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Telegram',
-    href: 'https://t.me/dr_olesea_jalba_official',
-    icon: (
-      <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
-        <path d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6.5 13.1l-4.8-1.5c-1-.3-1.1-1 .2-1.5l18.8-7.3c.9-.3 1.6.2 1.3 1.5z" />
-      </svg>
-    ),
-  },
-];
-
 export default async function ContactPage({
   params,
 }: {
@@ -118,6 +90,15 @@ export default async function ContactPage({
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+
+  const [contacts, hours] = await Promise.all([
+    api.contacts(),
+    api.workingHours(),
+  ]);
+  const { phones, emails, addresses, socials } = groupContacts(contacts);
+  const direct = [...emails, ...phones, ...addresses];
+  const week = formatWorkingWeek(locale, hours);
+  const provisional = provisionalNote(locale, hours);
 
   return (
     <main className="bg-cream text-ink">
@@ -277,58 +258,92 @@ export default async function ContactPage({
 
           {/* Aside: direct contact details */}
           <aside className="flex flex-col gap-8 md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
-            <div>
-              <p className="eyebrow mb-5">
-                {ru ? 'Другие способы связи' : en ? 'Other ways to reach us' : 'Alte modalități de contact'}
-              </p>
-              <dl className="grid gap-5">
-                <div className="border-t border-[var(--rule)] pt-4">
-                  <dt className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
-                    {ru ? 'Email' : en ? 'Email' : 'Email'}
-                  </dt>
-                  <dd className="serif mt-1.5 text-[1.4rem] leading-snug">
-                    <a
-                      href={`mailto:${EMAIL}`}
-                      className="text-ink underline-offset-4 transition-colors hover:text-sage hover:underline"
-                    >
-                      {EMAIL}
-                    </a>
-                  </dd>
-                </div>
-                <div className="border-t border-[var(--rule)] pt-4">
-                  <dt className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
-                    {ru ? 'Телефон' : en ? 'Phone' : 'Telefon'}
-                  </dt>
-                  <dd className="serif mt-1.5 text-[1.4rem] leading-snug lining-nums">
-                    <a
-                      href={PHONE_HREF}
-                      className="text-ink underline-offset-4 transition-colors hover:text-sage hover:underline"
-                    >
-                      {PHONE_DISPLAY}
-                    </a>
-                  </dd>
-                </div>
-              </dl>
-            </div>
+            {direct.length > 0 && (
+              <div>
+                <p className="eyebrow mb-5">
+                  {ru ? 'Другие способы связи' : en ? 'Other ways to reach us' : 'Alte modalități de contact'}
+                </p>
+                <dl className="grid gap-5">
+                  {direct.map((c) => {
+                    const href = contactHref(c);
+                    const label = loc(locale, c.labelRo, c.labelEn, c.labelRu);
+                    return (
+                      <div key={c.id} className="border-t border-[var(--rule)] pt-4">
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
+                          {label}
+                        </dt>
+                        <dd className="serif mt-1.5 text-[1.4rem] leading-snug lining-nums">
+                          {href ? (
+                            <a
+                              href={href}
+                              className="text-ink underline-offset-4 transition-colors hover:text-sage hover:underline"
+                            >
+                              {c.value}
+                            </a>
+                          ) : (
+                            c.value
+                          )}
+                        </dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+              </div>
+            )}
 
-            <div className="border-t border-[var(--rule)] pt-7">
-              <p className="eyebrow mb-4">{ru ? 'Соцсети' : en ? 'Social' : 'Rețele sociale'}</p>
-              <ul className="flex gap-3">
-                {SOCIALS.map((s) => (
-                  <li key={s.name}>
-                    <a
-                      href={s.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={s.name}
-                      className="grid size-11 place-items-center border border-[var(--rule)] text-ink-soft transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage"
+            {week.length > 0 && (
+              <div className="border-t border-[var(--rule)] pt-7">
+                <p className="eyebrow mb-4">
+                  {ru ? 'Часы работы' : en ? 'Opening hours' : 'Program de lucru'}
+                </p>
+                <dl className="grid gap-2.5">
+                  {week.map((row) => (
+                    <div
+                      key={row.days}
+                      className="flex items-baseline justify-between gap-6 text-[0.95rem]"
                     >
-                      {s.icon}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      <dt className="text-ink">{row.days}</dt>
+                      <dd
+                        className={`lining-nums ${row.closed ? 'text-ink-soft' : 'text-ink'}`}
+                      >
+                        {row.hours}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                {provisional && (
+                  <p className="mt-4 text-[0.8rem] leading-relaxed text-ink-soft text-pretty">
+                    {provisional}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {socials.length > 0 && (
+              <div className="border-t border-[var(--rule)] pt-7">
+                <p className="eyebrow mb-4">{ru ? 'Соцсети' : en ? 'Social' : 'Rețele sociale'}</p>
+                <ul className="flex gap-3">
+                  {socials.map((c) => {
+                    const href = contactHref(c);
+                    if (!href) return null;
+                    const label = loc(locale, c.labelRo, c.labelEn, c.labelRu);
+                    return (
+                      <li key={c.id}>
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={label}
+                          className="grid size-11 place-items-center border border-[var(--rule)] text-ink-soft transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage"
+                        >
+                          <SocialIcon network={socialNetwork(c.value)} />
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
           </aside>
         </div>
       </section>

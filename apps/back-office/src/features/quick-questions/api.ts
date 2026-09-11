@@ -11,7 +11,7 @@ import type {
 } from '@/features/quick-questions/types';
 
 /**
- * Real `quick-questions` endpoints (module_calendly.md §3.2.5) — 48h SLA
+ * Real `quick-questions` endpoints (module_calendly.md §3.2.5) — the SLA
  * tickets (service 05). The DTO carries a `closed` status the UI folds into
  * `answered`.
  */

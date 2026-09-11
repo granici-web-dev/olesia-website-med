@@ -5,14 +5,19 @@ import { Link } from '@/i18n/navigation';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
+import { api } from '@/lib/api';
+import { formatSla, formatSlaInHours, withSla } from '@/lib/working-hours';
 
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
    Single-service landing for the Express question (group B · portal). No
    calendar/video booking — the CTA opens the lead form (`quick_question`). The
-   page's job: a specific, non-urgent question → a written answer in ~1h, with a
-   clear "not for emergencies" boundary. Bilingual (RO default · EN); local copy.
+   page's job: a specific, non-urgent question → a written answer inside the
+   promised window, with a clear "not for emergencies" boundary. Trilingual
+   (RO default · EN · RU); local copy, except the promise itself: `{sla}` is
+   filled from `WorkingHours.expressSlaMinutes`, which the client edits. It was
+   the literal "~1 oră" in six places here (audit A6, F12).
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -23,17 +28,20 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
+  const minutes = (await api.workingHours()).expressSlaMinutes;
+  const sla = formatSla(locale, minutes);
+  const inHours = formatSlaInHours(locale, minutes);
   return {
     title: ru
-      ? 'Экспресс-вопрос — ответ за ~1 час | Dr. Olesea Jalba'
+      ? `Экспресс-вопрос — ответ за ${sla} | Dr. Olesea Jalba`
       : en
-      ? 'Express question — answer in ~1h | Dr. Olesea Jalba'
-      : 'Întrebare EXPRESS — răspuns în ~1h | Dr. Olesea Jalba',
+      ? `Express question — answer in ${sla} | Dr. Olesea Jalba`
+      : `Întrebare EXPRESS — răspuns în ${sla} | Dr. Olesea Jalba`,
     description: ru
-      ? 'Есть конкретный, неэкстренный вопрос? Получите письменный, обоснованный ответ от педиатра за ~1 час в рабочее время. Можно приложить фото и документы.'
+      ? `Есть конкретный, неэкстренный вопрос? Получите письменный, обоснованный ответ от педиатра за ${inHours}. Можно приложить фото и документы.`
       : en
-      ? 'Have one specific, non-urgent question? Get a written, documented answer from a pediatrician within ~1 hour during working hours. Photos and documents welcome.'
-      : 'Ai o întrebare punctuală, non-urgentă? Primești un răspuns scris și documentat de la un medic pediatru în ~1 oră în timpul programului de lucru. Poți atașa poze și documente.',
+      ? `Have one specific, non-urgent question? Get a written, documented answer from a pediatrician within ${inHours}. Photos and documents welcome.`
+      : `Ai o întrebare punctuală, non-urgentă? Primești un răspuns scris și documentat de la un medic pediatru în ${inHours}. Poți atașa poze și documente.`,
   };
 }
 
@@ -57,18 +65,18 @@ const STEPS: { title: Bi; text: Bi }[] = [
     },
   },
   {
-    title: { ro: 'Răspuns în ~1h', en: 'Answer in ~1h', ru: 'Ответ за ~1ч' },
+    title: { ro: 'Răspuns în {sla}', en: 'Answer in {sla}', ru: 'Ответ за {sla}' },
     text: {
-      ro: 'Primești răspunsul scris pe email sau WhatsApp în ~1 oră în timpul programului de lucru, cu o rundă de clarificări.',
-      en: 'You get the written answer by email or WhatsApp within ~1 hour during working hours, with one round of clarification.',
-      ru: 'Письменный ответ придёт на email или в WhatsApp за ~1 час в рабочее время. Можно один раз задать уточняющие вопросы.',
+      ro: 'Primești răspunsul scris pe email sau WhatsApp în {slaInHours}, cu o rundă de clarificări.',
+      en: 'You get the written answer by email or WhatsApp within {slaInHours}, with one round of clarification.',
+      ru: 'Письменный ответ придёт на email или в WhatsApp за {slaInHours}. Можно один раз задать уточняющие вопросы.',
     },
   },
 ];
 
 const GET: Bi[] = [
   { ro: 'Analiza informațiilor și a documentelor trimise', en: 'Review of the information and documents you send', ru: 'Разбор присланной информации и документов' },
-  { ro: 'Un răspuns scris și personalizat în ~1 oră în timpul programului de lucru', en: 'A written, personalized answer within ~1 hour during working hours', ru: 'Письменный, персональный ответ за ~1 час в рабочее время' },
+  { ro: 'Un răspuns scris și personalizat în {slaInHours}', en: 'A written, personalized answer within {slaInHours}', ru: 'Письменный, персональный ответ за {slaInHours}' },
   { ro: 'Recomandări orientative privind conduita ulterioară', en: 'Guidance on the next steps to take', ru: 'Ориентировочные рекомендации по дальнейшим действиям' },
   { ro: 'Recomandarea unor investigații suplimentare sau a unei consultații complete, dacă e nevoie', en: 'A suggestion for further tests or a full consultation, if needed', ru: 'Рекомендация дополнительных обследований или полной консультации, если нужно' },
   { ro: 'O rundă de clarificări', en: 'One round of clarification', ru: 'Возможность один раз задать уточняющие вопросы' },
@@ -137,7 +145,12 @@ export default async function QuickQuestionPage({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const minutes = (await api.workingHours()).expressSlaMinutes;
+  const sla = formatSla(locale, minutes);
+  const slaInHours = formatSlaInHours(locale, minutes);
+  /** Copy with the `{sla}` / `{slaInHours}` slots filled in. */
+  const lc = (b: Bi) =>
+    withSla(withSla(ru ? b.ru : en ? b.en : b.ro, slaInHours, 'slaInHours'), sla);
 
   return (
     <main className="bg-cream text-ink">
@@ -161,15 +174,15 @@ export default async function QuickQuestionPage({
               <h1 className="serif max-w-[16ch] text-[clamp(2.4rem,5.4vw,4.8rem)] leading-[1.05] tracking-[-0.015em] text-balance">
                 {ru ? (
                   <>
-                    Один вопрос, <span className="serif-it text-sage">ответ</span> за ~1 час
+                    Один вопрос, <span className="serif-it text-sage">ответ</span> за {sla}
                   </>
                 ) : en ? (
                   <>
-                    One question, an <span className="serif-it text-sage">answer</span> in ~1 hour
+                    One question, an <span className="serif-it text-sage">answer</span> in {sla}
                   </>
                 ) : (
                   <>
-                    O întrebare, un <span className="serif-it text-sage">răspuns</span> în ~1 oră
+                    O întrebare, un <span className="serif-it text-sage">răspuns</span> în {sla}
                   </>
                 )}
               </h1>
@@ -193,7 +206,7 @@ export default async function QuickQuestionPage({
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {ru ? 'Онлайн-портал · ответ за ~1ч' : en ? 'Online portal · ~1h reply' : 'Portal online · răspuns în ~1h'}
+                {ru ? `Онлайн-портал · ответ за ${sla}` : en ? `Online portal · ${sla} reply` : `Portal online · răspuns în ${sla}`}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru

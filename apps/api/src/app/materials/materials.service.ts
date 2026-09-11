@@ -3,7 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { MaterialCategoryDto, MaterialDto } from '@olesia/shared';
+import type {
+  MaterialCategoryDto,
+  MaterialDto,
+  PublicMaterialDto,
+} from '@olesia/shared';
 import { slugify } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,7 +34,7 @@ export class MaterialsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Public storefront: published materials only. */
-  async findPublished(): Promise<MaterialDto[]> {
+  async findPublished(): Promise<PublicMaterialDto[]> {
     const list = await this.prisma.material.findMany({
       where: { active: true },
       orderBy: { sortOrder: 'asc' },

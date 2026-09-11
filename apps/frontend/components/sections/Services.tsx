@@ -1,12 +1,13 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { api } from '@/lib/api';
+import { api, type PublicServiceDto } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { Reveal } from '@/components/ui/Reveal';
-import { CALENDLY_FALLBACK_URLS } from '@/lib/calendly';
+import { calendlyUrlFor } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import type { LeadService } from '@/lib/leads';
 import { SERVICE_INCLUDED } from '@/lib/service-content';
+import { formatSlaInHours, withSla } from '@/lib/working-hours';
 import {
   formatPriceRange,
   formatServiceDuration,
@@ -68,13 +69,21 @@ export async function Services() {
   // Group-A services (pediatric/nutrition/integrative) are calendar-backed —
   // book them through the Calendly popup using their per-service scheduling
   // URL. Group-B services (subscription/quick) have no calendar and route to
-  // the contact page instead. Keyed by service `code`.
-  const services = await api.services();
-  const byCode = new Map(services.map((s) => [s.code, s]));
-  const bookingUrl = new Map(
+  // the contact page instead. Both maps are keyed by `string` rather than by
+  // service code: the homepage's own keys ("quick", "subscription",
+  // "nutrition") are tile identities, not catalog codes.
+  const [services, hours] = await Promise.all([
+    api.services(),
+    api.workingHours(),
+  ]);
+  const slaInHours = formatSlaInHours(lc, hours.expressSlaMinutes);
+  const byCode = new Map<string, PublicServiceDto>(
+    services.map((s) => [s.code, s]),
+  );
+  const bookingUrl = new Map<string, string | null>(
     services
-      .filter((s) => s.group === 'A_booking' && s.calendlySchedulingUrl)
-      .map((s) => [s.code, s.calendlySchedulingUrl as string]),
+      .filter((s) => s.group === 'A_booking')
+      .map((s) => [s.code, s.calendlySchedulingUrl]),
   );
 
   return (
@@ -94,10 +103,14 @@ export async function Services() {
 
       {SERVICES.map(({ n, key }, i) => {
         const split = SPLIT_BOOKING[key];
-        const url = bookingUrl.get(key) ?? CALENDLY_FALLBACK_URLS[key];
+        const url = calendlyUrlFor(key, bookingUrl.get(key));
         const leadService = LEAD_SERVICE[key];
         const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
-        const includedItems = included ? (ru ? included.ru : en ? included.en : included.ro) : null;
+        const includedItems = included
+          ? (ru ? included.ru : en ? included.en : included.ro).map((item) =>
+              withSla(item, slaInHours, 'slaInHours'),
+            )
+          : null;
         const tileServices = codesFor(key)
           .map((code) => byCode.get(code))
           .filter((s) => s !== undefined);
@@ -143,8 +156,7 @@ export async function Services() {
               {split ? (
                 <div className="flex flex-col items-start gap-1">
                   {split.map(({ code, label }) => {
-                    const splitUrl =
-                      bookingUrl.get(code) ?? CALENDLY_FALLBACK_URLS[code];
+                    const splitUrl = calendlyUrlFor(code, bookingUrl.get(code));
                     return splitUrl ? (
                       <CalendlyButton
                         key={code}

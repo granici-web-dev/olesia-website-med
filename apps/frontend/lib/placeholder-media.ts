@@ -1,4 +1,4 @@
-import type { MediaAppearanceDto } from '@/lib/api';
+import type { PublicMediaAppearanceDto } from '@/lib/api';
 
 /**
  * Committed copy of the three real TV appearances, used only when the API
@@ -26,7 +26,7 @@ import type { MediaAppearanceDto } from '@/lib/api';
  * date (⛔ ask the client), and the summaries are ours, written from the
  * on-screen topic rather than the full 12–14 minutes — worth her read-through.
  */
-export const PLACEHOLDER_MEDIA: MediaAppearanceDto[] = [
+export const PLACEHOLDER_MEDIA: PublicMediaAppearanceDto[] = [
   {
     id: 'placeholder-yt-U3PhOZMC-6o',
     kind: 'tv',

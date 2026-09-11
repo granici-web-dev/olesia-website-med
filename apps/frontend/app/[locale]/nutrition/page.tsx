@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { calendlyUrlFor } from '@/lib/calendly';
+import { api } from '@/lib/api';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
@@ -153,8 +154,14 @@ export default async function NutritionPage({
 
   // One nutrition service, two audience-specific Calendly events (group A):
   // children / adults. Same price and duration; the patient picks the right one.
-  const copiiUrl = calendlyUrlFor('nutrition_copii');
-  const adultiUrl = calendlyUrlFor('nutrition_adulti');
+  // Both links come from the catalog, like /pediatrics — this page took the
+  // built-in test-account fallback every time, so the client's own booking
+  // links would never have reached it (audit A6, F13).
+  const services = await api.services();
+  const schedulingUrl = (code: string) =>
+    services.find((s) => s.code === code)?.calendlySchedulingUrl;
+  const copiiUrl = calendlyUrlFor('nutrition_copii', schedulingUrl('nutrition_copii'));
+  const adultiUrl = calendlyUrlFor('nutrition_adulti', schedulingUrl('nutrition_adulti'));
 
   const copiiLabel = ru ? 'Записаться · дети' : en ? 'Book · children' : 'Programează · copii';
   const adultiLabel = ru ? 'Записаться · взрослые' : en ? 'Book · adults' : 'Programează · adulți';

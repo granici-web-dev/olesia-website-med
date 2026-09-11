@@ -3,15 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { ServiceDto } from '@olesia/shared';
+import type { PublicServiceDto, ServiceDto } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { writeOrTranslate } from '../common/prisma-errors';
-import {
-  toPublicServiceDto,
-  toServiceDto,
-  type PublicServiceDto,
-} from './services.mapper';
+import { toPublicServiceDto, toServiceDto } from './services.mapper';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
-import { api, loc, type PostDto } from '@/lib/api';
+import { api, loc, type PublicPostDto } from '@/lib/api';
 import {
   BlogList,
   type BlogPostItem,
@@ -68,7 +68,7 @@ export default async function ArticlesPage({
     [fmtDate(dateIso), minLabel(minutes)].filter(Boolean).join(' · ');
   const href = (slug: string) => `/${locale}/articles/${slug}`;
 
-  const published: PostDto[] = await api.posts();
+  const published: PublicPostDto[] = await api.posts();
 
   const items: BlogPostItem[] = published.map((p) => ({
     slug: p.slug,

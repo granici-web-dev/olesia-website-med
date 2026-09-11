@@ -9,7 +9,8 @@ import { OrderDeliverableButton } from '@/components/ui/OrderDeliverableButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
 import { serviceLink } from '@/components/ui/cta';
 import type { LeadService, DeliverableProduct } from '@/lib/leads';
-import { SERVICE_DESCRIPTIONS, SERVICE_INCLUDED } from '@/lib/service-content';
+import { SERVICE_INCLUDED, serviceDescription } from '@/lib/service-content';
+import { formatSlaInHours, withSla } from '@/lib/working-hours';
 import {
   formatEur,
   formatServiceDuration,
@@ -92,7 +93,11 @@ export default async function PricingPage({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const services = await api.services();
+  const [services, hours] = await Promise.all([
+    api.services(),
+    api.workingHours(),
+  ]);
+  const slaInHours = formatSlaInHours(locale, hours.expressSlaMinutes);
 
   const t = {
     eyebrow: ru ? 'Цены' : en ? 'Pricing' : 'Tarife',
@@ -163,21 +168,20 @@ export default async function PricingPage({
                 </h2>
               </div>
               <div>
-                <p className={styles.serviceDesc}>
-                  {SERVICE_DESCRIPTIONS[s.code]
-                    ? locale === 'ru'
-                      ? SERVICE_DESCRIPTIONS[s.code].ru
-                      : loc(locale, SERVICE_DESCRIPTIONS[s.code].ro, SERVICE_DESCRIPTIONS[s.code].en)
-                    : loc(locale, s.descriptionRo, s.descriptionEn, s.descriptionRu)}
-                </p>
+                {serviceDescription(locale, s) && (
+                  <p className={styles.serviceDesc}>
+                    {serviceDescription(locale, s)}
+                  </p>
+                )}
                 {SERVICE_INCLUDED[s.code] && (
                   <div className="mt-5">
                     <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text">
                       {t.included}
                     </p>
                     <ul className="mt-3 grid gap-2">
-                      {(locale === 'ru' ? SERVICE_INCLUDED[s.code].ru : locale === 'en' ? SERVICE_INCLUDED[s.code].en : SERVICE_INCLUDED[s.code].ro).map(
-                        (item) => (
+                      {(locale === 'ru' ? SERVICE_INCLUDED[s.code].ru : locale === 'en' ? SERVICE_INCLUDED[s.code].en : SERVICE_INCLUDED[s.code].ro)
+                        .map((item) => withSla(item, slaInHours, 'slaInHours'))
+                        .map((item) => (
                           <li
                             key={item}
                             className="grid grid-cols-[1.1em_1fr] gap-x-2 text-[0.9rem] leading-relaxed text-ink-soft"
@@ -187,8 +191,7 @@ export default async function PricingPage({
                             </span>
                             <span className="text-pretty">{item}</span>
                           </li>
-                        ),
-                      )}
+                        ))}
                     </ul>
                   </div>
                 )}

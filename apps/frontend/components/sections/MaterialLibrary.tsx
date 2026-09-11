@@ -8,7 +8,7 @@ import { track } from '@/lib/analytics';
 import { subscribe } from '@/lib/newsletter';
 import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import type { AgeGroup } from '@/lib/age-taxonomy';
-import type { MaterialCategoryDto, MaterialDto } from '@/lib/api';
+import type { MaterialCategoryDto, PublicMaterialDto } from '@/lib/api';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Digital Library storefront (brief §6a). Owns the client-side interactions:
@@ -111,7 +111,7 @@ export function MaterialLibrary({
   contactHref,
 }: {
   locale: Locale;
-  materials: MaterialDto[];
+  materials: PublicMaterialDto[];
   categories: MaterialCategoryDto[];
   ages: AgeGroup[];
   contactHref: string;
@@ -120,13 +120,13 @@ export function MaterialLibrary({
   /** RU falls back to RO, an empty string counting as missing — as everywhere. */
   const tri = (ro: string, en: string, ru: string | null) =>
     locale === 'ru' ? (ru?.trim() ? ru : ro) : locale === 'en' ? en : ro;
-  const title = (m: MaterialDto) => tri(m.titleRo, m.titleEn, m.titleRu);
-  const summary = (m: MaterialDto) =>
+  const title = (m: PublicMaterialDto) => tri(m.titleRo, m.titleEn, m.titleRu);
+  const summary = (m: PublicMaterialDto) =>
     tri(m.descriptionRo, m.descriptionEn, m.descriptionRu);
-  const priceLabel = (m: MaterialDto) =>
+  const priceLabel = (m: PublicMaterialDto) =>
     m.price === null ? '' : `${m.price} €`;
   /** "PDF · 16 pag. · RO" — assembled per locale from the stored page count. */
-  const formatLine = (m: MaterialDto) => {
+  const formatLine = (m: PublicMaterialDto) => {
     const parts = ['PDF'];
     if (m.pageCount !== null) {
       parts.push(
@@ -140,7 +140,7 @@ export function MaterialLibrary({
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState('all');
   const [age, setAge] = useState('all');
-  const [gate, setGate] = useState<MaterialDto | null>(null);
+  const [gate, setGate] = useState<PublicMaterialDto | null>(null);
   const [unlocked, setUnlocked] = useState<Set<string>>(new Set());
 
   const catLabel = useMemo(

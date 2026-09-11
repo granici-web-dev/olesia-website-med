@@ -4,6 +4,11 @@
  * The API base is `NEXT_PUBLIC_API_URL` (must be browser-reachable); defaults
  * to the local API. CORS for the site origin is enabled server-side.
  */
+import type {
+  ContactMessageSubject,
+  DeliverableProduct as SharedDeliverableProduct,
+} from '@olesia/shared';
+
 import { getCaptchaToken, type CaptchaAction } from './captcha';
 
 const API_BASE = (
@@ -58,13 +63,12 @@ export interface QuickQuestionLeadInput extends PublicLeadInput {
  * server-side in the shared catalog: a public form must not be able to name its
  * own price, and the back office must never show a product name that came from
  * the internet.
+ *
+ * The union of codes is `@olesia/shared`'s, not a copy of it (audit A6, F8):
+ * a product added to the catalog and not here would have compiled fine and
+ * ordered nothing.
  */
-export type DeliverableProduct =
-  | 'menu_7'
-  | 'menu_14'
-  | 'menu_30'
-  | 'protocol_pednutri'
-  | 'protocol_complementary';
+export type DeliverableProduct = `${SharedDeliverableProduct}`;
 
 export interface DeliverableLeadInput extends PublicLeadInput {
   phone?: string;
@@ -72,7 +76,7 @@ export interface DeliverableLeadInput extends PublicLeadInput {
   product: DeliverableProduct;
 }
 
-export type ContactSubject = 'appointment' | 'payment' | 'how_it_works' | 'other';
+export type ContactSubject = ContactMessageSubject;
 
 export interface ContactMessageInput extends PublicLeadInput {
   subject: ContactSubject;

@@ -1,8 +1,19 @@
 /**
- * Shared per-service marketing copy (descriptions + "what's included"), keyed
- * by service `code`. Single source of truth so the wording stays identical on
- * the homepage Services section, the /services page, and the /pricing page.
- * (→ move into the content API / back office later.)
+ * Per-service "what's included" copy, keyed by service `code`.
+ *
+ * The descriptions used to live here too, and they shadowed the API's
+ * (audit A6, F7): the doctor could rewrite a service in the back office and the
+ * site kept showing the sentence compiled into the bundle. They are gone — the
+ * description comes from `Service.description*` and nowhere else.
+ *
+ * These lists stay, and are copywriting rather than data: they are not fields
+ * on `Service`, nothing in the back office edits them, and they are shared by
+ * the homepage tile and the /pricing row so the two cannot drift. They move
+ * into the catalog with `PLAN.md` step 8c, which is what gives them somewhere
+ * to be edited from.
+ *
+ * One exception: the EXPRESS promise is data, and leaves a `{slaInHours}` slot
+ * that both readers fill from `WorkingHours.expressSlaMinutes` (audit A6, F12).
  */
 
 export interface BiList {
@@ -16,40 +27,32 @@ export interface Bi {
   ru: string;
 }
 
-/** One-paragraph description per service, shared by the homepage, /services
- *  and /pricing so the wording cannot drift between them. */
-export const SERVICE_DESCRIPTIONS: Record<string, Bi> = {
-  pediatric: {
-    ro: 'O consultație video dedicată sănătății copilului — simptome, creștere, dezvoltare sau o a doua opinie.',
-    en: "A focused video visit for your child's health — symptoms, growth, development, or a second opinion.",
-    ru: 'Видеоконсультация о здоровье ребёнка — симптомы, рост, развитие или второе мнение.',
-  },
-  nutrition_copii: {
-    ro: 'O analiză personalizată a alimentației copilului, pe bază de dovezi — de la diversificare la vârsta școlară.',
-    en: 'A personalized, evidence-based look at your child’s nutrition — from first foods to school age.',
-    ru: 'Персональный анализ питания ребёнка на основе доказательной медицины — от прикорма до школьного возраста.',
-  },
-  nutrition_adulti: {
-    ro: 'O analiză personalizată a alimentației, pe bază de dovezi, pentru adulți — inclusiv în sarcină și alăptare.',
-    en: 'A personalized, evidence-based look at nutrition for adults — including pregnancy and breastfeeding.',
-    ru: 'Персональный анализ питания для взрослых на основе доказательной медицины — включая беременность и грудное вскармливание.',
-  },
-  integrative: {
-    ro: 'O consultație amănunțită care îmbină pediatria și nutriția, cu un plan de urmat în timp.',
-    en: 'An in-depth visit that combines pediatric and nutrition expertise, with a plan to follow over time.',
-    ru: 'Подробная консультация, объединяющая педиатрию и нутрициологию, с планом на будущее.',
-  },
-  monitoring: {
-    ro: 'Monitorizare și suport continuu — 4 tipuri de abonament, pe 1, 2, 3 sau 6 luni. Durata și prețul le stabilim individual cu medicul.',
-    en: 'Continuous monitoring and support — 4 subscription types, over 1, 2, 3, or 6 months. Duration and price are set individually with the doctor.',
-    ru: 'Постоянное наблюдение и поддержка — 4 типа абонемента на 1, 2, 3 или 6 месяцев. Длительность и цену врач согласует индивидуально.',
-  },
-  quick_question: {
-    ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în ~1 oră în timpul programului de lucru.',
-    en: 'Have one question? Get a written answer from the doctor within ~1 hour during working hours.',
-    ru: 'Есть один вопрос? Получите письменный ответ от врача в течение ~1 часа в рабочее время.',
-  },
-};
+/** The three description fields, so a caller can pass a narrower object. */
+export interface ServiceDescriptionFields {
+  descriptionRo: string;
+  descriptionEn: string;
+  descriptionRu: string | null;
+}
+
+/**
+ * The description the client wrote, in the reader's language.
+ *
+ * Same RU → RO fallback as `loc()`, with one difference that matters here: it
+ * returns an empty string when there is nothing to say, so a service with no
+ * description renders no paragraph rather than an empty one.
+ */
+export function serviceDescription(
+  locale: string,
+  service: ServiceDescriptionFields,
+): string {
+  const pick =
+    locale === 'ru'
+      ? service.descriptionRu
+      : locale === 'en'
+        ? service.descriptionEn
+        : service.descriptionRo;
+  return (pick?.trim() ? pick : service.descriptionRo).trim();
+}
 
 export const SERVICE_INCLUDED: Record<string, BiList> = {
   pediatric: {
@@ -182,17 +185,17 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
   quick_question: {
     ro: [
       'Trimiți întrebarea (cu poze sau documente, dacă e cazul)',
-      'Răspuns scris în ~1 oră în timpul programului de lucru',
+      'Răspuns scris în {slaInHours}',
       'O rundă de clarificări',
     ],
     en: [
       'Submit your question (with photos or documents if needed)',
-      'A written reply within ~1 hour during working hours',
+      'A written reply within {slaInHours}',
       'One round of clarification',
     ],
     ru: [
       'Отправляете вопрос (с фото или документами, если нужно)',
-      'Письменный ответ в течение ~1 часа в рабочее время',
+      'Письменный ответ в течение {slaInHours}',
       'Один круг уточнений',
     ],
   },

@@ -190,7 +190,7 @@ export const ro = {
     metricSubscriptions: 'Abonamente active',
     metricSubscriptionsHint: 'Monitorizare în curs',
     metricQuickQuestions: 'Întrebări deschise',
-    metricQuickQuestionsHint: 'Termen 48 de ore',
+    metricQuickQuestionsHint: 'Termen ~1 oră în programul de lucru',
     upcomingTitle: 'Programări apropiate',
     upcomingEmpty: 'Nicio programare apropiată.',
     activityTitle: 'Activitate recentă',
@@ -211,7 +211,7 @@ export const ro = {
     },
     quickQuestions: {
       title: 'Întrebări rapide',
-      subtitle: 'Tichete cu răspuns în maximum 48 de ore.',
+      subtitle: 'Tichete cu răspuns în ~1 oră în programul de lucru.',
     },
     patients: {
       title: 'Pacienți',
@@ -915,7 +915,7 @@ export const ro = {
 
   quickQuestions: {
     title: 'Întrebări rapide',
-    subtitle: 'Tichete cu răspuns scris în maximum 48 de ore.',
+    subtitle: 'Tichete cu răspuns scris în ~1 oră în programul de lucru.',
     refresh: 'Reîmprospătează',
 
     status: {

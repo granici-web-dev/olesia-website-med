@@ -200,9 +200,13 @@ const SERVICES = [
 ] as const;
 
 /**
- * Default contact channels for the public Contact page. Seeded only when no
- * Contact rows exist yet, so it never overwrites values edited in the back
- * office. Add phone / social channels there as needed.
+ * Default contact channels for the public site. Seeded only when no Contact
+ * rows exist yet, so it never overwrites values edited in the back office.
+ *
+ * These are the channels the client confirmed in the brief. They were string
+ * constants in the footer and on /contact until 2026-09-11, where she could not
+ * change them (audit A6, F12); the site reads this table now, so the seed has
+ * to carry what the site used to carry.
  */
 const CONTACTS = [
   {
@@ -210,37 +214,152 @@ const CONTACTS = [
     labelRo: 'Email',
     labelEn: 'Email',
     labelRu: 'Email',
-    value: 'contact@olesiajalba.md',
+    value: 'oleseajalba@gmail.com',
     sortOrder: 1,
+    active: true,
+  },
+  {
+    type: 'phone',
+    labelRo: 'Telefon',
+    labelEn: 'Phone',
+    labelRu: 'Телефон',
+    value: '+373 68837774',
+    sortOrder: 2,
+    active: true,
+  },
+  {
+    type: 'social',
+    labelRo: 'Instagram',
+    labelEn: 'Instagram',
+    labelRu: 'Instagram',
+    value: 'https://www.instagram.com/dr.olesea_jalba_pediatru',
+    sortOrder: 3,
+    active: true,
+  },
+  {
+    type: 'social',
+    labelRo: 'Facebook',
+    labelEn: 'Facebook',
+    labelRu: 'Facebook',
+    value: 'https://www.facebook.com/olesea.jalba.2025',
+    sortOrder: 4,
+    active: true,
+  },
+  {
+    type: 'social',
+    labelRo: 'Telegram',
+    labelEn: 'Telegram',
+    labelRu: 'Telegram',
+    value: 'https://t.me/dr_olesea_jalba_official',
+    sortOrder: 5,
     active: true,
   },
 ] as const;
 
+/**
+ * The About page's own content.
+ *
+ * This was hand-written on `apps/frontend/app/[locale]/about/page.tsx` until
+ * 2026-09-11: a six-section CV the client could not touch, next to a back-office
+ * `Despre noi` page editing a row nothing rendered (audit A6, F12). The site
+ * reads this row now, so the seed carries her real CV rather than a sample.
+ *
+ * ⚠ The WHO line in `Formare continuă` is the CLIENT'S OWN wording, copied
+ * verbatim from `docs/despre.md` — do not rephrase it, and do not "improve" it
+ * with the certificate. The certificate she sent (WHO Basic Emergency Care
+ * Provider, 2026) states that the recipient agrees not to use it *or their
+ * participation* for promotional, publicity or commercial purposes, and that it
+ * implies no WHO endorsement. **Never publish the scan, the certificate number,
+ * or the WHO logo anywhere on the site.** Whether the text mention itself stays
+ * is her call — asked in `docs/questions_v3.md` §4.2, together with the fact
+ * that her line says "cursuri" (plural, no year) while the evidence is one
+ * course in 2026.
+ */
 const ABOUT = {
-  titleRo: 'Despre Olesia',
-  titleEn: 'About Olesia',
-  titleRu: 'Об Олесе',
-  contentRo: `## Cine sunt
+  titleRo: 'Experiență și acreditare',
+  titleEn: 'Background & credentials',
+  titleRu: 'Опыт и аккредитация',
+  contentRo: `## Experiență
 
-Sunt medic pediatru cu o abordare **integrativă**, axată pe nutriție și pe dezvoltarea armonioasă a copilului.
+Lucrez ca medic pediatru la Spitalul Clinic Municipal de Copii „Valentin Ignatenco” și la clinica Harper Medklinic din Chișinău.
 
-Cred că fiecare familie merită sprijin clar, fără presiune și fără mituri. Lucrez alături de părinți pentru decizii informate și liniștite.
+Înainte de a deveni medic, am lucrat opt ani ca asistentă medicală în secția de gastroenterologie a Institutului Mamei și Copilului — de aici vine și interesul meu pentru sănătatea digestivă a copiilor.
 
-> Sănătatea copilului începe cu încredere și informație de calitate.`,
-  contentEn: `## Who I am
+## Studii
 
-I am a pediatrician with an **integrative** approach, focused on nutrition and the harmonious development of the child.
+- Master în Sănătate Publică – Nutriție Umană, USMF „Nicolae Testemițanu” (2025)
+- Rezidențiat în Pediatrie, USMF „Nicolae Testemițanu” (2018)
+- Studii superioare în Medicină Generală, USMF „Nicolae Testemițanu” (2014)
 
-I believe every family deserves clear support, without pressure and without myths. I work alongside parents toward informed, calm decisions.
+## Formare continuă
 
-> A child's health begins with trust and quality information.`,
-  contentRu: `## Кто я
+Particip constant la congrese și cursuri de specialitate, în Moldova și peste hotare. Printre cele mai recente:
 
-Я педиатр с **интегративным** подходом, с акцентом на питание и гармоничное развитие ребёнка.
+- Programe dedicate dificultăților de hrănire la copii (2026)
+- Congresul de Gastroenterologie, Hepatologie și Nutriție Pediatrică, Sibiu (2025)
+- Cursuri de urgențe pediatrice ale Organizației Mondiale a Sănătății
 
-Считаю, что каждая семья заслуживает понятной поддержки — без давления и мифов. Работаю вместе с родителями ради спокойных и осознанных решений.
+## Activitate științifică
 
-> Здоровье ребёнка начинается с доверия и качественной информации.`,
+Cercetarea mea s-a concentrat pe afecțiunile digestive la copii, inclusiv bolile inflamatorii intestinale. Am publicat articole despre diareea și constipația la copii și despre rinita alergică la copii.
+
+## Limbi
+
+Consultațiile pot avea loc în română, rusă și engleză.`,
+  contentEn: `## Experience
+
+I work as a pediatrician at the “Valentin Ignatenco” Municipal Children’s Clinical Hospital and at the Harper Medklinic clinic in Chișinău.
+
+Before becoming a doctor, I worked for eight years as a nurse in the gastroenterology department of the Mother and Child Institute — that’s where my interest in children’s digestive health comes from.
+
+## Education
+
+- MSc in Public Health – Human Nutrition, USMF “Nicolae Testemițanu” (2025)
+- Residency in Pediatrics, USMF “Nicolae Testemițanu” (2018)
+- Degree in General Medicine, USMF “Nicolae Testemițanu” (2014)
+
+## Continuing education
+
+I regularly take part in congresses and specialty courses, in Moldova and abroad. Among the most recent:
+
+- Programs on feeding difficulties in children (2026)
+- Congress of Pediatric Gastroenterology, Hepatology and Nutrition, Sibiu (2025)
+- WHO pediatric emergency courses
+
+## Research
+
+My research focused on digestive conditions in children, including inflammatory bowel disease. I’ve published articles on diarrhea and constipation in children and on allergic rhinitis in children.
+
+## Languages
+
+Consultations can take place in Romanian, Russian, and English.`,
+  contentRu: `## Опыт
+
+Работаю врачом-педиатром в Муниципальной клинической детской больнице имени Валентина Игнатенко и в клинике Harper Medklinic в Кишинёве.
+
+До того как стать врачом, я восемь лет работала медсестрой в отделении гастроэнтерологии Института матери и ребёнка — отсюда и мой интерес к детскому пищеварению.
+
+## Образование
+
+- Магистратура по общественному здоровью – питание человека, USMF «Nicolae Testemițanu» (2025)
+- Ординатура по педиатрии, USMF «Nicolae Testemițanu» (2018)
+- Диплом по общей медицине, USMF «Nicolae Testemițanu» (2014)
+
+## Непрерывное образование
+
+Постоянно участвую в конгрессах и профильных курсах — в Молдове и за рубежом. Из недавнего:
+
+- Программы по трудностям с кормлением у детей (2026)
+- Конгресс по детской гастроэнтерологии, гепатологии и питанию, Сибиу (2025)
+- Курсы ВОЗ по неотложной педиатрической помощи
+
+## Научная деятельность
+
+Я исследовала заболевания пищеварения у детей, в том числе воспалительные заболевания кишечника. Опубликовала статьи о диарее и запорах, а также об аллергическом рините у детей.
+
+## Языки
+
+Консультирую на румынском, русском и английском.`,
   images: [] as string[],
   stats: [
     {
@@ -262,7 +381,7 @@ I believe every family deserves clear support, without pressure and without myth
       labelRu: 'онлайн-консультаций',
     },
     {
-      value: 'RO · EN',
+      value: 'RO · RU · EN',
       labelRo: 'limbi de comunicare',
       labelEn: 'languages',
       labelRu: 'языки общения',
@@ -270,19 +389,14 @@ I believe every family deserves clear support, without pressure and without myth
   ],
   credentials: [
     {
-      ro: 'Medic pediatru, diplomă USMF',
-      en: 'Pediatrician, USMF degree',
-      ru: 'Врач-педиатр, диплом USMF',
+      ro: 'Membră a Societății Române de Pediatrie',
+      en: 'Member of the Romanian Society of Pediatrics',
+      ru: 'Член Румынского общества педиатрии',
     },
     {
-      ro: 'Formare în nutriție pediatrică',
-      en: 'Pediatric nutrition training',
-      ru: 'Обучение детской нутрициологии',
-    },
-    {
-      ro: 'Abordare integrativă & monitorizare',
-      en: 'Integrative approach & monitoring',
-      ru: 'Интегративный подход и наблюдение',
+      ro: 'Categorie de calificare confirmată de Ministerul Sănătății al Republicii Moldova',
+      en: 'Qualification category confirmed by the Ministry of Health of the Republic of Moldova',
+      ru: 'Квалификационная категория подтверждена Министерством здравоохранения Республики Молдова',
     },
   ],
 };

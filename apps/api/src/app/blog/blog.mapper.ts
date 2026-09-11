@@ -1,4 +1,4 @@
-import type { CategoryDto, PostDto } from '@olesia/shared';
+import type { CategoryDto, PostDto, PublicPostDto } from '@olesia/shared';
 import type { Category, Post } from '../../generated/prisma/client';
 
 export function toCategoryDto(c: Category): CategoryDto {
@@ -44,7 +44,7 @@ export function toPostDto(p: Post & { categories: Category[] }): PostDto {
  */
 export function toPublicPostDto(
   p: Post & { categories: Category[] },
-): Omit<PostDto, 'authorId'> {
+): PublicPostDto {
   const { authorId: _authorId, ...post } = toPostDto(p);
   return post;
 }

@@ -13,8 +13,12 @@ type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
  * Mock-only: a flat offset used to give the sample tickets a spread of
  * deadlines. The real `dueAt` comes from the API, which counts working hours
  * against the practice schedule (§11.5) — it is not `createdAt + N`.
+ *
+ * One hour, matching the default `WorkingHours.expressSlaMinutes` and what the
+ * public site promises. It was 48 hours, from the original spec, so the mocked
+ * panel and the live site disagreed by a factor of forty-eight (audit A6, F25).
  */
-export const MOCK_SLA_MS = 48 * 60 * 60 * 1000;
+const MOCK_SLA_HOURS = 1;
 
 export const bucketBadgeVariant: Record<TicketBucket, BadgeVariant> = {
   open: 'info',
@@ -29,7 +33,7 @@ export const paymentBadgeVariant: Record<PaymentStatus, BadgeVariant> = {
 
 /**
  * The deadline is whatever the API computed at intake — working hours, not
- * `createdAt + 48h`. Recomputing it here used to disagree with the server the
+ * `createdAt + N`. Recomputing it here used to disagree with the server the
  * moment the SLA changed, and would now be wrong for every question that
  * arrives outside opening hours.
  */
@@ -107,7 +111,7 @@ let store: Ticket[] = [
     answer: null,
     answeredAt: null,
     paymentStatus: 'pending',
-    dueAt: afterCreate(created1, 48),
+    dueAt: afterCreate(created1, MOCK_SLA_HOURS),
     createdAt: created1,
   },
   {
@@ -120,7 +124,7 @@ let store: Ticket[] = [
     answer: null,
     answeredAt: null,
     paymentStatus: 'confirmed',
-    dueAt: afterCreate(created2, 48),
+    dueAt: afterCreate(created2, MOCK_SLA_HOURS),
     createdAt: created2,
   },
   {
@@ -133,7 +137,7 @@ let store: Ticket[] = [
     answer: null,
     answeredAt: null,
     paymentStatus: 'confirmed',
-    dueAt: afterCreate(created3, 48),
+    dueAt: afterCreate(created3, MOCK_SLA_HOURS),
     createdAt: created3,
   },
   {
@@ -147,7 +151,7 @@ let store: Ticket[] = [
       'Recomandarea este să așteptați împlinirea a 6 luni. Semnele de interes sunt importante, dar maturitatea digestivă contează cel mai mult. Urmăriți încă 2-3 săptămâni.',
     answeredAt: afterCreate(created4, 30),
     paymentStatus: 'confirmed',
-    dueAt: afterCreate(created4, 48),
+    dueAt: afterCreate(created4, MOCK_SLA_HOURS),
     createdAt: created4,
   },
   {
@@ -161,7 +165,7 @@ let store: Ticket[] = [
       'Laptele matern se păstrează până la 4 zile în frigider (4 °C). Nu se reîncălzește de două ori — porționați în cantități mici și folosiți o singură dată după încălzire.',
     answeredAt: afterCreate(created5, 60),
     paymentStatus: 'confirmed',
-    dueAt: afterCreate(created5, 48),
+    dueAt: afterCreate(created5, MOCK_SLA_HOURS),
     createdAt: created5,
   },
   {
@@ -174,7 +178,7 @@ let store: Ticket[] = [
     answer: null,
     answeredAt: null,
     paymentStatus: 'pending',
-    dueAt: afterCreate(created6, 48),
+    dueAt: afterCreate(created6, MOCK_SLA_HOURS),
     createdAt: created6,
   },
   {
@@ -187,7 +191,7 @@ let store: Ticket[] = [
       'Principalele alergene: ou, arahide, lapte de vacă, pește, fructe de mare, soia, grâu și nuci. Se introduc pe rând, câte unul la 3-4 zile, observând reacțiile.',
     answeredAt: afterCreate(created7, 20),
     paymentStatus: 'confirmed',
-    dueAt: afterCreate(created7, 48),
+    dueAt: afterCreate(created7, MOCK_SLA_HOURS),
     createdAt: created7,
   },
 ];

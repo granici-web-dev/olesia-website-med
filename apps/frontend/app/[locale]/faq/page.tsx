@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import { creamPill, creamUnderline } from '@/components/ui/cta';
+import { btnDark, creamPill, creamUnderline } from '@/components/ui/cta';
 import { api } from '@/lib/api';
 
 export const revalidate = 60;
@@ -10,8 +10,10 @@ export const revalidate = 60;
 /* ──────────────────────────────────────────────────────────────────────────
    FAQ — the site's consolidation point. Removes friction before conversion,
    offloads support, and routes correctly (emergencies → 112, medical → Quick
-   question). Content comes from the back office (`GET /faq`); the local
-   `FALLBACK_CATEGORIES` below is only the safety net for an unreachable API.
+   question). Content comes from the back office (`GET /faq`) and from nowhere
+   else: a 200-line copy of the seeded questions used to render whenever the
+   API answered with nothing, so an empty FAQ and an unreachable one looked
+   identical and the client's own edits were invisible (audit A6, F6).
    Accessible native <details> accordions, deep-link category anchors, and
    FAQPage JSON-LD for rich snippets. Trilingual (RO default · EN · RU).
    ────────────────────────────────────────────────────────────────────────── */
@@ -51,239 +53,6 @@ interface FaqCategory {
 }
 
 /**
- * The content as it was seeded into the database. Rendered only when the API
- * is unreachable — an FAQ page that answers nothing is worse than a slightly
- * stale one, and this page is a support surface as much as a marketing one.
- */
-const FALLBACK_CATEGORIES: FaqCategory[] = [
-  {
-    key: 'consultatii',
-    title: { ro: 'Consultații online', en: 'Online consultations', ru: 'Онлайн-консультации' },
-    items: [
-      {
-        q: { ro: 'Cum decurge o consultație online?', en: 'How does an online consultation work?', ru: 'Как проходит онлайн-консультация?' },
-        a: {
-          ro: 'Consultația are loc pe Google Meet, la ora programată — primești linkul automat în e-mailul de confirmare, fără să instalezi nimic. La cerere, putem folosi și WhatsApp, Viber sau Instagram video. Instrucțiunile vin cu 24 de ore înainte.',
-          en: 'The consultation takes place on Google Meet at the scheduled time — you get the link automatically in the confirmation email, with nothing to install. On request, we can also use WhatsApp, Viber, or Instagram video. Instructions arrive 24 hours ahead.',
-          ru: 'Консультация проходит в Google Meet в назначенное время — ссылку вы получаете автоматически в письме-подтверждении, ничего устанавливать не нужно. По желанию можем использовать WhatsApp, Viber или Instagram video. Инструкции придут за 24 часа.',
-        },
-      },
-      {
-        q: { ro: 'De ce am nevoie pentru consultație?', en: 'What do I need for the consultation?', ru: 'Что нужно для консультации?' },
-        a: {
-          ro: 'Un dispozitiv cu cameră, conexiune la internet și un loc liniștit. Pregătește analizele și documentele relevante.',
-          en: 'A device with a camera, an internet connection, and a quiet spot. Have any relevant test results and documents ready.',
-          ru: 'Устройство с камерой, интернет и тихое место. Заранее подготовьте анализы и нужные документы.',
-        },
-      },
-      {
-        q: { ro: 'În ce limbi pot avea consultația?', en: 'Which languages can I have the consultation in?', ru: 'На каких языках можно пройти консультацию?' },
-        a: { ro: 'În română, rusă și engleză.', en: 'Romanian, Russian, and English.', ru: 'На румынском, русском и английском.' },
-      },
-      {
-        q: { ro: 'Trebuie să fie copilul prezent la consultație?', en: 'Does my child need to be present?', ru: 'Нужно ли, чтобы ребёнок был на консультации?' },
-        a: {
-          ro: 'Da, recomandăm ca cel mic să fie prezent — ajută la o evaluare cât mai bună.',
-          en: 'Yes — we recommend the child is present, as it helps with the most accurate assessment.',
-          ru: 'Да, лучше, чтобы ребёнок был рядом, — так врачу проще точно оценить состояние.',
-        },
-      },
-      {
-        q: { ro: 'Ce nu poate înlocui o consultație online?', en: 'What can’t an online consultation replace?', ru: 'Что онлайн-консультация не может заменить?' },
-        a: {
-          ro: 'Consultația online nu este pentru urgențe. Unele situații pot necesita o examinare fizică — îți vom spune clar când e cazul.',
-          en: 'Online consultations aren’t for emergencies. Some situations need a physical exam — we’ll tell you clearly when that’s the case.',
-          ru: 'Онлайн-консультация не подходит для экстренных ситуаций. Иногда нужен очный осмотр — и мы прямо скажем, когда именно.',
-        },
-      },
-    ],
-  },
-  {
-    key: 'programare',
-    title: { ro: 'Programare și anulare', en: 'Booking & cancellation', ru: 'Запись и отмена' },
-    items: [
-      {
-        q: { ro: 'Cum programez o consultație?', en: 'How do I book a consultation?', ru: 'Как записаться на консультацию?' },
-        a: {
-          ro: 'Alegi serviciul din „Servicii" și selectezi o oră liberă din calendar.',
-          en: 'Choose the service under “Services” and pick an available time from the calendar.',
-          ru: 'Выберите услугу в разделе «Услуги» и свободное время в календаре.',
-        },
-      },
-      {
-        q: { ro: 'Pot anula sau reprograma?', en: 'Can I cancel or reschedule?', ru: 'Можно ли отменить или перенести?' },
-        a: {
-          ro: 'Da. Poți anula sau reprograma cu cel puțin 24 de ore înainte, din linkul de confirmare.',
-          en: 'Yes. You can cancel or reschedule at least 24 hours ahead, from your confirmation link.',
-          ru: 'Да. Отменить или перенести запись можно минимум за 24 часа — по ссылке из письма-подтверждения.',
-        },
-      },
-      {
-        q: { ro: 'Ce se întâmplă dacă întârzii la consultație?', en: 'What if I’m late?', ru: 'Что если я опоздаю на консультацию?' },
-        a: {
-          ro: 'Te rugăm să ne anunți. Putem reprograma dacă întârzierea este prea mare pentru a desfășura consultația.',
-          en: 'Please let us know. We can reschedule if the delay is too long to hold the consultation.',
-          ru: 'Пожалуйста, предупредите нас. Если опоздание слишком большое и консультацию уже не успеть провести, мы её перенесём.',
-        },
-      },
-    ],
-  },
-  {
-    key: 'plata',
-    title: { ro: 'Plată', en: 'Payment', ru: 'Оплата' },
-    items: [
-      {
-        q: { ro: 'Cum se face plata?', en: 'How do I pay?', ru: 'Как происходит оплата?' },
-        a: {
-          ro: 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după confirmarea programării.',
-          en: 'By bank transfer (no online payment for now). You’ll get the details once your booking is confirmed.',
-          ru: 'Банковским переводом (пока без онлайн-оплаты). Реквизиты вы получите после подтверждения записи.',
-        },
-      },
-      {
-        q: { ro: 'Când achit consultația?', en: 'When do I pay?', ru: 'Когда я оплачиваю консультацию?' },
-        a: {
-          ro: 'Înainte de consultație, după confirmarea programării.',
-          en: 'Before the consultation, once your booking is confirmed.',
-          ru: 'До консультации, после подтверждения записи.',
-        },
-      },
-      {
-        q: { ro: 'Primesc o factură sau o confirmare?', en: 'Do I get an invoice or confirmation?', ru: 'Получу ли я счёт или подтверждение?' },
-        a: {
-          ro: 'Da, primești o confirmare pe email.',
-          en: 'Yes, you receive a confirmation by email.',
-          ru: 'Да, подтверждение придёт на электронную почту.',
-        },
-      },
-      {
-        q: { ro: 'Există posibilitatea de rambursare?', en: 'Are refunds possible?', ru: 'Возможен ли возврат средств?' },
-        a: {
-          ro: 'Da, dacă anulezi în timp util, conform politicii de anulare.',
-          en: 'Yes, if you cancel in good time, per the cancellation policy.',
-          ru: 'Да, если отменить запись вовремя — по правилам отмены.',
-        },
-      },
-    ],
-  },
-  {
-    key: 'servicii',
-    title: { ro: 'Servicii', en: 'Services', ru: 'Услуги' },
-    items: [
-      {
-        q: { ro: 'Care este diferența dintre consultații?', en: 'What’s the difference between the consultations?', ru: 'В чём разница между консультациями?' },
-        a: {
-          ro: 'Pediatrică (sănătate, 30 min) · Nutriție (alimentație, 60 min) · Integrativă (situații complexe + monitorizare, 90 min).',
-          en: 'Pediatric (health, 30 min) · Nutrition (feeding, 60 min) · Integrative (complex cases + monitoring, 90 min).',
-          ru: 'Педиатрическая (здоровье, 30 мин) · Нутрициологическая (питание, 60 мин) · Интегративная (сложные случаи + наблюдение, 90 мин).',
-        },
-      },
-      {
-        q: { ro: 'Cum aleg serviciul potrivit?', en: 'How do I choose the right service?', ru: 'Как выбрать подходящую услугу?' },
-        a: {
-          ro: 'Vezi ghidul scurt din pagina „Servicii", care te ajută să alegi în funcție de situație.',
-          en: 'See the short helper on the “Services” page that guides you by situation.',
-          ru: 'На странице «Услуги» есть короткая подсказка — она поможет выбрать под вашу ситуацию.',
-        },
-      },
-      {
-        q: { ro: 'Primesc o rețetă în urma consultației?', en: 'Will I get a prescription?', ru: 'Получу ли я рецепт после консультации?' },
-        a: {
-          ro: 'În funcție de situație. Unele recomandări pot necesita o evaluare suplimentară — îți spunem clar la consultație.',
-          en: 'It depends on the situation. Some recommendations may need further assessment — we’ll tell you clearly during the consultation.',
-          ru: 'Смотря по ситуации. Иногда, прежде чем что-то назначить, нужно дообследование — об этом мы прямо скажем на консультации.',
-        },
-      },
-      {
-        q: { ro: 'Pentru ce vârste sunt consultațiile?', en: 'What ages are the consultations for?', ru: 'Для какого возраста консультации?' },
-        a: {
-          ro: 'De la naștere până la adolescență.',
-          en: 'From birth through adolescence.',
-          ru: 'От рождения до подросткового возраста.',
-        },
-      },
-      {
-        q: { ro: 'Consultațiile sunt și pentru adulți?', en: 'Are consultations also for adults?', ru: 'Подходят ли консультации и для взрослых?' },
-        a: {
-          ro: 'Consultația de nutriție este disponibilă și pentru adulți.',
-          en: 'The nutrition consultation is also available for adults.',
-          ru: 'Консультация по нутрициологии доступна и для взрослых.',
-        },
-      },
-    ],
-  },
-  {
-    key: 'portal',
-    title: { ro: 'Servicii prin portal', en: 'Portal services', ru: 'Услуги через портал' },
-    items: [
-      {
-        q: { ro: 'Cum funcționează „Întreabă medicul"?', en: 'How does “Ask the doctor” work?', ru: 'Как работает «Спросить врача»?' },
-        a: {
-          ro: 'Scrii întrebarea, achiți prin transfer și primești un răspuns scris în ~1 oră în timpul programului de lucru.',
-          en: 'You write your question, pay by transfer, and get a written answer within ~1 hour during working hours.',
-          ru: 'Вы пишете вопрос, оплачиваете переводом и в течение ~1 часа в рабочее время получаете письменный ответ.',
-        },
-      },
-      {
-        q: { ro: '„~1 oră" înseamnă timp de lucru?', en: 'Does “~1 hour” mean working hours?', ru: '«~1 час» — это в рабочее время?' },
-        a: {
-          ro: 'Da — aproximativ o oră în timpul programului de lucru. Întrebările trimise în afara programului primesc răspuns în următorul interval de lucru.',
-          en: 'Yes — about an hour during working hours. Questions sent outside the schedule are answered in the next working interval.',
-          ru: 'Да, примерно час в рабочее время. На вопросы, отправленные вне графика, ответ приходит в следующий рабочий интервал.',
-        },
-      },
-      {
-        q: { ro: 'Ce include „Monitorizare și abonamente"?', en: 'What does “Monitoring & subscriptions” include?', ru: 'Что включает «Наблюдение и абонементы»?' },
-        a: {
-          ro: 'Sunt 4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex), pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului pe parcurs și comunicare directă cu medicul. Durata și prețul le stabilim individual — lași o solicitare și te contactăm.',
-          en: 'There are 4 subscription types (Pediatrics, Child nutrition, Adult nutrition, Complex), over 1, 2, 3, or 6 months: periodic monitoring, plan adjustments along the way, and direct communication with the doctor. Duration and price are set individually — leave a request and we’ll get in touch.',
-          ru: 'Есть 4 типа абонемента (педиатрия, питание детей, питание взрослых, комплекс) на 1, 2, 3 или 6 месяцев: периодическое наблюдение, корректировка плана и прямая связь с врачом. Длительность и цену согласуем индивидуально — оставьте заявку, и мы свяжемся с вами.',
-        },
-      },
-      {
-        q: { ro: 'Trebuie o consultație înainte de a intra în program?', en: 'Do I need a consultation before joining the program?', ru: 'Нужна ли консультация перед началом программы?' },
-        a: {
-          ro: 'Recomandăm o consultație inițială, ca planul să fie adaptat copilului.',
-          en: 'We recommend an initial consultation so the plan is tailored to your child.',
-          ru: 'Советуем начать с первой консультации — так план получится подобрать под ребёнка.',
-        },
-      },
-    ],
-  },
-  {
-    key: 'confidentialitate',
-    title: { ro: 'Confidențialitate și urgențe', en: 'Privacy & emergencies', ru: 'Конфиденциальность и неотложные случаи' },
-    items: [
-      {
-        q: { ro: 'Datele mele sunt în siguranță?', en: 'Is my data safe?', ru: 'Мои данные в безопасности?' },
-        a: {
-          ro: 'Da. Datele tale sunt folosite doar pentru consultație și sunt păstrate în siguranță, conform legii.',
-          en: 'Yes. Your data is used only for the consultation and is kept securely, in line with the law.',
-          ru: 'Да. Данные нужны только для консультации, хранятся надёжно и по закону.',
-        },
-      },
-      {
-        q: { ro: 'Este o urgență medicală — ce fac?', en: 'It’s a medical emergency — what do I do?', ru: 'Это неотложный медицинский случай — что делать?' },
-        a: {
-          ro: 'Sună la 112 sau mergi la cel mai apropiat serviciu de urgență. Nu folosi platforma pentru urgențe.',
-          en: 'Call 112 or go to the nearest emergency service. Don’t use the platform for emergencies.',
-          ru: 'Звоните 112 или обращайтесь в ближайшую службу неотложной помощи. Не используйте платформу для экстренных случаев.',
-        },
-      },
-      {
-        q: { ro: 'Pot atașa poze sau analize la „Întreabă medicul"?', en: 'Can I attach photos or test results to “Ask the doctor”?', ru: 'Можно ли прикрепить фото или анализы к «Спросить врача»?' },
-        a: {
-          ro: 'Da, poți atașa poze și documente. Sunt stocate în siguranță și folosite doar pentru a-ți răspunde.',
-          en: 'Yes — you can attach photos and documents. They’re stored securely and used only to answer you.',
-          ru: 'Да, фото и документы прикрепить можно. Они хранятся надёжно и нужны только для того, чтобы вам ответить.',
-        },
-      },
-    ],
-  },
-];
-
-
-/**
  * Fetch the published FAQ and reshape it for this page.
  *
  * The RU fallback is resolved here rather than at render time, so `lc()` keeps
@@ -294,8 +63,6 @@ const FALLBACK_CATEGORIES: FaqCategory[] = [
  */
 async function loadCategories(): Promise<FaqCategory[]> {
   const sections = await api.faq();
-  if (sections.length === 0) return FALLBACK_CATEGORIES;
-
   const ruOr = (ru: string | null, fallback: string) =>
     ru?.trim() ? ru : fallback;
 
@@ -399,6 +166,30 @@ export default async function FaqPage({
       </section>
 
       {/* 2 · Category nav (sticky) + 3 · accordions */}
+      {CATEGORIES.length === 0 ? (
+        // Nothing written yet. Say so and point at the two places a question
+        // can actually be asked, rather than showing a shelf of copy the
+        // client never approved.
+        <section className="shell py-20 md:py-28">
+          <h2 className="serif max-w-[20ch] text-[clamp(1.7rem,3vw,2.4rem)] leading-tight tracking-[-0.02em] text-balance">
+            {ru
+              ? 'Вопросы и ответы готовятся'
+              : en
+                ? 'The questions and answers are being prepared'
+                : 'Întrebările și răspunsurile sunt în pregătire'}
+          </h2>
+          <p className="mt-5 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty">
+            {ru
+              ? 'Пока раздел пуст — напишите нам, и мы ответим лично.'
+              : en
+                ? 'This section is still empty. Write to us and we will answer personally.'
+                : 'Deocamdată secțiunea este goală. Scrie-ne și îți răspundem personal.'}
+          </p>
+          <Link href="/contact" className={`${btnDark} mt-8`}>
+            {ru ? 'Контакт' : en ? 'Contact' : 'Contact'}
+          </Link>
+        </section>
+      ) : (
       <section className="shell grid gap-12 py-16 md:grid-cols-[240px_1fr] md:gap-16 md:py-24 lg:gap-24">
         <nav aria-label={ru ? 'Категории вопросов' : en ? 'FAQ categories' : 'Categorii de întrebări'} className="min-w-0 md:sticky md:top-[133px] md:self-start">
           <p className="eyebrow mb-4">{ru ? 'Категории' : en ? 'Categories' : 'Categorii'}</p>
@@ -446,6 +237,7 @@ export default async function FaqPage({
           ))}
         </div>
       </section>
+      )}
 
       {/* 4 · Still have a question? */}
       <section className="bg-paper">

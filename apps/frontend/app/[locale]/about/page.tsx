@@ -5,13 +5,19 @@ import { Reveal } from '@/components/ui/Reveal';
 import { Certificates } from '@/components/sections/Certificates';
 import { btnDark, creamPill } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
+import { api, loc } from '@/lib/api';
+import { renderMarkdown } from '@/lib/markdown';
 
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
    About — the site's trust anchor (every landing links here via "Vezi profilul
-   complet"). Built from CV facts, but curated and human, not a CV dump.
-   Bilingual (RO default · EN); content is local. First-person voice.
+   complet"). Curated and human, not a CV dump. Trilingual (RO default · EN ·
+   RU). First-person voice.
+   The record itself — experience, education, continuing education, research,
+   languages and the accreditation list — comes from `GET /about`. It was six
+   hand-written sections here, next to a back-office `Despre noi` page editing a
+   row nothing rendered (audit A6, F12).
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -37,7 +43,6 @@ export async function generateMetadata({
 }
 
 type Bi = { ro: string; en: string; ru: string };
-type BiList = { ro: string[]; en: string[]; ru: string[] };
 
 const FOCUS: Bi[] = [
   { ro: 'Probleme digestive la copii — un domeniu cu care lucrez încă de la începutul carierei.', en: 'Digestive issues in children — an area I’ve worked in since the start of my career.', ru: 'Проблемы пищеварения у детей — направление, с которым я работаю с самого начала карьеры.' },
@@ -111,121 +116,6 @@ function AdvIcon({ k }: { k: 'whole' | 'one' | 'evidence' }) {
   );
 }
 
-interface CvEntry {
-  label: Bi;
-  body?: Bi[];
-  items?: BiList;
-}
-
-const CV: CvEntry[] = [
-  {
-    label: { ro: 'Experiență', en: 'Experience', ru: 'Опыт' },
-    body: [
-      {
-        ro: 'Lucrez ca medic pediatru la Spitalul Clinic Municipal de Copii „Valentin Ignatenco” și la clinica Harper Medklinic din Chișinău.',
-        en: 'I work as a pediatrician at the “Valentin Ignatenco” Municipal Children’s Clinical Hospital and at the Harper Medklinic clinic in Chișinău.',
-        ru: 'Работаю врачом-педиатром в Муниципальной клинической детской больнице имени Валентина Игнатенко и в клинике Harper Medklinic в Кишинёве.',
-      },
-      {
-        ro: 'Înainte de a deveni medic, am lucrat opt ani ca asistentă medicală în secția de gastroenterologie a Institutului Mamei și Copilului — de aici vine și interesul meu pentru sănătatea digestivă a copiilor.',
-        en: 'Before becoming a doctor, I worked for eight years as a nurse in the gastroenterology department of the Mother and Child Institute — that’s where my interest in children’s digestive health comes from.',
-        ru: 'До того как стать врачом, я восемь лет работала медсестрой в отделении гастроэнтерологии Института матери и ребёнка — отсюда и мой интерес к детскому пищеварению.',
-      },
-    ],
-  },
-  {
-    label: { ro: 'Studii', en: 'Education', ru: 'Образование' },
-    items: {
-      ro: [
-        'Master în Sănătate Publică – Nutriție Umană, USMF „Nicolae Testemițanu” (2025)',
-        'Rezidențiat în Pediatrie, USMF „Nicolae Testemițanu” (2018)',
-        'Studii superioare în Medicină Generală, USMF „Nicolae Testemițanu” (2014)',
-      ],
-      en: [
-        'MSc in Public Health – Human Nutrition, USMF “Nicolae Testemițanu” (2025)',
-        'Residency in Pediatrics, USMF “Nicolae Testemițanu” (2018)',
-        'Degree in General Medicine, USMF “Nicolae Testemițanu” (2014)',
-      ],
-      ru: [
-        'Магистратура по общественному здоровью – питание человека, USMF «Nicolae Testemițanu» (2025)',
-        'Ординатура по педиатрии, USMF «Nicolae Testemițanu» (2018)',
-        'Диплом по общей медицине, USMF «Nicolae Testemițanu» (2014)',
-      ],
-    },
-  },
-  {
-    label: { ro: 'Formare continuă', en: 'Continuing education', ru: 'Непрерывное образование' },
-    body: [
-      {
-        ro: 'Particip constant la congrese și cursuri de specialitate, în Moldova și peste hotare. Printre cele mai recente:',
-        en: 'I regularly take part in congresses and specialty courses, in Moldova and abroad. Among the most recent:',
-        ru: 'Постоянно участвую в конгрессах и профильных курсах — в Молдове и за рубежом. Из недавнего:',
-      },
-    ],
-    /**
-     * ⚠ The WHO line is the CLIENT'S OWN wording, copied verbatim from
-     * `docs/despre.md` — do not rephrase it, and do not "improve" it with the
-     * certificate.
-     *
-     * The certificate she sent (WHO Basic Emergency Care Provider, 2026) states
-     * that the recipient agrees not to use it *or their participation* for
-     * promotional, publicity or commercial purposes, and that it implies no WHO
-     * endorsement. So: **never publish the scan, the certificate number, or the
-     * WHO logo here or anywhere else on the site.** Whether the text mention
-     * itself stays is her call — asked in `docs/questions_v3.md` §4.2, together
-     * with the fact that her line says "cursuri" (plural, no year) while the
-     * evidence is one course in 2026.
-     */
-    items: {
-      ro: [
-        'Programe dedicate dificultăților de hrănire la copii (2026)',
-        'Congresul de Gastroenterologie, Hepatologie și Nutriție Pediatrică, Sibiu (2025)',
-        'Cursuri de urgențe pediatrice ale Organizației Mondiale a Sănătății',
-      ],
-      en: [
-        'Programs on feeding difficulties in children (2026)',
-        'Congress of Pediatric Gastroenterology, Hepatology and Nutrition, Sibiu (2025)',
-        'WHO pediatric emergency courses',
-      ],
-      ru: [
-        'Программы по трудностям с кормлением у детей (2026)',
-        'Конгресс по детской гастроэнтерологии, гепатологии и питанию, Сибиу (2025)',
-        'Курсы ВОЗ по неотложной педиатрической помощи',
-      ],
-    },
-  },
-  {
-    label: { ro: 'Activitate științifică', en: 'Research', ru: 'Научная деятельность' },
-    body: [
-      {
-        ro: 'Cercetarea mea s-a concentrat pe afecțiunile digestive la copii, inclusiv bolile inflamatorii intestinale. Am publicat articole despre diareea și constipația la copii și despre rinita alergică la copii.',
-        en: 'My research focused on digestive conditions in children, including inflammatory bowel disease. I’ve published articles on diarrhea and constipation in children and on allergic rhinitis in children.',
-        ru: 'Я исследовала заболевания пищеварения у детей, в том числе воспалительные заболевания кишечника. Опубликовала статьи о диарее и запорах, а также об аллергическом рините у детей.',
-      },
-    ],
-  },
-  {
-    label: { ro: 'Limbi', en: 'Languages', ru: 'Языки' },
-    body: [
-      {
-        ro: 'Consultațiile pot avea loc în română, rusă și engleză.',
-        en: 'Consultations can take place in Romanian, Russian, and English.',
-        ru: 'Консультирую на румынском, русском и английском.',
-      },
-    ],
-  },
-  {
-    label: { ro: 'Membru și acreditare', en: 'Membership & accreditation', ru: 'Членство и аккредитация' },
-    body: [
-      {
-        ro: 'Membră a Societății Române de Pediatrie. Categorie de calificare confirmată de Ministerul Sănătății al Republicii Moldova.',
-        en: 'Member of the Romanian Society of Pediatrics. Qualification category confirmed by the Ministry of Health of the Republic of Moldova.',
-        ru: 'Член Румынского общества педиатрии. Квалификационная категория подтверждена Министерством здравоохранения Республики Молдова.',
-      },
-    ],
-  },
-];
-
 /* Q17 content (brief §7) — exact client text (RO), with EN/RU translations. */
 const WHY_INTRO: Bi = {
   ro: 'Nu doar diplome și experiență.',
@@ -291,7 +181,10 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const portrait = await siteMediaAsset('portrait_about');
+  const [portrait, about] = await Promise.all([
+    siteMediaAsset('portrait_about'),
+    api.about(),
+  ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
@@ -517,65 +410,63 @@ export default async function AboutPage({
         </div>
       </section>
 
-      {/* 5 · Curriculum — experience, education, CME, research, languages, membership */}
-      <section className="bg-paper">
-        <div className="shell py-20 md:py-28">
-          <header className="mx-auto mb-12 max-w-[820px] text-center md:mb-16">
-            <p className="eyebrow mb-3">{ru ? 'Путь' : en ? 'The record' : 'Parcurs'}</p>
-            <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
-              {ru ? (
-                <>
-                  Опыт и <span className="serif-it text-sage">аккредитация</span>
-                </>
-              ) : en ? (
-                <>
-                  Background & <span className="serif-it text-sage">credentials</span>
-                </>
-              ) : (
-                <>
-                  Experiență și <span className="serif-it text-sage">acreditare</span>
-                </>
-              )}
-            </h2>
-          </header>
+      {/* 5 · The record — her own text, edited in the back office */}
+      {about && (
+        <section className="bg-paper">
+          <div className="shell py-20 md:py-28">
+            <header className="mx-auto mb-12 max-w-[820px] text-center md:mb-16">
+              <p className="eyebrow mb-3">{ru ? 'Путь' : en ? 'The record' : 'Parcurs'}</p>
+              <h2 className="serif text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.04] tracking-[-0.02em] text-balance">
+                {loc(locale, about.titleRo, about.titleEn, about.titleRu)}
+              </h2>
+            </header>
 
-          <div className="mx-auto max-w-[880px] border-t border-[var(--rule)]">
-            {CV.map((entry) => (
-              <Reveal
-                key={entry.label.en}
-                className="grid gap-x-12 gap-y-4 border-b border-[var(--rule)] py-8 md:grid-cols-[200px_1fr] md:py-10"
-              >
-                <h3 className="eyebrow pt-1 text-sage-text">{lc(entry.label)}</h3>
-                <div className="max-w-[58ch]">
-                  {entry.body?.map((p, i) => (
-                    <p
-                      key={i}
-                      className="text-[1.0625rem] leading-[1.7] text-ink-soft text-pretty [&:not(:first-child)]:mt-3"
-                    >
-                      {lc(p)}
-                    </p>
-                  ))}
-                  {entry.items && (
-                    <ul className={`grid gap-2.5 ${entry.body ? 'mt-4' : ''}`}>
-                      {(ru ? entry.items.ru : en ? entry.items.en : entry.items.ro).map((item) => (
-                        <li
-                          key={item}
-                          className="grid grid-cols-[1.1em_1fr] gap-x-2.5 text-[1.0625rem] leading-relaxed text-ink"
-                        >
-                          <span aria-hidden="true" className="text-sage-text">
-                            —
-                          </span>
-                          <span className="text-pretty">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </Reveal>
-            ))}
+            <div className="mx-auto max-w-[68ch]">
+              {renderMarkdown(
+                loc(locale, about.contentRo, about.contentEn, about.contentRu),
+              )}
+            </div>
+
+            {about.credentials.length > 0 && (
+              <ul className="mx-auto mt-14 grid max-w-[68ch] gap-2.5 border-t border-[var(--rule)] pt-8">
+                {about.credentials.map((c) => (
+                  <li
+                    key={c.ro}
+                    className="grid grid-cols-[1.1em_1fr] gap-x-2.5 text-[1.0625rem] leading-relaxed text-ink"
+                  >
+                    <span aria-hidden="true" className="text-sage-text">
+                      —
+                    </span>
+                    <span className="text-pretty">
+                      {/* RU is optional on these JSON blocks; fall back to RO. */}
+                      {ru ? c.ru || c.ro : en ? c.en : c.ro}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {about.images && about.images.length > 0 && (
+              <div className="mx-auto mt-14 grid max-w-[880px] gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {about.images.map((src) => (
+                  <div
+                    key={src}
+                    className="relative aspect-[4/3] overflow-hidden bg-[#e9e1d0]"
+                  >
+                    <Image
+                      src={src}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 280px"
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 5.4 · Certificates — visual proof for the "Formare continuă" record */}
       <Certificates locale={locale} />

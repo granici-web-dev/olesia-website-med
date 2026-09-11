@@ -14,7 +14,7 @@ import {
 const d = ro.quickQuestions.deadline;
 const URGENT_MS = 6 * 60 * 60 * 1000;
 
-/** Live 48h SLA indicator: time left, overdue, or answered + SLA outcome. */
+/** Live SLA indicator: time left, overdue, or answered + SLA outcome. */
 export function DeadlineIndicator({
   ticket,
   className,

@@ -1,4 +1,4 @@
-import type { ServiceDto } from '@olesia/shared';
+import type { PublicServiceDto, ServiceDto } from '@olesia/shared';
 import type { Service } from '../../generated/prisma/client';
 
 /** The back-office shape: the whole row, hidden services included. */
@@ -26,7 +26,8 @@ export function toServiceDto(s: Service): ServiceDto {
 }
 
 /**
- * The public shape.
+ * The public shape, declared in `packages/shared` so the site can import it
+ * rather than keep a hand-written copy (audit A6, F8).
  *
  * `calendlyEventTypeUri` is how the webhook maps a booking to a service and
  * has no business on an unauthenticated endpoint (audit A4, F5). `active` was
@@ -35,11 +36,6 @@ export function toServiceDto(s: Service): ServiceDto {
  * kept its homepage tile and its booking button. The endpoint filters now, and
  * the field has nothing left to say.
  */
-export type PublicServiceDto = Omit<
-  ServiceDto,
-  'calendlyEventTypeUri' | 'active'
->;
-
 export function toPublicServiceDto(s: Service): PublicServiceDto {
   const {
     calendlyEventTypeUri: _uri,

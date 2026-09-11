@@ -1,4 +1,8 @@
-import type { MaterialCategoryDto, MaterialDto } from '@olesia/shared';
+import type {
+  MaterialCategoryDto,
+  MaterialDto,
+  PublicMaterialDto,
+} from '@olesia/shared';
 import type {
   Material,
   MaterialCategory,
@@ -64,7 +68,7 @@ export function toMaterialDto(
  */
 export function toPublicMaterialDto(
   m: Material & { category: Pick<MaterialCategory, 'slug'> },
-): MaterialDto {
+): PublicMaterialDto {
   const dto = toMaterialDto(m);
   return dto.access === 'free' ? dto : { ...dto, fileUrl: null };
 }
