@@ -7,6 +7,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { btnDark, creamPill, creamUnderline } from '@/components/ui/cta';
 import { api } from '@/lib/api';
+import { formatSla } from '@/lib/working-hours';
 
 export const revalidate = 60;
 
@@ -104,7 +105,11 @@ export default async function FaqPage({
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
-  const CATEGORIES = await loadCategories();
+  const [CATEGORIES, hours] = await Promise.all([
+    loadCategories(),
+    api.workingHours(),
+  ]);
+  const sla = formatSla(locale, hours.expressSlaMinutes);
 
   // FAQPage JSON-LD (rich snippets) — built from the current-locale answers.
   const faqJsonLd = {
@@ -284,7 +289,11 @@ export default async function FaqPage({
                   {ru ? 'Медицинский вопрос' : en ? 'A medical question' : 'O întrebare medicală'}
                 </span>
                 <span className="shrink-0 text-[13px] font-medium uppercase tracking-[0.06em] text-sage-text">
-                  {ru ? 'Спросить врача · ~1ч' : en ? 'Ask the doctor · ~1h' : 'Întreabă medicul · ~1h'}{' '}
+                  {ru
+                    ? `Спросить врача · ${sla}`
+                    : en
+                      ? `Ask the doctor · ${sla}`
+                      : `Întreabă medicul · ${sla}`}{' '}
                   <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
                 </span>
               </Link>
@@ -318,7 +327,11 @@ export default async function FaqPage({
                   {ru ? 'Посмотреть услуги' : en ? 'See the services' : 'Vezi serviciile'}
                 </Link>
                 <Link href="/quick-question" className={creamUnderline}>
-                  {ru ? 'Или задайте экспресс-вопрос · ~1ч →' : en ? 'Or ask an express question · ~1h →' : 'Sau o întrebare EXPRESS · ~1h →'}
+                  {ru
+                    ? `Или задайте экспресс-вопрос · ${sla} →`
+                    : en
+                      ? `Or ask an express question · ${sla} →`
+                      : `Sau o întrebare EXPRESS · ${sla} →`}
                 </Link>
               </div>
             </div>

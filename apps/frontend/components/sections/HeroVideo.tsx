@@ -66,7 +66,12 @@ export function HeroVideo({
         className={styles.video}
         poster={poster}
         playsInline
-        preload="metadata"
+        /* `none`, not `metadata`: the poster is already a separate image, so
+           the only thing `metadata` bought was a range request into an 8 MB
+           file on every home-page load, for a video most visitors never play
+           (audit A7, F24). The browser fetches it when the play button is
+           pressed. */
+        preload="none"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onEnded={() => setPlaying(false)}

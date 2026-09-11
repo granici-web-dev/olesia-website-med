@@ -10,6 +10,9 @@ import { Reveal } from '@/components/ui/Reveal';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import { btnDark, underlineLg, underline } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
+import { api } from '@/lib/api';
+import { formatServiceDuration } from '@/lib/service-price';
+import { formatSla, formatSlaInHours } from '@/lib/working-hours';
 
 /** Service code → its dedicated landing page. Rows link here ("Detalii"). */
 const DETAIL_ROUTE: Record<string, string> = {
@@ -90,7 +93,7 @@ const SERVICES_A: ServiceContent[] = [
       en: 'Pediatric consultation',
       ru: 'Педиатрическая консультация',
     },
-    duration: { ro: '30 min · video', en: '30 min · video', ru: '30 мин · видео' },
+    duration: { ro: '{duration} · video', en: '{duration} · video', ru: '{duration} · видео' },
     value: {
       ro: 'O consultație video dedicată sănătății copilului — simptome, creștere, dezvoltare sau o a doua opinie.',
       en: "A focused video visit for your child's health — symptoms, growth, development, or a second opinion.",
@@ -103,19 +106,19 @@ const SERVICES_A: ServiceContent[] = [
     },
     included: {
       ro: [
-        'Apel video de 30 de minute',
+        'Apel video',
         'Analiza simptomelor, a istoricului și a documentelor trimise',
         'Evaluare clară și pașii următori',
         'Plan scris cu recomandări, în 24 de ore',
       ],
       en: [
-        '30-minute video call',
+        'Video call',
         'Review of symptoms, history, and any documents you share',
         'A clear assessment and next steps',
         'Written summary with recommendations within 24 hours',
       ],
       ru: [
-        'Видеозвонок 30 минут',
+        'Видеозвонок',
         'Разбор симптомов, истории болезни и присланных документов',
         'Понятная оценка и следующие шаги',
         'Письменный план с рекомендациями в течение 24 часов',
@@ -133,7 +136,7 @@ const SERVICES_A: ServiceContent[] = [
       en: 'Nutrition consultation',
       ru: 'Консультация по питанию',
     },
-    duration: { ro: '60 min · video', en: '60 min · video', ru: '60 мин · видео' },
+    duration: { ro: '{duration} · video', en: '{duration} · video', ru: '{duration} · видео' },
     value: {
       ro: 'O analiză personalizată a alimentației, pe bază de dovezi — pentru copii sau adulți.',
       en: 'A personalized, evidence-based look at feeding and nutrition — for children or adults.',
@@ -146,19 +149,19 @@ const SERVICES_A: ServiceContent[] = [
     },
     included: {
       ro: [
-        'Apel video de 60 de minute',
+        'Apel video',
         'Analiza obiceiurilor alimentare actuale',
         'Un plan alimentar personalizat',
         'Recomandări scrise după consultație',
       ],
       en: [
-        '60-minute video call',
+        'Video call',
         'Analysis of current eating and feeding patterns',
         'A personalized nutrition plan',
         'Written recommendations after the call',
       ],
       ru: [
-        'Видеозвонок 60 минут',
+        'Видеозвонок',
         'Анализ текущих пищевых привычек',
         'Персональный план питания',
         'Письменные рекомендации после консультации',
@@ -182,7 +185,7 @@ const SERVICES_A: ServiceContent[] = [
       en: 'Integrative consultation & monitoring',
       ru: 'Интегративная консультация и наблюдение',
     },
-    duration: { ro: '90 min · video', en: '90 min · video', ru: '90 мин · видео' },
+    duration: { ro: '{duration} · video', en: '{duration} · video', ru: '{duration} · видео' },
     value: {
       ro: 'O consultație amănunțită care îmbină pediatria și nutriția, cu un plan de urmat în timp.',
       en: 'An in-depth visit that combines pediatric and nutrition expertise, with a plan to follow over time.',
@@ -195,19 +198,19 @@ const SERVICES_A: ServiceContent[] = [
     },
     included: {
       ro: [
-        'Apel video amănunțit de 90 de minute',
+        'Apel video amănunțit',
         'Evaluare pediatrică și nutrițională combinată',
         'Un plan de acțiune personalizat',
         'Prima urmărire / monitorizare inclusă',
       ],
       en: [
-        '90-minute in-depth video call',
+        'An in-depth video call',
         'Combined pediatric and nutrition assessment',
         'A tailored action plan',
         'Initial follow-up / monitoring included',
       ],
       ru: [
-        'Подробный видеозвонок 90 минут',
+        'Подробный видеозвонок',
         'Совместная педиатрическая и нутрициологическая оценка',
         'Персональный план действий',
         'Первый контрольный визит / наблюдение включены',
@@ -267,11 +270,11 @@ const SERVICES_B: ServiceContent[] = [
     num: '05',
     tag: { ro: 'EXPRESS', en: 'Express', ru: 'Экспресс' },
     title: { ro: 'Întrebare EXPRESS', en: 'Express question', ru: 'Экспресс-вопрос' },
-    duration: { ro: 'răspuns în ~1h · scris', en: '~1h reply · written', ru: 'ответ за ~1ч · письменно' },
+    duration: { ro: 'răspuns în {sla} · scris', en: '{sla} reply · written', ru: 'ответ за {sla} · письменно' },
     value: {
-      ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în ~1 oră în timpul programului de lucru.',
-      en: 'Have one question? Get a written answer from the doctor within ~1 hour during working hours.',
-      ru: 'Есть один вопрос? Получите письменный ответ от врача в течение ~1 часа в рабочее время.',
+      ro: 'Ai o singură întrebare? Primești un răspuns scris de la medic în {slaInHours}.',
+      en: 'Have one question? Get a written answer from the doctor within {slaInHours}.',
+      ru: 'Есть один вопрос? Получите письменный ответ от врача в течение {slaInHours}.',
     },
     bestFor: {
       ro: 'Pentru o întrebare punctuală, non-urgentă, care nu cere o consultație completă.',
@@ -281,17 +284,17 @@ const SERVICES_B: ServiceContent[] = [
     included: {
       ro: [
         'Trimiți întrebarea (cu poze sau documente, dacă e cazul)',
-        'Răspuns scris în ~1 oră în timpul programului de lucru',
+        'Răspuns scris în {slaInHours}',
         'O rundă de clarificări',
       ],
       en: [
         'Submit your question (with photos or documents if needed)',
-        'A written reply within ~1 hour during working hours',
+        'A written reply within {slaInHours}',
         'One round of clarification',
       ],
       ru: [
         'Отправляете вопрос (с фото или документами, если нужно)',
-        'Письменный ответ в течение ~1 часа в рабочее время',
+        'Письменный ответ в течение {slaInHours}',
         'Одно уточнение по ответу',
       ],
     },
@@ -365,11 +368,11 @@ const COMPARE_ROWS: { label: Bi; cells: Bi[] }[] = [
   {
     label: { ro: 'Durată', en: 'Duration', ru: 'Длительность' },
     cells: [
-      { ro: '30 min', en: '30 min', ru: '30 мин' },
-      { ro: '60 min', en: '60 min', ru: '60 мин' },
-      { ro: '90 min', en: '90 min', ru: '90 мин' },
+      { ro: '{duration}', en: '{duration}', ru: '{duration}' },
+      { ro: '{duration}', en: '{duration}', ru: '{duration}' },
+      { ro: '{duration}', en: '{duration}', ru: '{duration}' },
       { ro: '1–6 luni', en: '1–6 months', ru: '1–6 месяцев' },
-      { ro: '~1h', en: '~1h', ru: '~1ч' },
+      { ro: '{sla}', en: '{sla}', ru: '{sla}' },
     ],
   },
   {
@@ -460,11 +463,50 @@ const FAQ: { q: Bi; a: Bi }[] = [
   },
 ];
 
+/**
+ * The numbers this page quotes and does not own: how long a call is, and how
+ * long the EXPRESS answer takes. Both are edited by the client — the first in
+ * the service catalog, the second in the working-hours row — and both used to
+ * be literal text in twelve places here (audit A7, F2). The copy leaves a slot;
+ * this fills it, and drops the separator when there is nothing to fill it with,
+ * so an unreachable catalog shows "video" rather than "· video".
+ */
+interface ServiceFacts {
+  duration: (code: string) => string | null;
+  sla: string;
+  slaInHours: string;
+}
+
+/** The page's own row keys → the catalog code carrying the duration. */
+const CATALOG_CODE: Record<string, string> = { nutrition: 'nutrition_copii' };
+
+function fillFacts(text: string, code: string, facts: ServiceFacts): string {
+  return text
+    .split('{duration}')
+    .join(facts.duration(CATALOG_CODE[code] ?? code) ?? '')
+    .split('{slaInHours}')
+    .join(facts.slaInHours)
+    .split('{sla}')
+    .join(facts.sla)
+    .replace(/^\s*·\s*/, '')
+    .replace(/\s*·\s*$/, '')
+    .trim();
+}
+
 /** A described service — homepage-style numbered editorial row. */
-function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {
+function ServiceRow({
+  locale,
+  s,
+  facts,
+}: {
+  locale: string;
+  s: ServiceContent;
+  facts: ServiceFacts;
+}) {
   const detailHref = DETAIL_ROUTE[s.code] ?? '/services';
-  const included =
-    locale === 'ru' ? s.included.ru : locale === 'en' ? s.included.en : s.included.ro;
+  const included = (
+    locale === 'ru' ? s.included.ru : locale === 'en' ? s.included.en : s.included.ro
+  ).map((item) => fillFacts(item, s.code, facts));
   const ru = locale === 'ru';
   const en = locale === 'en';
   const pick = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
@@ -494,7 +536,7 @@ function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {
             {title}
           </h3>
           <p className="mono mt-3 text-[11px] uppercase tracking-[0.06em] text-ink-soft">
-            {pick(s.duration)}
+            {fillFacts(pick(s.duration), s.code, facts)}
           </p>
           <p className="mt-5 max-w-[40ch] text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
             <span className="text-ink">{ru ? 'Рекомендуется — ' : en ? 'Best for — ' : 'Recomandat — '}</span>
@@ -505,7 +547,7 @@ function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {
         {/* Detail */}
         <div>
           <p className="max-w-[58ch] text-[1.15rem] leading-relaxed text-ink text-pretty">
-            {pick(s.value)}
+            {fillFacts(pick(s.value), s.code, facts)}
           </p>
 
           <p className="mt-7 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
@@ -534,7 +576,7 @@ function ServiceRow({ locale, s }: { locale: string; s: ServiceContent }) {
               }
             >
               {s.note.kind === 'warning' && (
-                <span className="mono mr-2 text-[11px] uppercase tracking-[0.12em] text-sage not-italic">
+                <span className="mono mr-2 text-[11px] uppercase tracking-[0.12em] text-sage-text not-italic">
                   {ru ? 'Важно' : en ? 'Important' : 'Important'}
                 </span>
               )}
@@ -560,7 +602,20 @@ export default async function ServicesPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const portrait = await siteMediaAsset('portrait_services');
+  const [portrait, services, hours] = await Promise.all([
+    siteMediaAsset('portrait_services'),
+    api.services(),
+    api.workingHours(),
+  ]);
+  const facts: ServiceFacts = {
+    duration: (code) =>
+      formatServiceDuration(
+        locale,
+        services.find((s) => s.code === code)?.durationMin ?? null,
+      ),
+    sla: formatSla(locale, hours.expressSlaMinutes),
+    slaInHours: formatSlaInHours(locale, hours.expressSlaMinutes),
+  };
 
   const en = locale === 'en';
   const ru = locale === 'ru';
@@ -779,7 +834,7 @@ export default async function ServicesPage({
         </header>
         <div>
           {SERVICES_A.map((s) => (
-            <ServiceRow key={s.code} locale={locale} s={s} />
+            <ServiceRow key={s.code} locale={locale} s={s} facts={facts} />
           ))}
         </div>
       </section>
@@ -801,7 +856,7 @@ export default async function ServicesPage({
           </header>
           <div>
             {SERVICES_B.map((s) => (
-              <ServiceRow key={s.code} locale={locale} s={s} />
+              <ServiceRow key={s.code} locale={locale} s={s} facts={facts} />
             ))}
           </div>
         </div>
@@ -821,7 +876,7 @@ export default async function ServicesPage({
               className="flex flex-col border-b border-[var(--rule)] py-7 lg:border-b-0 lg:px-7 lg:pb-5 lg:pt-9 lg:first:pl-0 lg:last:pr-0"
             >
               <span className="mono self-start rounded-full border border-[var(--rule)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-ink-soft">
-                {lc(COMPARE_ROWS[0].cells[ci])}
+                {fillFacts(lc(COMPARE_ROWS[0].cells[ci]), COMPARE_CODES[ci], facts)}
               </span>
               <h3 className="serif mt-4 text-[clamp(1.45rem,1.8vw,1.8rem)] leading-[1.1] tracking-[-0.01em] text-balance">
                 {lc(col)}
@@ -833,7 +888,11 @@ export default async function ServicesPage({
                       {lc(COMPARE_ROWS[ri].label)}
                     </dt>
                     <dd className="mt-1 text-[0.95rem] leading-snug text-ink text-pretty">
-                      {lc(COMPARE_ROWS[ri].cells[ci])}
+                      {fillFacts(
+                        lc(COMPARE_ROWS[ri].cells[ci]),
+                        COMPARE_CODES[ci],
+                        facts,
+                      )}
                     </dd>
                   </div>
                 ))}

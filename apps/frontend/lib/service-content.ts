@@ -12,8 +12,11 @@
  * into the catalog with `PLAN.md` step 8c, which is what gives them somewhere
  * to be edited from.
  *
- * One exception: the EXPRESS promise is data, and leaves a `{slaInHours}` slot
- * that both readers fill from `WorkingHours.expressSlaMinutes` (audit A6, F12).
+ * Two exceptions are data, not copy, and are left as slots for the reader to
+ * fill: `{slaInHours}` from `WorkingHours.expressSlaMinutes` (audit A6, F12)
+ * and `{duration}` from the catalog's `durationMin` (audit A7, F2). Both are
+ * numbers the client edits in the back office, and both were written out in
+ * full here while she edited them somewhere else.
  */
 
 export interface BiList {
@@ -57,19 +60,19 @@ export function serviceDescription(
 export const SERVICE_INCLUDED: Record<string, BiList> = {
   pediatric: {
     ro: [
-      'Apel video de 30 de minute',
+      'Apel video · {duration}',
       'Analiza simptomelor, a istoricului și a documentelor trimise',
       'Evaluare clară și pașii următori',
       'Plan scris cu recomandări, în 24 de ore',
     ],
     en: [
-      '30-minute video call',
+      'Video call · {duration}',
       'Review of symptoms, history, and any documents you share',
       'A clear assessment and next steps',
       'Written summary with recommendations within 24 hours',
     ],
     ru: [
-      'Видеозвонок 30 минут',
+      'Видеозвонок · {duration}',
       'Разбор симптомов, истории болезни и присланных документов',
       'Понятное заключение и дальнейшие шаги',
       'Письменный план с рекомендациями в течение 24 часов',
@@ -84,19 +87,19 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
    */
   nutrition: {
     ro: [
-      'Apel video de 60 de minute',
+      'Apel video · {duration}',
       'Analiza obiceiurilor alimentare actuale',
       'Un plan alimentar personalizat',
       'Recomandări scrise după consultație',
     ],
     en: [
-      '60-minute video call',
+      'Video call · {duration}',
       'Analysis of current eating patterns',
       'A personalized nutrition plan',
       'Written recommendations after the call',
     ],
     ru: [
-      'Видеозвонок 60 минут',
+      'Видеозвонок · {duration}',
       'Анализ текущих привычек питания',
       'Персональный план питания',
       'Письменные рекомендации после консультации',
@@ -104,19 +107,19 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
   },
   nutrition_copii: {
     ro: [
-      'Apel video de 60 de minute',
+      'Apel video · {duration}',
       'Analiza obiceiurilor alimentare actuale ale copilului',
       'Un plan alimentar personalizat, adaptat vârstei',
       'Recomandări scrise după consultație',
     ],
     en: [
-      '60-minute video call',
+      'Video call · {duration}',
       'Analysis of the child’s current eating patterns',
       'A personalized, age-appropriate nutrition plan',
       'Written recommendations after the call',
     ],
     ru: [
-      'Видеозвонок 60 минут',
+      'Видеозвонок · {duration}',
       'Анализ текущих пищевых привычек ребёнка',
       'Персональный план питания по возрасту',
       'Письменные рекомендации после консультации',
@@ -124,19 +127,19 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
   },
   nutrition_adulti: {
     ro: [
-      'Apel video de 60 de minute',
+      'Apel video · {duration}',
       'Analiza obiceiurilor alimentare actuale',
       'Un plan alimentar personalizat',
       'Recomandări scrise după consultație',
     ],
     en: [
-      '60-minute video call',
+      'Video call · {duration}',
       'Analysis of current eating patterns',
       'A personalized nutrition plan',
       'Written recommendations after the call',
     ],
     ru: [
-      'Видеозвонок 60 минут',
+      'Видеозвонок · {duration}',
       'Анализ текущих привычек питания',
       'Персональный план питания',
       'Письменные рекомендации после консультации',
@@ -144,19 +147,19 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
   },
   integrative: {
     ro: [
-      'Apel video amănunțit de 90 de minute',
+      'Apel video amănunțit · {duration}',
       'Evaluare pediatrică și nutrițională combinată',
       'Un plan de acțiune personalizat',
       'Prima urmărire / monitorizare inclusă',
     ],
     en: [
-      '90-minute in-depth video call',
+      'In-depth video call · {duration}',
       'Combined pediatric and nutrition assessment',
       'A tailored action plan',
       'Initial follow-up / monitoring included',
     ],
     ru: [
-      'Подробный видеозвонок 90 минут',
+      'Подробный видеозвонок · {duration}',
       'Совместная педиатрическая и нутрициологическая оценка',
       'Индивидуальный план действий',
       'Первичное наблюдение / мониторинг включены',
@@ -200,3 +203,26 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
     ],
   },
 };
+
+/**
+ * The list a reader sees: the copy above with its `{duration}` and
+ * `{slaInHours}` slots filled from the API.
+ *
+ * A slot the API has nothing for leaves the separator behind, so the dangling
+ * " · " is trimmed rather than shown — `PRINCIPLES.md` asks for a missing value
+ * to be rendered as missing, not as punctuation.
+ */
+export function fillIncluded(
+  items: string[],
+  facts: { duration: string | null; slaInHours: string },
+): string[] {
+  return items.map((item) =>
+    item
+      .split('{duration}')
+      .join(facts.duration ?? '')
+      .split('{slaInHours}')
+      .join(facts.slaInHours)
+      .replace(/\s*·\s*$/, '')
+      .trim(),
+  );
+}

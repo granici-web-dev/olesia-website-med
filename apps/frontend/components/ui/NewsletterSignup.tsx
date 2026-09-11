@@ -84,7 +84,7 @@ export function NewsletterSignup({
             placeholder={lc(T.placeholder)}
             aria-label={lc(T.title)}
             maxLength={FIELD_LIMITS.email}
-            className="min-w-[220px] flex-1 border-b border-[var(--rule)] bg-transparent py-2 text-[0.95rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
+            className="min-w-[220px] flex-1 border-b border-[var(--rule)] bg-transparent py-2 text-[0.95rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-text"
           />
           <button
             type="submit"

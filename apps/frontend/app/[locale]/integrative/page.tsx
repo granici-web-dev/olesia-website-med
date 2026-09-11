@@ -8,6 +8,7 @@ import { Link } from '@/i18n/navigation';
 import { api, loc } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { calendlyUrlFor } from '@/lib/calendly';
+import { formatServiceDuration } from '@/lib/service-price';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
@@ -15,9 +16,9 @@ import { siteMediaAsset } from '@/lib/site-media';
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Single-service landing for the Integrative consultation (group A · 90 min ·
+   Single-service landing for the Integrative consultation (group A · video ·
    video · with monitoring). Books the same Calendly event as the `integrative`
-   service. The page's job is to justify the 90 min + monitoring against the
+   service. The page's job is to justify the longer call + monitoring against the
    single consultations, so the core is "when to choose this" + "how it differs"
    — and the pediatrician × nutrition duo as the reason it works. Bilingual
    (RO default · EN); content is local, the API supplies only the Calendly URL.
@@ -31,6 +32,13 @@ export async function generateMetadata({
   const { locale } = await params;
   const en = locale === 'en';
   const ru = locale === 'ru';
+  // The length quoted in a search result is the catalog's, not a number
+  // compiled in here (audit A7, F2); with no catalog it is simply not quoted.
+  const durationMin =
+    (await api.services()).find((s) => s.code === 'integrative')?.durationMin ??
+    null;
+  const duration = formatServiceDuration(locale, durationMin);
+  const inBrackets = duration ? ` (${duration})` : '';
   return pageMetadata({
     locale,
     path: '/integrative',
@@ -40,10 +48,10 @@ export async function generateMetadata({
         ? 'Integrative consultation & monitoring | Dr. Olesea Jalba'
         : 'Consultație integrativă și monitorizare | Dr. Olesea Jalba',
     description: ru
-      ? 'Углублённая видеоконсультация (90 мин), объединяющая педиатрию и нутрициологию, с персональным планом и наблюдением. Для сложных ситуаций.'
+      ? `Углублённая видеоконсультация${inBrackets}, объединяющая педиатрию и нутрициологию, с персональным планом и наблюдением. Для сложных ситуаций.`
       : en
-        ? 'In-depth video consultation (90 min) combining pediatrics and nutrition, with a personalized plan and monitoring. For complex situations.'
-        : 'Consultație video aprofundată (90 min) care îmbină pediatria și nutriția, cu plan personalizat și monitorizare. Pentru situații complexe.',
+        ? `In-depth video consultation${inBrackets} combining pediatrics and nutrition, with a personalized plan and monitoring. For complex situations.`
+        : `Consultație video aprofundată${inBrackets} care îmbină pediatria și nutriția, cu plan personalizat și monitorizare. Pentru situații complexe.`,
   });
 }
 
@@ -57,7 +65,7 @@ const CHOOSE_WHEN: Bi[] = [
 ];
 
 const INCLUDES: Bi[] = [
-  { ro: 'Apel video aprofundat de 90 de minute', en: '90-minute in-depth video call', ru: 'Углублённый видеозвонок на 90 минут' },
+  { ro: 'Apel video aprofundat', en: 'An in-depth video call', ru: 'Углублённый видеозвонок' },
   { ro: 'Evaluare combinată: pediatrică și nutrițională', en: 'Combined assessment: pediatric and nutrition', ru: 'Комплексная оценка: педиатрия и питание' },
   { ro: 'Un plan de acțiune personalizat', en: 'A personalized action plan', ru: 'Персональный план действий' },
   { ro: 'Îndrumare inițială de monitorizare și urmărire', en: 'Initial monitoring and follow-up guidance', ru: 'Первые рекомендации по наблюдению' },
@@ -75,9 +83,9 @@ const STEPS: { title: Bi; text: Bi }[] = [
   {
     title: { ro: 'Apel video', en: 'Video call', ru: 'Видеозвонок' },
     text: {
-      ro: 'Te conectezi la apelul video de 90 de minute pe Google Meet, unde analizăm situația în ansamblu — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
-      en: 'Join the 90-minute video call on Google Meet, where we look at the whole picture — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
-      ru: 'Подключаетесь к 90-минутному видеозвонку в Google Meet, где мы разбираем ситуацию в целом — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
+      ro: 'Te conectezi la apelul video pe Google Meet, unde analizăm situația în ansamblu — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
+      en: 'Join the video call on Google Meet, where we look at the whole picture — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
+      ru: 'Подключаетесь к видеозвонку в Google Meet, где мы разбираем ситуацию в целом — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
     },
   },
   {
@@ -98,20 +106,26 @@ const STEPS: { title: Bi; text: Bi }[] = [
   },
 ];
 
-const COMPARE: { title: Bi; duration: Bi; text: Bi; current?: boolean }[] = [
+/**
+ * The three consultations side by side. `code` rather than a written duration:
+ * the three lengths were compiled in here while the catalog edited them, so a
+ * changed appointment length showed on /pricing and not in this table
+ * (audit A7, F2).
+ */
+const COMPARE: { code: string; title: Bi; text: Bi; current?: boolean }[] = [
   {
+    code: 'pediatric',
     title: { ro: 'Consultație pediatrică', en: 'Pediatric consultation', ru: 'Педиатрическая консультация' },
-    duration: { ro: '30 min', en: '30 min', ru: '30 мин' },
     text: { ro: 'O problemă de sănătate, evaluare focusată.', en: 'One health issue, a focused assessment.', ru: 'Одна проблема со здоровьем, точечная оценка.' },
   },
   {
+    code: 'nutrition_copii',
     title: { ro: 'Consultație de nutriție', en: 'Nutrition consultation', ru: 'Консультация по питанию' },
-    duration: { ro: '60 min', en: '60 min', ru: '60 мин' },
     text: { ro: 'Alimentație și hrănire.', en: 'Feeding and nutrition.', ru: 'Питание и кормление.' },
   },
   {
+    code: 'integrative',
     title: { ro: 'Consultație integrativă', en: 'Integrative consultation', ru: 'Интегративная консультация' },
-    duration: { ro: '90 min', en: '90 min', ru: '90 мин' },
     text: {
       ro: 'Situații complexe care îmbină sănătatea și nutriția, cu mai mult timp și cu monitorizare.',
       en: 'Complex situations combining health and nutrition, with more time and monitoring.',
@@ -171,15 +185,25 @@ export default async function IntegrativePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const portrait = await siteMediaAsset('portrait_integrative');
+  const [portrait, services] = await Promise.all([
+    siteMediaAsset('portrait_integrative'),
+    api.services(),
+  ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
+  const integrative = services.find((s) => s.code === 'integrative');
   const integrativeUrl = calendlyUrlFor(
     'integrative',
-    (await api.services()).find((s) => s.code === 'integrative')?.calendlySchedulingUrl,
+    integrative?.calendlySchedulingUrl,
   );
+  const durationFor = (code: string) =>
+    formatServiceDuration(
+      locale,
+      services.find((s) => s.code === code)?.durationMin ?? null,
+    );
+  const duration = durationFor('integrative');
 
   const bookReason = ru ? 'Интегративная консультация' : en ? 'Integrative consultation' : 'Consultație integrativă';
 
@@ -245,7 +269,13 @@ export default async function IntegrativePage({
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {ru ? 'Видеозвонок · 90 мин · с наблюдением' : en ? 'Video call · 90 min · with monitoring' : 'Apel video · 90 min · cu monitorizare'}
+                {(ru ? 'Видеозвонок' : en ? 'Video call' : 'Apel video') +
+                  (duration ? ` · ${duration}` : '') +
+                  (ru
+                    ? ' · с наблюдением'
+                    : en
+                      ? ' · with monitoring'
+                      : ' · cu monitorizare')}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
@@ -421,7 +451,7 @@ export default async function IntegrativePage({
                 </span>
               ) : (
                 <span className="mono mb-3 text-[11px] uppercase tracking-[0.1em] text-ink-soft">
-                  {lc(c.duration)}
+                  {durationFor(c.code)}
                 </span>
               )}
               <h3
@@ -433,7 +463,7 @@ export default async function IntegrativePage({
               </h3>
               {c.current && (
                 <span className="mono mt-2 text-[11px] uppercase tracking-[0.1em] text-ink-soft">
-                  {lc(c.duration)}
+                  {durationFor(c.code)}
                 </span>
               )}
               <p className="mt-3 max-w-[34ch] text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
@@ -628,7 +658,13 @@ export default async function IntegrativePage({
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <BookPrimary
                   className={creamPill}
-                  label={ru ? 'Записаться (90 мин, видео)' : en ? 'Book a time (90 min, video)' : 'Programează o oră (90 min, video)'}
+                  label={
+                    ru
+                      ? `Записаться${duration ? ` (${duration}, видео)` : ' (видео)'}`
+                      : en
+                        ? `Book a time${duration ? ` (${duration}, video)` : ' (video)'}`
+                        : `Programează o oră${duration ? ` (${duration}, video)` : ' (video)'}`
+                  }
                 />
                 <span className="text-sm text-[var(--sage-soft)]">
                   {ru ? 'Не уверены, что подходит? ' : en ? 'Not sure what fits? ' : 'Nu ești sigur ce ți se potrivește? '}

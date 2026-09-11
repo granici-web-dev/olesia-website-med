@@ -13,8 +13,12 @@ import { OrderDeliverableButton } from '@/components/ui/OrderDeliverableButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
 import { serviceLink } from '@/components/ui/cta';
 import type { LeadService, DeliverableProduct } from '@/lib/leads';
-import { SERVICE_INCLUDED, serviceDescription } from '@/lib/service-content';
-import { formatSlaInHours, withSla } from '@/lib/working-hours';
+import {
+  SERVICE_INCLUDED,
+  fillIncluded,
+  serviceDescription,
+} from '@/lib/service-content';
+import { formatSlaInHours } from '@/lib/working-hours';
 import {
   formatEur,
   formatServiceDuration,
@@ -208,9 +212,17 @@ export default async function PricingPage({
                       {t.included}
                     </p>
                     <ul className="mt-3 grid gap-2">
-                      {(locale === 'ru' ? SERVICE_INCLUDED[s.code].ru : locale === 'en' ? SERVICE_INCLUDED[s.code].en : SERVICE_INCLUDED[s.code].ro)
-                        .map((item) => withSla(item, slaInHours, 'slaInHours'))
-                        .map((item) => (
+                      {fillIncluded(
+                        locale === 'ru'
+                          ? SERVICE_INCLUDED[s.code].ru
+                          : locale === 'en'
+                            ? SERVICE_INCLUDED[s.code].en
+                            : SERVICE_INCLUDED[s.code].ro,
+                        {
+                          duration: formatServiceDuration(locale, s.durationMin),
+                          slaInHours,
+                        },
+                      ).map((item) => (
                           <li
                             key={item}
                             className="grid grid-cols-[1.1em_1fr] gap-x-2 text-[0.9rem] leading-relaxed text-ink-soft"

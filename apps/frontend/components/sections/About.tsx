@@ -12,12 +12,15 @@ export function About() {
     <section className={styles.section}>
       <div>
         <div className={styles.eyebrow}>{t('eyebrow')}</div>
-        <h3 className={styles.title}>
+        {/* h2, not h3: this is a top-level home-page section like Services and
+            HowItWorks, and an h3 here skipped a level in the outline the whole
+            page reads as (audit A7, F17). */}
+        <h2 className={styles.title}>
           {t.rich('title', {
             accent: (chunks) => <span className={styles.titleAccent}>{chunks}</span>,
             br: () => <br />,
           })}
-        </h3>
+        </h2>
       </div>
 
       <div>

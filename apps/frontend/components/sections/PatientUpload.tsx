@@ -314,7 +314,7 @@ export function PatientUpload({
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={t(T.notePlaceholder)}
                   maxLength={200}
-                  className="w-full border border-[var(--rule)] bg-paper px-4 py-3 text-[0.95rem] text-ink outline-none transition-colors placeholder:text-ink-soft focus-visible:border-sage"
+                  className="w-full border border-[var(--rule)] bg-paper px-4 py-3 text-[0.95rem] text-ink outline-none transition-colors placeholder:text-ink-soft focus-visible:border-sage focus-visible:ring-2 focus-visible:ring-sage-text"
                 />
               </label>
 

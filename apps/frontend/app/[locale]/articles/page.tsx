@@ -10,6 +10,7 @@ import {
   type BlogCategory,
 } from '@/components/sections/BlogList';
 import { AGE_GROUPS, type Bi } from '@/lib/age-taxonomy';
+import { formatSla } from '@/lib/working-hours';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
 
 export const revalidate = 60;
@@ -74,7 +75,11 @@ export default async function ArticlesPage({
     [fmtDate(dateIso), minLabel(minutes)].filter(Boolean).join(' · ');
   const href = (slug: string) => `/${locale}/articles/${slug}`;
 
-  const published: PublicPostDto[] = await api.posts();
+  const [published, hours] = await Promise.all([
+    api.posts(),
+    api.workingHours(),
+  ]);
+  const sla = formatSla(locale, hours.expressSlaMinutes);
 
   const items: BlogPostItem[] = published.map((p) => ({
     slug: p.slug,
@@ -302,7 +307,11 @@ export default async function ArticlesPage({
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/quick-question" className={creamPill}>
-                  {ru ? 'Спросить врача · ~1ч' : en ? 'Ask the doctor · ~1h' : 'Întreabă medicul · ~1h'}
+                  {ru
+                    ? `Спросить врача · ${sla}`
+                    : en
+                      ? `Ask the doctor · ${sla}`
+                      : `Întreabă medicul · ${sla}`}
                 </Link>
                 <Link href="/services" className={creamUnderline}>
                   {ru ? 'Смотреть консультации →' : en ? 'See the consultations →' : 'Vezi consultațiile →'}

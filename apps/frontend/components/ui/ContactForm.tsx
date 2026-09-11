@@ -44,7 +44,7 @@ const SUBJECTS: {
 ];
 
 const inputCls =
-  'w-full border border-[var(--rule)] bg-paper px-4 py-3 text-[1rem] text-ink transition-colors placeholder:text-ink-soft/70 focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage/40 aria-[invalid=true]:border-danger';
+  'w-full border border-[var(--rule)] bg-paper px-4 py-3 text-[1rem] text-ink transition-colors placeholder:text-ink-soft/70 focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-text aria-[invalid=true]:border-danger';
 const labelCls =
   'mb-2 block text-[11px] font-medium uppercase tracking-[0.16em] text-sage-text';
 const errCls =

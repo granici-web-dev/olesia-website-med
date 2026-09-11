@@ -12,8 +12,14 @@ import { CookieConsent } from '@/components/analytics/CookieConsent';
 import { ANALYTICS } from '@/lib/analytics';
 import './globals.css';
 
+/**
+ * All three faces carry Cyrillic. `subsets` does not choose which glyphs a
+ * font has — it chooses which unicode-range files Next preloads, and with
+ * `latin` alone a Russian reader waited for the Cyrillic file to be discovered
+ * mid-render (audit A7, F26).
+ */
 const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
+  subsets: ['latin', 'cyrillic'],
   weight: ['300', '400', '500', '600'],
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
@@ -21,14 +27,14 @@ const cormorant = Cormorant_Garamond({
 });
 
 const manrope = Manrope({
-  subsets: ['latin'],
+  subsets: ['latin', 'cyrillic'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-manrope',
   display: 'swap',
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
+  subsets: ['latin', 'cyrillic'],
   weight: ['400', '500'],
   variable: '--font-jetbrains',
   display: 'swap',
@@ -97,8 +103,19 @@ export default async function LocaleLayout({
     >
       <body>
         <NextIntlClientProvider messages={messages}>
+          {/* First tab stop on every page, so the header's fifteen links are
+              skippable (audit A7, F9). */}
+          <a href="#content" className="skip-link">
+            {locale === 'ru'
+              ? 'Перейти к содержанию'
+              : locale === 'en'
+                ? 'Skip to content'
+                : 'Sari la conținut'}
+          </a>
           <Nav locale={locale} />
-          {children}
+          <div id="content" tabIndex={-1}>
+            {children}
+          </div>
           <Footer />
           <DevTools />
           <CookieConsent />

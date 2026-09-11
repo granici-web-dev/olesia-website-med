@@ -37,7 +37,8 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--sage);
+  /* The micro-label green, not the display one — see Services.module.css. */
+  color: var(--sage-text);
 }
 
 .title {
@@ -97,7 +98,10 @@
 .input:focus,
 .textarea:focus {
   border-color: var(--sage);
-  box-shadow: 0 0 0 3px rgba(124, 138, 78, 0.18);
+  /* Opaque, and the darker of the two greens: the ring used to be sage at 18%
+     alpha, which measures 1.56:1 against the field and is invisible to anyone
+     who needs it (audit A7, F7). */
+  box-shadow: 0 0 0 2px var(--sage-text);
 }
 
 .input[aria-invalid='true'],

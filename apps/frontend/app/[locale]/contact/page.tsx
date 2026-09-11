@@ -9,7 +9,13 @@ import { SocialIcon } from '@/components/ui/SocialIcon';
 import { underlineLg } from '@/components/ui/cta';
 import { api, loc } from '@/lib/api';
 import { contactHref, groupContacts, socialNetwork } from '@/lib/contacts';
-import { formatWorkingWeek, provisionalNote } from '@/lib/working-hours';
+import {
+  formatSla,
+  formatSlaInHours,
+  formatWorkingWeek,
+  provisionalNote,
+  withSla,
+} from '@/lib/working-hours';
 
 export const revalidate = 60;
 
@@ -71,7 +77,13 @@ const TRIAGE: { situation: Bi; route: Bi; href: string; anchor?: boolean }[] = [
       en: 'I have a medical question for the doctor',
       ru: 'У меня медицинский вопрос к врачу',
     },
-    route: { ro: 'Întreabă medicul · ~1h', en: 'Ask the doctor · ~1h', ru: 'Спросить врача · ~1ч' },
+    /* `{sla}` is filled from `WorkingHours.expressSlaMinutes` below — the
+       promise is the client's to edit, not ours to compile in (audit A7, F2). */
+    route: {
+      ro: 'Întreabă medicul · {sla}',
+      en: 'Ask the doctor · {sla}',
+      ru: 'Спросить врача · {sla}',
+    },
     href: '/quick-question',
   },
   {
@@ -105,6 +117,8 @@ export default async function ContactPage({
   const direct = [...emails, ...phones, ...addresses];
   const week = formatWorkingWeek(locale, hours);
   const provisional = provisionalNote(locale, hours);
+  const sla = formatSla(locale, hours.expressSlaMinutes);
+  const slaInHours = formatSlaInHours(locale, hours.expressSlaMinutes);
 
   return (
     <main className="bg-cream text-ink">
@@ -148,10 +162,10 @@ export default async function ContactPage({
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
-                  ? 'Медицинский вопрос о ребёнке или о себе? Воспользуйтесь сервисом «Спросить врача» — обоснованный ответ придёт в течение ~1 часа в рабочее время, с уважением к согласию и границам.'
+                  ? `Медицинский вопрос о ребёнке или о себе? Воспользуйтесь сервисом «Спросить врача» — обоснованный ответ придёт в течение ${slaInHours}, с уважением к согласию и границам.`
                   : en
-                  ? 'For a medical question about your child or yourself, use the “Ask the doctor” service — you’ll get a documented answer within ~1 hour during working hours, with proper consent and boundaries.'
-                  : 'Pentru o întrebare medicală despre copilul tău sau despre tine, folosește serviciul „Întreabă medicul" — primești un răspuns documentat în ~1 oră în timpul programului de lucru, cu acordul și limitele corecte.'}
+                  ? `For a medical question about your child or yourself, use the “Ask the doctor” service — you’ll get a documented answer within ${slaInHours}, with proper consent and boundaries.`
+                  : `Pentru o întrebare medicală despre copilul tău sau despre tine, folosește serviciul „Întreabă medicul" — primești un răspuns documentat în ${slaInHours}, cu acordul și limitele corecte.`}
               </p>
               <Link
                 href="/quick-question"
@@ -199,7 +213,9 @@ export default async function ContactPage({
                   {lc(item.situation)}
                 </span>
                 <span className="flex shrink-0 items-center gap-2 text-[13px] font-medium uppercase tracking-[0.08em] text-sage-text">
-                  <span className="hidden sm:inline">{lc(item.route)}</span>
+                  <span className="hidden sm:inline">
+                    {withSla(lc(item.route), sla)}
+                  </span>
                   <span
                     aria-hidden="true"
                     className="transition-transform duration-200 group-hover:translate-x-1"

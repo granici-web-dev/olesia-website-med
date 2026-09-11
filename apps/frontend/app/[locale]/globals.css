@@ -6,9 +6,7 @@
   --cream-2: #ede6d8;
   --paper: #faf7f1;
   --beige: #4d3a28;
-  --beige-soft: #8a7256;
   --sage: #7c8a4e;
-  --sage-2: #94a266;
   --sage-soft: #c8d09e;
   --sage-deep: #2a3315;
   /* AA-safe sage for small text (<18px) on cream/paper: 5.06:1 / 5.32:1.
@@ -91,6 +89,35 @@ body {
   text-transform: uppercase;
   color: var(--ink-soft);
   font-weight: 500;
+}
+
+/* Skip link: the first thing a keyboard or screen-reader visitor reaches, and
+   invisible to everyone else until it takes focus. Without it the only way
+   past the header was fifteen tab stops through the nav, on every page
+   (audit A7, F9). Positioned rather than clipped, so it is genuinely on screen
+   when focused. */
+.skip-link {
+  /* Fixed rather than absolute: it must be on screen when it takes focus even
+     if the browser restored a scroll position. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  transform: translateY(-150%);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--sage-soft);
+  outline-offset: 2px;
 }
 
 /* Page shell: matches Nav/Footer — full-bleed background, content centered

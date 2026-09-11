@@ -8,6 +8,8 @@ import { Link } from '@/i18n/navigation';
 import { api, loc } from '@/lib/api';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { calendlyUrlFor } from '@/lib/calendly';
+import { formatServiceDuration } from '@/lib/service-price';
+import { formatSla } from '@/lib/working-hours';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
@@ -16,7 +18,7 @@ import { siteMediaAsset } from '@/lib/site-media';
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Single-service landing for the Pediatric consultation (group A · 30 min ·
+   Single-service landing for the Pediatric consultation (group A · video ·
    video). Books the same Calendly event as the `pediatric` service. Content is
    bilingual (RO default · EN) and lives here so the page renders fully even if
    the API is unreachable; the API supplies only the Calendly scheduling URL.
@@ -120,9 +122,9 @@ const STEPS: { title: Bi; text: Bi }[] = [
   {
     title: { ro: 'Apel video', en: 'Video call', ru: 'Видеозвонок' },
     text: {
-      ro: 'Te conectezi la apelul video de 30 de minute pe Google Meet — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
-      en: 'Join the 30-minute video call on Google Meet — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
-      ru: 'Подключаетесь к 30-минутному видеозвонку в Google Meet — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
+      ro: 'Te conectezi la apelul video pe Google Meet — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
+      en: 'Join the video call on Google Meet — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
+      ru: 'Подключаетесь к видеозвонку в Google Meet — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
     },
   },
   {
@@ -204,16 +206,24 @@ export default async function PediatricsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const portrait = await siteMediaAsset('portrait_pediatrics');
+  const [portrait, services, hours] = await Promise.all([
+    siteMediaAsset('portrait_pediatrics'),
+    api.services(),
+    api.workingHours(),
+  ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
 
-  // Calendly URL for the pediatric service (group A). API supplies only this.
+  const pediatric = services.find((s) => s.code === 'pediatric');
   const pediatricUrl = calendlyUrlFor(
     'pediatric',
-    (await api.services()).find((s) => s.code === 'pediatric')?.calendlySchedulingUrl,
+    pediatric?.calendlySchedulingUrl,
   );
+  // The call length and the EXPRESS promise are the client's to edit; this page
+  // stated both as literal text while the back office edited them (A7, F2).
+  const duration = formatServiceDuration(locale, pediatric?.durationMin ?? null);
+  const sla = formatSla(locale, hours.expressSlaMinutes);
 
   const bookLabel = ru ? 'Записаться на консультацию' : en ? 'Book a consultation' : 'Programează o consultație';
   const bookReason = ru ? 'Педиатрическая консультация' : en ? 'Pediatric consultation' : 'Consultație pediatrică';
@@ -273,7 +283,8 @@ export default async function PediatricsPage({
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {ru ? 'Видеозвонок · 30 мин' : en ? 'Video call · 30 min' : 'Apel video · 30 min'}
+                {(ru ? 'Видеозвонок' : en ? 'Video call' : 'Apel video') +
+                  (duration ? ` · ${duration}` : '')}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
@@ -549,13 +560,25 @@ export default async function PediatricsPage({
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <BookPrimary
                   className={creamPill}
-                  label={ru ? 'Выбрать время (30 мин, видео)' : en ? 'Book a time (30 min, video)' : 'Programează o oră (30 min, video)'}
+                  label={
+                    ru
+                      ? `Выбрать время${duration ? ` (${duration}, видео)` : ' (видео)'}`
+                      : en
+                        ? `Book a time${duration ? ` (${duration}, video)` : ' (video)'}`
+                        : `Programează o oră${duration ? ` (${duration}, video)` : ' (video)'}`
+                  }
                 />
                 <span className="text-sm text-[var(--sage-soft)]">
                   {ru ? 'Всего один вопрос? ' : en ? 'Have just one question? ' : 'Ai o singură întrebare? '}
                   <BookGroupBButton
                     service="quick_question"
-                    label={ru ? 'Спросить врача (ответ за ~1 ч)' : en ? 'Ask the doctor (~1h reply)' : 'Întreabă medicul (răspuns în ~1h)'}
+                    label={
+                      ru
+                        ? `Спросить врача (ответ за ${sla})`
+                        : en
+                          ? `Ask the doctor (${sla} reply)`
+                          : `Întreabă medicul (răspuns în ${sla})`
+                    }
                     className={creamUnderline}
                   />
                 </span>

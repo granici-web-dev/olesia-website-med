@@ -65,7 +65,9 @@
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--sage);
+  /* --sage is the display green; at 11px uppercase it falls below 4.5:1 on
+     cream. --sage-text is the same hue, darkened for exactly this (A7, F18). */
+  color: var(--sage-text);
   font-weight: 500;
   margin-bottom: 12px;
 }

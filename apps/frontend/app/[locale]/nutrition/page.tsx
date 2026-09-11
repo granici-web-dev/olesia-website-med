@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { calendlyUrlFor } from '@/lib/calendly';
+import { formatServiceDuration } from '@/lib/service-price';
+import { formatSla } from '@/lib/working-hours';
 import { api } from '@/lib/api';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
@@ -16,7 +18,7 @@ import { siteMediaAsset } from '@/lib/site-media';
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Single-service landing for the Nutrition consultation (group A · 60 min ·
+   Single-service landing for the Nutrition consultation (group A · video ·
    video). One service, two audience-specific Calendly events — children and
    adults — surfaced as two booking buttons (see CALENDLY_FALLBACK_URLS).
    Content is bilingual (RO default · EN) and lives here so the page renders
@@ -77,9 +79,9 @@ const STEPS: { title: Bi; text: Bi }[] = [
   {
     title: { ro: 'Apel video', en: 'Video call', ru: 'Видеозвонок' },
     text: {
-      ro: 'Te conectezi la apelul video de 60 de minute pe Google Meet — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
-      en: 'Join the 60-minute video call on Google Meet — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
-      ru: 'Подключаетесь к 60-минутному видеозвонку в Google Meet — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
+      ro: 'Te conectezi la apelul video pe Google Meet — primești linkul în e-mailul de confirmare (la cerere, și WhatsApp, Viber sau Instagram).',
+      en: 'Join the video call on Google Meet — you get the link in the confirmation email (WhatsApp, Viber, or Instagram on request).',
+      ru: 'Подключаетесь к видеозвонку в Google Meet — ссылка приходит в письме-подтверждении (по запросу — WhatsApp, Viber или Instagram).',
     },
   },
   {
@@ -153,7 +155,11 @@ export default async function NutritionPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const portrait = await siteMediaAsset('portrait_nutrition');
+  const [portrait, services, hours] = await Promise.all([
+    siteMediaAsset('portrait_nutrition'),
+    api.services(),
+    api.workingHours(),
+  ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
   const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
@@ -163,11 +169,17 @@ export default async function NutritionPage({
   // Both links come from the catalog, like /pediatrics — this page took the
   // built-in test-account fallback every time, so the client's own booking
   // links would never have reached it (audit A6, F13).
-  const services = await api.services();
   const schedulingUrl = (code: string) =>
     services.find((s) => s.code === code)?.calendlySchedulingUrl;
   const copiiUrl = calendlyUrlFor('nutrition_copii', schedulingUrl('nutrition_copii'));
   const adultiUrl = calendlyUrlFor('nutrition_adulti', schedulingUrl('nutrition_adulti'));
+  // Duration and the EXPRESS promise come from the catalog and the schedule,
+  // both of which the client edits (audit A7, F2).
+  const duration = formatServiceDuration(
+    locale,
+    services.find((s) => s.code === 'nutrition_copii')?.durationMin ?? null,
+  );
+  const sla = formatSla(locale, hours.expressSlaMinutes);
 
   const copiiLabel = ru ? 'Записаться · дети' : en ? 'Book · children' : 'Programează · copii';
   const adultiLabel = ru ? 'Записаться · взрослые' : en ? 'Book · adults' : 'Programează · adulți';
@@ -258,7 +270,8 @@ export default async function NutritionPage({
             </div>
             <div className="md:border-l md:border-[var(--rule)] md:pl-12 lg:pl-16">
               <p className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
-                {ru ? 'Видеозвонок · 60 мин' : en ? 'Video call · 60 min' : 'Apel video · 60 min'}
+                {(ru ? 'Видеозвонок' : en ? 'Video call' : 'Apel video') +
+                  (duration ? ` · ${duration}` : '')}
               </p>
               <p className="mt-6 max-w-[44ch] text-[1.0625rem] leading-[1.75] text-ink text-pretty">
                 {ru
@@ -514,7 +527,13 @@ export default async function NutritionPage({
                   {ru ? 'Всего один вопрос? ' : en ? 'Have just one question? ' : 'Ai o singură întrebare? '}
                   <BookGroupBButton
                     service="quick_question"
-                    label={ru ? 'Спросить врача (ответ за ~1 ч)' : en ? 'Ask the doctor (~1h reply)' : 'Întreabă medicul (răspuns în ~1h)'}
+                    label={
+                      ru
+                        ? `Спросить врача (ответ за ${sla})`
+                        : en
+                          ? `Ask the doctor (${sla} reply)`
+                          : `Întreabă medicul (răspuns în ${sla})`
+                    }
                     className={creamUnderline}
                   />
                 </span>

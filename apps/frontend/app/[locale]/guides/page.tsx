@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { MaterialLibrary } from '@/components/sections/MaterialLibrary';
 import { AGE_GROUPS } from '@/lib/age-taxonomy';
 import { api } from '@/lib/api';
+import { formatSla } from '@/lib/working-hours';
 import { btnDark, underlineLg, creamPill, creamUnderline, cardCta } from '@/components/ui/cta';
 
 export const revalidate = 60;
@@ -65,10 +66,12 @@ export default async function LibraryPage({
   const tri = (ro: string, enText: string, ruText: string | null) =>
     ru ? (ruText?.trim() ? ruText : ro) : en ? enText : ro;
 
-  const [materials, categories] = await Promise.all([
+  const [materials, categories, hours] = await Promise.all([
     api.materials(),
     api.materialCategories(),
+    api.workingHours(),
   ]);
+  const sla = formatSla(locale, hours.expressSlaMinutes);
 
   const catLabel = (slug: string) => {
     const c = categories.find((x) => x.slug === slug);
@@ -357,7 +360,11 @@ export default async function LibraryPage({
               </h2>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/quick-question" className={creamPill}>
-                  {ru ? 'Спросить врача · ~1ч' : en ? 'Ask the doctor · ~1h' : 'Întreabă medicul · ~1h'}
+                  {ru
+                    ? `Спросить врача · ${sla}`
+                    : en
+                      ? `Ask the doctor · ${sla}`
+                      : `Întreabă medicul · ${sla}`}
                 </Link>
                 <Link href="/services" className={creamUnderline}>
                   {ru ? 'Смотреть консультации →' : en ? 'See the consultations →' : 'Vezi consultațiile →'}

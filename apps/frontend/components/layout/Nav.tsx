@@ -104,7 +104,7 @@ export function Nav({ locale }: NavProps) {
         <Image
           src="/assets/logo-long.png"
           alt="Dr. Olesea Jalba — pediatru & nutriționist"
-          width={240}
+          width={150}
           height={60}
           className={styles.logo}
           priority
@@ -193,12 +193,16 @@ export function Nav({ locale }: NavProps) {
           className={`${styles.burger} ${open ? styles.burgerOpen : ''}`}
           aria-label={
             open
-              ? locale === 'en'
-                ? 'Close menu'
-                : 'Închide meniul'
-              : locale === 'en'
-                ? 'Open menu'
-                : 'Deschide meniul'
+              ? locale === 'ru'
+                ? 'Закрыть меню'
+                : locale === 'en'
+                  ? 'Close menu'
+                  : 'Închide meniul'
+              : locale === 'ru'
+                ? 'Открыть меню'
+                : locale === 'en'
+                  ? 'Open menu'
+                  : 'Deschide meniul'
           }
           aria-expanded={open}
           aria-controls="mobile-menu"

@@ -280,9 +280,34 @@ administrator password when prompted. Enrol the second factor in the same
 session.
 
 **6. Vercel.** Set `API_URL` and `NEXT_PUBLIC_API_URL` to
-`https://api.oleseajalba.md`, plus the analytics, reCAPTCHA and newsletter
-variables. Redeploy, then confirm `/pricing` shows prices from the API rather
-than the notice.
+`https://api.oleseajalba.md`, plus `NEXT_PUBLIC_SITE_URL` and the analytics and
+reCAPTCHA variables. Redeploy, then confirm `/pricing` shows prices from the API
+rather than the notice.
+
+⚠️ **A changed `API_URL` needs a rebuild, not a restart** (audit A7, F10).
+`next.config.ts` derives `images.remotePatterns` from it at *build* time, so the
+allowed image host is compiled into the bundle. Change the variable without
+redeploying and every photo the client uploaded answers 400 from the image
+optimizer while the rest of the page renders normally — which is the hardest
+kind of breakage to attribute. Redeploy after any change to it.
+
+⚠️ `NEXT_PUBLIC_SITE_URL` is **required** from this release on. Without it (and
+without Vercel's own `VERCEL_PROJECT_PRODUCTION_URL`) the production build fails
+rather than shipping a `robots.txt`, a sitemap and a canonical link that all
+point at `localhost` (audit A7, F6).
+
+📌 **Pictures inside article and About text stay plain `<img>` until this step
+is done** (audit A7, F13). `next/image` only accepts hosts listed in
+`next.config.ts`, and until the API has a stable public host an optimized image
+there would render nothing at all. Once `api.oleseajalba.md` is live and step 6
+has been done once, `lib/markdown.tsx` and `app/[locale]/articles/[slug]` can
+move to `next/image`.
+
+📌 **The photographs on `/about` have no `alt` text**, and will not until the
+back office has a field for it — the images come from `AboutPage.images`, which
+is a list of URLs with nothing to describe them. Adding that field is audit pass
+**A9**; until then they are `alt=""`, which is the correct way to mark a picture
+as decorative and the wrong description of what they are.
 
 **7. Calendly.** Point the webhook at `https://api.oleseajalba.md`. Recreate the
 subscription rather than editing it, and check the signing key matches

@@ -103,7 +103,7 @@
       "faq": "Частые вопросы"
     },
     "contactLabel": "Контакты",
-    "rights": "© Olesea Jalba · 2026",
+    "rights": "© Olesea Jalba · {year}",
     "legal": "GDPR · Условия",
     "legalGdpr": "GDPR",
     "legalTerms": "Условия"

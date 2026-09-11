@@ -6,8 +6,8 @@ import { Reveal } from '@/components/ui/Reveal';
 import { calendlyUrlFor } from '@/lib/calendly';
 import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import type { LeadService } from '@/lib/leads';
-import { SERVICE_INCLUDED } from '@/lib/service-content';
-import { formatSlaInHours, withSla } from '@/lib/working-hours';
+import { SERVICE_INCLUDED, fillIncluded } from '@/lib/service-content';
+import { formatSlaInHours } from '@/lib/working-hours';
 import {
   formatPriceRange,
   formatServiceDuration,
@@ -105,12 +105,6 @@ export async function Services() {
         const split = SPLIT_BOOKING[key];
         const url = calendlyUrlFor(key, bookingUrl.get(key));
         const leadService = LEAD_SERVICE[key];
-        const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
-        const includedItems = included
-          ? (ru ? included.ru : en ? included.en : included.ro).map((item) =>
-              withSla(item, slaInHours, 'slaInHours'),
-            )
-          : null;
         const tileServices = codesFor(key)
           .map((code) => byCode.get(code))
           .filter((s) => s !== undefined);
@@ -119,6 +113,13 @@ export async function Services() {
           lc,
           tileServices[0]?.durationMin ?? null,
         );
+        const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
+        const includedItems = included
+          ? fillIncluded(ru ? included.ru : en ? included.en : included.ro, {
+              duration: durationText,
+              slaInHours,
+            })
+          : null;
         return (
           <Reveal key={n} as="div" className={styles.serviceRow} delay={i * 70}>
             <div className={styles.serviceNum}>{n}</div>

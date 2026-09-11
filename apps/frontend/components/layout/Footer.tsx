@@ -64,7 +64,7 @@ export async function Footer() {
             src="/assets/logo-long.png"
             alt="Dr. Olesea Jalba — pediatru & nutriționist"
             width={380}
-            height={96}
+            height={152}
             className={styles.logo}
           />
           <p className={styles.tagline}>{t('tagline')}</p>
@@ -134,7 +134,10 @@ export async function Footer() {
       </div>
 
       <div className={styles.bottom}>
-        <span>{t('rights')}</span>
+        {/* The year came from the JSON and would have read 2026 forever
+            (audit A7, F22). The footer renders on every page, so this is the
+            one string on the site that has to know today's date. */}
+        <span>{t('rights', { year: new Date().getFullYear() })}</span>
         <FooterLangSwitch />
         <span>
           <Link href="/gdpr" className={styles.legalLink}>
