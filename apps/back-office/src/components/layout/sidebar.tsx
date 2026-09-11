@@ -14,7 +14,7 @@ export function Sidebar() {
         <Link
           to={paths.dashboard}
           className="rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/40"
-          aria-label={`${ro.app.name} — acasă`}
+          aria-label={`${ro.app.name}: ${ro.sidebar.home}`}
         >
           <BrandMark />
         </Link>

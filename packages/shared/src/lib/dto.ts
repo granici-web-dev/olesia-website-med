@@ -614,8 +614,13 @@ export interface DashboardStatsDto {
     /** Share of period tickets answered within the 48h SLA, 0..1. */
     slaRate: number;
   };
-  /** Next scheduled consultations, soonest first. */
-  upcoming: DashboardUpcomingItem[];
+  /**
+   * Next scheduled consultations, soonest first. Absent for an editor: the
+   * list carries patient names, and `/appointments` is admin-only, so sending
+   * them here would have been the way around that (audit A10, F9). Absent and
+   * empty are different, and the panel shows the card only when it is present.
+   */
+  upcoming?: DashboardUpcomingItem[];
 }
 
 // --- Patients / medical records (module_patients.md) ---

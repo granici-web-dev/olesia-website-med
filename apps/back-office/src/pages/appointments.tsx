@@ -1,13 +1,16 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  CalendarSync,
   CalendarX2,
   ChevronRight,
+  Loader2,
   RefreshCw,
   Search,
   SearchX,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/common/page-header';
 import { EmptyState } from '@/components/common/empty-state';
@@ -43,6 +46,7 @@ import {
   serviceLabel,
   formatDateTime,
 } from '@/features/appointments/data';
+import { syncWithCalendly } from '@/features/appointments/api';
 import { appointmentsQueryKey } from '@/features/appointments/query-key';
 import type {
   AppointmentServiceCode,
@@ -67,9 +71,38 @@ const SERVICE_OPTIONS: AppointmentServiceCode[] = [
 ];
 
 export function AppointmentsPage() {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: appointmentsQueryKey,
     queryFn: fetchAppointments,
+  });
+
+  /**
+   * A booking the doctor can see in Calendly and not here means a webhook
+   * delivery was lost, which is precisely what the backup sync reconciles. It
+   * ran every half hour and nowhere else; this is the same pass, on demand.
+   */
+  const sync = useMutation({
+    mutationFn: syncWithCalendly,
+    onSuccess: (stats) => {
+      if (!stats.configured) {
+        toast.warning(t.sync.notConfigured);
+        return;
+      }
+      const changed = stats.created + stats.updated + stats.canceled;
+      const summary = changed
+        ? t.sync.result(stats.created, stats.updated, stats.canceled)
+        : t.sync.nothing;
+      // Partial is not success: the pass read part of the listing, so an
+      // appointment that is still missing may simply not have been looked at.
+      if (stats.partial)
+        toast.warning(summary, { description: t.sync.partial });
+      else toast.success(summary);
+      if (changed) {
+        queryClient.invalidateQueries({ queryKey: appointmentsQueryKey });
+      }
+    },
+    onError: () => toast.error(t.sync.failed),
   });
 
   const [status, setStatus] = React.useState<StatusFilter>('all');
@@ -110,7 +143,8 @@ export function AppointmentsPage() {
   }, [scoped]);
 
   const visible = React.useMemo(
-    () => (status === 'all' ? scoped : scoped.filter((a) => a.status === status)),
+    () =>
+      status === 'all' ? scoped : scoped.filter((a) => a.status === status),
     [scoped, status],
   );
 
@@ -146,15 +180,30 @@ export function AppointmentsPage() {
         title={t.title}
         subtitle={t.subtitle}
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw className={cn(isFetching && 'animate-spin')} />
-            {t.refresh}
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCw className={cn(isFetching && 'animate-spin')} />
+              {t.refresh}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => sync.mutate()}
+              disabled={sync.isPending}
+            >
+              {sync.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <CalendarSync />
+              )}
+              {sync.isPending ? t.actions.syncing : t.actions.sync}
+            </Button>
+          </>
         }
       />
 
@@ -203,7 +252,10 @@ export function AppointmentsPage() {
               setService(v as AppointmentServiceCode | 'all')
             }
           >
-            <SelectTrigger className="w-auto min-w-[10rem]" aria-label={t.filters.service}>
+            <SelectTrigger
+              className="w-auto min-w-[10rem]"
+              aria-label={t.filters.service}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

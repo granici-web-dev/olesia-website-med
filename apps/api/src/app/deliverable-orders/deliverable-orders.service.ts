@@ -1,12 +1,23 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { deliverableEntry } from '@olesia/shared';
 import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { writeOrTranslate } from '../common/prisma-errors';
 import { StorageService } from '../storage/storage.service';
 import { paginate } from '../common/dto/pagination.dto';
-import { DeliverableOrderStatus } from '../../generated/prisma/enums';
+import {
+  DeliverableOrderStatus,
+  Locale,
+  PaymentStatus,
+} from '../../generated/prisma/enums';
 import { toDeliverableOrderDto } from './deliverable-orders.mapper';
+import { CreateDeliverableOrderDto } from './dto/create-deliverable-order.dto';
 import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders-query.dto';
 
@@ -65,6 +76,43 @@ export class DeliverableOrdersService {
       this.prisma.deliverableOrder.count({ where }),
     ]);
     return paginate(items.map(toDeliverableOrderDto), total, query);
+  }
+
+  /**
+   * Record an order the doctor took herself, by phone or in a message.
+   *
+   * It starts where a paid one does, `new` and `pending`, rather than in
+   * `awaiting_payment`: nobody is going to pay for it in a browser, so a state
+   * that means "waiting for the bank" would keep it off the doctor's own list
+   * forever. Money arrives through the manual-payment panel, which writes the
+   * ledger row the `paymentStatus` mirrors.
+   *
+   * The title and the price are stamped from the catalog, never taken from the
+   * request, for the same reason the public checkout does it: the back office
+   * has to show what was sold, not what somebody typed.
+   */
+  async create(dto: CreateDeliverableOrderDto): Promise<DeliverableOrderDto> {
+    const entry = deliverableEntry(dto.product);
+    if (!entry) throw new BadRequestException('unknown_deliverable_product');
+
+    return toDeliverableOrderDto(
+      await writeOrTranslate(() =>
+        this.prisma.deliverableOrder.create({
+          data: {
+            product: dto.product,
+            titleRo: entry.titleRo,
+            priceEur: entry.priceEur,
+            clientName: dto.clientName,
+            clientEmail: dto.clientEmail,
+            phone: dto.phone ?? null,
+            notes: dto.notes ?? null,
+            locale: dto.locale ?? Locale.ro,
+            status: DeliverableOrderStatus.new,
+            paymentStatus: PaymentStatus.pending,
+          },
+        }),
+      ),
+    );
   }
 
   /**

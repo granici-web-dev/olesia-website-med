@@ -1,7 +1,7 @@
 import type { UploadLinkDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
-import type { UploadLink } from '@/features/uploads/types';
+import type { UploadLink, UploadTarget } from '@/features/uploads/types';
 
 /** Real `upload-links` endpoints — the staff half of §11.14. */
 
@@ -23,23 +23,20 @@ function toView(d: UploadLinkDto): UploadLink {
 }
 
 export async function fetchUploadLinks(
-  appointmentId: string,
+  target: UploadTarget,
+  id: string,
 ): Promise<UploadLink[]> {
-  const r = await http.get<UploadLinkDto[]>(
-    `/upload-links/appointment/${appointmentId}`,
-  );
+  const r = await http.get<UploadLinkDto[]>(`/upload-links/${target}/${id}`);
   return r.map(toView);
 }
 
 /** Issue or extend the link. Re-issuing keeps the same URL and its files. */
 export async function issueUploadLink(
-  appointmentId: string,
+  target: UploadTarget,
+  id: string,
 ): Promise<UploadLink> {
   return toView(
-    await http.post<UploadLinkDto>(
-      `/upload-links/appointment/${appointmentId}`,
-      {},
-    ),
+    await http.post<UploadLinkDto>(`/upload-links/${target}/${id}`, {}),
   );
 }
 

@@ -9,6 +9,13 @@
  * Mirrors `UploadLinkDto` / `UploadedDocumentDto` in `packages/shared`.
  */
 
+/**
+ * What the link hangs off. Appointments send analyses before a consultation;
+ * a group-C order sends whatever the menu or protocol has to be written from.
+ * The API keys both off the same table and the routes are symmetric.
+ */
+export type UploadTarget = 'appointment' | 'order';
+
 export interface UploadedDocument {
   id: string;
   fileName: string;

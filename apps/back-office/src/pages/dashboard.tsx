@@ -9,16 +9,11 @@ import {
   RefreshCw,
   type LucideIcon,
 } from 'lucide-react';
-import type { DashboardStatsDto } from '@olesia/shared';
+import type { DashboardStatsDto, DashboardUpcomingItem } from '@olesia/shared';
 
 import { PageHeader } from '@/components/common/page-header';
 import { EmptyState } from '@/components/common/empty-state';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -143,7 +138,7 @@ function UpcomingRow({
   item,
   first,
 }: {
-  item: DashboardStatsDto['upcoming'][number];
+  item: DashboardUpcomingItem;
   first: boolean;
 }) {
   const serviceLabel =
@@ -175,7 +170,9 @@ export function DashboardPage() {
   });
 
   const metrics = data ? toMetrics(data) : [];
-  const upcoming = data?.upcoming ?? [];
+  // Absent, not empty: the API sends this list to an admin only, and an editor
+  // must not read "Nicio programare apropiată" off a list nobody sent her.
+  const upcoming = data?.upcoming;
 
   return (
     <div className="space-y-6">
@@ -224,32 +221,38 @@ export function DashboardPage() {
           {/* One card, full width: the "Activitate" panel that used to take the
               third column had no feed behind it and rendered its empty state
               on every load. */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {ro.dashboard.upcomingTitle}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <TableRowsSkeleton rows={4} />
-                ) : upcoming.length === 0 ? (
-                  <EmptyState
-                    icon={CalendarClock}
-                    title={ro.dashboard.upcomingEmpty}
-                    className="py-10"
-                  />
-                ) : (
-                  <div className="space-y-3">
-                    {upcoming.map((item, i) => (
-                      <UpcomingRow key={item.id} item={item} first={i === 0} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          {(isLoading || upcoming) && (
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">
+                    {ro.dashboard.upcomingTitle}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <TableRowsSkeleton rows={4} />
+                  ) : upcoming?.length === 0 ? (
+                    <EmptyState
+                      icon={CalendarClock}
+                      title={ro.dashboard.upcomingEmpty}
+                      className="py-10"
+                    />
+                  ) : (
+                    <div className="space-y-3">
+                      {upcoming?.map((item, i) => (
+                        <UpcomingRow
+                          key={item.id}
+                          item={item}
+                          first={i === 0}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </>
       )}
     </div>

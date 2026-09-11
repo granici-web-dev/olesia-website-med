@@ -40,7 +40,7 @@ import {
   sendUploadLink,
 } from '@/features/uploads/data';
 import { uploadLinksQueryKey } from '@/features/uploads/query-key';
-import type { UploadedDocument } from '@/features/uploads/types';
+import type { UploadedDocument, UploadTarget } from '@/features/uploads/types';
 
 const t = ro.patientUploads;
 
@@ -64,32 +64,38 @@ function humanSize(bytes: number): string {
 }
 
 /**
- * Analyses the patient sent before the consultation (§11.14).
+ * The documents a client sent, and the link they sent them through (§11.14).
  *
  * The link is the whole access mechanism, so this panel is built around
  * handing it over: it is copyable first and emailable second, because with no
  * SMTP configured the email genuinely does not leave — and the panel says so
  * rather than showing a success toast for a message that was never sent.
+ *
+ * Both targets, because both need it: analyses before a consultation, and
+ * whatever a personalized menu or protocol has to be written from. The order
+ * side of it had routes in the API and no button anywhere (audit A10, F15).
  */
 export function PatientUploadsPanel({
-  appointmentId,
+  target,
+  targetId,
 }: {
-  appointmentId: string;
+  target: UploadTarget;
+  targetId: string;
 }) {
   const queryClient = useQueryClient();
-  const queryKey = uploadLinksQueryKey(appointmentId);
+  const queryKey = uploadLinksQueryKey(target, targetId);
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey,
-    queryFn: () => fetchUploadLinks(appointmentId),
+    queryFn: () => fetchUploadLinks(target, targetId),
   });
 
   const [deletingDocument, setDeletingDocument] =
     React.useState<UploadedDocument | null>(null);
 
   const issue = useMutation({
-    mutationFn: () => issueUploadLink(appointmentId),
+    mutationFn: () => issueUploadLink(target, targetId),
     onSuccess: () => {
       toast.success(t.toast.issued);
       invalidate();
@@ -145,8 +151,8 @@ export function PatientUploadsPanel({
   }
 
   // These routes are `admin` only (uploads.controller.ts), so an editor with
-  // an appointment open gets a 403 here. Reading that as "no link yet" offered
-  // her a button that could only 403 again.
+  // an appointment or an order open gets a 403 here. Reading that as "no link
+  // yet" offered her a button that could only 403 again.
   if (isError) {
     const forbidden = error instanceof ApiError && error.status === 403;
     return forbidden ? (

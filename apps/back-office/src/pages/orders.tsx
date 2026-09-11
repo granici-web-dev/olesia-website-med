@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   ChevronRight,
   PackageOpen,
+  Plus,
   RefreshCw,
   Search,
   SearchX,
@@ -26,11 +27,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { TablePagination } from '@/components/common/table-pagination';
 import { usePagedRows } from '@/hooks/use-paged';
+import { useAuth } from '@/auth/auth-context';
 import { ro } from '@/i18n/ro';
 
 import { OrderStatusBadge } from '@/features/orders/status-badges';
 import { OrderPaymentCell } from '@/features/orders/payment-cell';
 import { OrderDetailSheet } from '@/features/orders/order-detail-sheet';
+import { OrderFormSheet } from '@/features/orders/order-form-sheet';
 import {
   fetchOrders,
   formatDateTime,
@@ -69,10 +72,12 @@ export function OrdersPage() {
     queryFn: fetchOrders,
   });
 
+  const { hasRole } = useAuth();
   const [status, setStatus] = React.useState<OrderStatusFilter>('all');
   const [search, setSearch] = React.useState('');
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [formOpen, setFormOpen] = React.useState(false);
 
   const orders = React.useMemo(() => data ?? [], [data]);
 
@@ -101,7 +106,8 @@ export function OrdersPage() {
   }, [scoped]);
 
   const visible = React.useMemo(
-    () => (status === 'all' ? scoped : scoped.filter((o) => o.status === status)),
+    () =>
+      status === 'all' ? scoped : scoped.filter((o) => o.status === status),
     [scoped, status],
   );
 
@@ -128,15 +134,25 @@ export function OrdersPage() {
         title={t.title}
         subtitle={t.subtitle}
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw className={cn(isFetching && 'animate-spin')} />
-            {t.refresh}
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCw className={cn(isFetching && 'animate-spin')} />
+              {t.refresh}
+            </Button>
+            {/* Taking an order by phone writes a sale, which is the authority
+                the manual-payment panel needs rather than a content edit. */}
+            {hasRole(['admin']) && (
+              <Button size="sm" onClick={() => setFormOpen(true)}>
+                <Plus />
+                {t.actions.create}
+              </Button>
+            )}
+          </>
         }
       />
 
@@ -307,6 +323,8 @@ export function OrdersPage() {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />
+
+      <OrderFormSheet open={formOpen} onOpenChange={setFormOpen} />
     </div>
   );
 }

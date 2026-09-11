@@ -53,3 +53,13 @@ export async function resetPassword(id: string): Promise<string> {
   );
   return r.password;
 }
+
+/**
+ * Clear somebody else's second factor after they lost the phone and the
+ * recovery codes with it. Refused on oneself (400 `cannot_reset_own_totp`):
+ * with one admin account that path would strip the second factor rather than
+ * recover it, and the way out of that corner is in docs/deployment.md.
+ */
+export async function resetUserTotp(id: string): Promise<void> {
+  await http.post<void>(`/users/${id}/2fa/reset`, {});
+}

@@ -16,10 +16,7 @@ import {
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PatientNotificationsService } from '../mail/patient-notifications.service';
-import {
-  StorageService,
-  type UploadedImage,
-} from '../storage/storage.service';
+import { StorageService, type UploadedImage } from '../storage/storage.service';
 import { UploadLinkTarget } from '../../generated/prisma/enums';
 import {
   UPLOAD_LINK_TTL_DAYS,
@@ -235,6 +232,21 @@ export class UploadsService {
     return links.map((l) => toUploadLinkDto(l, this.publicUrl(l.token)));
   }
 
+  /**
+   * The same listing for a group-C order. It had none, so the back office
+   * could issue an order's link and then had no way to read it back: the
+   * analyses a buyer sent for a menu were in the database and on no screen
+   * (audit A10, F15).
+   */
+  async listForOrder(orderId: string): Promise<UploadLinkDto[]> {
+    const links = await this.prisma.uploadLink.findMany({
+      where: { orderId },
+      include: { documents: { orderBy: { uploadedAt: 'desc' } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    return links.map((l) => toUploadLinkDto(l, this.publicUrl(l.token)));
+  }
+
   /** Stop a link working, without touching what was already sent. */
   async revoke(linkId: string): Promise<UploadLinkDto> {
     const existing = await this.prisma.uploadLink.findUnique({
@@ -401,7 +413,11 @@ export class UploadsService {
   private async purgeDeadLinks(now: Date): Promise<void> {
     const candidates = await this.prisma.uploadLink.findMany({
       where: { expiresAt: { lt: retentionCutoff(now) } },
-      select: { id: true, expiresAt: true, _count: { select: { documents: true } } },
+      select: {
+        id: true,
+        expiresAt: true,
+        _count: { select: { documents: true } },
+      },
     });
     const purgeable = candidates.filter((link) =>
       isPurgeableLink(
@@ -499,4 +515,3 @@ function reissue(revokedAt: Date | null): { revokedAt: null; token?: string } {
     ? { revokedAt: null, token: newToken() }
     : { revokedAt: null };
 }
-

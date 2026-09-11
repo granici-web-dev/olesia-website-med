@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, LogOut, Settings, UserRound } from 'lucide-react';
+import { ChevronDown, LogOut, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -71,11 +71,9 @@ export function UserMenu() {
           </Badge>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
-          <UserRound />
-          {ro.userMenu.profile}
-        </DropdownMenuItem>
-        <DropdownMenuItem disabled>
+        {/* "Profilul meu" went with it: there is no profile page, and the
+            account's own settings are the security page (audit A10, F14). */}
+        <DropdownMenuItem onSelect={() => navigate(paths.security)}>
           <Settings />
           {ro.userMenu.settings}
         </DropdownMenuItem>

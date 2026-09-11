@@ -2,7 +2,7 @@ import type { DeliverableOrderDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
 import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
-import type { Order, OrderStatus } from '@/features/orders/types';
+import type { NewOrder, Order, OrderStatus } from '@/features/orders/types';
 
 /**
  * Real `deliverable-orders` endpoints. Rows are created by the public checkout
@@ -33,6 +33,20 @@ function toStatus(status: string): Order['status'] {
   return KNOWN_STATUSES.includes(status as Order['status'])
     ? (status as Order['status'])
     : 'new';
+}
+
+/**
+ * An order the doctor took herself, by phone or in a message.
+ *
+ * Only the product code goes over the wire: the title and the price are read
+ * from the catalog server-side, so a hand-written order records the same price
+ * as one bought on the site. It starts `new` and unpaid, and the money is
+ * recorded afterwards through the manual-payment panel.
+ */
+export async function createOrder(input: NewOrder): Promise<Order> {
+  return toView(
+    await http.post<DeliverableOrderDto>('/deliverable-orders', input),
+  );
 }
 
 function toView(d: DeliverableOrderDto): Order {

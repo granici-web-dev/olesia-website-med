@@ -162,14 +162,15 @@ export function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="password">{ro.login.passwordLabel}</Label>
-                <button
-                  type="button"
-                  className="text-xs font-medium text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:underline"
-                >
+                {/* Not a link: there is no self-service reset, and a button
+                    that did nothing was worse than the sentence that says so
+                    (audit A10, F14). Registration is closed and an admin
+                    issues the new password. */}
+                <span className="text-xs text-muted-foreground">
                   {ro.login.forgot}
-                </button>
+                </span>
               </div>
               <Input
                 id="password"

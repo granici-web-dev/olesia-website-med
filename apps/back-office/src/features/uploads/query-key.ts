@@ -1,3 +1,5 @@
-/** Query key for the upload links attached to one appointment. */
-export const uploadLinksQueryKey = (appointmentId: string) =>
-  ['upload-links', 'appointment', appointmentId] as const;
+import type { UploadTarget } from '@/features/uploads/types';
+
+/** Query key for the upload links attached to one appointment or order. */
+export const uploadLinksQueryKey = (target: UploadTarget, id: string) =>
+  ['upload-links', target, id] as const;

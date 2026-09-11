@@ -46,7 +46,12 @@ export const navGroups: NavGroup[] = [
   {
     label: ro.nav.sectionMain,
     items: [
-      { to: paths.dashboard, label: ro.nav.dashboard, icon: LayoutDashboard, end: true },
+      {
+        to: paths.dashboard,
+        label: ro.nav.dashboard,
+        icon: LayoutDashboard,
+        end: true,
+      },
       {
         to: paths.appointments,
         label: ro.nav.appointments,
@@ -54,7 +59,11 @@ export const navGroups: NavGroup[] = [
         roles: ['admin'],
       },
       { to: paths.subscriptions, label: ro.nav.subscriptions, icon: Repeat2 },
-      { to: paths.quickQuestions, label: ro.nav.quickQuestions, icon: MessagesSquare },
+      {
+        to: paths.quickQuestions,
+        label: ro.nav.quickQuestions,
+        icon: MessagesSquare,
+      },
       { to: paths.orders, label: ro.nav.orders, icon: PackageOpen },
       { to: paths.payments, label: ro.nav.payments, icon: CreditCard },
       { to: paths.messages, label: ro.nav.messages, icon: Mail },
@@ -78,7 +87,12 @@ export const navGroups: NavGroup[] = [
   {
     label: ro.nav.sectionAdmin,
     items: [
-      { to: paths.patients, label: ro.nav.patients, icon: Stethoscope },
+      {
+        to: paths.patients,
+        label: ro.nav.patients,
+        icon: Stethoscope,
+        roles: ['admin'],
+      },
       { to: paths.workingHours, label: ro.nav.workingHours, icon: Clock },
       { to: paths.users, label: ro.nav.users, icon: Users, roles: ['admin'] },
       { to: paths.security, label: ro.nav.security, icon: ShieldCheck },

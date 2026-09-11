@@ -101,3 +101,25 @@ export async function uploadPlan(args: {
 export function downloadPlanFile(id: string, fileName: string): Promise<void> {
   return http.download(`/appointments/${id}/plan/file`, fileName || 'plan');
 }
+
+/** What one manual reconciliation pass against Calendly found (§8.5). */
+export interface CalendlySyncResult {
+  configured: boolean;
+  /** A page of the Calendly listing failed, so this pass saw less than it asked for. */
+  partial: boolean;
+  scanned: number;
+  created: number;
+  updated: number;
+  canceled: number;
+  skipped: number;
+}
+
+/**
+ * Reconcile against Calendly now, rather than waiting for the half-hourly
+ * pass. This is what the doctor reaches for when a booking she can see in
+ * Calendly is not in the panel: a lost webhook delivery is exactly the case
+ * the backup sync exists for, and until now there was no way to ask for one.
+ */
+export function syncWithCalendly(): Promise<CalendlySyncResult> {
+  return http.post<CalendlySyncResult>('/appointments/sync', {});
+}

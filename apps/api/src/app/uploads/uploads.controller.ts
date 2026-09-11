@@ -123,6 +123,11 @@ export class UploadLinksController {
     return this.uploads.listForAppointment(appointmentId);
   }
 
+  @Get('order/:orderId')
+  listForOrder(@Param('orderId') orderId: string) {
+    return this.uploads.listForOrder(orderId);
+  }
+
   /** Returns `{ sent: false }` when SMTP is not configured — see the service. */
   @Post(':id/send')
   send(@Param('id') id: string) {

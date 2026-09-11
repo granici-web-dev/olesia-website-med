@@ -131,8 +131,7 @@ export function AppointmentDetailSheet({
   const busy = noShowMutation.isPending || planMutation.isPending;
 
   const a = appointment;
-  const canEditPlan =
-    !!a && a.status !== 'canceled' && a.status !== 'no_show';
+  const canEditPlan = !!a && a.status !== 'canceled' && a.status !== 'no_show';
 
   const startEditPlan = () => {
     setPlanDraft(a?.planText ?? '');
@@ -226,7 +225,9 @@ export function AppointmentDetailSheet({
 
               <SectionTitle>{t.detail.appointment}</SectionTitle>
               <dl className="mt-1 divide-y">
-                <Field label={t.detail.when}>{formatDateTime(a.startTime)}</Field>
+                <Field label={t.detail.when}>
+                  {formatDateTime(a.startTime)}
+                </Field>
                 <Field label={t.detail.duration}>
                   {durationMinutes(a.startTime, a.endTime)} min
                 </Field>
@@ -278,7 +279,7 @@ export function AppointmentDetailSheet({
                   from, so they belong before it in reading order. */}
               <SectionTitle>{ro.patientUploads.title}</SectionTitle>
               <div className="mt-2">
-                <PatientUploadsPanel appointmentId={a.id} />
+                <PatientUploadsPanel target="appointment" targetId={a.id} />
               </div>
 
               <Separator className="my-4" />

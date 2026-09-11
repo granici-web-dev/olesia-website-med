@@ -3,13 +3,17 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { navGroups } from '@/config/nav';
 import { useAuth } from '@/auth/auth-context';
+import { ro } from '@/i18n/ro';
 
 /** Navigation list shared by the desktop rail and the mobile sheet. */
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const { hasRole } = useAuth();
 
   return (
-    <nav className="flex flex-col gap-6 px-3 py-4" aria-label="Navigare principală">
+    <nav
+      className="flex flex-col gap-6 px-3 py-4"
+      aria-label={ro.sidebar.mainNav}
+    >
       {navGroups.map((group) => {
         const items = group.items.filter((item) => hasRole(item.roles));
         if (items.length === 0) return null;

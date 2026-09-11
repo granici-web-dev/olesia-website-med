@@ -47,5 +47,18 @@ export interface Order {
   createdAt: string; // ISO
 }
 
+/**
+ * What the doctor fills in for an order she took herself. No price and no
+ * title: those come from the catalog, on the server.
+ */
+export interface NewOrder {
+  product: OrderProduct;
+  clientName: string;
+  clientEmail: string;
+  phone?: string;
+  notes?: string;
+  locale?: 'ro' | 'en' | 'ru';
+}
+
 /** Tab filter over the workflow status. */
 export type OrderStatusFilter = 'all' | OrderStatus;

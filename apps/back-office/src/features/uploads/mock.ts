@@ -1,4 +1,4 @@
-import type { UploadLink } from '@/features/uploads/types';
+import type { UploadLink, UploadTarget } from '@/features/uploads/types';
 
 /* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`.
    Invented people, as everywhere in the mocks. */
@@ -36,12 +36,14 @@ function clone(l: UploadLink): UploadLink {
 }
 
 export async function fetchUploadLinks(
-  appointmentId: string,
+  _target: UploadTarget,
+  id: string,
 ): Promise<UploadLink[]> {
-  return store.filter((l) => l.appointmentId === appointmentId).map(clone);
+  return store.filter((l) => l.appointmentId === id).map(clone);
 }
 
 export async function issueUploadLink(
+  _target: UploadTarget,
   appointmentId: string,
 ): Promise<UploadLink> {
   const existing = store.find((l) => l.appointmentId === appointmentId);
@@ -81,7 +83,9 @@ export async function revokeUploadLink(id: string): Promise<UploadLink> {
   return clone(link);
 }
 
-export async function deleteUploadedDocument(documentId: string): Promise<void> {
+export async function deleteUploadedDocument(
+  documentId: string,
+): Promise<void> {
   for (const l of store) {
     l.documents = l.documents.filter((d) => d.id !== documentId);
   }

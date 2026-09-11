@@ -32,7 +32,10 @@ import {
 import { useAuth } from '@/auth/auth-context';
 import { ro } from '@/i18n/ro';
 
-import { OrderStatusBadge, PaymentBadge } from '@/features/orders/status-badges';
+import {
+  OrderStatusBadge,
+  PaymentBadge,
+} from '@/features/orders/status-badges';
 import {
   deleteOrder,
   formatDateTime,
@@ -40,6 +43,7 @@ import {
   setOrderStatus,
 } from '@/features/orders/data';
 import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
+import { PatientUploadsPanel } from '@/features/uploads/patient-uploads-panel';
 import { ordersQueryKey } from '@/features/orders/query-key';
 import type { Order, OrderStatus } from '@/features/orders/types';
 
@@ -88,7 +92,7 @@ export function OrderDetailSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ordersQueryKey });
 
@@ -187,11 +191,17 @@ export function OrderDetailSheet({
                 <Select
                   value={o.status}
                   onValueChange={(v) =>
-                    statusMutation.mutate({ id: o.id, status: v as OrderStatus })
+                    statusMutation.mutate({
+                      id: o.id,
+                      status: v as OrderStatus,
+                    })
                   }
                   disabled={statusMutation.isPending}
                 >
-                  <SelectTrigger className="w-full" aria-label={t.detail.status}>
+                  <SelectTrigger
+                    className="w-full"
+                    aria-label={t.detail.status}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -219,6 +229,19 @@ export function OrderDetailSheet({
 
               <Separator />
 
+              {/* The documents a menu or a protocol is written from. The API
+                  had the routes for an order's upload link and nothing in the
+                  panel reached them (audit A10, F15). */}
+              <div className="space-y-2">
+                <SectionTitle>{t.detail.uploads}</SectionTitle>
+                <p className="text-sm text-muted-foreground text-pretty">
+                  {t.detail.uploadsHint}
+                </p>
+                <PatientUploadsPanel target="order" targetId={o.id} />
+              </div>
+
+              <Separator />
+
               <div className="space-y-2">
                 <SectionTitle>{t.detail.deliver}</SectionTitle>
                 <p className="text-sm text-muted-foreground text-pretty">
@@ -233,12 +256,17 @@ export function OrderDetailSheet({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 border-t px-6 py-4">
-              <DeleteOrder
-                pending={deleteMutation.isPending}
-                onConfirm={() => deleteMutation.mutate(o.id)}
-              />
-            </div>
+            {/* Deleting is admin-only in the API; rendering the button for
+                an editor only produced a 403 after the confirmation dialog
+                had already said the order was about to go (audit A10, F8). */}
+            {hasRole(['admin']) && (
+              <div className="flex flex-col gap-2 border-t px-6 py-4">
+                <DeleteOrder
+                  pending={deleteMutation.isPending}
+                  onConfirm={() => deleteMutation.mutate(o.id)}
+                />
+              </div>
+            )}
           </>
         )}
       </SheetContent>
@@ -268,7 +296,9 @@ function DeleteOrder({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t.confirm.deleteTitle}</AlertDialogTitle>
-          <AlertDialogDescription>{t.confirm.deleteBody}</AlertDialogDescription>
+          <AlertDialogDescription>
+            {t.confirm.deleteBody}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>

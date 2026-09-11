@@ -49,16 +49,29 @@ export function App() {
             }
           />
           <Route path={paths.subscriptions} element={<SubscriptionsPage />} />
-          <Route
-            path={paths.quickQuestions}
-            element={<QuickQuestionsPage />}
-          />
+          <Route path={paths.quickQuestions} element={<QuickQuestionsPage />} />
           <Route path={paths.orders} element={<OrdersPage />} />
           <Route path={paths.payments} element={<PaymentsPage />} />
           <Route path={paths.messages} element={<MessagesPage />} />
           <Route path={paths.subscribers} element={<SubscribersPage />} />
-          <Route path={paths.patients} element={<PatientsPage />} />
-          <Route path="/pacienti/:id" element={<PatientDetailPage />} />
+          {/* The patients API is admin-only, so the panel says so instead of
+              letting an editor open a screen that answers 403 (audit A10, F5). */}
+          <Route
+            path={paths.patients}
+            element={
+              <RequireRole roles={['admin']}>
+                <PatientsPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/pacienti/:id"
+            element={
+              <RequireRole roles={['admin']}>
+                <PatientDetailPage />
+              </RequireRole>
+            }
+          />
           <Route path={paths.blog} element={<BlogPage />} />
           <Route path={paths.blogNew} element={<BlogEditorPage />} />
           <Route path="/blog/:id" element={<BlogEditorPage />} />

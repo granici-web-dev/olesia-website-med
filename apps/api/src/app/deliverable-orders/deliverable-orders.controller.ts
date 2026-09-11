@@ -6,6 +6,7 @@ import {
   HttpCode,
   Param,
   Patch,
+  Post,
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -15,6 +16,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/jwt.types';
 import { Role } from '../../generated/prisma/enums';
 import { DeliverableOrdersService } from './deliverable-orders.service';
+import { CreateDeliverableOrderDto } from './dto/create-deliverable-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders-query.dto';
 import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
 
@@ -34,6 +36,17 @@ export class DeliverableOrdersController {
   @Get()
   findAll(@Query() query: ListOrdersQueryDto) {
     return this.orders.findAll(query);
+  }
+
+  /**
+   * An order taken by phone. Admin only: this writes a sale, and the money
+   * behind it is recorded by hand afterwards, so it is the same authority the
+   * manual-payment panel needs rather than a content edit.
+   */
+  @Roles(Role.admin)
+  @Post()
+  create(@Body() dto: CreateDeliverableOrderDto) {
+    return this.orders.create(dto);
   }
 
   @Patch(':id')

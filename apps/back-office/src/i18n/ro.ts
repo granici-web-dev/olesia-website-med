@@ -49,14 +49,16 @@ export const ro = {
   },
 
   header: {
-    search: 'Caută…',
     openMenu: 'Deschide meniul',
-    notifications: 'Notificări',
+  },
+
+  sidebar: {
+    mainNav: 'Navigare principală',
+    home: 'Acasă',
   },
 
   userMenu: {
     account: 'Cont',
-    profile: 'Profilul meu',
     settings: 'Setări',
     logout: 'Deconectare',
     logoutFailed:
@@ -125,7 +127,7 @@ export const ro = {
     passwordPlaceholder: '••••••••',
     submit: 'Intră în cont',
     submitting: 'Se autentifică…',
-    forgot: 'Ai uitat parola?',
+    forgot: 'Parola se resetează de administrator.',
     errorInvalid: 'Email sau parolă incorecte.',
     errorGeneric: 'Autentificarea a eșuat. Încearcă din nou.',
     success: 'Bine ai revenit!',
@@ -323,6 +325,20 @@ export const ro = {
 
     actions: {
       markNoShow: 'Marchează neprezentare',
+      sync: 'Sincronizează cu Calendly',
+      syncing: 'Se sincronizează…',
+    },
+
+    /** What one manual reconciliation pass found (module_calendly.md §8.5). */
+    sync: {
+      result: (created: number, updated: number, canceled: number) =>
+        `Sincronizare încheiată: ${created} adăugate, ${updated} actualizate, ${canceled} anulate.`,
+      nothing: 'Sincronizare încheiată: nimic nou.',
+      partial:
+        'Calendly a răspuns doar parțial, așa că pasul acesta a văzut mai puțin decât a cerut. Reîncearcă în câteva minute.',
+      notConfigured:
+        'Contul Calendly nu este conectat, așa că nu există de unde sincroniza.',
+      failed: 'Sincronizarea a eșuat. Încearcă din nou.',
     },
 
     plan: {
@@ -1343,7 +1359,7 @@ export const ro = {
 
     empty: {
       title: 'Nicio comandă',
-      body: 'Comenzile pentru meniuri personalizate și protocoale apar aici după ce clientul achită pe site.',
+      body: 'Comenzile pentru meniuri personalizate și protocoale apar aici după ce clientul achită pe site sau după ce le înregistrezi tu.',
       filteredTitle: 'Niciun rezultat',
       filteredBody: 'Nicio comandă nu corespunde filtrelor selectate.',
       unpaidTitle: 'Nicio comandă neachitată',
@@ -1362,11 +1378,36 @@ export const ro = {
       deliver: 'Livrare',
       deliverHint:
         'Trimiterea fișierelor din portal se activează după configurarea email-ului. Până atunci, poți trimite rezultatul din contul tău de email.',
+      uploads: 'Documente de la client',
+      uploadsHint:
+        'Linkul prin care clientul încarcă analize, rețete sau alte documente necesare pentru meniu sau protocol.',
     },
 
     actions: {
+      create: 'Comandă nouă',
       sendByEmail: 'Trimite prin email',
       delete: 'Șterge comanda',
+    },
+
+    form: {
+      title: 'Comandă nouă',
+      subtitle:
+        'Pentru comenzile primite la telefon sau în mesaje. Prețul este cel din catalog; plata se înregistrează separat, din comandă.',
+      product: 'Produs',
+      productPlaceholder: 'Alege produsul',
+      clientName: 'Nume client',
+      clientEmail: 'Email client',
+      phone: 'Telefon',
+      phoneHint: 'Opțional.',
+      notes: 'Detalii de la client',
+      notesHint:
+        'Alergii, obiceiuri alimentare, vârsta copilului: tot ce ai notat în timpul convorbirii.',
+      required: 'Câmp obligatoriu',
+      invalidEmail: 'Adresă de email invalidă.',
+      save: 'Înregistrează comanda',
+      saving: 'Se salvează…',
+      paymentHint:
+        'Comanda intră direct în lista de lucru, ca neachitată. Achitarea se înregistrează din comandă, la „Plata”.',
     },
 
     confirm: {
@@ -1378,7 +1419,9 @@ export const ro = {
 
     toast: {
       statusSaved: 'Statusul comenzii a fost actualizat.',
+      created: 'Comanda a fost înregistrată.',
       deleted: 'Comanda a fost ștearsă.',
+      unknownProduct: 'Produsul nu mai există în catalog.',
       error: 'Nu am putut salva modificarea. Încearcă din nou.',
     },
   },
@@ -1561,6 +1604,7 @@ export const ro = {
       menu: 'Acțiuni',
       edit: 'Editează',
       resetPassword: 'Resetează parola',
+      resetTotp: 'Resetează autentificarea în doi pași',
       block: 'Blochează',
       unblock: 'Deblochează',
     },
@@ -1570,6 +1614,10 @@ export const ro = {
       blockBody:
         'Utilizatorul nu se va mai putea autentifica până la deblocare.',
       blockCta: 'Blochează',
+      resetTotpTitle: 'Resetezi autentificarea în doi pași?',
+      resetTotpBody:
+        'Contul se va autentifica doar cu parola, până când își configurează din nou aplicația. Fă-o doar dacă ești sigură cine ți-a cerut-o: este singura cale de intrare când telefonul și codurile de recuperare s-au pierdut deodată.',
+      resetTotpCta: 'Resetează',
     },
 
     form: {
@@ -1605,6 +1653,10 @@ export const ro = {
       cannotDeactivateSelf:
         'Nu îți poți bloca propriul cont. Cere-i altui administrator să o facă.',
       passwordReset: 'Parolă nouă generată — comunic-o utilizatorului.',
+      totpReset:
+        'Autentificarea în doi pași a fost resetată. Utilizatorul o poate configura din nou din pagina „Securitate”.',
+      cannotResetOwnTotp:
+        'Nu îți poți reseta singură al doilea factor. Dacă ai pierdut telefonul și codurile, calea de ieșire este în docs/deployment.md.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
   },
@@ -2064,6 +2116,7 @@ export const ro = {
       fileTooLarge: 'Fișierul depășește 20 MB.',
       fileType: 'Sunt acceptate doar fișiere PDF, DOC sau DOCX.',
       categoryCreated: 'Categoria a fost adăugată.',
+      categoryRenamed: 'Categoria a fost redenumită.',
       // Unused: the library's categories can be created and deleted, not
       // renamed, although the API's PATCH route is there. The button is
       // `PLAN.md` 13d; this string is what it will say.
@@ -2131,6 +2184,9 @@ export const ro = {
       nameRu: 'Nume (RU)',
       add: 'Adaugă categoria',
       adding: 'Se adaugă…',
+      rename: 'Redenumește',
+      renameSave: 'Salvează numele',
+      renameCancel: 'Renunță',
       count: (n: number) =>
         n === 1 ? 'un material' : `${n} materiale`,
       empty: 'Nicio categorie încă.',

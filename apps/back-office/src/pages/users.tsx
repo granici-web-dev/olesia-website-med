@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Search,
   SearchX,
+  ShieldOff,
   Users as UsersIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -64,6 +65,7 @@ import {
   formatDate,
   initials,
 } from '@/features/users/data';
+import { resetUserTotp } from '@/features/users/api';
 import { usersQueryKey } from '@/features/users/query-key';
 import type { User, RoleFilter } from '@/features/users/types';
 
@@ -84,14 +86,14 @@ export function UsersPage() {
   const [formOpen, setFormOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<User | null>(null);
   const [blocking, setBlocking] = React.useState<User | null>(null);
+  const [resettingTotp, setResettingTotp] = React.useState<User | null>(null);
 
   const scoped = React.useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
     return users.filter(
       (u) =>
-        u.name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q),
+        u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
     );
   }, [users, search]);
 
@@ -147,6 +149,26 @@ export function UsersPage() {
       toast.success(t.toast.passwordReset, { description: password });
     },
     onError: () => toast.error(t.toast.error),
+  });
+
+  // The only way back in for somebody who lost the phone and the recovery
+  // codes together. The route existed; nothing in the panel called it
+  // (audit A10, F15).
+  const totpMutation = useMutation({
+    mutationFn: (id: string) => resetUserTotp(id),
+    onSuccess: () => {
+      toast.success(t.toast.totpReset);
+      setResettingTotp(null);
+      invalidate();
+    },
+    onError: (err) => {
+      const code = err instanceof ApiError ? err.message : '';
+      toast.error(
+        code === 'cannot_reset_own_totp'
+          ? t.toast.cannotResetOwnTotp
+          : t.toast.error,
+      );
+    },
   });
 
   const openCreate = () => {
@@ -322,6 +344,12 @@ export function UsersPage() {
                           </DropdownMenuItem>
                           {!self && (
                             <>
+                              <DropdownMenuItem
+                                onSelect={() => setResettingTotp(u)}
+                              >
+                                <ShieldOff />
+                                {t.actions.resetTotp}
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               {u.isActive ? (
                                 <DropdownMenuItem
@@ -368,6 +396,42 @@ export function UsersPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
       />
+
+      <AlertDialog
+        open={resettingTotp !== null}
+        onOpenChange={(open) => !open && setResettingTotp(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.confirm.resetTotpTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {resettingTotp && (
+                <>
+                  <span className="font-medium text-foreground">
+                    {resettingTotp.name}
+                  </span>{' '}
+                  — {t.confirm.resetTotpBody}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={totpMutation.isPending}>
+              {ro.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={totpMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (resettingTotp) totpMutation.mutate(resettingTotp.id);
+              }}
+            >
+              {t.confirm.resetTotpCta}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={blocking !== null}

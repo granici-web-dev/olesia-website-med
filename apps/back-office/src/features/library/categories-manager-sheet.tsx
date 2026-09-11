@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Check, Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -30,6 +30,7 @@ import { ro } from '@/i18n/ro';
 import {
   createMaterialCategory,
   deleteMaterialCategory,
+  updateMaterialCategory,
 } from '@/features/library/data';
 import {
   materialCategoriesQueryKey,
@@ -40,10 +41,22 @@ import type { MaterialCategory } from '@/features/library/types';
 const t = ro.library;
 const f = t.categoryForm;
 
+/** The three names of one category, while it is being edited. */
+interface CategoryNames {
+  nameRo: string;
+  nameEn: string;
+  nameRu: string;
+}
+
 /**
  * Manage the library's categories. Deletion is refused server-side while
  * materials still point at a category, so nothing disappears silently — the
  * count next to each name is there to make that obvious before the click.
+ *
+ * Renaming is here too. `PATCH /materials/categories/:id` existed and nothing
+ * called it, so a typo in a category name could only be fixed by deleting the
+ * category — which is refused while any material sits under it (audit A10,
+ * F15). The slug stays as it was, so links already sent keep working.
  */
 export function MaterialCategoriesSheet({
   categories,
@@ -61,6 +74,21 @@ export function MaterialCategoriesSheet({
   const [nameEn, setNameEn] = React.useState('');
   const [nameRu, setNameRu] = React.useState('');
   const [deleting, setDeleting] = React.useState<MaterialCategory | null>(null);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editNames, setEditNames] = React.useState<CategoryNames>({
+    nameRo: '',
+    nameEn: '',
+    nameRu: '',
+  });
+
+  const startRename = (c: MaterialCategory) => {
+    setEditingId(c.id);
+    setEditNames({
+      nameRo: c.nameRo,
+      nameEn: c.nameEn,
+      nameRu: c.nameRu ?? '',
+    });
+  };
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: materialCategoriesQueryKey });
@@ -79,6 +107,21 @@ export function MaterialCategoriesSheet({
       setNameRo('');
       setNameEn('');
       setNameRu('');
+      invalidate();
+    },
+    onError: () => toast.error(t.toast.error),
+  });
+
+  const renameMutation = useMutation({
+    mutationFn: (id: string) =>
+      updateMaterialCategory(id, {
+        nameRo: editNames.nameRo.trim(),
+        nameEn: editNames.nameEn.trim(),
+        nameRu: editNames.nameRu.trim() || null,
+      }),
+    onSuccess: () => {
+      toast.success(t.toast.categoryRenamed);
+      setEditingId(null);
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -122,6 +165,76 @@ export function MaterialCategoriesSheet({
             <ul className="divide-y rounded-lg border">
               {categories.map((c) => {
                 const count = countByCategory[c.id] ?? 0;
+                const renaming = editingId === c.id;
+                const saving =
+                  renameMutation.isPending && renameMutation.variables === c.id;
+
+                if (renaming) {
+                  return (
+                    <li key={c.id} className="space-y-2 px-3 py-2.5">
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        <Input
+                          value={editNames.nameRo}
+                          aria-label={f.nameRo}
+                          onChange={(e) =>
+                            setEditNames((n) => ({
+                              ...n,
+                              nameRo: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          value={editNames.nameEn}
+                          aria-label={f.nameEn}
+                          onChange={(e) =>
+                            setEditNames((n) => ({
+                              ...n,
+                              nameEn: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          value={editNames.nameRu}
+                          aria-label={f.nameRu}
+                          onChange={(e) =>
+                            setEditNames((n) => ({
+                              ...n,
+                              nameRu: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          disabled={
+                            saving ||
+                            editNames.nameRo.trim().length === 0 ||
+                            editNames.nameEn.trim().length === 0
+                          }
+                          onClick={() => renameMutation.mutate(c.id)}
+                        >
+                          {saving ? (
+                            <Loader2 className="animate-spin" />
+                          ) : (
+                            <Check />
+                          )}
+                          {f.renameSave}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={saving}
+                          onClick={() => setEditingId(null)}
+                        >
+                          <X />
+                          {f.renameCancel}
+                        </Button>
+                      </div>
+                    </li>
+                  );
+                }
+
                 return (
                   <li
                     key={c.id}
@@ -133,6 +246,16 @@ export function MaterialCategoriesSheet({
                         {f.count(count)}
                       </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 shrink-0 text-muted-foreground"
+                      aria-label={f.rename}
+                      disabled={renameMutation.isPending}
+                      onClick={() => startRename(c)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"

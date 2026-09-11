@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { DashboardStatsDto } from '@olesia/shared';
+import type { DashboardStatsDto, DashboardUpcomingItem } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -17,7 +17,10 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Aggregate back-office metrics for a period (module_calendly.md §11). */
-  async getStats(query: DashboardQueryDto): Promise<DashboardStatsDto> {
+  async getStats(
+    query: DashboardQueryDto,
+    options: { withUpcoming: boolean },
+  ): Promise<DashboardStatsDto> {
     const to = query.to ? new Date(query.to) : new Date();
     const from = query.from
       ? new Date(query.from)
@@ -107,14 +110,16 @@ export class DashboardService {
         },
         select: { answeredAt: true, dueAt: true },
       }),
-      this.prisma.appointment.findMany({
-        where: {
-          status: AppointmentStatus.scheduled,
-          startTime: { gte: new Date() },
-        },
-        orderBy: { startTime: 'asc' },
-        take: 5,
-      }),
+      options.withUpcoming
+        ? this.prisma.appointment.findMany({
+            where: {
+              status: AppointmentStatus.scheduled,
+              startTime: { gte: new Date() },
+            },
+            orderBy: { startTime: 'asc' },
+            take: 5,
+          })
+        : null,
     ]);
 
     const svcMap = new Map(services.map((s) => [s.id, s]));
@@ -160,15 +165,15 @@ export class DashboardService {
         total: qqTotal,
         slaRate: answered.length > 0 ? answeredInSla / answered.length : 0,
       },
-      upcoming: upcomingRaw.map((a) => ({
+      upcoming: upcomingRaw?.map((a) => ({
         id: a.id,
         clientName: a.clientName,
         serviceCode: (svcMap.get(a.serviceId)?.code ??
-          'pediatric') as DashboardStatsDto['upcoming'][number]['serviceCode'],
+          'pediatric') as DashboardUpcomingItem['serviceCode'],
         startTime: a.startTime.toISOString(),
-        status: a.status as DashboardStatsDto['upcoming'][number]['status'],
+        status: a.status as DashboardUpcomingItem['status'],
         paymentStatus:
-          a.paymentStatus as DashboardStatsDto['upcoming'][number]['paymentStatus'],
+          a.paymentStatus as DashboardUpcomingItem['paymentStatus'],
       })),
     };
   }
