@@ -581,7 +581,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
-| A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[>]` architect + shape 2026-09-11, craft в работе |
+| A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[>]` 12a и 12b закрыты `1f31ba6`…`e345c72`; 12c следующий |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
 | A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[ ]` |
@@ -972,7 +972,7 @@ working-hours, subscriptions, about, faq, deliverable-orders). Тесты на
 через `/payment-status`, который сам спрашивает банк, так что сценарий проходим
 целиком.
 
-**12a** `[ ]` `/rigorous shape`: пре-чекаут (сводка, чекбокс условий, уведомление
+**12a** `[x]` `/rigorous shape`: пре-чекаут (сводка, чекбокс условий, уведомление
 о конвертации EUR на карте в MDL, данные плательщика, `POST /payments/start` с
 капчей и троттлом), страницы `/[locale]/payment/success` и `/failed` с опросом
 статуса, EXPRESS как первый платный сценарий: сначала оплата, потом форма вопроса
@@ -1006,9 +1006,29 @@ production, в production всегда EUR из каталога. Находки
 условный `updateMany` по `status: awaiting_payment`, повторный callback не
 откроет отвеченный тикет; guard-ы §18 внутри `start()`.
 
-**12b** `[ ]` `/rigorous craft` и живой прогон: API на туннеле, сайт локально,
+**12b** `[x]` `/rigorous craft` и живой прогон: API на туннеле, сайт локально,
 sandbox-карта, полный путь EXPRESS → банк → возврат → статус `paid` в бэк-офисе,
 рефанд из бэк-офиса, повторный заход на страницу возврата с чужим `orderId`.
+
+12a и 12b закрыты 2026-09-11: `c8c9d26` shape, `1f31ba6` API и shared (пять
+миграций: `awaiting_payment`, `dueAt` nullable, `intentKey`,
+`confirmationSentAt`, `checkoutUrl`), `9f30f5b` сайт (страница чекаута,
+`/payment/success` и `/failed` с опросом статуса, юрлицо из API), `d7fcaa4`
+бэк-офис (вкладка «Neachitate», чек с «netrimisă · copiază»), `e345c72` два
+бага живого прогона: рефанд не опускал зеркало тикета обратно в `pending`, и
+страница возврата падала в браузере из-за транзитивного импорта серверного
+`lib/api` ровно в момент, когда деньги уже списаны. 392 теста. Живой прогон
+через туннель против sandbox в MDL: полный путь с сайта до банка и обратно,
+тикет невидим до оплаты и виден после, `dueAt` от оплаты по реальному графику,
+повтор с тем же `intentKey` возвращает ту же сессию, чужой `orderId` даёт 404,
+purge удаляет неоплаченные старше семи дней, чек без SMTP честно «netrimisă».
+Callback банка по-прежнему не доставлялся ни разу, статус приходит опросом.
+
+Мелкие решения после прогона: повтор с тем же `intentKey` должен обновлять
+текст вопроса, а не хранить первую версию; `dueAt` считать от `paidAt` банка,
+а не от момента, когда мы узнали (callback может опоздать на часы); заголовок
+таблицы тикетов «Termen (48 h)» заменить на SLA из настроек. Юрлицо отдаётся
+через `/contacts/legal-entity`, не полем массива.
 
 **12c** `[ ]` Deliverables и платные материалы тем же чекаутом; для материалов
 файл переезжает в приватное хранилище и отдаётся по ссылке из письма после
