@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocale } from 'next-intl';
 import * as CC from 'vanilla-cookieconsent';
 import 'vanilla-cookieconsent/dist/cookieconsent.css';
@@ -166,6 +166,11 @@ const broadcast = () => {
 export function CookieConsent() {
   const locale = useLocale();
   const lang: Lang = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'ro';
+  // The banner is configured once per document. `lang` is read at mount and
+  // kept in step by `setLanguage` below; re-running `run()` on every locale
+  // change re-registered the whole plugin and could re-show the banner to
+  // somebody who had already answered it (audit A6, F19).
+  const initialLang = useRef(lang);
 
   useEffect(() => {
     void CC.run({
@@ -181,12 +186,12 @@ export function CookieConsent() {
         analytics: {},
         marketing: {},
       },
-      language: { default: lang, translations: TRANSLATIONS },
+      language: { default: initialLang.current, translations: TRANSLATIONS },
       onFirstConsent: broadcast,
       onConsent: broadcast,
       onChange: broadcast,
-    });
-  }, [lang]);
+    }).then(broadcast);
+  }, []);
 
   // Keep the banner's language in step with the site's language switcher.
   useEffect(() => {

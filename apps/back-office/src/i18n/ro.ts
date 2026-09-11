@@ -32,6 +32,7 @@ export const ro = {
     orders: 'Comenzi',
     payments: 'Plăți',
     messages: 'Mesaje',
+    subscribers: 'Abonați',
     patients: 'Pacienți',
     blog: 'Blog',
     services: 'Servicii',
@@ -1690,6 +1691,53 @@ export const ro = {
       save: 'Salvează',
       saving: 'Se salvează…',
     },
+  },
+
+  subscribers: {
+    title: 'Abonați',
+    subtitle:
+      'Adresele lăsate pe site — la descărcarea unui material sau în subsolul paginii.',
+    refresh: 'Reîmprospătează',
+    note: 'Deocamdată nu se trimite niciun email: lista se adună până când există un server de email. Materialele se descarcă direct de pe site.',
+
+    columns: {
+      email: 'Adresă',
+      source: 'De unde',
+      language: 'Limbă',
+      consent: 'Acord dat la',
+      status: 'Stare',
+    },
+
+    source: {
+      library: 'Bibliotecă',
+      footer: 'Subsol',
+    },
+
+    language: {
+      ro: 'Română',
+      en: 'Engleză',
+      ru: 'Rusă',
+    },
+
+    status: {
+      active: 'Abonat',
+      unsubscribed: 'Dezabonat',
+    },
+
+    filters: {
+      searchPlaceholder: 'Caută după adresă…',
+      reset: 'Șterge căutarea',
+    },
+
+    empty: {
+      title: 'Niciun abonat deocamdată',
+      body: 'Adresele apar aici după ce cineva descarcă un material din bibliotecă sau se abonează din subsolul site-ului.',
+      filteredTitle: 'Nicio adresă găsită',
+      filteredBody: 'Încearcă alt termen de căutare.',
+    },
+
+    count: (n: number) =>
+      n === 1 ? '1 abonat' : n < 20 ? `${n} abonați` : `${n} de abonați`,
   },
 
   testimonials: {

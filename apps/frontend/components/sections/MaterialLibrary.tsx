@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { cardCta } from '@/components/ui/cta';
 import { track } from '@/lib/analytics';
 import { subscribe } from '@/lib/newsletter';
+import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import type { AgeGroup } from '@/lib/age-taxonomy';
 import type { MaterialCategoryDto, MaterialDto } from '@/lib/api';
 
@@ -14,10 +15,11 @@ import type { MaterialCategoryDto, MaterialDto } from '@/lib/api';
    search, category + child-age filters, free/paid badges, merchandising flags,
    and the email-gate that collects an address before a free download. Content
    arrives from the back-office `materials` module; this component localizes by
-   `locale`. The email-gate is still UI-only (no newsletter backend — blocked on
-   the client's SMTP provider): it unlocks the download on submit, and
-   persistence/opt-in lands with the newsletter work. Paid materials route to
-   /contact until the payments module exists.
+   `locale`. The email-gate stores the address through `POST /newsletter/
+   subscribe` and only then hands over the file: it used to unlock optimistically
+   and throw the address away, under copy promising the material would arrive by
+   email (audit A6, F3). Nothing is mailed — the download happens here, and the
+   wording says so. Paid materials route to /contact until payments are wired.
    ────────────────────────────────────────────────────────────────────────── */
 
 type Locale = 'ro' | 'en' | 'ru';
@@ -38,13 +40,15 @@ const T: Record<string, Bi> = {
   emptyBody: { ro: 'Încearcă altă categorie, vârstă sau termen de căutare.', en: 'Try another category, age, or search term.', ru: 'Попробуйте другую категорию, возраст или запрос.' },
   reset: { ro: 'Resetează filtrele', en: 'Reset filters', ru: 'Сбросить фильтры' },
   gateTitle: { ro: 'Descarcă gratuit', en: 'Free download', ru: 'Бесплатное скачивание' },
-  gateBody: { ro: 'Lasă-ți adresa de email și primești materialul. Te poți abona și la noutăți.', en: 'Leave your email to get the material. You can also subscribe to updates.', ru: 'Оставьте email, чтобы получить материал. Можно также подписаться на новости.' },
+  gateBody: { ro: 'Lasă-ți adresa și descarcă materialul. Te poți abona și la noutăți.', en: 'Leave your address and download the material. You can also subscribe to updates.', ru: 'Оставьте адрес и скачайте материал. Можно также подписаться на новости.' },
   email: { ro: 'Email', en: 'Email', ru: 'Email' },
   emailPlaceholder: { ro: 'email@exemplu.md', en: 'email@example.com', ru: 'email@example.com' },
-  consent: { ro: 'Sunt de acord să primesc materialul și noutăți pe email.', en: 'I agree to receive the material and updates by email.', ru: 'Согласен(на) получать материал и новости по email.' },
-  getIt: { ro: 'Primește materialul', en: 'Get the material', ru: 'Получить материал' },
+  consent: { ro: 'Sunt de acord să primesc noutăți pe email și ca adresa mea să fie păstrată în acest scop.', en: 'I agree to receive updates by email and to my address being kept for that purpose.', ru: 'Согласен(на) получать новости по email и на хранение моего адреса для этой цели.' },
+  getIt: { ro: 'Descarcă materialul', en: 'Download the material', ru: 'Скачать материал' },
+  sending: { ro: 'Se salvează…', en: 'Saving…', ru: 'Сохранение…' },
   cancel: { ro: 'Anulează', en: 'Cancel', ru: 'Отмена' },
   ready: { ro: 'Gata! Descărcarea ta este pregătită.', en: 'Done! Your download is ready.', ru: 'Готово! Файл готов к скачиванию.' },
+  gateError: { ro: 'Nu am putut salva adresa. Încearcă din nou.', en: 'We could not save your address. Try again.', ru: 'Не удалось сохранить адрес. Попробуйте ещё раз.' },
   flagRecommended: { ro: 'Recomandat', en: 'Recommended', ru: 'Рекомендуем' },
   flagPopular: { ro: 'Popular', en: 'Popular', ru: 'Популярное' },
   flagNew: { ro: 'Nou', en: 'New', ru: 'Новое' },
@@ -340,16 +344,23 @@ export function MaterialLibrary({
       {/* Email gate */}
       {gate && (
         <EmailGate
+          key={gate.slug}
           materialTitle={title(gate)}
+          fileUrl={gate.fileUrl ?? ''}
           lc={lc}
           onClose={() => setGate(null)}
-          onSubmit={(email) => {
-            track('material_download', { slug: gate.slug, category: gate.categorySlug });
-            // Email-gate doubles as a newsletter opt-in (brief §6a); no-ops when
-            // the newsletter isn't configured yet.
-            void subscribe(email, { source: 'library', locale });
+          onSubscribed={async (email) => {
+            // The address is what the material is exchanged for, so the file is
+            // released only once the API has it (audit A6, F3). A failure keeps
+            // the gate open and says so, rather than unlocking on a promise.
+            const result = await subscribe(email, { source: 'library', locale });
+            if (result !== 'ok') return false;
+            track('material_download', {
+              slug: gate.slug,
+              category: gate.categorySlug,
+            });
             unlock(gate.slug);
-            setGate(null);
+            return true;
           }}
         />
       )}
@@ -359,21 +370,34 @@ export function MaterialLibrary({
 
 function EmailGate({
   materialTitle,
+  fileUrl,
   lc,
   onClose,
-  onSubmit,
+  onSubscribed,
 }: {
   /** Localized by the parent, which owns the locale helpers. */
   materialTitle: string;
+  fileUrl: string;
   lc: (b: Bi) => string;
   onClose: () => void;
-  onSubmit: (email: string) => void;
+  /** Stores the address; `false` means it was not stored and nothing unlocks. */
+  onSubscribed: (email: string) => Promise<boolean>;
 }) {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'ready' | 'error'>(
+    'idle',
+  );
   const titleId = useId();
   const emailId = useId();
-  const valid = /\S+@\S+\.\S+/.test(email) && consent;
+  const valid = isEmailLike(email) && consent;
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!valid || status === 'sending') return;
+    setStatus('sending');
+    setStatus((await onSubscribed(email)) ? 'ready' : 'error');
+  };
 
   return (
     <Modal open onClose={onClose} labelledBy={titleId}>
@@ -382,54 +406,80 @@ function EmailGate({
         <h3 id={titleId} className="serif mt-2 text-[1.5rem] leading-snug tracking-[-0.01em] text-pretty">
           {materialTitle}
         </h3>
-        <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(T.gateBody)}</p>
 
-        <form
-          className="mt-6"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (valid) onSubmit(email);
-          }}
-        >
-          <label htmlFor={emailId} className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text">
-            {lc(T.email)}
-          </label>
-          <input
-            id={emailId}
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={lc(T.emailPlaceholder)}
-            className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
-          />
-          <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-[0.85rem] leading-relaxed text-ink-soft">
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 size-4 shrink-0 accent-[var(--sage,#7a8b6f)]"
-            />
-            <span>{lc(T.consent)}</span>
-          </label>
-
-          <div className="mt-7 flex items-center gap-4">
-            <button
-              type="submit"
-              disabled={!valid}
-              className="inline-flex cursor-pointer items-center bg-ink px-[22px] py-[13px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {lc(T.getIt)}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="cursor-pointer text-[13px] uppercase tracking-[0.04em] text-ink-soft transition-colors hover:text-ink"
-            >
-              {lc(T.cancel)}
-            </button>
+        {status === 'ready' ? (
+          <div className="mt-4">
+            <p className="text-[0.95rem] leading-relaxed text-ink text-pretty">{lc(T.ready)}</p>
+            <div className="mt-6 flex items-center gap-4">
+              <a
+                href={fileUrl}
+                download
+                className="inline-flex cursor-pointer items-center gap-2 bg-ink px-[22px] py-[13px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage"
+              >
+                {lc(T.download)} <span aria-hidden="true">↓</span>
+              </a>
+              <button
+                type="button"
+                onClick={onClose}
+                className="cursor-pointer text-[13px] uppercase tracking-[0.04em] text-ink-soft transition-colors hover:text-ink"
+              >
+                {lc(T.cancel)}
+              </button>
+            </div>
           </div>
-        </form>
+        ) : (
+          <>
+            <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft text-pretty">{lc(T.gateBody)}</p>
+
+            <form className="mt-6" onSubmit={onSubmit}>
+              <label htmlFor={emailId} className="mono mb-1.5 block text-[10px] uppercase tracking-[0.14em] text-sage-text">
+                {lc(T.email)}
+              </label>
+              <input
+                id={emailId}
+                type="email"
+                required
+                value={email}
+                maxLength={FIELD_LIMITS.email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={lc(T.emailPlaceholder)}
+                className="w-full border-b border-[var(--rule)] bg-transparent py-2.5 text-[1rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
+              />
+              <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-[0.85rem] leading-relaxed text-ink-soft">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0 accent-[var(--sage,#7a8b6f)]"
+                />
+                <span>{lc(T.consent)}</span>
+              </label>
+
+              {status === 'error' && (
+                <p role="alert" className="mt-4 text-[0.85rem] leading-relaxed text-[var(--walnut,#8a5a3a)]">
+                  {lc(T.gateError)}
+                </p>
+              )}
+
+              <div className="mt-7 flex items-center gap-4">
+                <button
+                  type="submit"
+                  disabled={!valid || status === 'sending'}
+                  className="inline-flex cursor-pointer items-center bg-ink px-[22px] py-[13px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {status === 'sending' ? lc(T.sending) : lc(T.getIt)}
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="cursor-pointer text-[13px] uppercase tracking-[0.04em] text-ink-soft transition-colors hover:text-ink"
+                >
+                  {lc(T.cancel)}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </Modal>
   );

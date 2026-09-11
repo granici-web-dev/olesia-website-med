@@ -30,6 +30,7 @@ import { PatientsModule } from './patients/patients.module';
 import { StorageModule } from './storage/storage.module';
 import { MailModule } from './mail/mail.module';
 import { LeadsModule } from './leads/leads.module';
+import { NewsletterModule } from './newsletter/newsletter.module';
 import { PaymentsModule } from './payments/payments.module';
 import { CaptchaModule } from './common/captcha/captcha.module';
 
@@ -72,6 +73,7 @@ import { CaptchaModule } from './common/captcha/captcha.module';
     StorageModule,
     MailModule,
     LeadsModule,
+    NewsletterModule,
     PaymentsModule,
   ],
   /**

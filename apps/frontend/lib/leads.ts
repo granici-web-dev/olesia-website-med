@@ -80,6 +80,35 @@ export interface ContactMessageInput extends PublicLeadInput {
 }
 
 /**
+ * A refused submission, carrying enough for the form to say what happened.
+ *
+ * `status` is 0 when the request never reached the API at all — an offline
+ * visitor and a 500 need different sentences, and before this they got the
+ * same one (audit A6, F14). `code` is the API's machine code when it sent one.
+ * `describeLeadError` in `lib/form-errors.ts` turns the pair into wording.
+ */
+export class LeadError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string,
+  ) {
+    super(`lead_failed_${status}${code ? `_${code}` : ''}`);
+  }
+}
+
+/** The API's machine code, when the body carries one. */
+async function readCode(res: Response): Promise<string> {
+  try {
+    const body = (await res.json()) as { message?: string | string[] };
+    const first = Array.isArray(body.message) ? body.message[0] : body.message;
+    return typeof first === 'string' ? first : '';
+  } catch {
+    // A proxy answering 429 or 502 with HTML; the status is all there is.
+    return '';
+  }
+}
+
+/**
  * Every lead carries a reCAPTCHA token in `x-captcha-token` — a header rather
  * than a body field, because the API validates bodies with
  * `forbidNonWhitelisted` and a header keeps the token out of logged payloads.
@@ -93,15 +122,21 @@ async function postLead(
   action: CaptchaAction,
 ): Promise<void> {
   const token = await getCaptchaToken(action);
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { 'x-captcha-token': token } : {}),
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`lead_failed_${res.status}`);
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'x-captcha-token': token } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    // `fetch` rejects only when the request never happened: offline, DNS, CORS.
+    throw new LeadError(0, '');
+  }
+  if (!res.ok) throw new LeadError(res.status, await readCode(res));
 }
 
 export function submitMonitoringLead(input: MonitoringLeadInput): Promise<void> {

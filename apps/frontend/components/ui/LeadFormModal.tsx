@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { Modal } from './Modal';
 import {
+  LeadError,
   leadLocale,
   submitMonitoringLead,
   submitQuickQuestionLead,
@@ -13,6 +14,8 @@ import {
   type DeliverableProduct,
 } from '@/lib/leads';
 import { track } from '@/lib/analytics';
+import { describeLeadError } from '@/lib/form-errors';
+import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import styles from './LeadFormModal.module.css';
 import { CaptchaNotice } from './CaptchaNotice';
 
@@ -30,8 +33,6 @@ interface FieldErrors {
   question?: string;
   consent?: string;
 }
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LeadFormModal({
   service,
@@ -54,6 +55,10 @@ export function LeadFormModal({
   // sees what they're ordering; otherwise the per-service i18n title.
   const headerTitle = deliverable ? deliverable.title : t(`${copy}.title`);
   const trackId = service ?? deliverable?.code ?? 'lead';
+  // The EXPRESS question is the API's longest field; a message is the shorter
+  // one. Both caps mirror `create-lead.dto.ts` so the box cannot collect text
+  // the server will refuse (audit A6, F9).
+  const textLimit = isQuick ? FIELD_LIMITS.question : FIELD_LIMITS.message;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -66,6 +71,7 @@ export function LeadFormModal({
   const [company, setCompany] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<Status>('idle');
+  const [failure, setFailure] = useState('');
 
   const reset = () => {
     setName('');
@@ -76,6 +82,7 @@ export function LeadFormModal({
     setCompany('');
     setErrors({});
     setStatus('idle');
+    setFailure('');
   };
 
   const close = () => {
@@ -88,7 +95,7 @@ export function LeadFormModal({
     const e: FieldErrors = {};
     if (!name.trim()) e.name = t('required');
     if (!email.trim()) e.email = t('required');
-    else if (!EMAIL_RE.test(email.trim())) e.email = t('invalidEmail');
+    else if (!isEmailLike(email)) e.email = t('invalidEmail');
     if (isQuick && !text.trim()) e.question = t('required');
     if (!consent) e.consent = t('consentRequired');
     setErrors(e);
@@ -124,7 +131,10 @@ export function LeadFormModal({
       }
       track('lead_submit', { service: trackId });
       setStatus('success');
-    } catch {
+    } catch (err) {
+      const { status, code } =
+        err instanceof LeadError ? err : { status: 0, code: '' };
+      setFailure(describeLeadError(status, code, locale));
       setStatus('error');
     }
   };
@@ -186,6 +196,7 @@ export function LeadFormModal({
             value={name}
             onChange={setName}
             placeholder={t('namePlaceholder')}
+            maxLength={FIELD_LIMITS.name}
             autoComplete="name"
           />
           <Field
@@ -195,6 +206,7 @@ export function LeadFormModal({
             value={email}
             onChange={setEmail}
             placeholder={t('emailPlaceholder')}
+            maxLength={FIELD_LIMITS.email}
             type="email"
             autoComplete="email"
           />
@@ -204,6 +216,7 @@ export function LeadFormModal({
             value={phone}
             onChange={setPhone}
             placeholder={t('phonePlaceholder')}
+            maxLength={FIELD_LIMITS.phone}
             type="tel"
             autoComplete="tel"
           />
@@ -221,8 +234,16 @@ export function LeadFormModal({
               placeholder={
                 isQuick ? t('questionPlaceholder') : t('messagePlaceholder')
               }
+              maxLength={textLimit}
               aria-invalid={!!errors.question}
             />
+            {/* Only once it matters: a counter above an empty box is noise,
+                and a box that silently stops accepting characters is worse. */}
+            {text.length > textLimit * 0.8 && (
+              <span aria-live="polite" className={styles.counter}>
+                {text.length} / {textLimit}
+              </span>
+            )}
             {errors.question && (
               <span className={styles.error}>{errors.question}</span>
             )}
@@ -243,7 +264,7 @@ export function LeadFormModal({
 
           {status === 'error' && (
             <p className={styles.formError} role="alert">
-              {t('error')}
+              {failure}
             </p>
           )}
 
@@ -269,6 +290,7 @@ function Field({
   value,
   onChange,
   placeholder,
+  maxLength,
   type = 'text',
   autoComplete,
 }: {
@@ -278,6 +300,7 @@ function Field({
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  maxLength?: number;
   type?: string;
   autoComplete?: string;
 }) {
@@ -293,6 +316,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        maxLength={maxLength}
         autoComplete={autoComplete}
         aria-invalid={!!error}
       />

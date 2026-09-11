@@ -33,39 +33,87 @@ export interface UploadSession {
   acceptedTypes: string[];
 }
 
-/** Thrown when the API says the link is gone — the only expected failure. */
+/** Thrown when the API says the link is gone — the page replaces itself. */
 export class UploadLinkGone extends Error {
   constructor() {
     super('upload_link_gone');
   }
 }
 
+/**
+ * Any other refusal, carrying what `describeUploadError` needs to name it.
+ * `status` is 0 when the request never reached the API.
+ */
+export class UploadError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string,
+  ) {
+    super(`upload_failed_${status}${code ? `_${code}` : ''}`);
+  }
+}
+
 async function parse(res: Response): Promise<UploadSession> {
   if (res.status === 404) throw new UploadLinkGone();
   if (!res.ok) {
-    // Surface the API's machine code so the page can pick its own wording
-    // (too_many_files, file_too_large, unsupported_file_type, …).
-    let code = `upload_failed_${res.status}`;
+    // Surface the API's machine code alongside the status: 413 arrives from a
+    // proxy with no body at all, and `file_too_large` from our own filter.
+    let code = '';
     try {
       const body = (await res.json()) as { message?: string | string[] };
       const m = Array.isArray(body.message) ? body.message[0] : body.message;
-      if (m) code = m;
+      if (typeof m === 'string') code = m;
     } catch {
-      /* keep the status-based code */
+      /* a proxy answering with HTML; the status is all there is */
     }
-    throw new Error(code);
+    throw new UploadError(res.status, code);
   }
   return (await res.json()) as UploadSession;
 }
 
+/** `fetch` rejects only when the request never happened: offline, DNS, CORS. */
+async function send(
+  path: string,
+  init?: RequestInit,
+): Promise<UploadSession> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, init);
+  } catch {
+    throw new UploadError(0, '');
+  }
+  return parse(res);
+}
+
 export function fetchUploadSession(token: string): Promise<UploadSession> {
-  return fetch(`${API_BASE}/uploads/${token}`, { cache: 'no-store' }).then(parse);
+  return send(`/uploads/${token}`, { cache: 'no-store' });
 }
 
 export function acceptUploadConsent(token: string): Promise<UploadSession> {
-  return fetch(`${API_BASE}/uploads/${token}/consent`, {
-    method: 'POST',
-  }).then(parse);
+  return send(`/uploads/${token}/consent`, { method: 'POST' });
+}
+
+/**
+ * Refuse a file the API would refuse, before it goes over the wire.
+ *
+ * A patient on a phone uploading a 40 MB photo waited for the whole transfer
+ * and then read "too large" (audit A6, F15). The session already carries the
+ * limit and the accepted types, so the same answer costs nothing here.
+ *
+ * @returns the machine code the API would have answered with, or null.
+ */
+export function rejectedBeforeSending(
+  file: File,
+  session: UploadSession,
+): 'file_too_large' | 'unsupported_file_type' | 'too_many_files' | null {
+  if (session.documents.length >= session.maxFiles) return 'too_many_files';
+  if (file.size > session.maxFileBytes) return 'file_too_large';
+  // The browser's type for an unrecognised extension is '', which the API
+  // sniffs and decides on for itself — let those through rather than guess.
+  if (file.type && !session.acceptedTypes.includes(file.type)) {
+    return 'unsupported_file_type';
+  }
+  return null;
 }
 
 export function uploadPatientFile(
@@ -76,17 +124,14 @@ export function uploadPatientFile(
   const body = new FormData();
   body.append('file', file);
   if (note?.trim()) body.append('note', note.trim());
-  return fetch(`${API_BASE}/uploads/${token}/documents`, {
-    method: 'POST',
-    body,
-  }).then(parse);
+  return send(`/uploads/${token}/documents`, { method: 'POST', body });
 }
 
 export function deletePatientFile(
   token: string,
   documentId: string,
 ): Promise<UploadSession> {
-  return fetch(`${API_BASE}/uploads/${token}/documents/${documentId}`, {
+  return send(`/uploads/${token}/documents/${documentId}`, {
     method: 'DELETE',
-  }).then(parse);
+  });
 }

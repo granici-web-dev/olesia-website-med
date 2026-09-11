@@ -13,6 +13,7 @@ import { QuickQuestionsPage } from '@/pages/quick-questions';
 import { OrdersPage } from '@/pages/orders';
 import { PaymentsPage } from '@/pages/payments';
 import { MessagesPage } from '@/pages/messages';
+import { SubscribersPage } from '@/pages/subscribers';
 import { PatientsPage } from '@/pages/patients';
 import { PatientDetailPage } from '@/pages/patient-detail';
 import { BlogPage } from '@/pages/blog';
@@ -55,6 +56,7 @@ export function App() {
           <Route path={paths.orders} element={<OrdersPage />} />
           <Route path={paths.payments} element={<PaymentsPage />} />
           <Route path={paths.messages} element={<MessagesPage />} />
+          <Route path={paths.subscribers} element={<SubscribersPage />} />
           <Route path={paths.patients} element={<PatientsPage />} />
           <Route path="/pacienti/:id" element={<PatientDetailPage />} />
           <Route path={paths.blog} element={<BlogPage />} />

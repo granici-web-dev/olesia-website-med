@@ -2,6 +2,7 @@
 
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
+import * as CC from 'vanilla-cookieconsent';
 import { ANALYTICS, CONSENT_EVENT, type ConsentState } from '@/lib/analytics';
 
 /* Loads each tracker only once the visitor has granted its category —
@@ -19,6 +20,14 @@ export function Analytics() {
   useEffect(() => {
     const onConsent = (e: CustomEvent<ConsentState>) => setConsent(e.detail);
     window.addEventListener(CONSENT_EVENT, onConsent);
+    // A returning visitor's answer is already in the cookie, and the banner's
+    // own event may have fired before this listener existed — whichever
+    // component mounted first decided whether analytics ever loaded
+    // (audit A6, F18). Read the stored answer instead of waiting for it.
+    setConsent({
+      analytics: CC.acceptedCategory('analytics'),
+      marketing: CC.acceptedCategory('marketing'),
+    });
     return () => window.removeEventListener(CONSENT_EVENT, onConsent);
   }, []);
 

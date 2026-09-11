@@ -5,10 +5,13 @@ import {
   acceptUploadConsent,
   deletePatientFile,
   fetchUploadSession,
+  rejectedBeforeSending,
   uploadPatientFile,
+  UploadError,
   UploadLinkGone,
   type UploadSession,
 } from '@/lib/uploads';
+import { describeUploadError } from '@/lib/form-errors';
 import { btnDark, underline } from '@/components/ui/cta';
 import { CONSENT_VERSION, PATIENT_CONSENT_TEXT } from '@olesia/shared';
 
@@ -90,6 +93,9 @@ const T = {
 
   addFile: { ro: 'Alege un fișier', en: 'Choose a file', ru: 'Выбрать файл' },
   uploading: { ro: 'Se trimite…', en: 'Sending…', ru: 'Отправка…' },
+  // The consent button is not sending a file, and saying so while somebody
+  // waits for their consent to register is its own small lie (audit A6, F17).
+  confirming: { ro: 'Se confirmă…', en: 'Confirming…', ru: 'Подтверждение…' },
   notePlaceholder: {
     ro: 'Notă scurtă (opțional) — de ex. „analize din 12 mai”',
     en: 'Short note (optional) — e.g. "blood work, 12 May"',
@@ -116,32 +122,19 @@ const T = {
   remove: { ro: 'Șterge', en: 'Remove', ru: 'Удалить' },
   removed: { ro: 'Documentul a fost șters.', en: 'Document removed.', ru: 'Документ удалён.' },
 
-  errTooLarge: {
-    ro: 'Fișierul este prea mare.',
-    en: 'That file is too large.',
-    ru: 'Файл слишком большой.',
-  },
-  errType: {
-    ro: 'Acest tip de fișier nu este acceptat. Trimite un PDF, un document Word sau o fotografie.',
-    en: 'That file type is not accepted. Send a PDF, a Word document or a photo.',
-    ru: 'Такой тип файла не принимается. Пришлите PDF, документ Word или фотографию.',
-  },
-  errTooMany: {
-    ro: 'Ai atins numărul maxim de fișiere. Șterge unul înainte de a trimite altul.',
-    en: 'You have reached the maximum number of files. Remove one before sending another.',
-    ru: 'Достигнут лимит файлов. Удалите один, прежде чем отправлять следующий.',
-  },
-  errGeneric: {
-    ro: 'Nu am putut trimite fișierul. Încearcă din nou.',
-    en: 'We could not send the file. Please try again.',
-    ru: 'Не удалось отправить файл. Попробуйте ещё раз.',
-  },
   privacy: {
     ro: 'Documentele sunt stocate securizat, nu sunt publice și nu sunt accesibile prin niciun link. Le poate vedea doar medicul.',
     en: 'Documents are stored securely, are not public and are not reachable by any URL. Only the doctor can see them.',
     ru: 'Документы хранятся защищённо, не публичны и недоступны ни по какой ссылке. Их видит только врач.',
   },
 } satisfies Record<string, Bi>;
+
+/** The wording for a refusal, from the pure mapping in `lib/form-errors`. */
+function explain(e: unknown, locale: string): string {
+  const { status, code } =
+    e instanceof UploadError ? e : { status: 0, code: '' };
+  return describeUploadError(status, code, locale);
+}
 
 function humanSize(bytes: number): string {
   const mb = bytes / (1024 * 1024);
@@ -171,24 +164,13 @@ export function PatientUpload({
       setSession(await fetchUploadSession(token));
     } catch (e) {
       if (e instanceof UploadLinkGone) setGone(true);
-      else setError(t(T.errGeneric));
+      else setError(explain(e, locale));
     }
-    // `t` is derived from props that never change during a visit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, locale]);
 
   useEffect(() => {
     void load();
   }, [load]);
-
-  /** Map the API's machine code onto wording that names the actual problem. */
-  const explain = (err: unknown): string => {
-    const code = err instanceof Error ? err.message : '';
-    if (code === 'file_too_large') return t(T.errTooLarge);
-    if (code === 'unsupported_file_type') return t(T.errType);
-    if (code === 'too_many_files') return t(T.errTooMany);
-    return t(T.errGeneric);
-  };
 
   const run = async (fn: () => Promise<UploadSession>) => {
     setBusy(true);
@@ -197,7 +179,7 @@ export function PatientUpload({
       setSession(await fn());
     } catch (e) {
       if (e instanceof UploadLinkGone) setGone(true);
-      else setError(explain(e));
+      else setError(explain(e, locale));
     } finally {
       setBusy(false);
     }
@@ -207,7 +189,15 @@ export function PatientUpload({
     const file = e.target.files?.[0];
     // Clear immediately: picking the same file twice in a row must re-fire.
     e.target.value = '';
-    if (!file) return;
+    if (!file || !session) return;
+    // Answer before the upload rather than after it: a phone photo over a slow
+    // connection used to transfer in full and only then be refused for its size
+    // (audit A6, F15). The session already carries the limits.
+    const refusal = rejectedBeforeSending(file, session);
+    if (refusal) {
+      setError(describeUploadError(400, refusal, locale));
+      return;
+    }
     await run(() => uploadPatientFile(token, file, note));
     setNote('');
   };
@@ -311,7 +301,7 @@ export function PatientUpload({
                 disabled={busy}
                 onClick={() => void run(() => acceptUploadConsent(token))}
               >
-                {busy ? t(T.uploading) : t(T.consentCta)}
+                {busy ? t(T.confirming) : t(T.consentCta)}
               </button>
             </div>
           ) : (

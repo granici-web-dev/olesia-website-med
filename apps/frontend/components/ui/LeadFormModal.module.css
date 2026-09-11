@@ -124,6 +124,13 @@
   cursor: pointer;
 }
 
+.counter {
+  align-self: flex-end;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
 .error {
   font-size: 0.78rem;
   font-weight: 500;

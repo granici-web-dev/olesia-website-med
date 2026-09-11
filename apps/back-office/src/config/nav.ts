@@ -7,6 +7,7 @@ import {
   Repeat2,
   MessagesSquare,
   Mail,
+  Mails,
   PackageOpen,
   Newspaper,
   Tags,
@@ -57,6 +58,7 @@ export const navGroups: NavGroup[] = [
       { to: paths.orders, label: ro.nav.orders, icon: PackageOpen },
       { to: paths.payments, label: ro.nav.payments, icon: CreditCard },
       { to: paths.messages, label: ro.nav.messages, icon: Mail },
+      { to: paths.subscribers, label: ro.nav.subscribers, icon: Mails },
     ],
   },
   {

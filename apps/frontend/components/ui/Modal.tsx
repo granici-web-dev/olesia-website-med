@@ -5,6 +5,17 @@ import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
 
 /**
+ * Anything inside the panel that Tab can reach.
+ *
+ * `:not([tabindex="-1"])` on every branch, not just the last: the forms in
+ * these dialogs carry a honeypot input, which is off the tab order but is still
+ * an `input` (audit A6, F21). It sorted first in the panel, so the trap sent
+ * Shift+Tab from the first real field into a hidden box — and focus vanished.
+ */
+const FOCUSABLE =
+  'input:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), a[href]:not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
+
+/**
  * Accessible modal dialog. Centered panel on desktop, full-screen bottom sheet
  * on mobile. Closes on ESC and backdrop click, locks body scroll while open,
  * moves focus into the panel and restores it on close. Honors reduced-motion
@@ -32,8 +43,6 @@ export function Modal({
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
 
-    const FOCUSABLE =
-      'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -63,10 +72,7 @@ export function Modal({
     document.addEventListener('keydown', onKey);
 
     // Focus the first focusable control inside the panel.
-    const focusable = panelRef.current?.querySelector<HTMLElement>(
-      'input, textarea, select, button, [href], [tabindex]:not([tabindex="-1"])',
-    );
-    focusable?.focus();
+    panelRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
 
     return () => {
       document.removeEventListener('keydown', onKey);

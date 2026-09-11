@@ -611,6 +611,43 @@ model ContactMessage {
   @@index([createdAt])
 }
 
+// --- Newsletter (brief §6c) ---
+//
+// A row here is a consent record before it is a mailing address: `consentAt`
+// and `consentVersion` say what the person agreed to and when, which is what
+// GDPR asks for and what an export from a provider's dashboard would not give
+// us. The version is stamped server-side from `NEWSLETTER_CONSENT_VERSION` in
+// packages/shared, never taken from the request.
+//
+// `email` is CITEXT and unique, so `Ana@Gmail.com` and `ana@gmail.com` are one
+// subscriber. Re-subscribing the same address is an update, not a second row.
+//
+// `confirmedAt` is for the double opt-in that becomes possible the day the
+// client has an SMTP server. Nothing is sent today and every row is
+// unconfirmed; the field exists so confirming later does not need a migration
+// against a populated table.
+
+enum SubscriberSource {
+  /// The email gate in front of a free library material (/guides).
+  library
+  /// The signup block in the site footer.
+  footer
+}
+
+model Subscriber {
+  id             String           @id @default(uuid())
+  email          String           @unique @db.Citext
+  locale         Locale           @default(ro)
+  source         SubscriberSource
+  consentAt      DateTime
+  consentVersion String
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  createdAt      DateTime         @default(now())
+
+  @@index([createdAt])
+}
+
 // --- Deliverable orders (group C: personalized menus + protocols, brief §2) ---
 //
 // One-off products rather than appointments or subscriptions: the visitor picks

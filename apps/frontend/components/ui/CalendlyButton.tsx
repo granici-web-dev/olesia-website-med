@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { track } from '@/lib/analytics';
 
 /**
@@ -26,7 +25,17 @@ declare global {
   }
 }
 
-/** Inject the Calendly widget assets once per document. */
+/**
+ * Inject the Calendly widget assets once per document, on the first click.
+ *
+ * This used to run from a mount effect as well, so every page carrying a
+ * booking button fetched widget.css and widget.js from assets.calendly.com
+ * before the visitor had done anything and, on the pages that render the
+ * button in the footer, regardless of whether they ever scrolled to it
+ * (audit A6, F2). Calendly is a third party and the request carries the
+ * visitor's address and referrer; the cookie banner cannot cover a request
+ * that happens without an action. Nothing is fetched until `open()`.
+ */
 function ensureWidgetAssets(): void {
   if (typeof document === 'undefined') return;
   if (!document.querySelector(`link[href="${WIDGET_CSS}"]`)) {
@@ -63,10 +72,6 @@ export function CalendlyButton({
    */
   withArrow?: boolean;
 }) {
-  useEffect(() => {
-    ensureWidgetAssets();
-  }, []);
-
   const open = () => {
     track('booking_click', { service: reason });
     ensureWidgetAssets();

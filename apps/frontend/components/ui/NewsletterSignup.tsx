@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { newsletterEnabled, subscribe } from '@/lib/newsletter';
+import { subscribe, type SubscribeSource } from '@/lib/newsletter';
+import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import { CaptchaNotice } from './CaptchaNotice';
 
-/* Newsletter signup (brief §6c). Renders nothing until an endpoint is
-   configured (newsletterEnabled), mirroring the analytics no-op pattern.
-   Email + consent, with idle/submitting/success/error states. Trilingual via
-   the active locale. `source` tags where the signup happened for analytics. */
+/* Newsletter signup (brief §6c). Posts to our own API, so there is nothing to
+   configure and nothing to hide behind: the block rendered nowhere for as long
+   as it waited on an endpoint variable nobody was ever going to set
+   (audit A6, F3). Email + consent, with idle/submitting/success/error states.
+   Trilingual via the active locale. `source` tags where the signup happened. */
 
 type Bi = { ro: string; en: string; ru: string };
 
@@ -24,26 +26,31 @@ const T: Record<string, Bi> = {
   cta: { ro: 'Abonează-te', en: 'Subscribe', ru: 'Подписаться' },
   sending: { ro: 'Se trimite…', en: 'Sending…', ru: 'Отправка…' },
   consent: {
-    ro: 'Sunt de acord să primesc e-mailuri.',
-    en: 'I agree to receive emails.',
-    ru: 'Согласен(на) получать письма.',
+    ro: 'Sunt de acord să primesc noutăți pe email și ca adresa mea să fie păstrată în acest scop.',
+    en: 'I agree to receive updates by email and to my address being kept for that purpose.',
+    ru: 'Согласен(на) получать новости по email и на хранение моего адреса для этой цели.',
   },
   privacy: { ro: 'Confidențialitate', en: 'Privacy', ru: 'Конфиденциальность' },
-  success: { ro: 'Mulțumim! Verifică-ți e-mailul.', en: 'Thank you! Check your email.', ru: 'Спасибо! Проверьте почту.' },
+  // Nothing is mailed yet, so "check your email" would be a promise the site
+  // cannot keep. It says what actually happened instead (audit A6, F3).
+  success: { ro: 'Mulțumim! Adresa ta este pe listă.', en: 'Thank you! Your address is on the list.', ru: 'Спасибо! Ваш адрес в списке.' },
   error: { ro: 'Ceva n-a mers. Încearcă din nou.', en: 'Something went wrong. Try again.', ru: 'Что-то пошло не так. Попробуйте ещё раз.' },
 };
 
-export function NewsletterSignup({ source = 'footer', className = '' }: { source?: string; className?: string }) {
+export function NewsletterSignup({
+  source = 'footer',
+  className = '',
+}: {
+  source?: SubscribeSource;
+  className?: string;
+}) {
   const locale = useLocale();
   const lc = (b: Bi) => (locale === 'ru' ? b.ru : locale === 'en' ? b.en : b.ro);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
-  // Hidden entirely until a provider endpoint is configured.
-  if (!newsletterEnabled) return null;
-
-  const valid = /\S+@\S+\.\S+/.test(email) && consent;
+  const valid = isEmailLike(email) && consent;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +83,7 @@ export function NewsletterSignup({ source = 'footer', className = '' }: { source
             onChange={(e) => setEmail(e.target.value)}
             placeholder={lc(T.placeholder)}
             aria-label={lc(T.title)}
+            maxLength={FIELD_LIMITS.email}
             className="min-w-[220px] flex-1 border-b border-[var(--rule)] bg-transparent py-2 text-[0.95rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage/40"
           />
           <button

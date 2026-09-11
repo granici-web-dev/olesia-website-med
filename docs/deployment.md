@@ -129,6 +129,14 @@ worked — a personal mailbox, a disabled captcha, a directory that empties on
 the next deploy — and every one of those failures is silent. This mirrors the
 JWT check that has been there since the secrets were found committed.
 
+**`RECAPTCHA_SECRET` on the API and `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` on Vercel
+are set together or not at all.** Either alone breaks every public form in a way
+nothing reports: with only the secret, the site mints no token and the guard
+answers 403 to the contact form, the EXPRESS question, the deliverable order and
+the newsletter signup; with only the site key, Google is contacted on every
+submit and nothing verifies the result (audit A6, F4). Both blank is a supported
+state — the honeypot and the rate limit still work.
+
 Optional but wanted before launch: `CALENDLY_*` (booking is dead without them)
 and `SMTP_*`. Without SMTP nothing is emailed at all — not the practice, not
 the patient. Leads are still saved; the back office says the mail did not go,

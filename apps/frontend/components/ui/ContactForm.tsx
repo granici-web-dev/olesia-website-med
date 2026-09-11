@@ -3,18 +3,21 @@
 import { useId, useRef, useState } from 'react';
 
 import {
+  LeadError,
   leadLocale,
   submitContactMessage,
   type ContactSubject,
 } from '@/lib/leads';
 import { track } from '@/lib/analytics';
+import { describeLeadError } from '@/lib/form-errors';
+import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import { CaptchaNotice } from './CaptchaNotice';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Contact form — non-medical questions only (appointments, payment, how it
    works, other). Medical questions are routed to "Întrebare EXPRESS" by design,
    so this form collects no medical data and says so. Posts to /leads/contact.
-   Bilingual (RO default · EN); copy lives here so it travels with the form.
+   Trilingual (RO default · EN · RU); copy lives here so it travels with it.
    Accessibility: visible labels, errors tied to fields (aria-describedby),
    error summary focus, color-not-only states, honeypot + reduced-motion safe.
    ────────────────────────────────────────────────────────────────────────── */
@@ -27,8 +30,6 @@ interface FieldErrors {
   message?: string;
   consent?: string;
 }
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const SUBJECTS: {
   value: ContactSubject;
@@ -63,6 +64,7 @@ export function ContactForm({ locale }: { locale: string }) {
   const [company, setCompany] = useState(''); // honeypot
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<Status>('idle');
+  const [failure, setFailure] = useState('');
 
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -81,7 +83,7 @@ export function ContactForm({ locale }: { locale: string }) {
     );
     if (!name.trim()) e.name = required;
     if (!email.trim()) e.email = required;
-    else if (!EMAIL_RE.test(email.trim()))
+    else if (!isEmailLike(email))
       e.email = t(
         'Introdu o adresă de email validă.',
         'Enter a valid email address.',
@@ -125,7 +127,10 @@ export function ContactForm({ locale }: { locale: string }) {
       });
       track('lead_submit', { service: 'contact', subject });
       setStatus('success');
-    } catch {
+    } catch (err) {
+      const { status, code } =
+        err instanceof LeadError ? err : { status: 0, code: '' };
+      setFailure(describeLeadError(status, code, locale));
       setStatus('error');
     }
   };
@@ -189,6 +194,7 @@ export function ContactForm({ locale }: { locale: string }) {
             value={name}
             onChange={(ev) => setName(ev.target.value)}
             placeholder={t('Numele tău', 'Your name', 'Ваше имя')}
+            maxLength={FIELD_LIMITS.name}
             autoComplete="name"
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? fid('name-err') : undefined}
@@ -213,6 +219,7 @@ export function ContactForm({ locale }: { locale: string }) {
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
             placeholder="adresa.ta@email.com"
+            maxLength={FIELD_LIMITS.email}
             autoComplete="email"
             inputMode="email"
             aria-invalid={!!errors.email}
@@ -273,9 +280,17 @@ export function ContactForm({ locale }: { locale: string }) {
           value={message}
           onChange={(ev) => setMessage(ev.target.value)}
           placeholder={t('Cum te putem ajuta?', 'How can we help?', 'Чем мы можем помочь?')}
+          maxLength={FIELD_LIMITS.message}
           aria-invalid={!!errors.message}
           aria-describedby={errors.message ? fid('message-err') : undefined}
         />
+        {/* Only once it matters: a counter above an empty box is noise, and a
+            box that silently stops accepting characters is worse. */}
+        {message.length > FIELD_LIMITS.message * 0.8 && (
+          <span aria-live="polite" className="mono mt-2 block text-right text-[0.75rem] text-ink-soft">
+            {message.length} / {FIELD_LIMITS.message}
+          </span>
+        )}
         {errors.message && (
           <span id={fid('message-err')} className={errCls}>
             <span aria-hidden="true">✕</span>
@@ -316,11 +331,7 @@ export function ContactForm({ locale }: { locale: string }) {
           role="alert"
           className="border border-danger/40 bg-danger/5 px-4 py-3 text-[0.95rem] leading-relaxed text-ink text-pretty"
         >
-          {t(
-            'Ceva nu a funcționat. Încearcă din nou sau scrie-ne direct prin canalele de mai jos.',
-            'Something went wrong. Try again, or reach us through the channels below.',
-            'Что-то пошло не так. Попробуйте ещё раз или напишите нам напрямую по контактам ниже.',
-          )}
+          {failure}
         </p>
       )}
 

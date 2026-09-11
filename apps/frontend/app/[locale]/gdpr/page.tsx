@@ -204,6 +204,18 @@ const DATA: { term: Bi; desc: Bi }[] = [
     },
   },
   {
+    term: {
+      ro: 'Adresa de e-mail pentru noutăți',
+      en: 'Email address for updates',
+      ru: 'Адрес e-mail для новостей',
+    },
+    desc: {
+      ro: 'dacă te abonezi la newsletter sau descarci un material din bibliotecă, îți păstrăm adresa, limba paginii și momentul în care ți-ai dat acordul, pe serverul nostru. Materialul se descarcă pe loc — nu îl trimitem pe e-mail. Te poți dezabona oricând scriindu-ne la ' + META.email + '.',
+      en: 'if you subscribe to the newsletter or download a material from the library, we keep your address, the language of the page, and the moment you gave your consent, on our own server. The material downloads straight away — we do not email it to you. You can unsubscribe at any time by writing to us at ' + META.email + '.',
+      ru: 'если вы подписываетесь на рассылку или скачиваете материал из библиотеки, мы храним ваш адрес, язык страницы и момент вашего согласия на нашем сервере. Материал скачивается сразу — мы не отправляем его по почте. Отписаться можно в любой момент, написав нам на ' + META.email + '.',
+    },
+  },
+  {
     term: { ro: 'Date tehnice', en: 'Technical data', ru: 'Технические данные' },
     desc: {
       ro: 'cookie-uri, adresă IP și statistici de utilizare a site-ului.',
@@ -235,9 +247,9 @@ const BASIS: Bi[] = [
     ru: 'Для оплаты — обработка платежа необходима для исполнения договора, а хранение платёжных документов является требованием бухгалтерского и налогового законодательства.',
   },
   {
-    ro: 'Pe baza consimțământului — pentru newsletter sau ghiduri, dacă te abonezi.',
-    en: 'Based on consent — for newsletter or guides, if you subscribe.',
-    ru: 'На основании согласия — для рассылки или гайдов, если вы подпишетесь.',
+    ro: 'Pe baza consimțământului — pentru newsletter și materialele din bibliotecă. Păstrăm adresa ta împreună cu momentul acordului, ca dovadă a acestuia, și o ștergem când te dezabonezi.',
+    en: 'Based on consent — for the newsletter and the library materials. We keep your address together with the moment you consented, as the record of that consent, and delete it when you unsubscribe.',
+    ru: 'На основании согласия — для рассылки и материалов библиотеки. Мы храним ваш адрес вместе с моментом согласия как подтверждение этого согласия и удаляем его при отписке.',
   },
 ];
 

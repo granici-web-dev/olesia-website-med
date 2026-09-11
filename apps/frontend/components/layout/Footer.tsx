@@ -5,7 +5,6 @@ import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FooterLangSwitch } from './FooterLangSwitch';
 import { CookiePreferencesLink } from './CookiePreferencesLink';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
-import { newsletterEnabled } from '@/lib/newsletter';
 import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
 import { creamBox } from '@/components/ui/cta';
 import styles from './Footer.module.css';
@@ -82,11 +81,9 @@ export function Footer() {
         </div>
       </div>
 
-      {newsletterEnabled && (
-        <div className="mt-12 border-t border-[var(--rule)] pt-10">
-          <NewsletterSignup source="footer" className="max-w-[520px]" />
-        </div>
-      )}
+      <div className="mt-12 border-t border-[var(--rule)] pt-10">
+        <NewsletterSignup source="footer" className="max-w-[520px]" />
+      </div>
 
       <div className={styles.bottom}>
         <span>{t('rights')}</span>

@@ -11,12 +11,13 @@ export const revalidate = 60;
 /* ──────────────────────────────────────────────────────────────────────────
    Biblioteca Digitală (brief §6a) — the downloads storefront. Nine categories,
    free + paid materials, search, child-age + category filters, and an
-   email-gate before free downloads. Content lives as local trilingual data
-   (lib/placeholder-materials) until the back-office `materials` module exists;
-   the interactive shelf is the client `MaterialLibrary`. Route kept as /guides
-   (linked from the footer) to avoid nav churn. Bilingual (RO default · EN · RU).
-   ⚠ PDFs/prices and the email-gate persistence (newsletter, blocker #8) are not
-   wired yet — files show "în curând"; the gate unlocks the download UI only.
+   email-gate before free downloads. Content comes from the back-office
+   `materials` module; the interactive shelf is the client `MaterialLibrary`.
+   Route kept as /guides (linked from the footer) to avoid nav churn.
+   Trilingual (RO default · EN · RU).
+   The gate stores the address through the `newsletter` module and then hands
+   the file over on the spot — nothing is mailed. A material without a PDF shows
+   "în curând" rather than asking for an address it cannot pay back.
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -222,10 +223,10 @@ export default async function LibraryPage({
           </div>
           <p className="max-w-[340px] text-sm leading-[1.7] text-ink-soft">
             {ru
-              ? 'Ищите по названию, фильтруйте по категории и возрасту. Бесплатные материалы — по email.'
+              ? 'Ищите по названию, фильтруйте по категории и возрасту. Оставьте адрес и скачайте материал. Можно также подписаться на новости.'
               : en
-              ? 'Search by title, filter by category and age. Free materials are delivered by email.'
-              : 'Caută după titlu, filtrează după categorie și vârstă. Materialele gratuite se trimit pe email.'}
+              ? 'Search by title, filter by category and age. Leave your address and download the material. You can also subscribe to updates.'
+              : 'Caută după titlu, filtrează după categorie și vârstă. Lasă-ți adresa și descarcă materialul. Te poți abona și la noutăți.'}
           </p>
         </header>
 
