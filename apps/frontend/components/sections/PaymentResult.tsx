@@ -7,7 +7,6 @@ import type { PublicPaymentStatusDto } from '@olesia/shared';
 import { Link } from '@/i18n/navigation';
 import { normalizeApiBase } from '@/lib/api-base';
 import { clearCheckoutIntent } from '@/lib/checkout';
-import { formatEur } from '@/lib/service-price';
 
 /* ──────────────────────────────────────────────────────────────────────────
    What happened to a payment, asked of our API rather than believed from the
@@ -40,6 +39,32 @@ const TERMINAL: PublicPaymentStatusDto['state'][] = [
   'refunded',
   'partially_refunded',
 ];
+
+const INTL_LOCALE: Record<'ro' | 'en' | 'ru', string> = {
+  ro: 'ro-RO',
+  en: 'en-GB',
+  ru: 'ru-RU',
+};
+
+/**
+ * The amount, in whatever the bank actually charged.
+ *
+ * Formatted here rather than through `lib/service-price`'s `formatEur`: that
+ * module imports `loc` from `lib/api`, which resolves `API_URL` at module scope
+ * and throws in a browser — so importing it from a client component took down
+ * the return page at the one moment it matters most. It also only knows EUR,
+ * and this page has to render whatever currency the payment was opened in.
+ */
+function formatMoney(
+  locale: 'ro' | 'en' | 'ru',
+  amount: number,
+  currency: string,
+) {
+  return new Intl.NumberFormat(INTL_LOCALE[locale], {
+    style: 'currency',
+    currency,
+  }).format(amount);
+}
 
 type Tri = { ro: string; en: string; ru: string };
 
@@ -261,16 +286,14 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
           </Row>
           <Row label={t('service')}>{payment.description}</Row>
           <Row label={t('amount')}>
-            {payment.currency === 'EUR'
-              ? formatEur(locale, payment.amount)
-              : `${payment.amount} ${payment.currency}`}
+            {formatMoney(locale, payment.amount, payment.currency)}
           </Row>
           {payment.paidAt && (
             <Row label={t('paidAt')}>
-              {new Date(payment.paidAt).toLocaleString(
-                locale === 'ru' ? 'ru-RU' : locale === 'en' ? 'en-GB' : 'ro-RO',
-                { dateStyle: 'long', timeStyle: 'short' },
-              )}
+              {new Date(payment.paidAt).toLocaleString(INTL_LOCALE[locale], {
+                dateStyle: 'long',
+                timeStyle: 'short',
+              })}
             </Row>
           )}
         </dl>

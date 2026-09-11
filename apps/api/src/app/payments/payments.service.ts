@@ -884,6 +884,16 @@ export class PaymentsService {
 
       if (payment.state === PaymentState.paid) {
         await this.markTargetPaid(payment, tx);
+      } else {
+        // The other direction, which nothing used to take: a refund moves a
+        // payment out of `paid`, and before this the purchase went on reading
+        // `confirmed` for money that had gone back. `recomputeTargetMirror`
+        // reads the whole ledger rather than assuming, so a purchase paid
+        // twice — once by hand, once by card — does not read as unpaid because
+        // one of the two was refunded. It writes `paymentStatus` only: an
+        // answered EXPRESS ticket keeps its answer and its status, and loses
+        // just the claim that it was paid for.
+        await this.recomputeTargetMirror(payment, tx);
       }
       return payment.state === PaymentState.paid;
     });
