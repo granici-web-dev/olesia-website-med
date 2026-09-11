@@ -8,3 +8,7 @@ export const patientPaymentsQueryKey = (patientId: string) =>
 /** Everything recorded against one purchase. */
 export const targetPaymentsQueryKey = (targetType: string, targetId: string) =>
   ['payments', 'target', targetType, targetId] as const;
+
+/** The download grant one material payment opened. */
+export const materialGrantQueryKey = (paymentId: string) =>
+  ['payments', 'grant', paymentId] as const;

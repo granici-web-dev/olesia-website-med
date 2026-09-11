@@ -4,8 +4,8 @@ import { http } from '@/api/http';
 import type { Order, OrderStatus } from '@/features/orders/types';
 
 /**
- * Real `deliverable-orders` endpoints. Rows are created by the public
- * `/leads/deliverable` endpoint; here we list them, move them through the
+ * Real `deliverable-orders` endpoints. Rows are created by the public checkout
+ * at `/leads/deliverable/checkout`; here we list them, move them through the
  * workflow, and delete the ones that came to nothing. Payment is not one of
  * them: `paymentStatus` mirrors the payments ledger, and money that arrived
  * outside the bank is recorded through `/payments/manual`.
@@ -32,11 +32,27 @@ function asList<T>(r: T[] | Paginated<T>): T[] {
   return Array.isArray(r) ? r : r.items;
 }
 
+/**
+ * Both lists, deliberately — the same arrangement the EXPRESS tickets have.
+ *
+ * `GET /deliverable-orders` leaves out `awaiting_payment` by default, so the
+ * doctor's working queue is not padded with orders nobody bought. The panel
+ * still has to show them, which is what the "Neachitate" tab is, so it asks
+ * for them by name and merges the two, newest first.
+ *
+ * Two requests rather than one because the API's default is the right default
+ * for every other caller, and a `status=all` escape hatch would be a way to
+ * undo it by accident.
+ */
 export async function fetchOrders(): Promise<Order[]> {
-  const r = await http.get<DeliverableOrderDto[] | Paginated<DeliverableOrderDto>>(
-    '/deliverable-orders?pageSize=200',
-  );
-  return asList(r).map(toView);
+  type Response = DeliverableOrderDto[] | Paginated<DeliverableOrderDto>;
+  const [working, unpaid] = await Promise.all([
+    http.get<Response>('/deliverable-orders?pageSize=200'),
+    http.get<Response>('/deliverable-orders?pageSize=200&status=awaiting_payment'),
+  ]);
+  return [...asList(working), ...asList(unpaid)]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(toView);
 }
 
 export async function setOrderStatus(input: {

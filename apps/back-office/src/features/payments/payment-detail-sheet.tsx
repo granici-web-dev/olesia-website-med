@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { PaymentConfirmationCell } from '@/features/payments/confirmation-cell';
+import { MaterialGrantPanel } from '@/features/payments/material-grant-panel';
 import { useAuth } from '@/auth/auth-context';
 import { patientDetailPath } from '@/config/routes';
 import { ro } from '@/i18n/ro';
@@ -208,6 +209,11 @@ export function PaymentDetailSheet({
               <Ref label={t.detail.threeDs} value={p.threeDsResult} />
               <Ref label={t.detail.terminal} value={p.terminalId} />
             </div>
+
+            {/* Above the refunds, because a refund revokes the grant: the
+                two are the same subject read in opposite directions, and the
+                link is what an operator opened this sheet for. */}
+            <MaterialGrantPanel payment={p} />
 
             <div className="space-y-2">
               <SectionTitle>{t.detail.refunds}</SectionTitle>

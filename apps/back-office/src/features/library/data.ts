@@ -30,3 +30,6 @@ export const deleteMaterialCategory = USE_MOCKS
 export const uploadMaterialFile = USE_MOCKS
   ? mock.uploadMaterialFile
   : remote.uploadMaterialFile;
+export const uploadPrivateMaterialFile = USE_MOCKS
+  ? mock.uploadPrivateMaterialFile
+  : remote.uploadPrivateMaterialFile;

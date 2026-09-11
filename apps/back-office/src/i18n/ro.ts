@@ -1163,6 +1163,28 @@ export const ro = {
         'Confirmarea tot nu a plecat — serverul de email nu este configurat. Copiază textul și trimite-l tu.',
       onlyPaid: 'Doar plățile confirmate au o confirmare de trimis.',
     },
+
+    /**
+     * Linkul de descărcare pe care l-a deschis plata unui material.
+     *
+     * Ecranul acesta este singura cale de recuperare pentru cineva care a
+     * pierdut linkul de pe pagina de întoarcere: linkul se revendică cu o
+     * cheie păstrată în fila cumpărătorului, iar fără SMTP nici chitanța nu
+     * ajunge la el.
+     */
+    grant: {
+      title: 'Link de descărcare',
+      validUntil: 'Valabil până la',
+      downloadsLeft: (n: number) => `${n} descărcări rămase`,
+      copy: 'Copiază link',
+      copied: 'Linkul de descărcare a fost copiat.',
+      none: 'Nu există un link activ. Un link nou se deschide doar printr-o nouă achiziție.',
+      revoke: 'Retrage accesul',
+      revoked: 'Accesul a fost retras.',
+      revokeTitle: 'Retragi accesul la material?',
+      revokeBody:
+        'Linkul de descărcare nu va mai funcționa, iar clientul va avea nevoie de o nouă achiziție pentru a primi altul. Acțiunea nu poate fi anulată.',
+    },
     filters: {
       searchPlaceholder: 'Caută după nume, email sau RRN…',
       reset: 'Renunță la filtre',
@@ -1261,6 +1283,7 @@ export const ro = {
     refresh: 'Reîmprospătează',
 
     status: {
+      awaiting_payment: 'Neachitată',
       new: 'Nouă',
       in_progress: 'În lucru',
       delivered: 'Livrată',
@@ -1270,10 +1293,12 @@ export const ro = {
     payment: {
       pending: 'Neachitată',
       confirmed: 'Achitată',
+      abandonedHint: 'Plata nu a fost finalizată pe site.',
     },
 
     tabs: {
       all: 'Toate',
+      awaiting_payment: 'Neachitate',
       new: 'Noi',
       in_progress: 'În lucru',
       delivered: 'Livrate',
@@ -1296,9 +1321,12 @@ export const ro = {
 
     empty: {
       title: 'Nicio comandă',
-      body: 'Comenzile pentru meniuri personalizate și protocoale apar aici.',
+      body: 'Comenzile pentru meniuri personalizate și protocoale apar aici după ce clientul achită pe site.',
       filteredTitle: 'Niciun rezultat',
       filteredBody: 'Nicio comandă nu corespunde filtrelor selectate.',
+      unpaidTitle: 'Nicio comandă neachitată',
+      unpaidBody:
+        'Aici ajung comenzile începute pe site, dar la care plata nu a fost finalizată. Se șterg automat după șapte zile.',
     },
 
     detail: {
@@ -1997,6 +2025,8 @@ export const ro = {
       shown: 'Acum este vizibil pe site.',
       hidden: 'Acum este ascuns de pe site.',
       fileUploaded: 'Fișierul a fost încărcat.',
+      fileClearedOnAccessChange:
+        'Fișierul a fost eliminat: materialele gratuite și cele cu plată se păstrează în locuri diferite. Încarcă din nou fișierul.',
       fileTooLarge: 'Fișierul depășește 20 MB.',
       fileType: 'Sunt acceptate doar fișiere PDF, DOC sau DOCX.',
       categoryCreated: 'Categoria a fost adăugată.',
@@ -2031,6 +2061,9 @@ export const ro = {
       file: 'Fișierul',
       fileHint:
         'PDF, DOC sau DOCX, până la 20 MB. Poți salva fișa și fără fișier — pe site va apărea „În curând”.',
+      filePaidHint:
+        'PDF, DOC sau DOCX, până la 20 MB. Fișierul unui material cu plată se păstrează separat și nu are adresă publică: clientul îl primește printr-un link personal, după plată. Poți salva fișa și fără fișier — pe site va apărea „În curând”, iar materialul nu poate fi cumpărat.',
+      filePrivate: 'Fișier în stocarea privată',
       fileUpload: 'Încarcă fișierul',
       fileUploading: 'Se încarcă…',
       fileReplace: 'Înlocuiește',

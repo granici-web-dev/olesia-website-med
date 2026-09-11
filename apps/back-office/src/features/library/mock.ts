@@ -50,6 +50,7 @@ let store: Material[] = [
     price: null,
     flags: ['recommended', 'popular'],
     fileUrl: null,
+    fileKey: null,
     fileName: null,
     sortOrder: 1,
     active: true,
@@ -72,6 +73,7 @@ let store: Material[] = [
     price: 7,
     flags: ['popular'],
     fileUrl: null,
+    fileKey: null,
     fileName: null,
     sortOrder: 2,
     active: true,
@@ -174,4 +176,16 @@ export async function uploadMaterialFile(
 ): Promise<UploadedFileInfo> {
   await delay(700);
   return { url: URL.createObjectURL(file), name: file.name };
+}
+
+/**
+ * A key rather than a URL, because that is what the real endpoint answers —
+ * a paid file has no public address, which is the whole point of the second
+ * endpoint existing.
+ */
+export async function uploadPrivateMaterialFile(
+  file: File,
+): Promise<UploadedFileInfo> {
+  await delay(700);
+  return { key: `${crypto.randomUUID()}.pdf`, name: file.name };
 }

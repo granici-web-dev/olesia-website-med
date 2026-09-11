@@ -18,7 +18,18 @@ export type OrderProduct =
   | 'protocol_pednutri'
   | 'protocol_complementary';
 
-export type OrderStatus = 'new' | 'in_progress' | 'delivered' | 'canceled';
+/**
+ * `awaiting_payment` is the order somebody filled in and never paid for. It is
+ * not a stage of the doctor's work — she cannot do anything with one — which
+ * is why the API leaves it out of the list unless it is asked for by name, and
+ * why it sits in its own tab here (docs/shape-paid-deliverables-and-materials.md).
+ */
+export type OrderStatus =
+  | 'awaiting_payment'
+  | 'new'
+  | 'in_progress'
+  | 'delivered'
+  | 'canceled';
 export type OrderPayment = 'pending' | 'confirmed';
 
 export interface Order {

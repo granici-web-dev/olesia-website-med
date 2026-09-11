@@ -1,4 +1,8 @@
-import type { Paginated, PaymentDto } from '@olesia/shared';
+import type {
+  Paginated,
+  PaymentDto,
+  PurchaseNextStepDto,
+} from '@olesia/shared';
 
 import { http } from '@/api/http';
 import type {
@@ -42,6 +46,31 @@ export async function fetchPatientPayments(
 ): Promise<Payment[]> {
   const r = await http.get<PaymentDto[]>(`/payments/patient/${patientId}`);
   return r.map(toView);
+}
+
+/**
+ * The live download link for a payment that bought a material, or null when
+ * there is none — an unpaid purchase, a grant a refund took back.
+ *
+ * The one recourse a buyer who lost the return page's link has: with no SMTP
+ * the receipt does not reach them either, so they write in and the doctor
+ * copies the link off the payment (shape open question 3, decided).
+ */
+export async function fetchMaterialGrant(
+  paymentId: string,
+): Promise<PurchaseNextStepDto | null> {
+  return http.get<PurchaseNextStepDto | null>(
+    `/materials/grant/payment/${paymentId}`,
+  );
+}
+
+/**
+ * Take a buyer's access back by hand. Admin only server-side; the button is
+ * hidden for an editor. A refund already does this on its own — this is the
+ * path with no money in it.
+ */
+export async function revokeMaterialGrant(paymentId: string): Promise<void> {
+  await http.del<void>(`/materials/grant/payment/${paymentId}`);
 }
 
 /** Re-ask the bank about one payment, for when a callback went missing. */

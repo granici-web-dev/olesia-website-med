@@ -1,5 +1,7 @@
 import type { VariantProps } from 'class-variance-authority';
 
+import type { PurchaseNextStepDto } from '@olesia/shared';
+
 import type { badgeVariants } from '@/components/ui/badge';
 import type {
   ManualPaymentInput,
@@ -304,6 +306,33 @@ export async function resendConfirmation(id: string): Promise<Payment> {
   if (!p) throw new Error('not_found');
   if (p.state !== 'paid') throw new Error('payment_not_paid');
   return clone(p);
+}
+
+/**
+ * The grant a material payment opened. Minted here rather than stored: the
+ * mock's job is to give the screen something plausible to render, and a token
+ * is the one field whose exact value means nothing to it.
+ */
+export async function fetchMaterialGrant(
+  paymentId: string,
+): Promise<PurchaseNextStepDto | null> {
+  await delay();
+  const p = store.find((x) => x.id === paymentId);
+  if (!p || p.targetType !== 'material' || p.state !== 'paid') return null;
+  if (revokedGrants.has(paymentId)) return null;
+  return {
+    kind: 'material_download',
+    url: `http://localhost:3333/api/materials/download/mock-${paymentId}`,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    downloadsLeft: 8,
+  };
+}
+
+const revokedGrants = new Set<string>();
+
+export async function revokeMaterialGrant(paymentId: string): Promise<void> {
+  await delay();
+  revokedGrants.add(paymentId);
 }
 
 export async function voidPayment(id: string): Promise<Payment> {

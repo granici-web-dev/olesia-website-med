@@ -19,6 +19,8 @@ import type { Response } from 'express';
 
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { AuthUser } from '../auth/jwt.types';
 import { Role } from '../../generated/prisma/enums';
 import {
   DOCUMENT_MAX_BYTES,
@@ -93,6 +95,21 @@ export class MaterialsController {
   @Get('grant/payment/:paymentId')
   grantForPayment(@Param('paymentId') paymentId: string) {
     return this.grants.linkForPayment(paymentId);
+  }
+
+  /**
+   * Take a buyer's access back by hand. Admin only: a refund does this on its
+   * own, so pressing this is a deliberate act with no money behind it.
+   */
+  @ApiBearerAuth()
+  @Roles(Role.admin)
+  @Delete('grant/payment/:paymentId')
+  @HttpCode(204)
+  revokeGrant(
+    @Param('paymentId') paymentId: string,
+    @CurrentUser() actor: AuthUser,
+  ) {
+    return this.grants.revokeForPayment(paymentId, actor.id);
   }
 
   /**

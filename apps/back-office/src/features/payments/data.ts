@@ -31,3 +31,9 @@ export const voidPayment = USE_MOCKS ? mock.voidPayment : remote.voidPayment;
 export const resendConfirmation = USE_MOCKS
   ? mock.resendConfirmation
   : remote.resendConfirmation;
+export const fetchMaterialGrant = USE_MOCKS
+  ? mock.fetchMaterialGrant
+  : remote.fetchMaterialGrant;
+export const revokeMaterialGrant = USE_MOCKS
+  ? mock.revokeMaterialGrant
+  : remote.revokeMaterialGrant;

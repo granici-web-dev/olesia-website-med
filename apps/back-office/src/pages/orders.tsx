@@ -26,10 +26,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
-import {
-  OrderStatusBadge,
-  PaymentBadge,
-} from '@/features/orders/status-badges';
+import { OrderStatusBadge } from '@/features/orders/status-badges';
+import { OrderPaymentCell } from '@/features/orders/payment-cell';
 import { OrderDetailSheet } from '@/features/orders/order-detail-sheet';
 import {
   fetchOrders,
@@ -40,8 +38,16 @@ import { ordersQueryKey } from '@/features/orders/query-key';
 import type { OrderStatusFilter } from '@/features/orders/types';
 
 const t = ro.orders;
+/**
+ * `awaiting_payment` sits first for the reason the tickets' "Neachitate" does:
+ * it is the one bucket that needs no work. It is the queue of orders somebody
+ * began and never paid for, and the doctor's job there is to look and do
+ * nothing. Keeping it visible rather than hidden is what makes "the doctor
+ * sees it only once it is paid" legible instead of mysterious.
+ */
 const STATUS_TABS: OrderStatusFilter[] = [
   'all',
+  'awaiting_payment',
   'new',
   'in_progress',
   'delivered',
@@ -82,6 +88,7 @@ export function OrdersPage() {
   const counts = React.useMemo(() => {
     const c: Record<OrderStatusFilter, number> = {
       all: scoped.length,
+      awaiting_payment: 0,
       new: 0,
       in_progress: 0,
       delivered: 0,
@@ -186,8 +193,20 @@ export function OrdersPage() {
         ) : visible.length === 0 ? (
           <EmptyState
             icon={filtersActive ? SearchX : PackageOpen}
-            title={filtersActive ? t.empty.filteredTitle : t.empty.title}
-            description={filtersActive ? t.empty.filteredBody : t.empty.body}
+            title={
+              status === 'awaiting_payment' && !search
+                ? t.empty.unpaidTitle
+                : filtersActive
+                  ? t.empty.filteredTitle
+                  : t.empty.title
+            }
+            description={
+              status === 'awaiting_payment' && !search
+                ? t.empty.unpaidBody
+                : filtersActive
+                  ? t.empty.filteredBody
+                  : t.empty.body
+            }
             className="py-16"
             action={
               filtersActive ? (
@@ -250,7 +269,7 @@ export function OrdersPage() {
                     <OrderStatusBadge status={o.status} />
                   </TableCell>
                   <TableCell className="align-top">
-                    <PaymentBadge payment={o.paymentStatus} />
+                    <OrderPaymentCell order={o} />
                   </TableCell>
                   <TableCell className="text-right align-top">
                     <Button

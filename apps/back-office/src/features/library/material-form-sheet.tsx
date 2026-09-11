@@ -35,6 +35,7 @@ import {
   createMaterial,
   updateMaterial,
   uploadMaterialFile,
+  uploadPrivateMaterialFile,
 } from '@/features/library/data';
 import { materialsQueryKey } from '@/features/library/query-key';
 import {
@@ -136,9 +137,16 @@ export function MaterialFormSheet({
   const queryClient = useQueryClient();
   const fileRef = React.useRef<HTMLInputElement>(null);
 
-  /** The file is stored, not a form field — it is uploaded before the save. */
+  /**
+   * The file is stored, not a form field — it is uploaded before the save.
+   *
+   * `url` for a free material, `key` for a paid one, never both: the two live
+   * in different directories, and which one a file went to is decided by the
+   * endpoint that took it rather than by a column somebody sets afterwards.
+   */
   const [file, setFile] = React.useState<{
-    url: string;
+    url: string | null;
+    key: string | null;
     name: string;
   } | null>(null);
   const [uploading, setUploading] = React.useState(false);
@@ -156,14 +164,39 @@ export function MaterialFormSheet({
         : emptyValues(categories[0]?.id ?? ''),
     );
     setFile(
-      material?.fileUrl
-        ? { url: material.fileUrl, name: material.fileName ?? '' }
+      material?.fileUrl || material?.fileKey
+        ? {
+            url: material.fileUrl,
+            key: material.fileKey,
+            name: material.fileName ?? '',
+          }
         : null,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, material]);
 
   const access = form.watch('access');
+  const isPaid = access === 'paid';
+
+  /**
+   * Changing `access` drops the file.
+   *
+   * The two stores are separate volumes in `docker-compose.prod.yml`, so
+   * moving the bytes would be a copy plus an unlink that can half-fail — and
+   * the API refuses to keep a file across the switch for the same reason. The
+   * sheet does it here as well, visibly, so the editor finds out while she is
+   * looking at the form rather than after saving. The storefront already
+   * renders a material with no file honestly, as "în curând".
+   */
+  const previousAccess = React.useRef(access);
+  React.useEffect(() => {
+    if (previousAccess.current === access) return;
+    previousAccess.current = access;
+    if (file) {
+      setFile(null);
+      toast.info(t.toast.fileClearedOnAccessChange);
+    }
+  }, [access, file]);
 
   const onPickFile: React.ChangeEventHandler<HTMLInputElement> = async (ev) => {
     const picked = ev.target.files?.[0];
@@ -180,7 +213,17 @@ export function MaterialFormSheet({
     }
     setUploading(true);
     try {
-      setFile(await uploadMaterialFile(picked));
+      // Which endpoint decides which directory the bytes land in, and there is
+      // no later step that can move them. A paid PDF on the public route is
+      // the failure this whole step exists to close.
+      const stored = isPaid
+        ? await uploadPrivateMaterialFile(picked)
+        : await uploadMaterialFile(picked);
+      setFile({
+        url: stored.url ?? null,
+        key: stored.key ?? null,
+        name: stored.name,
+      });
       toast.success(t.toast.fileUploaded);
     } catch {
       toast.error(t.toast.error);
@@ -207,6 +250,7 @@ export function MaterialFormSheet({
       values.access === 'paid' && values.price ? Number(values.price) : null,
     flags: values.flags as Material['flags'],
     fileUrl: file?.url ?? null,
+    fileKey: file?.key ?? null,
     fileName: file?.name ?? null,
     active: values.active,
   });
@@ -398,14 +442,23 @@ export function MaterialFormSheet({
               {file ? (
                 <div className="flex items-center gap-3 rounded-lg border bg-muted/40 px-3 py-2.5">
                   <FileText className="size-4 shrink-0 text-muted-foreground" />
-                  <a
-                    href={file.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="min-w-0 flex-1 truncate text-sm underline-offset-4 hover:text-primary hover:underline"
-                  >
-                    {file.name || file.url}
-                  </a>
+                  {/* A paid file has no URL to open — it is in private storage
+                      and comes out only through a buyer's download grant. So
+                      the name is text rather than a dead link. */}
+                  {file.url ? (
+                    <a
+                      href={file.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="min-w-0 flex-1 truncate text-sm underline-offset-4 hover:text-primary hover:underline"
+                    >
+                      {file.name || file.url}
+                    </a>
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate text-sm">
+                      {file.name || f.filePrivate}
+                    </span>
+                  )}
                   <Button
                     type="button"
                     variant="outline"
@@ -442,7 +495,9 @@ export function MaterialFormSheet({
                   {uploading ? f.fileUploading : f.fileUpload}
                 </Button>
               )}
-              <p className="text-xs text-muted-foreground">{f.fileHint}</p>
+              <p className="text-xs text-muted-foreground">
+                {isPaid ? f.filePaidHint : f.fileHint}
+              </p>
               <input
                 ref={fileRef}
                 type="file"

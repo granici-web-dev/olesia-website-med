@@ -30,6 +30,7 @@ function toView(d: MaterialDto): Material {
     price: d.price,
     flags: d.flags as Material['flags'],
     fileUrl: d.fileUrl,
+    fileKey: d.fileKey,
     fileName: d.fileName,
     sortOrder: d.sortOrder,
     active: d.active,
@@ -96,11 +97,26 @@ export async function deleteMaterialCategory(id: string): Promise<void> {
   await http.del<void>(`/materials/categories/${id}`);
 }
 
-/** Upload the PDF itself. Returns the public URL plus the original filename. */
+/**
+ * Upload the PDF of a FREE material. Returns the public URL plus the original
+ * filename — the storefront links it directly.
+ */
 export async function uploadMaterialFile(
   file: File,
 ): Promise<UploadedFileInfo> {
   const form = new FormData();
   form.append('file', file);
   return http.post<UploadedFileInfo>('/materials/file', form);
+}
+
+/**
+ * Upload the PDF of a PAID material, into private storage. Returns an opaque
+ * key rather than a URL: there is no URL, which is the point.
+ */
+export async function uploadPrivateMaterialFile(
+  file: File,
+): Promise<UploadedFileInfo> {
+  const form = new FormData();
+  form.append('file', file);
+  return http.post<UploadedFileInfo>('/materials/file/private', form);
 }

@@ -203,6 +203,29 @@ export class MaterialGrantsService {
   }
 
   /**
+   * Take a buyer's access back by hand.
+   *
+   * A refund already does this on its own, inside the transaction that moves
+   * the payment out of `paid`, and that is the ordinary path. This is the one
+   * that has no money in it: a link that went somewhere it should not have,
+   * an address typed wrong, a purchase the doctor is settling another way.
+   * Admin only, and audited, because it is a capability being destroyed.
+   *
+   * The row is deleted rather than flagged: what it held was permission, and
+   * permission that has been withdrawn is not a record of anything. The
+   * payment stays, which is the record of what was bought.
+   */
+  async revokeForPayment(paymentId: string, authorId: string): Promise<void> {
+    const { count } = await this.prisma.materialGrant.deleteMany({
+      where: { paymentId },
+    });
+    if (count === 0) throw new NotFoundException('material_grant_not_found');
+    this.logger.log(
+      `audit material.grant-revoked paymentId=${paymentId} userId=${authorId}`,
+    );
+  }
+
+  /**
    * The same, but only while the grant still opens something.
    *
    * What the public return page is allowed to see. A grant that has expired or

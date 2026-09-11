@@ -1,4 +1,12 @@
-import { CircleDot, Loader, PackageCheck, Ban, Clock, Check } from 'lucide-react';
+import {
+  Ban,
+  Check,
+  CircleDot,
+  Clock,
+  Loader,
+  PackageCheck,
+  Wallet,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { ro } from '@/i18n/ro';
@@ -9,6 +17,7 @@ import {
 } from '@/features/orders/data';
 
 const STATUS_ICON = {
+  awaiting_payment: Wallet,
   new: CircleDot,
   in_progress: Loader,
   delivered: PackageCheck,

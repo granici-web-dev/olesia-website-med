@@ -43,8 +43,18 @@ export interface Material {
   /** Whole EUR, paid materials only. */
   price: number | null;
   flags: MaterialFlag[];
-  /** Null until the PDF is uploaded — the site then shows "în curând". */
+  /**
+   * The PDF, in one of two places and never both.
+   *
+   * A free material's file is a public URL under `/uploads`, because the
+   * storefront links it directly. A paid one's is an opaque key into private
+   * storage, released only by the download grant the payment mints — a paid
+   * PDF on a public URL would be one forwarded link away from free.
+   *
+   * Both null until a file is uploaded; the site then shows "în curând".
+   */
   fileUrl: string | null;
+  fileKey: string | null;
   fileName: string | null;
   sortOrder: number;
   active: boolean;
@@ -57,8 +67,13 @@ export type MaterialCategoryInput = Omit<
   'id' | 'slug' | 'sortOrder'
 >;
 
-/** What the file-upload endpoint returns. */
+/**
+ * What a file upload answers with: a public URL for a free material, an opaque
+ * storage key for a paid one. Exactly one of the two, decided by which
+ * endpoint was called.
+ */
 export interface UploadedFileInfo {
-  url: string;
+  url?: string;
+  key?: string;
   name: string;
 }
