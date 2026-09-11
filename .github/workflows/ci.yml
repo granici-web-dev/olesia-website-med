@@ -16,6 +16,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # GitHub dropped the push run for one merge on 2026-09-11 and there was no
+  # way to ask for it: a workflow with only `push` and `pull_request` can be
+  # started by nothing but another commit. This is the button.
+  workflow_dispatch:
 
 # A new push to the same branch makes the previous run pointless — cancel it
 # rather than queue behind it. Never cancel a run on main.
