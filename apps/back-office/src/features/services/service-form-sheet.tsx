@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
 import {
@@ -209,7 +210,25 @@ export function ServiceFormSheet({
       queryClient.invalidateQueries({ queryKey: servicesQueryKey });
       onOpenChange(false);
     },
-    onError: () => toast.error(ro.services.toast.error),
+    // Both clashes are unique indexes, and both have a field on this form.
+    // The Calendly one cannot name the service holding the event: the API
+    // answers with the code and nothing else.
+    onError: (err) => {
+      const code = err instanceof ApiError ? err.message : '';
+      if (code === 'code_taken') {
+        form.setError('code', { message: f.codeTaken });
+        toast.error(f.codeTaken);
+        return;
+      }
+      if (code === 'calendly_event_type_taken') {
+        form.setError('calendlyEventTypeUri', {
+          message: f.calendlyEventTypeTaken,
+        });
+        toast.error(f.calendlyEventTypeTaken);
+        return;
+      }
+      toast.error(ro.services.toast.error);
+    },
   });
 
   const errors = form.formState.errors;
@@ -264,7 +283,13 @@ export function ServiceFormSheet({
                     )}
                   />
                 )}
-                <p className="text-xs text-muted-foreground">{f.codeHint}</p>
+                {errors.code ? (
+                  <p className="text-xs font-medium text-destructive">
+                    {errors.code.message}
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">{f.codeHint}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -430,6 +455,7 @@ export function ServiceFormSheet({
                 id="calendlyEventTypeUri"
                 label={f.calendly}
                 hint={f.calendlyHint}
+                error={errors.calendlyEventTypeUri?.message}
                 optional
                 placeholder="https://api.calendly.com/event_types/…"
                 {...form.register('calendlyEventTypeUri')}

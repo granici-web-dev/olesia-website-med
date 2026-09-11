@@ -3,10 +3,9 @@ import { ImagePlus, Loader2, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { IMAGE_MAX_BYTES } from '@olesia/shared';
 import { ro } from '@/i18n/ro';
 import { uploadImage } from '@/features/blog/data';
-
-const MAX_BYTES = 5 * 1024 * 1024;
 
 /**
  * Cover image upload. Uploads to the storage module (converted to WebP) and
@@ -27,7 +26,7 @@ export function CoverImageField({
     const file = ev.target.files?.[0];
     ev.target.value = '';
     if (!file) return;
-    if (file.size > MAX_BYTES) {
+    if (file.size > IMAGE_MAX_BYTES) {
       toast.error(ro.blog.toast.coverTooLarge);
       return;
     }

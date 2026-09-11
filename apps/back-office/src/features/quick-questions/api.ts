@@ -55,7 +55,15 @@ export async function fetchTickets(): Promise<Ticket[]> {
     http.get<Response>('/quick-questions?pageSize=200'),
     http.get<Response>('/quick-questions?pageSize=200&status=awaiting_payment'),
   ]);
-  return [...asList(working), ...asList(unpaid)]
+  // The two answers are not one snapshot. A payment landing between them puts
+  // the same question in both lists, and the doctor sees the row twice, once
+  // as unpaid. The copy that is no longer awaiting payment is the later truth.
+  const byId = new Map<string, QuickQuestionDto>();
+  for (const row of [...asList(working), ...asList(unpaid)]) {
+    const seen = byId.get(row.id);
+    if (!seen || seen.status === 'awaiting_payment') byId.set(row.id, row);
+  }
+  return [...byId.values()]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map(toView);
 }

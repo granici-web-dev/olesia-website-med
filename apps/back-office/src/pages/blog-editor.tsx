@@ -202,7 +202,14 @@ export function BlogEditorPage() {
       queryClient.invalidateQueries({ queryKey: postsQueryKey });
       navigate(paths.blog);
     },
-    onError: () => toast.error(ro.blog.toast.error),
+    onError: (err) => {
+      if (err instanceof ApiError && err.message === 'slug_taken') {
+        form.setError('slug', { message: e.slugTaken });
+        toast.error(e.slugTaken);
+        return;
+      }
+      toast.error(ro.blog.toast.error);
+    },
   });
 
   const save = (status: PostStatus) =>

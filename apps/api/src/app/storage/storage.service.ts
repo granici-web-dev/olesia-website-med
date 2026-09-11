@@ -3,6 +3,12 @@ import { mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import sharp from 'sharp';
+import {
+  DOCUMENT_MAX_BYTES,
+  IMAGE_MAX_BYTES,
+  PATIENT_UPLOAD_MAX_BYTES,
+  VIDEO_MAX_BYTES,
+} from '@olesia/shared';
 
 import {
   PRIVATE_STORAGE_DIR,
@@ -31,28 +37,29 @@ export interface StoredImage {
   height: number;
 }
 
-const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 /**
- * The caps, exported because every multipart route has to repeat its own on
+ * The caps, re-exported because every multipart route has to repeat its own on
  * multer's `limits`: the check below runs after the whole part is already in
- * memory, which is too late to be the only one.
+ * memory, which is too late to be the only one. The numbers themselves are in
+ * `packages/shared`, so the back office states them before a file is sent.
  */
-export const IMAGE_MAX_BYTES = MAX_BYTES;
+export {
+  DOCUMENT_MAX_BYTES,
+  IMAGE_MAX_BYTES,
+  PATIENT_UPLOAD_MAX_BYTES,
+  VIDEO_MAX_BYTES,
+};
 
 /** Output tuning: cap the longest side and re-encode as WebP. */
 const MAX_DIMENSION = 1600;
 const WEBP_QUALITY = 80;
 
 /** Videos (site media): stored as-is, no transcoding — see `saveVideo`. */
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
-export const VIDEO_MAX_BYTES = MAX_VIDEO_BYTES;
 const VIDEO_MIME = ['video/mp4', 'video/webm'];
 
 /** Documents (written plans): larger cap, office/PDF types, stored as-is. */
-const MAX_DOC_BYTES = 20 * 1024 * 1024;
-export const DOCUMENT_MAX_BYTES = MAX_DOC_BYTES;
 const DOCUMENT_MIME = [
   'application/pdf',
   'application/msword',
@@ -70,8 +77,6 @@ const DOCUMENT_MIME = [
  * caps the long edge at 1600px and re-encodes to WebP, which is exactly the
  * wrong thing to do to a photograph of small print in a lab table.
  */
-const MAX_PATIENT_UPLOAD_BYTES = 15 * 1024 * 1024;
-
 /** MIME types a patient may send — surfaced to the upload page's `accept`. */
 export const PATIENT_UPLOAD_MIME = [
   ...DOCUMENT_MIME,
@@ -81,8 +86,6 @@ export const PATIENT_UPLOAD_MIME = [
   'image/heic',
   'image/heif',
 ];
-export const PATIENT_UPLOAD_MAX_BYTES = MAX_PATIENT_UPLOAD_BYTES;
-
 /**
  * The signature every declared type has to actually have.
  *
@@ -125,7 +128,7 @@ export class StorageService {
         'Unsupported image type (use JPEG/PNG/WebP).',
       );
     }
-    if (file.size > MAX_BYTES) {
+    if (file.size > IMAGE_MAX_BYTES) {
       throw new BadRequestException('Image exceeds the 5 MB limit.');
     }
     return this.storeImageBuffer(file.buffer);
@@ -184,8 +187,8 @@ export class StorageService {
     if (!file) {
       throw new BadRequestException('No file uploaded.');
     }
-    if (file.size > MAX_DOC_BYTES) {
-      throw new BadRequestException('Document exceeds the 20 MB limit.');
+    if (file.size > DOCUMENT_MAX_BYTES) {
+      throw new BadRequestException('file_too_large');
     }
     const ext = this.verifiedExtension(file, DOCUMENT_MIME);
 
@@ -208,7 +211,7 @@ export class StorageService {
     if (!file) {
       throw new BadRequestException('No file uploaded.');
     }
-    if (file.size > MAX_VIDEO_BYTES) {
+    if (file.size > VIDEO_MAX_BYTES) {
       throw new BadRequestException('Video exceeds the 50 MB limit.');
     }
     const ext = this.verifiedExtension(file, VIDEO_MIME);
@@ -229,8 +232,8 @@ export class StorageService {
     file: UploadedImage | undefined,
   ): Promise<{ key: string }> {
     if (!file) throw new BadRequestException('No file uploaded.');
-    if (file.size > MAX_DOC_BYTES) {
-      throw new BadRequestException('Document exceeds the 20 MB limit.');
+    if (file.size > DOCUMENT_MAX_BYTES) {
+      throw new BadRequestException('file_too_large');
     }
     const ext = this.verifiedExtension(file, DOCUMENT_MIME);
     const key = `${randomUUID()}.${ext}`;
@@ -259,7 +262,7 @@ export class StorageService {
     file: UploadedImage | undefined,
   ): Promise<{ key: string; ext: string }> {
     if (!file) throw new BadRequestException('No file uploaded.');
-    if (file.size > MAX_PATIENT_UPLOAD_BYTES) {
+    if (file.size > PATIENT_UPLOAD_MAX_BYTES) {
       throw new BadRequestException('file_too_large');
     }
     const ext = this.verifiedExtension(file, PATIENT_UPLOAD_MIME);

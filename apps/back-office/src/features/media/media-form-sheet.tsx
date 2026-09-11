@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { IMAGE_MAX_BYTES } from '@olesia/shared';
 import { ro } from '@/i18n/ro';
 
 import {
@@ -47,7 +48,6 @@ import {
 const t = ro.media;
 const f = t.form;
 
-const MAX_THUMB_BYTES = 5 * 1024 * 1024;
 
 const schema = z.object({
   url: z
@@ -183,7 +183,7 @@ export function MediaFormSheet({
     const file = ev.target.files?.[0];
     ev.target.value = '';
     if (!file) return;
-    if (file.size > MAX_THUMB_BYTES) {
+    if (file.size > IMAGE_MAX_BYTES) {
       toast.error(t.toast.thumbTooLarge);
       return;
     }

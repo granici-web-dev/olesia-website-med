@@ -1,6 +1,11 @@
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SITE_MEDIA_SLOTS, type SiteMediaSlot } from '@olesia/shared';
+import {
+  IMAGE_MAX_BYTES,
+  SITE_MEDIA_SLOTS,
+  VIDEO_MAX_BYTES,
+  type SiteMediaSlot,
+} from '@olesia/shared';
 import {
   AlertTriangle,
   ExternalLink,
@@ -33,8 +38,6 @@ import type { SiteMediaOverride } from '@/features/site-media/types';
 
 const t = ro.siteMedia;
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 const IMAGE_EXT = ['.jpg', '.jpeg', '.png', '.webp'];
 const VIDEO_EXT = ['.mp4', '.webm'];
 
@@ -97,7 +100,7 @@ export function SiteMediaPage() {
       toast.error(isVideo ? t.toast.wrongTypeVideo : t.toast.wrongTypeImage);
       return;
     }
-    if (file.size > (isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES)) {
+    if (file.size > (isVideo ? VIDEO_MAX_BYTES : IMAGE_MAX_BYTES)) {
       toast.error(isVideo ? t.toast.tooLargeVideo : t.toast.tooLargeImage);
       return;
     }

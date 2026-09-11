@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { DOCUMENT_MAX_BYTES } from '@olesia/shared';
 import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
@@ -50,7 +51,6 @@ import {
 const t = ro.library;
 const f = t.form;
 
-const MAX_FILE_BYTES = 20 * 1024 * 1024;
 const ALLOWED_EXT = ['.pdf', '.doc', '.docx'];
 
 const optionalInt = z
@@ -202,7 +202,7 @@ export function MaterialFormSheet({
     const picked = ev.target.files?.[0];
     ev.target.value = '';
     if (!picked) return;
-    if (picked.size > MAX_FILE_BYTES) {
+    if (picked.size > DOCUMENT_MAX_BYTES) {
       toast.error(t.toast.fileTooLarge);
       return;
     }

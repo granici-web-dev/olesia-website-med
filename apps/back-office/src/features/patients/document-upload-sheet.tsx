@@ -13,6 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DOCUMENT_MAX_BYTES, megabytes } from '@olesia/shared';
+import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
 import { uploadDocument } from '@/features/patients/data';
@@ -55,13 +57,31 @@ export function DocumentUploadSheet({
       queryClient.invalidateQueries({ queryKey: patientQueryKey(patientId) });
       onOpenChange(false);
     },
-    onError: () => toast.error(ro.patients.toast.error),
+    // The parser stops an oversized part before the handler is entered, which
+    // Nest renders as a 413; the service answers `file_too_large` for whatever
+    // gets past it. Both are the same sentence to the doctor.
+    onError: (err) => {
+      const tooLarge =
+        err instanceof ApiError &&
+        (err.status === 413 || err.message === 'file_too_large');
+      toast.error(
+        tooLarge
+          ? f.tooLarge(megabytes(DOCUMENT_MAX_BYTES))
+          : ro.patients.toast.error,
+      );
+    },
   });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
       toast.error(f.noFile);
+      return;
+    }
+    // Refused here rather than after the upload: a 20 MB scan over a phone
+    // tether is a minute of waiting for a refusal we could state at once.
+    if (file.size > DOCUMENT_MAX_BYTES) {
+      toast.error(f.tooLarge(megabytes(DOCUMENT_MAX_BYTES)));
       return;
     }
     mutation.mutate();
@@ -122,7 +142,9 @@ export function DocumentUploadSheet({
                 >
                   <UploadCloud className="size-6" strokeWidth={1.75} />
                   <span className="font-medium text-foreground">{f.choose}</span>
-                  <span className="text-xs">PDF, DOC, DOCX</span>
+                  <span className="text-xs">
+                    {f.accept(megabytes(DOCUMENT_MAX_BYTES))}
+                  </span>
                 </button>
               )}
             </div>

@@ -2,11 +2,10 @@ import * as React from 'react';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { IMAGE_MAX_BYTES } from '@olesia/shared';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 import { uploadImage } from '@/features/about/data';
-
-const MAX_BYTES = 5 * 1024 * 1024;
 const a = ro.about;
 
 /**
@@ -34,7 +33,7 @@ export function ImagesField({
     if (files.length === 0) return;
 
     const accepted = files.filter((f) => {
-      if (f.size > MAX_BYTES) {
+      if (f.size > IMAGE_MAX_BYTES) {
         toast.error(a.toast.imageTooLarge);
         return false;
       }

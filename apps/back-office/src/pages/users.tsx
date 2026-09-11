@@ -49,6 +49,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 import { useAuth } from '@/auth/auth-context';
 
@@ -124,7 +125,16 @@ export function UsersPage() {
       setBlocking(null);
       invalidate();
     },
-    onError: () => toast.error(t.toast.error),
+    onError: (err) => {
+      const code = err instanceof ApiError ? err.message : '';
+      toast.error(
+        code === 'last_admin'
+          ? t.toast.lastAdmin
+          : code === 'cannot_deactivate_self'
+            ? t.toast.cannotDeactivateSelf
+            : t.toast.error,
+      );
+    },
   });
 
   const resetMutation = useMutation({

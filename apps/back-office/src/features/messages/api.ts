@@ -9,12 +9,24 @@ import type { Message } from '@/features/messages/types';
  * here we list them, mark them read, and delete them.
  */
 
+const KNOWN_SUBJECTS: readonly Message['subject'][] = [
+  'appointment',
+  'payment',
+  'how_it_works',
+  'other',
+];
+
 function toView(d: ContactMessageDto): Message {
   return {
     id: d.id,
     name: d.name,
     email: d.email,
-    subject: d.subject as Message['subject'],
+    // `Re: ${subjects[subject]}` goes into a mailto the doctor sends, and a
+    // subject this build does not know would put `Re: undefined` in front of
+    // the person who wrote in.
+    subject: KNOWN_SUBJECTS.includes(d.subject as Message['subject'])
+      ? (d.subject as Message['subject'])
+      : 'other',
     message: d.message,
     status: d.status as Message['status'],
     readAt: d.readAt,

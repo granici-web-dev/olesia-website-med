@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
 import {
@@ -99,7 +100,29 @@ export function UserFormSheet({
       queryClient.invalidateQueries({ queryKey: usersQueryKey });
       onOpenChange(false);
     },
-    onError: () => toast.error(ro.users.toast.error),
+    // Four refusals, each a different conversation: the address is taken, the
+    // account is the last admin, or the change is one nobody may make on
+    // themselves. "A apărut o eroare" answered all four the same way.
+    onError: (err) => {
+      const code = err instanceof ApiError ? err.message : '';
+      if (code === 'email_taken') {
+        form.setError('email', { message: ro.users.form.emailTaken });
+        toast.error(ro.users.form.emailTaken);
+        return;
+      }
+      const roleRefusal =
+        code === 'last_admin'
+          ? ro.users.toast.lastAdmin
+          : code === 'cannot_demote_self'
+            ? ro.users.toast.cannotDemoteSelf
+            : null;
+      if (roleRefusal) {
+        form.setError('role', { message: roleRefusal });
+        toast.error(roleRefusal);
+        return;
+      }
+      toast.error(ro.users.toast.error);
+    },
   });
 
   const errors = form.formState.errors;
@@ -178,9 +201,15 @@ export function UserFormSheet({
                   </Select>
                 )}
               />
-              <p className="text-xs text-muted-foreground">
-                {ro.users.roleHint[role]}
-              </p>
+              {errors.role ? (
+                <p className="text-xs font-medium text-destructive">
+                  {errors.role.message}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {ro.users.roleHint[role]}
+                </p>
+              )}
             </div>
 
             {!isEdit && (

@@ -11,6 +11,29 @@ import type { Order, OrderStatus } from '@/features/orders/types';
  * outside the bank is recorded through `/payments/manual`.
  */
 
+const KNOWN_STATUSES: readonly Order['status'][] = [
+  'awaiting_payment',
+  'new',
+  'in_progress',
+  'delivered',
+  'canceled',
+];
+
+/**
+ * A status this build has never heard of goes in the working queue.
+ *
+ * `OrderStatusBadge` looks its icon up in a literal map, so an unrecognised
+ * value renders `<undefined />` and takes the whole table down with it. The
+ * panel being one deploy behind the API is the ordinary way that happens, and
+ * `new` is the answer that puts the row in front of the doctor rather than
+ * hiding it: the detail sheet still shows what the order really says.
+ */
+function toStatus(status: string): Order['status'] {
+  return KNOWN_STATUSES.includes(status as Order['status'])
+    ? (status as Order['status'])
+    : 'new';
+}
+
 function toView(d: DeliverableOrderDto): Order {
   return {
     id: d.id,
@@ -21,7 +44,7 @@ function toView(d: DeliverableOrderDto): Order {
     clientEmail: d.clientEmail,
     phone: d.phone,
     notes: d.notes,
-    status: d.status as Order['status'],
+    status: toStatus(d.status),
     paymentStatus: d.paymentStatus as Order['paymentStatus'],
     deliveredAt: d.deliveredAt,
     createdAt: d.createdAt,
@@ -50,7 +73,15 @@ export async function fetchOrders(): Promise<Order[]> {
     http.get<Response>('/deliverable-orders?pageSize=200'),
     http.get<Response>('/deliverable-orders?pageSize=200&status=awaiting_payment'),
   ]);
-  return [...asList(working), ...asList(unpaid)]
+  // The two answers are not one snapshot. A payment landing between them puts
+  // the same order in both lists, and the doctor sees the row twice, once as
+  // unpaid. The copy that is no longer awaiting payment is the later truth.
+  const byId = new Map<string, DeliverableOrderDto>();
+  for (const row of [...asList(working), ...asList(unpaid)]) {
+    const seen = byId.get(row.id);
+    if (!seen || seen.status === 'awaiting_payment') byId.set(row.id, row);
+  }
+  return [...byId.values()]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map(toView);
 }

@@ -431,6 +431,9 @@ export const ro = {
       editSubtitle: 'Modifică detaliile tarifului.',
       code: 'Cod serviciu',
       codeHint: 'Identificator unic. Nu se mai poate schimba după creare.',
+      codeTaken: 'Acest cod aparține altui serviciu. Alege altul.',
+      calendlyEventTypeTaken:
+        'Acest eveniment Calendly este deja legat de alt serviciu. Un eveniment ține de un singur serviciu, altfel rezervarea nu știe ce s-a cumpărat.',
       group: 'Tip serviciu',
       content: 'Conținut',
       titleField: 'Titlu',
@@ -562,6 +565,7 @@ export const ro = {
         'Generat din titlul RO. Poate fi editat: litere mici, cifre și liniuțe.',
       slugInvalid:
         'Doar litere mici, cifre și liniuțe. Un titlu scris cu chirilice nu produce un slug — scrieți-l aici cu litere latine.',
+      slugTaken: 'Acest slug este folosit de alt articol. Alege altul.',
       cover: 'Imagine de copertă',
       coverHint: 'JPG sau PNG, până la 5 MB.',
       uploadCover: 'Încarcă imagine',
@@ -860,6 +864,9 @@ export const ro = {
       save: 'Încarcă',
       saving: 'Se încarcă…',
       noFile: 'Alege un fișier pentru încărcare.',
+      accept: (mb: number) => `PDF, DOC, DOCX, până la ${mb} MB`,
+      tooLarge: (mb: number) =>
+        `Fișierul depășește ${mb} MB. Trimite unul mai mic.`,
     },
 
     fromLead: {
@@ -1590,6 +1597,7 @@ export const ro = {
       required: 'Câmp obligatoriu',
       invalidEmail: 'Email invalid',
       passwordMin: 'Minimum 8 caractere',
+      emailTaken: 'Există deja un cont cu această adresă.',
     },
 
     toast: {
@@ -1597,6 +1605,12 @@ export const ro = {
       updated: 'Utilizatorul a fost actualizat.',
       blocked: 'Utilizatorul a fost blocat.',
       unblocked: 'Utilizatorul a fost deblocat.',
+      lastAdmin:
+        'Este ultimul administrator activ. Fă alt cont administrator înainte de a-l schimba pe acesta.',
+      cannotDemoteSelf:
+        'Nu îți poți schimba singur rolul. Cere-i altui administrator să o facă.',
+      cannotDeactivateSelf:
+        'Nu îți poți bloca propriul cont. Cere-i altui administrator să o facă.',
       passwordReset: 'Parolă nouă generată — comunic-o utilizatorului.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
