@@ -580,7 +580,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
-| A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[ ]` |
+| A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[>]` аудит 2026-09-11, 31 находка + critique, harden в работе |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[ ]` |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
@@ -706,6 +706,32 @@ Calendly до клика, подписка создаёт строку и отк
 в статьях, нет `global-error.tsx`: всё в A7. Отписка от рассылки появится
 вместе с письмами, до тех пор удаление адреса это действие в бэк-офисе, и
 `/gdpr` говорит это.
+
+Аудит A7 (2026-09-11, 31 находка + critique) уточнил план: кириллица в
+шрифтах есть, `subsets` управляет только предзагрузкой, `agentation` из
+бандла выпадает, `sizes` везде, паритет i18n точный. Новое: `Disallow` в
+robots не совпадает ни с одним реальным URL, потому что маршруты с префиксом
+локали, и токены загрузки не закрыты от индексации; `not-found.tsx` нет ни на
+одном уровне, 404 отдаёт документ без `<html>` на английском; ни одна страница
+не пререндерится, ноль `generateStaticParams`; метаданные как класс
+отсутствуют целиком (canonical, hreflang, OG, иконки, JSON-LD кроме FAQ);
+`siteUrl()` без env даёт `localhost` в robots и sitemap; фокус на четырёх
+формах 1.56:1; skip-link нет; 12 МБ активов не ссылается ничем; шесть страниц
+обещают «~1ч» вшитым текстом, пока две другие читают SLA из API;
+`CALENDLY_FALLBACK_URLS` с аккаунтом разработчика пережил A6; `/services`
+держит вторую копию списков «что входит», 15 из 57 пунктов уже разошлись с
+главной; `type Bi` объявлен 18 раз, `lc` 15 раз, базовый URL API 4 раза.
+Решения: пререндер через `generateStaticParams` и `setRequestLocale`; CSP в
+Report-Only с `'unsafe-inline'` для скриптов и отчётами на маршрут сайта, без
+nonce; `not-found.tsx` и `global-error.tsx`; хелпер метаданных с canonical,
+hreflang и x-default, OG и иконки из портрета, JSON-LD Physician/Article/
+BreadcrumbList; `siteUrl()` бросает в production; SLA и длительность из API на
+всех страницах; Calendly-фолбэк и константа бесплатной консультации
+удаляются, нет ссылки в каталоге, нет кнопки; `/services` читает
+`SERVICE_INCLUDED`; `zustand` уходит отовсюду, `react-query` из манифеста
+сайта, `agentation` в dev; сайт переходит на `react-markdown` (решение A4);
+alt у фотографий `/about` это поле редактора, A9; `<img>` → `next/image`
+вместе с деплоем API, потому что хост картинок зашит в сборку.
 
 Проходы программы аудита: A1 (10a), A6 (10b, 10e), A7 (10c, 10d, 10e).
 
