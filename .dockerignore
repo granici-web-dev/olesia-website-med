@@ -1,3 +1,9 @@
+# What never needs to reach a build.
+#
+# The context was 506 MB, 396 of it the client's videos and PDFs in `docs/`
+# (audit A11, M9). Every byte of that is sent to the daemon on every build,
+# and on a CI runner that is the build.
+
 .git
 node_modules
 **/node_modules
@@ -14,3 +20,21 @@ out
 .playwright-mcp
 .agents
 apps/api/src/generated
+
+# The decision log and the reference design: 420 MB between them, and neither
+# is compiled into anything.
+docs
+screenshots
+apps/frontend/origin
+
+# Tooling that belongs to whoever is working on this, not to the image.
+.vercel
+.claude
+.codex
+.idea
+.vscode
+.DS_Store
+
+# Documentation. The three standards files and AGENTS.md are the ones a build
+# would notice missing, and it would not: nothing reads them at build time.
+*.md

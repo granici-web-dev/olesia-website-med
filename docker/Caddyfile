@@ -2,31 +2,75 @@
 #
 # Two hostnames, both from the environment so the same image serves the real
 # domain and a laptop. CADDY_TLS is the switch, and compose fills it from
-# ACME_EMAIL: an address means a certificate from Let's Encrypt, and an empty
-# ACME_EMAIL becomes the literal `internal`, so Caddy issues its own. That is
-# what makes an acceptance run on `localhost` possible without a public CA.
-# The substitution happens in compose rather than here because Caddy's own
-# `{$VAR:default}` only defaults when the variable is unset, and compose always
-# sets it.
+# ACME_EMAIL: an address means a certificate from Let's Encrypt, the literal
+# `internal` makes Caddy issue its own, which is what an acceptance run on
+# `localhost` needs. Neither has a default any more — a blank ACME_EMAIL used
+# to mean `internal`, so a half-filled .env produced a public host serving a
+# self-signed certificate (audit A11, M8).
 #
 # The admin host answers /api itself rather than sending the browser to the API
 # host: the refresh cookie is host-only and SameSite=Lax, and a cross-origin
 # back office would need CORS plus SameSite=None on a cookie that carries a
 # session into patient data.
-
 {
 	admin off
+}
+
+# Shared by both hosts. `preload` is the strongest form of HSTS and these two
+# names are HTTPS-only by construction; the apex domain is Vercel's and sets
+# its own.
+#
+# These replace what helmet sets on API responses rather than adding to it,
+# which is deliberate for `Referrer-Policy`: helmet's default is `no-referrer`,
+# nobody chose it, and the site sends `strict-origin-when-cross-origin`
+# (next.config.ts). One answer across the three surfaces beats three.
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		# The version number is an invitation to look up which CVEs apply.
+		-Server
+	}
 }
 
 {$CADDY_API_HOST} {
 	tls {$CADDY_TLS}
 	encode zstd gzip
+	import security_headers
+
+	# The largest thing a stranger can legitimately send here is one patient
+	# document (15 MB, PATIENT_UPLOAD_MAX_BYTES), and multer's own ceiling only
+	# applies once the body has been read. This one refuses it at the edge.
+	request_body {
+		max_size 20MB
+	}
+
 	reverse_proxy api:3333
 }
 
 {$CADDY_ADMIN_HOST} {
 	tls {$CADDY_TLS}
 	encode zstd gzip
+	import security_headers
+
+	# The doctor uploads videos for the site's media slots, and those are
+	# capped at 50 MB (VIDEO_MAX_BYTES). Raise both together or the panel will
+	# report a failure Caddy caused.
+	request_body {
+		max_size 60MB
+	}
+
+	header {
+		X-Frame-Options "DENY"
+		# The panel loads its own bundle, its own styles, and images and videos
+		# the doctor uploaded — which the API serves from its own host, because
+		# a stored file URL keeps the origin it was minted at. `unsafe-inline`
+		# for styles is Radix, which positions every popover and dialog with a
+		# style attribute.
+		Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https://{$CADDY_API_HOST}; media-src 'self' blob: https://{$CADDY_API_HOST}; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+	}
 
 	# The two paths the API owns on this host. /health sits outside the API's
 	# global /api prefix, so it needs naming separately.

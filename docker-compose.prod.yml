@@ -88,14 +88,34 @@ services:
       retries: 10
     logging: *logging
 
+  # Pending migrations, applied once per deploy by a container that exits.
+  # They used to run in the API's own CMD, which is why the Prisma CLI — and a
+  # tool that can rewrite the schema of a database full of patient records —
+  # sat in the long-lived image (audit A11, M10).
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+      target: migrate
+    restart: 'no'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+    logging: *logging
+
   api:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
+      target: runtime
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
       PORT: '3333'
@@ -188,9 +208,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
-      # Migrations run before the server listens, and 26 of them against a cold
-      # Postgres take longer than one interval.
-      start_period: 40s
+      start_period: 20s
     logging: *logging
 
   # Nightly dump of the database AND the uploaded files. Both, because a dump

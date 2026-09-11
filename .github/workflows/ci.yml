@@ -5,10 +5,10 @@
 # merging blind or checking out every branch locally. A green tick here means
 # the types still line up and all three apps still build on that branch.
 #
-# It also runs all three unit suites and applies every migration to a clean
-# Postgres. What it still does NOT tell you: whether a page renders correctly,
-# whether an integration with Calendly or the bank actually works end to end, or
-# whether the Docker image still builds — no job here touches `docker/`.
+# It also runs all three unit suites, applies every migration to a clean
+# Postgres, and builds the API image. What it still does NOT tell you: whether
+# a page renders correctly, or whether an integration with Calendly or the bank
+# actually works end to end.
 
 name: CI
 
@@ -150,3 +150,33 @@ jobs:
             --from-config-datasource \
             --to-schema prisma/schema.prisma \
             --exit-code
+
+  # The image broke twice without anyone finding out until a deploy: once when
+  # the workspace `node_modules` stopped being copied and the container could
+  # not start at all (PLAN.md step 8e), and once over a pruned lockfile. Both
+  # are build failures, and a build is a thing CI can do (audit A11, M9).
+  #
+  # No push: there is no registry yet, and the question this answers is whether
+  # the Dockerfile still produces an image, not where the image goes.
+  image:
+    name: Build API image
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build the API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.api
+          target: runtime
+          push: false
+          # Without a cache every run reinstalls the whole workspace. GitHub's
+          # own cache is scoped per branch with a fallback to the default one,
+          # which is the shape a Dependabot PR needs.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

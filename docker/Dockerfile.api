@@ -6,6 +6,10 @@
 # image: it is 2 GB of build tooling, and the earlier attempt to ship it also
 # shipped a `@olesia/shared` symlink pointing at a `packages/` directory that
 # was never copied, which is why the container could not start at all.
+#
+# Three stages come out of this file. `runtime` is the server and the default;
+# `migrate` is the same install with devDependencies, which is where the Prisma
+# CLI now lives, and it runs once per deploy and exits.
 
 # --- builder ---
 FROM node:22-slim AS builder
@@ -22,6 +26,40 @@ RUN pnpm exec prisma generate --schema apps/api/prisma/schema.prisma
 # `prune` depends on `build`, so this compiles main.js and seed.js as well.
 RUN pnpm nx prune api
 
+# --- migrations ---
+# Applying migrations is this image's whole job. It runs once per deploy and
+# exits; the server image no longer carries a `prisma` binary, and no longer
+# runs a schema-mutating command as its first act (audit A11, M10).
+#
+# ⚠ It does NOT make the runtime image smaller, which is what M10 expected.
+# `@prisma/client` declares `prisma` as an optional peer dependency, and the
+# pruned lockfile carries the resolution the workspace made for it — so
+# `pnpm install --prod` materialises the CLI's 160 MB of `@prisma/studio-core`,
+# `effect`, `pglite` and TypeScript into `node_modules/.pnpm` whether or not
+# anything can reach them. Measured: 218,656,582 bytes before, 218,646,950
+# after. Getting those bytes out means not having the CLI in the workspace at
+# all, which is a larger change than this one.
+FROM node:22-slim AS migrate
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+WORKDIR /app
+ENV NODE_ENV=production
+
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/apps/api/dist ./
+# `--prod=false` rather than a bare install: NODE_ENV is production above, and
+# pnpm reads that as --prod, which leaves out the one package this image exists
+# for. The CLI is a devDependency of apps/api, and this is the only image that
+# installs it.
+RUN pnpm install --prod=false --frozen-lockfile && pnpm store prune
+
+COPY --from=builder /app/apps/api/prisma ./prisma
+COPY --from=builder /app/apps/api/prisma.config.ts ./prisma.config.ts
+
+USER node
+CMD ["node_modules/.bin/prisma", "migrate", "deploy", "--schema", "prisma/schema.prisma"]
+
 # --- runtime ---
 FROM node:22-slim AS runtime
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
@@ -34,6 +72,8 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
 COPY --from=builder /app/apps/api/dist ./
 RUN pnpm install --prod --frozen-lockfile && pnpm store prune
 
+# The schema travels with the server even though it no longer applies
+# migrations: `seed.js` is run by hand from this image (docs/deployment.md).
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/apps/api/prisma.config.ts ./prisma.config.ts
 
@@ -45,7 +85,7 @@ RUN mkdir -p /app/uploads /app/private-uploads \
 USER node
 EXPOSE 3333
 
-# Apply pending migrations, then start the server. The seed is deliberately not
-# here: it is a runbook step (`node seed.js`), run once, by a person who has the
-# administrator password in hand.
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy --schema prisma/schema.prisma && node main.js"]
+# Just the server. Migrations are the `migrate` service's job, and the seed is
+# deliberately nobody's: it is a runbook step (`node seed.js`), run once, by a
+# person who has the administrator password in hand.
+CMD ["node", "main.js"]
