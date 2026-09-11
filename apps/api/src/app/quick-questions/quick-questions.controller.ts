@@ -3,9 +3,9 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { QuickQuestionsService } from './quick-questions.service';
 import { AnswerTicketDto } from './dto/quick-question.dto';
+import { ListTicketsQueryDto } from './dto/list-tickets-query.dto';
 
 /** Quick-question tickets (module_calendly.md §3.2.5) — admin/editor. */
 @ApiTags('quick-questions')
@@ -16,7 +16,7 @@ export class QuickQuestionsController {
   constructor(private readonly tickets: QuickQuestionsService) {}
 
   @Get()
-  findAll(@Query() query: PaginationQueryDto) {
+  findAll(@Query() query: ListTicketsQueryDto) {
     return this.tickets.findAll(query);
   }
 

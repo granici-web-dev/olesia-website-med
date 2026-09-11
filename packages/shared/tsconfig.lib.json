@@ -9,5 +9,8 @@
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],
+  // Specs run under the API's Jest (see apps/api/jest.config.cts) and must not
+  // reach dist: this package is consumed as compiled JavaScript.
+  "exclude": ["src/**/*.spec.ts"],
   "references": []
 }

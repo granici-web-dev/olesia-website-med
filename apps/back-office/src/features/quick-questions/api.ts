@@ -5,10 +5,7 @@ import type {
 } from '@olesia/shared';
 
 import { http } from '@/api/http';
-import type {
-  AnsweredTicket,
-  Ticket,
-} from '@/features/quick-questions/types';
+import type { AnsweredTicket, Ticket } from '@/features/quick-questions/types';
 
 /**
  * Real `quick-questions` endpoints (module_calendly.md §3.2.5) — the SLA
@@ -24,7 +21,10 @@ function toView(d: QuickQuestionDto): Ticket {
     phone: d.phone,
     question: d.question,
     // The UI has no "closed" bucket; a closed ticket has an answer → "answered".
-    status: d.status === 'open' ? 'open' : 'answered',
+    status:
+      d.status === 'awaiting_payment' || d.status === 'open'
+        ? d.status
+        : 'answered',
     answer: d.answer,
     answeredAt: d.answeredAt,
     paymentStatus: d.paymentStatus as Ticket['paymentStatus'],

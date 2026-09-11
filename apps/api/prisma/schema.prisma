@@ -75,6 +75,9 @@ enum SubscriptionStatus {
 }
 
 enum QuickQuestionStatus {
+  /// Written, not paid for, invisible to the doctor. See the QuickQuestion
+  /// model comment and docs/shape-express-checkout.md.
+  awaiting_payment
   open
   answered
   closed
@@ -285,7 +288,11 @@ model QuickQuestion {
   answer        String?
   status        QuickQuestionStatus @default(open)
   paymentStatus PaymentStatus       @default(pending)
-  dueAt         DateTime // 48h SLA deadline
+  /// When the answer is owed, in working time. Null until the money lands: the
+  /// SLA clock starts at payment, not at submission, so an unpaid ticket must
+  /// not carry a deadline the back office's overdue counter would then count
+  /// (docs/shape-express-checkout.md, approved 2026-09-11).
+  dueAt         DateTime?
   answeredAt    DateTime?
   patient       Patient?            @relation(fields: [patientId], references: [id])
   patientId     String?
@@ -943,6 +950,18 @@ model Payment {
   paymentId  String? @unique
   /// Our own order reference, sent as `orderInfo.id` and echoed back.
   orderId    String  @unique
+  /// The buyer's own idea of "this purchase", minted by the checkout page and
+  /// kept in sessionStorage. A second submit of the same form — a double click,
+  /// a back button, a reload — finds this row and is handed the checkout URL it
+  /// already has, instead of opening a second session and a second ticket.
+  intentKey  String? @unique
+  /// The bank's hosted page for this session. Stored because maib returns it
+  /// exactly once, in the response to `POST /v2/checkouts`, and `GET
+  /// /v2/checkouts/{id}` does not carry it — so without this column an
+  /// `intentKey` that is supposed to hand back "the same checkout" has nothing
+  /// to hand back. Never leaves the API on a read route: it is a live link to
+  /// a card form.
+  checkoutUrl String?
 
   state    PaymentState @default(created)
   amount   Decimal      @db.Decimal(12, 2)
@@ -991,6 +1010,10 @@ model Payment {
   expiresAt DateTime?
   paidAt    DateTime?
   failedAt  DateTime?
+  /// When the bank's required payment confirmation left. Null means it did not:
+  /// with no SMTP nothing is delivered, and the back office shows the payment as
+  /// unconfirmed with a resend action rather than claiming a receipt was sent.
+  confirmationSentAt DateTime?
 
   refunds   PaymentRefund[]
   createdAt DateTime        @default(now())

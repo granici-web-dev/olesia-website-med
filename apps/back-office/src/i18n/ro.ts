@@ -919,6 +919,7 @@ export const ro = {
     refresh: 'Reîmprospătează',
 
     status: {
+      unpaid: 'Neachitat',
       open: 'Deschis',
       overdue: 'Întârziat',
       answered: 'Răspuns salvat',
@@ -931,6 +932,7 @@ export const ro = {
 
     tabs: {
       all: 'Toate',
+      unpaid: 'Neachitate',
       open: 'Deschise',
       overdue: 'Întârziate',
       answered: 'Răspunse',

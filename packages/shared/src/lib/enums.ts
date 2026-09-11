@@ -89,6 +89,14 @@ export enum SubscriptionStatus {
 
 /** Lifecycle of a "Întrebare rapidă" ticket (service 05). */
 export enum QuickQuestionStatus {
+  /**
+   * Written, paid for by nobody yet, and invisible to the doctor. This is how
+   * "an answer only after payment" is enforced: the ticket exists from the
+   * moment the form is submitted so a closed tab loses nothing, but it is not
+   * in the working list and has no answer box until the bank says the money
+   * arrived (docs/shape-express-checkout.md, approved 2026-09-11).
+   */
+  AwaitingPayment = 'awaiting_payment',
   Open = 'open',
   Answered = 'answered',
   Closed = 'closed',

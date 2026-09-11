@@ -6,3 +6,5 @@ export * from './lib/site-media.js';
 export * from './lib/slugify.js';
 export * from './lib/patient-consent.js';
 export * from './lib/newsletter.js';
+export * from './lib/phone.js';
+export * from './lib/terms.js';

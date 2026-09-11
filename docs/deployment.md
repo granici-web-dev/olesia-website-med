@@ -158,6 +158,22 @@ The callback also needs the API reachable from the internet over HTTPS at
 `PUBLIC_API_URL`. Until that exists the signature path stays unproven — see
 `docs/payments-maib-checkout.md`.
 
+`PAYMENT_CURRENCY` is a testing affordance and nothing else. The catalog quotes
+EUR, production charges EUR, and setting this variable in production is ignored
+with a warning. It exists so the end-to-end run against the sandbox can go
+through in MDL while the merchant profile still refuses EUR
+(`docs/shape-express-checkout.md`, decision 5).
+
+**The registered entity** — `LEGAL_ENTITY_NAME`, `LEGAL_ENTITY_IDNO`,
+`LEGAL_ENTITY_ADDRESS` — is named on `/gdpr`, on `/terms` and on the payment
+confirmation email the bank's go-live checklist requires. All three come from
+here so the three surfaces cannot disagree, and the site's own copy of them was
+deleted with this step. They are deliberately **not** in the boot check: the
+client's incorporation does not exist yet, and the rest of the site is not
+blocked on it. While they are empty the legal pages render their draft banner
+and `POST /leads/quick-question/checkout` answers `503 legal_entity_missing`.
+Nothing else changes.
+
 `MEDICAL_UPLOAD_RETENTION_DAYS` defaults to 180 — **a placeholder**, pending the
 client's and her lawyer's answer on how long medical files may be kept.
 

@@ -18,6 +18,10 @@ module.exports = {
     '^.+\\.[cm]?[tj]s$': ['@swc/jest', swcJestConfig],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
+  // `packages/shared` has no runner of its own and does not warrant one for
+  // two pure helpers. Its specs run here, against the source rather than the
+  // built dist, so a change is covered before it is compiled.
+  roots: ['<rootDir>/src', '<rootDir>/../../packages/shared/src'],
   // otplib ships ESM only, as do the crypto packages it pulls in, so the TOTP
   // tests need them compiled like our own sources. Everything else in
   // node_modules is left alone, which is what the default pattern does.

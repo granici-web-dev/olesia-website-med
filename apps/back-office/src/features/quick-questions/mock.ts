@@ -21,6 +21,7 @@ type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 const MOCK_SLA_HOURS = 1;
 
 export const bucketBadgeVariant: Record<TicketBucket, BadgeVariant> = {
+  unpaid: 'warning',
   open: 'info',
   overdue: 'destructive',
   answered: 'success',
@@ -37,25 +38,30 @@ export const paymentBadgeVariant: Record<PaymentStatus, BadgeVariant> = {
  * moment the SLA changed, and would now be wrong for every question that
  * arrives outside opening hours.
  */
-export function deadlineMs(ticket: Ticket): number {
-  return new Date(ticket.dueAt).getTime();
+export function deadlineMs(ticket: Ticket): number | null {
+  return ticket.dueAt ? new Date(ticket.dueAt).getTime() : null;
 }
 
-export function remainingMs(ticket: Ticket): number {
-  return deadlineMs(ticket) - Date.now();
+export function remainingMs(ticket: Ticket): number | null {
+  const deadline = deadlineMs(ticket);
+  return deadline === null ? null : deadline - Date.now();
 }
 
 export function bucketOf(ticket: Ticket): TicketBucket {
+  if (ticket.status === 'awaiting_payment') return 'unpaid';
   if (ticket.status === 'answered') return 'answered';
-  return remainingMs(ticket) < 0 ? 'overdue' : 'open';
+  const remaining = remainingMs(ticket);
+  return remaining !== null && remaining < 0 ? 'overdue' : 'open';
 }
 
 /** Whether an answered ticket beat its deadline. */
 export function slaMet(ticket: Ticket): boolean {
+  const deadline = deadlineMs(ticket);
   return (
     ticket.status === 'answered' &&
     ticket.answeredAt !== null &&
-    new Date(ticket.answeredAt).getTime() <= deadlineMs(ticket)
+    deadline !== null &&
+    new Date(ticket.answeredAt).getTime() <= deadline
   );
 }
 
@@ -216,7 +222,7 @@ export async function fetchTickets(): Promise<Ticket[]> {
     const aOpen = a.status === 'open';
     const bOpen = b.status === 'open';
     if (aOpen !== bOpen) return aOpen ? -1 : 1;
-    if (aOpen) return deadlineMs(a) - deadlineMs(b);
+    if (aOpen) return (deadlineMs(a) ?? 0) - (deadlineMs(b) ?? 0);
     return b.createdAt.localeCompare(a.createdAt);
   });
 }
@@ -235,4 +241,3 @@ export async function answerTicket(
   // configured — so the UI shows its "saved but not sent" path by default.
   return { ticket, emailSent: false };
 }
-

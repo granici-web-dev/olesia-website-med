@@ -82,14 +82,28 @@ export class DashboardService {
         where: { status: QuickQuestionStatus.open },
       }),
       this.prisma.quickQuestion.count({
-        where: { createdAt: { gte: from, lte: to } },
+        // Unpaid tickets are questions nobody bought. Counting them here would
+        // report an EXPRESS volume the practice never sold.
+        where: {
+          createdAt: { gte: from, lte: to },
+          status: { not: QuickQuestionStatus.awaiting_payment },
+        },
       }),
       this.prisma.quickQuestion.findMany({
-        where: { createdAt: { gte: from, lte: to }, answeredAt: { not: null } },
+        where: {
+          createdAt: { gte: from, lte: to },
+          answeredAt: { not: null },
+          // A ticket with no deadline was never owed one, so it has no SLA to
+          // be inside or outside of — it belongs in neither half of the rate.
+          dueAt: { not: null },
+        },
         select: { answeredAt: true, dueAt: true },
       }),
       this.prisma.appointment.findMany({
-        where: { status: AppointmentStatus.scheduled, startTime: { gte: new Date() } },
+        where: {
+          status: AppointmentStatus.scheduled,
+          startTime: { gte: new Date() },
+        },
         orderBy: { startTime: 'asc' },
         take: 5,
       }),
@@ -102,7 +116,8 @@ export class DashboardService {
         const svc = svcMap.get(r.serviceId);
         return {
           serviceId: r.serviceId,
-          code: (svc?.code ?? 'pediatric') as DashboardStatsDto['appointments']['byService'][number]['code'],
+          code: (svc?.code ??
+            'pediatric') as DashboardStatsDto['appointments']['byService'][number]['code'],
           titleRo: svc?.titleRo ?? '—',
           count: r._count._all,
         };
@@ -110,7 +125,7 @@ export class DashboardService {
       .sort((a, b) => b.count - a.count);
 
     const answeredInSla = answered.filter(
-      (q) => q.answeredAt && q.answeredAt <= q.dueAt,
+      (q) => q.answeredAt && q.dueAt && q.answeredAt <= q.dueAt,
     ).length;
 
     return {

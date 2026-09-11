@@ -12,7 +12,7 @@ export function toQuickQuestionDto(q: QuickQuestion): QuickQuestionDto {
     locale: q.locale as QuickQuestionDto['locale'],
     status: q.status as QuickQuestionDto['status'],
     paymentStatus: q.paymentStatus as QuickQuestionDto['paymentStatus'],
-    dueAt: q.dueAt.toISOString(),
+    dueAt: q.dueAt ? q.dueAt.toISOString() : null,
     answeredAt: q.answeredAt ? q.answeredAt.toISOString() : null,
     createdAt: q.createdAt.toISOString(),
     updatedAt: q.updatedAt.toISOString(),

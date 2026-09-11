@@ -3,19 +3,27 @@
  * a written answer within ~1 working hour.
  *
  * The deadline is `dueAt`, computed by the API from the practice schedule at
- * the moment the question arrived (§11.5) — it is NOT derivable from
- * `createdAt` here, because the clock only runs during working hours. This UI
+ * the moment the question was **paid for** — it is NOT derivable from
+ * `createdAt` here, because the clock only runs during working hours and only
+ * starts once the money has arrived. This UI
  * displays what the server decided; it never recomputes it.
  * The wire shapes are the DTOs in `@olesia/shared`; `api.ts` maps them into
  * the view types below. That layer is deliberate, not a placeholder — it is
  * where a shared enum gets narrowed to what this UI actually renders.
  */
 
-export type TicketStatus = 'open' | 'answered';
+export type TicketStatus = 'awaiting_payment' | 'open' | 'answered';
 export type PaymentStatus = 'pending' | 'confirmed';
 
-/** Derived bucket: an open ticket past its deadline is `overdue`. */
-export type TicketBucket = 'open' | 'overdue' | 'answered';
+/**
+ * Derived bucket: an open ticket past its deadline is `overdue`.
+ *
+ * `unpaid` is not derived from a date — it is the ticket's own status. An
+ * EXPRESS question is written before it is paid for and is invisible to the
+ * doctor until the money lands, so it has no deadline to be late against
+ * (docs/shape-express-checkout.md).
+ */
+export type TicketBucket = 'unpaid' | 'open' | 'overdue' | 'answered';
 
 export interface Ticket {
   id: string;
@@ -28,8 +36,12 @@ export interface Ticket {
   answer: string | null;
   answeredAt: string | null;
   paymentStatus: PaymentStatus;
-  /** Server-computed SLA deadline, in working hours. ISO. */
-  dueAt: string;
+  /**
+   * Server-computed SLA deadline, in working hours. ISO. Null while the ticket
+   * is unpaid: the clock starts at payment, so an unpaid question is owed
+   * nothing yet and must not count as overdue.
+   */
+  dueAt: string | null;
   createdAt: string; // ISO
 }
 

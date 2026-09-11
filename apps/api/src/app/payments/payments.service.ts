@@ -5,15 +5,20 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { toE164, type PublicPaymentStatusDto } from '@olesia/shared';
 import { Prisma } from '../../generated/prisma/client';
 import {
   PaymentState,
   PaymentStatus,
   PaymentTargetType,
+  QuickQuestionStatus,
   RefundState,
+  ServiceCode,
 } from '../../generated/prisma/enums';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { WorkingHoursService } from '../working-hours/working-hours.service';
+import { PatientNotificationsService } from '../mail/patient-notifications.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
 import {
   MaibService,
@@ -21,20 +26,49 @@ import {
   type MaibCheckout,
 } from './maib.service';
 import { toPaymentDto } from './payments.mapper';
+import { activateTicketData } from '../quick-questions/quick-questions.service';
 
-/** What the caller needs to open a checkout for one payable thing. */
+/**
+ * What the caller needs to open a checkout for one payable thing.
+ *
+ * There is deliberately no `amount`: the price is read from the catalog by
+ * whoever builds this input, never taken from a request body. A public route
+ * that accepted an amount would sell an 8 € consultation for 1.01.
+ */
 export interface StartPaymentInput {
   targetType: PaymentTargetType;
   targetId?: string;
+  /** In the currency below, already resolved from the catalog. */
   amount: number;
   currency: string;
   description: string;
+  /** One line on the bank's hosted page. Defaults to `description`. */
+  itemTitle?: string;
   locale: 'ro' | 'ru' | 'en';
   payerName?: string;
   payerEmail: string;
+  /** As the payer typed it. Normalised to E.164 here, or omitted. */
   payerPhone?: string;
   payerIp?: string;
   payerUserAgent?: string;
+  /**
+   * The buyer's own idea of "this purchase". A repeat submit carrying the same
+   * key is handed back the session it already opened.
+   */
+  intentKey?: string;
+}
+
+/**
+ * Where to send the payer, and whether this is a session that already existed.
+ *
+ * `reused` is for the caller's benefit, not the payer's: the purchase row is
+ * written before the session is opened, so a duplicate submit has something to
+ * roll back.
+ */
+export interface StartedPayment {
+  checkoutUrl: string;
+  orderId: string;
+  reused: boolean;
 }
 
 /**
@@ -52,10 +86,14 @@ export function toPaymentState(
   refundedAmount?: number | null,
 ): PaymentState {
   const pay = (paymentStatus ?? '').toLowerCase();
-  if (pay === 'refunded' || (refundedAmount && amount && refundedAmount >= amount)) {
+  if (
+    pay === 'refunded' ||
+    (refundedAmount && amount && refundedAmount >= amount)
+  ) {
     return PaymentState.refunded;
   }
-  if (refundedAmount && refundedAmount > 0) return PaymentState.partially_refunded;
+  if (refundedAmount && refundedAmount > 0)
+    return PaymentState.partially_refunded;
   if (pay === 'executed') return PaymentState.paid;
   if (pay === 'failed') return PaymentState.failed;
 
@@ -168,6 +206,54 @@ export function mirrorStatusFor(
  */
 const MANUAL_METHOD = 'manual';
 
+/**
+ * maib refuses an amount at or below 1.00 (docs/payments-maib-checkout.md §18),
+ * and a service priced 0 is "on request" rather than free. Both are refused
+ * here, before the bank is called, so the buyer reads our sentence instead of
+ * error 42007.
+ *
+ * Returns the machine code of the problem, or null when the amount can be
+ * charged. Exported because it is the one piece of arithmetic between a price
+ * in the catalog and money leaving somebody's card.
+ */
+export function checkoutAmount(price: number): string | null {
+  if (price === 0) return 'price_on_request';
+  if (price <= MAIB_MINIMUM_AMOUNT) return 'amount_below_minimum';
+  return null;
+}
+
+/** maib's floor. Strictly greater than, not at least. */
+const MAIB_MINIMUM_AMOUNT = 1.0;
+
+/**
+ * What to do with the payment an intent key already points at.
+ *
+ * A person who double-clicks submit, or reloads the checkout page and sends
+ * the form again, must not end up with two tickets and two bank sessions. The
+ * key is minted by the page and kept for the length of the tab, so the second
+ * request arrives carrying the first one's key.
+ *
+ *  - nothing recorded: open a session.
+ *  - a session still live: hand back the URL it already has.
+ *  - a session that is over (paid, failed, expired, cancelled): the key has
+ *    done its job. Detach it so it can be reused, and open a fresh session —
+ *    somebody whose card was declined is trying again, and must be able to.
+ */
+export function resolveIntent(
+  existing: {
+    state: PaymentState;
+    checkoutUrl: string | null;
+    expiresAt: Date | null;
+  } | null,
+  now: Date = new Date(),
+): { reuse: string } | { detach: true } | { open: true } {
+  if (!existing) return { open: true };
+  if (TERMINAL.includes(existing.state)) return { detach: true };
+  if (existing.expiresAt && existing.expiresAt <= now) return { detach: true };
+  if (!existing.checkoutUrl) return { detach: true };
+  return { reuse: existing.checkoutUrl };
+}
+
 /** States after which nothing more will happen on its own. */
 const TERMINAL: PaymentState[] = [
   PaymentState.paid,
@@ -183,9 +269,17 @@ const TERMINAL: PaymentState[] = [
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
+  /**
+   * `WorkingHoursService` and `PatientNotificationsService` are both `@Global()`,
+   * so fulfilment lives inside the transaction that records the payment without
+   * a new module import and without a risk of an import cycle. That is the whole
+   * reason there is no event bus here — see the shape's tradeoffs.
+   */
   constructor(
     private readonly prisma: PrismaService,
     private readonly maib: MaibService,
+    private readonly workingHours: WorkingHoursService,
+    private readonly notifications: PatientNotificationsService,
   ) {}
 
   /* ---------------------------- starting ---------------------------- */
@@ -194,8 +288,23 @@ export class PaymentsService {
    * Open a hosted checkout and record it before the payer ever sees the page.
    * The row exists first on purpose: the bank's list endpoints are broken, so
    * a session we did not write down is unrecoverable.
+   *
+   * Every rule maib has about its input is enforced here rather than in the
+   * callers (docs/payments-maib-checkout.md §18), so no caller ever learns that
+   * the bank has opinions about phone formats or minimum amounts.
    */
-  async start(input: StartPaymentInput): Promise<{ checkoutUrl: string; orderId: string }> {
+  async start(input: StartPaymentInput): Promise<StartedPayment> {
+    const amountProblem = checkoutAmount(input.amount);
+    if (amountProblem) throw new BadRequestException(amountProblem);
+
+    if (input.intentKey) {
+      const reused = await this.reuseIntent(input.intentKey);
+      // `reused` says the purchase the caller just wrote down is a duplicate of
+      // one already in flight, so the caller can undo it. Without that, a double
+      // click leaves a second ticket nobody can pay for.
+      if (reused) return { ...reused, reused: true };
+    }
+
     // The order reference is the only thing guarding the public status
     // endpoint, so it is drawn from the CSPRNG rather than Math.random. Not
     // uppercased: base64url is case-sensitive and folding it would throw away
@@ -204,6 +313,10 @@ export class PaymentsService {
 
     const site = process.env.PUBLIC_SITE_URL ?? '';
     const api = process.env.PUBLIC_API_URL ?? '';
+
+    // E.164 or nothing: a phone in any other shape is refused by maib with
+    // error 42005, and it refuses the whole session rather than the field.
+    const payerPhone = toE164(input.payerPhone, 'MD') ?? undefined;
 
     const session = await this.maib.createCheckout({
       amount: input.amount,
@@ -214,11 +327,26 @@ export class PaymentsService {
       callbackUrl: `${api}/payments/maib/callback`,
       successUrl: `${site}/${input.locale}/payment/success?order=${orderId}`,
       failUrl: `${site}/${input.locale}/payment/failed?order=${orderId}`,
-      orderInfo: { id: orderId, description: input.description.slice(0, 125) },
+      orderInfo: {
+        id: orderId,
+        description: input.description.slice(0, 125),
+        date: new Date().toISOString(),
+        // One line per purchase. Without it the hosted page shows an amount and
+        // nothing about what it is for, which is the moment a card form loses
+        // people.
+        items: [
+          {
+            title: (input.itemTitle ?? input.description).slice(0, 125),
+            amount: input.amount,
+            currency: input.currency,
+            quantity: 1,
+          },
+        ],
+      },
       payerInfo: {
         name: input.payerName,
         email: input.payerEmail,
-        phone: input.payerPhone,
+        phone: payerPhone,
         ip: input.payerIp,
         userAgent: input.payerUserAgent,
       },
@@ -228,6 +356,8 @@ export class PaymentsService {
       await this.prisma.payment.create({
         data: {
           checkoutId: session.checkoutId,
+          checkoutUrl: session.checkoutUrl,
+          intentKey: input.intentKey,
           orderId,
           state: PaymentState.created,
           amount: new Prisma.Decimal(input.amount),
@@ -236,7 +366,7 @@ export class PaymentsService {
           targetId: input.targetId,
           payerName: input.payerName,
           payerEmail: input.payerEmail.toLowerCase(),
-          payerPhone: input.payerPhone,
+          payerPhone,
           patientId: await this.findPatientId(input.payerEmail),
         },
       });
@@ -254,7 +384,43 @@ export class PaymentsService {
       throw e;
     }
 
-    return { checkoutUrl: session.checkoutUrl, orderId };
+    return { checkoutUrl: session.checkoutUrl, orderId, reused: false };
+  }
+
+  /**
+   * The session an intent key already opened, if it is still worth reusing.
+   *
+   * Returns null when a fresh session should be opened; in that case a stale
+   * key has already been detached from its old row, so the unique index does
+   * not refuse the new one.
+   */
+  private async reuseIntent(
+    intentKey: string,
+  ): Promise<{ checkoutUrl: string; orderId: string } | null> {
+    const existing = await this.prisma.payment.findUnique({
+      where: { intentKey },
+      select: {
+        id: true,
+        orderId: true,
+        state: true,
+        checkoutUrl: true,
+        expiresAt: true,
+      },
+    });
+
+    if (!existing) return null;
+
+    const verdict = resolveIntent(existing);
+    if ('reuse' in verdict) {
+      return { checkoutUrl: verdict.reuse, orderId: existing.orderId };
+    }
+    if ('detach' in verdict) {
+      await this.prisma.payment.update({
+        where: { id: existing.id },
+        data: { intentKey: null },
+      });
+    }
+    return null;
   }
 
   /* ---------------------------- ingesting ---------------------------- */
@@ -315,7 +481,9 @@ export class PaymentsService {
           ? new Date(body.paymentExecutedAt ?? Date.now())
           : undefined,
       failedAt:
-        !payment.failedAt && state === PaymentState.failed ? new Date() : undefined,
+        !payment.failedAt && state === PaymentState.failed
+          ? new Date()
+          : undefined,
     });
   }
 
@@ -324,7 +492,9 @@ export class PaymentsService {
    * an optimisation, and maib does not promise one for every failure.
    */
   async syncFromBank(checkoutId: string): Promise<void> {
-    const payment = await this.prisma.payment.findUnique({ where: { checkoutId } });
+    const payment = await this.prisma.payment.findUnique({
+      where: { checkoutId },
+    });
     if (!payment) throw new NotFoundException('payment_not_found');
 
     let checkout: MaibCheckout;
@@ -348,7 +518,7 @@ export class PaymentsService {
 
     await this.persist(payment.id, {
       state,
-      paymentId: pay?.PaymentId ?? pay?.paymentId ?? payment.paymentId,
+      paymentId: pay?.paymentId ?? payment.paymentId,
       // Captured only while it is still there: maib blanks paymentMethod out
       // on the payment record once a refund is accepted.
       method: pay?.paymentMethod ?? payment.method,
@@ -527,8 +697,10 @@ export class PaymentsService {
       if (!locked) throw new NotFoundException('payment_not_found');
       // Also what refuses a manual payment: it never had a bank payment id,
       // and money the bank never took is not money the bank can send back.
-      if (!locked.paymentId) throw new BadRequestException('payment_not_executed');
-      if (!locked.checkoutId) throw new BadRequestException('payment_not_executed');
+      if (!locked.paymentId)
+        throw new BadRequestException('payment_not_executed');
+      if (!locked.checkoutId)
+        throw new BadRequestException('payment_not_executed');
 
       const payment = await tx.payment.findUniqueOrThrow({
         where: { id: paymentRowId },
@@ -558,7 +730,11 @@ export class PaymentsService {
           authorId,
         },
       });
-      return { rowId: row.id, payId: locked.paymentId, checkoutId: locked.checkoutId };
+      return {
+        rowId: row.id,
+        payId: locked.paymentId,
+        checkoutId: locked.checkoutId,
+      };
     });
 
     let res: { refundId: string; status: string };
@@ -630,7 +806,10 @@ export class PaymentsService {
 
     const rows = await this.prisma.payment.findMany({
       where: {
-        OR: [{ patientId: patient.id }, { payerEmail: patient.email.toLowerCase() }],
+        OR: [
+          { patientId: patient.id },
+          { payerEmail: patient.email.toLowerCase() },
+        ],
       },
       orderBy: { createdAt: 'desc' },
       include: { refunds: true },
@@ -638,11 +817,19 @@ export class PaymentsService {
     return rows.map(toPaymentDto);
   }
 
-  /** Public, PII-free status for the return page. */
-  async publicStatus(orderId: string) {
+  /**
+   * Public, PII-free status for the return page.
+   *
+   * It gained `targetType`, `description` and `paidAt` with the checkout: a
+   * person landing here has just been charged and needs to recognise the
+   * purchase, and everything here is already printed on their card statement.
+   * Still no payer, no card and no bank references — the `order` in the URL is
+   * user-controllable and this answers on its strength alone.
+   */
+  async publicStatus(orderId: string): Promise<PublicPaymentStatusDto> {
     const p = await this.prisma.payment.findUnique({
       where: { orderId },
-      select: { orderId: true, state: true, amount: true, currency: true, checkoutId: true },
+      select: { orderId: true, state: true, checkoutId: true },
     });
     if (!p) throw new NotFoundException('payment_not_found');
 
@@ -653,11 +840,27 @@ export class PaymentsService {
       await this.syncFromBank(p.checkoutId);
     }
 
-    const fresh = await this.prisma.payment.findUnique({
+    const fresh = await this.prisma.payment.findUniqueOrThrow({
       where: { orderId },
-      select: { orderId: true, state: true, amount: true, currency: true },
+      select: {
+        orderId: true,
+        state: true,
+        amount: true,
+        currency: true,
+        targetType: true,
+        paidAt: true,
+      },
     });
-    return fresh ?? p;
+
+    return {
+      orderId: fresh.orderId,
+      state: fresh.state,
+      amount: Number(fresh.amount),
+      currency: fresh.currency,
+      targetType: fresh.targetType,
+      description: await this.describeTarget(fresh),
+      paidAt: fresh.paidAt?.toISOString() ?? null,
+    };
   }
 
   /* ---------------------------- internals ---------------------------- */
@@ -668,7 +871,7 @@ export class PaymentsService {
    * appointment still read `pending`, and no retry repaired it.
    */
   private async persist(id: string, data: Prisma.PaymentUpdateInput) {
-    await this.prisma.$transaction(async (tx) => {
+    const isPaid = await this.prisma.$transaction(async (tx) => {
       const payment = await tx.payment.update({ where: { id }, data });
 
       // Late-link: the Patient may have been created between start and payment.
@@ -682,7 +885,81 @@ export class PaymentsService {
       if (payment.state === PaymentState.paid) {
         await this.markTargetPaid(payment, tx);
       }
+      return payment.state === PaymentState.paid;
     });
+
+    // Outside the transaction: sending mail takes a network round-trip, and a
+    // transaction held open across one holds the row lock for an SMTP server's
+    // benefit. `deliverReceipt` is itself idempotent, so a redelivered callback
+    // reaching this line again sends nothing.
+    if (isPaid) await this.deliverReceipt(id);
+  }
+
+  /**
+   * The payment confirmation maib's go-live checklist requires (§8).
+   *
+   * `confirmationSentAt` is stamped only when the message actually left. With
+   * no SMTP configured nothing leaves, and the back office then shows the
+   * payment as unconfirmed with a resend button — the same honesty the answer
+   * and upload-link paths already practise (audit A3, F2). It is deliberately
+   * not a throw: the money has arrived, the purchase is fulfilled, and failing
+   * the callback over an email would make the bank retry a payment we have
+   * already recorded.
+   */
+  private async deliverReceipt(id: string): Promise<void> {
+    const payment = await this.prisma.payment.findUnique({ where: { id } });
+    if (!payment || payment.confirmationSentAt) return;
+
+    try {
+      const { sent } = await this.notifications.paymentReceipt(
+        {
+          to: payment.payerEmail,
+          locale: await this.localeForPayment(payment),
+        },
+        {
+          clientName: payment.payerName ?? payment.payerEmail,
+          orderId: payment.orderId,
+          description: await this.describeTarget(payment),
+          amount: Number(payment.amount),
+          currency: payment.currency,
+          paidAt: payment.paidAt ?? new Date(),
+        },
+      );
+      if (sent) {
+        await this.prisma.payment.update({
+          where: { id },
+          data: { confirmationSentAt: new Date() },
+        });
+      }
+    } catch (e) {
+      this.logger.error(
+        `payment ${id} recorded, confirmation email failed: ${String(e)}`,
+      );
+    }
+  }
+
+  /**
+   * Re-send the confirmation for a payment whose first attempt did not leave.
+   * Clears the stamp first so a resend after a successful one is possible too —
+   * the operator pressing this button has a reason we do not know.
+   */
+  async resendConfirmation(id: string, authorId: string) {
+    const payment = await this.prisma.payment.findUnique({ where: { id } });
+    if (!payment) throw new NotFoundException('payment_not_found');
+    if (payment.state !== PaymentState.paid) {
+      throw new BadRequestException('payment_not_paid');
+    }
+
+    await this.prisma.payment.update({
+      where: { id },
+      data: { confirmationSentAt: null },
+    });
+    await this.deliverReceipt(id);
+
+    this.logger.log(
+      `audit payment.resend-confirmation paymentId=${id} userId=${authorId}`,
+    );
+    return this.findOne(id);
   }
 
   private async findPatientId(
@@ -718,16 +995,28 @@ export class PaymentsService {
     const select = { clientName: true, clientEmail: true } as const;
     const row =
       targetType === PaymentTargetType.appointment
-        ? await this.prisma.appointment.findUnique({ where: { id: targetId }, select })
+        ? await this.prisma.appointment.findUnique({
+            where: { id: targetId },
+            select,
+          })
         : targetType === PaymentTargetType.subscription
-          ? await this.prisma.subscription.findUnique({ where: { id: targetId }, select })
+          ? await this.prisma.subscription.findUnique({
+              where: { id: targetId },
+              select,
+            })
           : targetType === PaymentTargetType.quick_question
-            ? await this.prisma.quickQuestion.findUnique({ where: { id: targetId }, select })
+            ? await this.prisma.quickQuestion.findUnique({
+                where: { id: targetId },
+                select,
+              })
             : targetType === PaymentTargetType.deliverable_order
-              ? await this.prisma.deliverableOrder.findUnique({ where: { id: targetId }, select })
-              // A paid material has no order row to read a payer off; the
-              // checkout collects one, and there is nothing to record manually.
-              : null;
+              ? await this.prisma.deliverableOrder.findUnique({
+                  where: { id: targetId },
+                  select,
+                })
+              : // A paid material has no order row to read a payer off; the
+                // checkout collects one, and there is nothing to record manually.
+                null;
     return row ? { name: row.clientName, email: row.clientEmail } : null;
   }
 
@@ -772,7 +1061,10 @@ export class PaymentsService {
     } catch (e) {
       // Same reasoning as markTargetPaid: the purchase can be gone, and the
       // payment record is the source of truth either way.
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2025'
+      ) {
         this.logger.warn(
           `voided ${targetType} ${targetId} no longer exists; payment cancelled anyway`,
         );
@@ -785,6 +1077,10 @@ export class PaymentsService {
   /**
    * Mirror the paid state onto the thing that was bought, so every screen that
    * already reads `paymentStatus` keeps working without knowing about Payment.
+   *
+   * An EXPRESS ticket does more than mirror: paying is what makes it exist for
+   * the doctor. It moves out of `awaiting_payment` and its SLA clock starts
+   * here, not at submission, because that is when the promise was bought.
    */
   private async markTargetPaid(
     payment: { targetType: PaymentTargetType; targetId: string | null },
@@ -800,7 +1096,7 @@ export class PaymentsService {
           await tx.appointment.update({ where: { id: targetId }, data });
           break;
         case PaymentTargetType.quick_question:
-          await tx.quickQuestion.update({ where: { id: targetId }, data });
+          await this.activateTicket(targetId, tx);
           break;
         case PaymentTargetType.deliverable_order:
           await tx.deliverableOrder.update({ where: { id: targetId }, data });
@@ -828,5 +1124,83 @@ export class PaymentsService {
       }
       throw e;
     }
+  }
+
+  /**
+   * Put a paid EXPRESS ticket in front of the doctor and start its clock.
+   *
+   * `updateMany` scoped to `awaiting_payment`, not `update`: maib may deliver
+   * the same success notification more than once, and the reconcile sweep
+   * writes the same transition from the other side. An unconditional write
+   * would walk an already-answered ticket back to `open` and restart a deadline
+   * that was already met. A ticket the condition does not match is a no-op,
+   * which is also why a deleted one raises nothing here.
+   *
+   * The mirror is set in the same statement, so the two can never disagree.
+   */
+  private async activateTicket(
+    ticketId: string,
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
+    const ticket = await tx.quickQuestion.findUnique({
+      where: { id: ticketId },
+      select: { status: true },
+    });
+    if (!ticket) {
+      this.logger.warn(
+        `paid quick_question ${ticketId} no longer exists; payment recorded anyway`,
+      );
+      return;
+    }
+
+    const activation = activateTicketData(
+      ticket.status,
+      await this.workingHours.expressDueAt(),
+    );
+
+    await tx.quickQuestion.updateMany({
+      // Scoped to the status we read, so a callback redelivered while the
+      // doctor is answering cannot overwrite what she wrote.
+      where: activation
+        ? { id: ticketId, status: QuickQuestionStatus.awaiting_payment }
+        : { id: ticketId },
+      data: { paymentStatus: PaymentStatus.confirmed, ...activation },
+    });
+  }
+
+  /** Which language to write the receipt in. */
+  private async localeForPayment(payment: {
+    targetType: PaymentTargetType;
+    targetId: string | null;
+  }): Promise<string | null> {
+    if (
+      payment.targetType !== PaymentTargetType.quick_question ||
+      !payment.targetId
+    ) {
+      return null;
+    }
+    const ticket = await this.prisma.quickQuestion.findUnique({
+      where: { id: payment.targetId },
+      select: { locale: true },
+    });
+    return ticket?.locale ?? null;
+  }
+
+  /**
+   * What the receipt calls the purchase. The bank's own `orderInfo.description`
+   * is not stored, so this is reconstructed from the catalog — which is the
+   * same source that priced it in the first place.
+   */
+  private async describeTarget(payment: {
+    targetType: PaymentTargetType;
+  }): Promise<string> {
+    if (payment.targetType === PaymentTargetType.quick_question) {
+      const service = await this.prisma.service.findUnique({
+        where: { code: ServiceCode.quick_question },
+        select: { titleRo: true },
+      });
+      return service?.titleRo ?? 'Întrebare EXPRESS';
+    }
+    return payment.targetType;
   }
 }

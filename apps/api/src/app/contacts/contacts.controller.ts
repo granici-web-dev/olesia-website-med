@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
+import { legalEntity } from '../common/legal-entity';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -27,6 +28,25 @@ export class ContactsController {
   @Get()
   findPublished() {
     return this.contacts.findPublished();
+  }
+
+  /**
+   * The registered entity behind the practice, for the pages legally required
+   * to name it (/gdpr, /terms).
+   *
+   * Its own route rather than a field on the list above: three of the four
+   * readers of `GET /contacts` want contact blocks and nothing else, and
+   * wrapping the array to serve two pages would change the shape for all of
+   * them. Public, because it is on two public pages already.
+   *
+   * Empty strings while the client's incorporation is outstanding. The site
+   * derives its draft banner from that emptiness rather than from a flag —
+   * see `PRINCIPLES.md`, "a placeholder must be visible, and derived".
+   */
+  @Public()
+  @Get('legal-entity')
+  legalEntity() {
+    return legalEntity();
   }
 
   @ApiBearerAuth()

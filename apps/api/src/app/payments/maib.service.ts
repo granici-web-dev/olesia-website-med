@@ -1,5 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 
 /** Body we send to open a hosted checkout session. */
 export interface MaibCheckoutRequest {
@@ -12,6 +16,8 @@ export interface MaibCheckoutRequest {
   orderInfo: {
     id: string;
     description: string;
+    /** ISO 8601. The hosted page prints it next to the order reference. */
+    date?: string;
     items?: {
       externalId?: string;
       title: string;
@@ -59,7 +65,10 @@ export interface MaibCallbackBody {
   paymentMethod?: string | null;
 }
 
-/** Checkout detail as returned by `GET /v2/checkouts/{id}`. */
+/**
+ * Checkout detail as returned by `GET /v2/checkouts/{id}`, after
+ * `normalizeCheckout` has settled the casing.
+ */
 export interface MaibCheckout {
   id: string;
   status: string;
@@ -67,9 +76,10 @@ export interface MaibCheckout {
   currency: string;
   expiresAt?: string | null;
   completedAt?: string | null;
+  failedAt?: string | null;
+  cancelledAt?: string | null;
   order?: { id?: string | null } | null;
   payment?: {
-    PaymentId?: string;
     paymentId?: string;
     status?: string;
     amount?: number;
@@ -80,6 +90,70 @@ export interface MaibCheckout {
     referenceNumber?: string | null;
     terminalId?: string | null;
   } | null;
+}
+
+/**
+ * The same checkout as it actually arrives: maib's documented schema
+ * capitalises the three timestamps and the sandbox sends them lower case, and
+ * §18 says production may differ from sandbox in either direction. Everything
+ * optional, everything `unknown`-adjacent, because this is what a remote
+ * system sent us rather than a shape we control.
+ */
+export interface RawMaibCheckout
+  extends Omit<
+    MaibCheckout,
+    'completedAt' | 'failedAt' | 'cancelledAt' | 'payment'
+  > {
+  completedAt?: string | null;
+  CompletedAt?: string | null;
+  failedAt?: string | null;
+  FailedAt?: string | null;
+  cancelledAt?: string | null;
+  CancelledAt?: string | null;
+  payment?:
+    | (NonNullable<MaibCheckout['payment']> & { PaymentId?: string })
+    | null;
+}
+
+/**
+ * Settle the casing of the fields maib spells two ways, so nothing downstream
+ * has to know the bank has opinions about capital letters.
+ *
+ * `paidAt` is taken from `completedAt` and the refund path is keyed by
+ * `paymentId`, so reading only one spelling means a payment recorded as paid
+ * with no date on it, or one that cannot be refunded — against a bank
+ * statement that has both. Exported so the pairing can be pinned by a test
+ * without a bank.
+ *
+ * A field with neither spelling stays absent rather than becoming the string
+ * "undefined", which is what reading it straight into a template would have
+ * produced.
+ */
+export function normalizeCheckout(raw: RawMaibCheckout): MaibCheckout {
+  const {
+    CompletedAt,
+    FailedAt,
+    CancelledAt,
+    completedAt,
+    failedAt,
+    cancelledAt,
+    payment,
+    ...rest
+  } = raw;
+  const pick = (upper?: string | null, lower?: string | null) =>
+    upper ?? lower ?? undefined;
+
+  const { PaymentId, ...restOfPayment } = payment ?? {};
+
+  return {
+    ...rest,
+    payment: payment
+      ? { ...restOfPayment, paymentId: pick(PaymentId, payment.paymentId) }
+      : payment,
+    completedAt: pick(CompletedAt, completedAt),
+    failedAt: pick(FailedAt, failedAt),
+    cancelledAt: pick(CancelledAt, cancelledAt),
+  };
 }
 
 interface MaibEnvelope<T> {
@@ -140,7 +214,9 @@ export class MaibService {
   }
 
   async getCheckout(checkoutId: string): Promise<MaibCheckout> {
-    return this.request('GET', `/v2/checkouts/${checkoutId}`);
+    return normalizeCheckout(
+      await this.request<RawMaibCheckout>('GET', `/v2/checkouts/${checkoutId}`),
+    );
   }
 
   async cancelCheckout(checkoutId: string): Promise<{ status: string }> {
@@ -152,7 +228,10 @@ export class MaibService {
     amount: number,
     reason: string,
   ): Promise<{ refundId: string; status: string }> {
-    return this.request('POST', `/v2/payments/${payId}/refund`, { amount, reason });
+    return this.request('POST', `/v2/payments/${payId}/refund`, {
+      amount,
+      reason,
+    });
   }
 
   async getRefund(refundId: string): Promise<{
@@ -216,7 +295,9 @@ export class MaibService {
     }
 
     const token = await this.accessToken();
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
     // Only when there is a body: a GET carrying Content-Type gets 403 from the
     // WAF, with a `{"supportID": …}` body that is not an API error at all.
     if (body !== undefined) headers['Content-Type'] = 'application/json';
@@ -242,7 +323,9 @@ export class MaibService {
           err?.errorCode ?? 'none'
         } message=${err?.errorMessage ?? 'none'}`,
       );
-      throw new ServiceUnavailableException(err?.errorCode ?? 'maib_request_failed');
+      throw new ServiceUnavailableException(
+        err?.errorCode ?? 'maib_request_failed',
+      );
     }
 
     return json.result;

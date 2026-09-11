@@ -3,8 +3,13 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
-import type { DeliverableOrderDto, QuickQuestionDto, SubscriptionDto } from '@olesia/shared';
+import type {
+  DeliverableOrderDto,
+  QuickQuestionDto,
+  SubscriptionDto,
+} from '@olesia/shared';
 import { deliverableEntry } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,10 +22,15 @@ import {
   DeliverableOrderStatus,
   Locale,
   PaymentStatus,
+  PaymentTargetType,
   QuickQuestionStatus,
   ServiceCode,
   SubscriptionStatus,
 } from '../../generated/prisma/enums';
+import { PaymentsService } from '../payments/payments.service';
+import { canSell } from '../common/legal-entity';
+import { paymentCurrency } from '../common/payment-currency';
+import { QuickQuestionCheckoutDto } from './dto/checkout.dto';
 import { toDeliverableOrderDto } from '../deliverable-orders/deliverable-orders.mapper';
 import {
   ContactMessageDto,
@@ -55,6 +65,7 @@ export class LeadsService {
     private readonly prisma: PrismaService,
     private readonly mail: MailService,
     private readonly workingHours: WorkingHoursService,
+    private readonly payments: PaymentsService,
   ) {}
 
   /**
@@ -120,7 +131,9 @@ export class LeadsService {
    * Monday. It is computed once, here, and stored — editing the schedule later
    * must not retroactively make an already-answered ticket late.
    */
-  async createQuickQuestion(dto: QuickQuestionLeadDto): Promise<QuickQuestionDto> {
+  async createQuickQuestion(
+    dto: QuickQuestionLeadDto,
+  ): Promise<QuickQuestionDto> {
     const dueAt = await this.workingHours.expressDueAt();
 
     const qq = await this.prisma.quickQuestion.create({
@@ -153,6 +166,88 @@ export class LeadsService {
   }
 
   /**
+   * "Întrebare EXPRESS", bought: the ticket first, then the bank.
+   *
+   * The question is written down before the redirect and the ticket starts in
+   * `awaiting_payment` — invisible to the doctor, no deadline, no answer box.
+   * That is the whole of "an answer only after payment", and it costs the buyer
+   * nothing if they close the tab: the worst case is a question we keep for
+   * seven days and delete. Pay-first was the other reading of the brief and was
+   * rejected, because with no SMTP the recovery path for a closed tab is an
+   * email nobody can send (docs/shape-express-checkout.md, decision 1).
+   *
+   * Nothing about the price comes from the request. `Service.price` is read
+   * here and handed to `PaymentsService.start()`, which applies maib's own
+   * rules to it before the bank is called.
+   */
+  async startQuickQuestionCheckout(
+    dto: QuickQuestionCheckoutDto,
+  ): Promise<{ checkoutUrl: string; orderId: string }> {
+    // The bank's compliance review requires the merchant's registered entity on
+    // the site and in the receipt. Selling before it exists would mean taking
+    // money as a company that is not named anywhere, so the route refuses while
+    // the client's incorporation is outstanding (decision 3). 503, not 400:
+    // there is nothing wrong with what the buyer sent.
+    if (!canSell())
+      throw new ServiceUnavailableException('legal_entity_missing');
+
+    const service = await this.prisma.service.findUnique({
+      where: { code: ServiceCode.quick_question },
+    });
+    if (!service)
+      throw new NotFoundException('quick_question_service_not_found');
+
+    const locale = dto.locale ?? Locale.ro;
+
+    // No `dueAt`: the SLA clock starts when the money lands, not now.
+    const ticket = await this.prisma.quickQuestion.create({
+      data: {
+        clientName: dto.name,
+        clientEmail: dto.email,
+        phone: dto.phone ?? null,
+        question: dto.question,
+        locale,
+        status: QuickQuestionStatus.awaiting_payment,
+        paymentStatus: PaymentStatus.pending,
+      },
+    });
+
+    let started;
+    try {
+      started = await this.payments.start({
+        targetType: PaymentTargetType.quick_question,
+        targetId: ticket.id,
+        amount: service.price,
+        currency: paymentCurrency(),
+        description: service.titleRo,
+        locale,
+        payerName: dto.name,
+        payerEmail: dto.email,
+        payerPhone: dto.phone,
+        intentKey: dto.intentKey,
+      });
+    } catch (e) {
+      // A ticket with no session behind it is a medical question nobody can
+      // pay for. The purge would collect it in seven days; deleting it now
+      // keeps a refused price or an unreachable bank from leaving anything
+      // behind at all.
+      await this.prisma.quickQuestion.delete({ where: { id: ticket.id } });
+      throw e;
+    }
+
+    // The same form submitted twice. The first ticket is the one the payment
+    // points at; this one has nothing behind it.
+    if (started.reused) {
+      await this.prisma.quickQuestion.delete({ where: { id: ticket.id } });
+    }
+
+    this.logger.log(
+      `EXPRESS checkout ${started.reused ? 'resumed' : 'opened'} (order ${started.orderId}).`,
+    );
+    return { checkoutUrl: started.checkoutUrl, orderId: started.orderId };
+  }
+
+  /**
    * Group-C product order → a `new` DeliverableOrder the doctor works through
    * in the back office ("Comenzi").
    *
@@ -160,7 +255,9 @@ export class LeadsService {
    * request: the form posts a product code and nothing else about the product.
    * An unknown code is a 400 rather than an order nobody can price.
    */
-  async createDeliverable(dto: DeliverableLeadDto): Promise<DeliverableOrderDto> {
+  async createDeliverable(
+    dto: DeliverableLeadDto,
+  ): Promise<DeliverableOrderDto> {
     const entry = deliverableEntry(dto.product);
     if (!entry) throw new BadRequestException('unknown_deliverable_product');
 

@@ -1,14 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { maskEmail } from '../common/mask-email';
+import { legalEntity } from '../common/legal-entity';
 import { WorkingHoursService } from '../working-hours/working-hours.service';
 import { MailService } from './mail.service';
 import {
   ANSWER_TEMPLATES,
+  PAYMENT_RECEIPT_TEMPLATES,
   PREP_TEMPLATES,
   UPLOAD_LINK_TEMPLATES,
   render,
   type AnswerVars,
+  type PaymentReceiptVars,
   type PrepVars,
   type UploadLinkVars,
 } from './patient-templates';
@@ -56,7 +59,11 @@ export class PatientNotificationsService {
     recipient: Recipient,
     vars: AnswerVars,
   ): Promise<Delivery> {
-    return this.send('answer', recipient, render(ANSWER_TEMPLATES, recipient.locale, vars));
+    return this.send(
+      'answer',
+      recipient,
+      render(ANSWER_TEMPLATES, recipient.locale, vars),
+    );
   }
 
   /** Preparation instructions ahead of a consultation. */
@@ -86,6 +93,38 @@ export class PatientNotificationsService {
   }
 
   /**
+   * The confirmation the bank's go-live checklist requires after a payment.
+   *
+   * The amount is formatted here rather than in the template: it is the same
+   * number in all three languages and the currency belongs next to it, so
+   * three copies of `Intl.NumberFormat` in the templates would be three places
+   * to get the same rounding wrong.
+   */
+  async paymentReceipt(
+    recipient: Recipient,
+    vars: Omit<PaymentReceiptVars, 'paidAt' | 'amount' | 'merchant'> & {
+      paidAt: Date;
+      amount: number;
+      currency: string;
+    },
+  ): Promise<Delivery> {
+    const { amount, currency, paidAt, ...rest } = vars;
+    return this.send(
+      'payment-receipt',
+      recipient,
+      render(PAYMENT_RECEIPT_TEMPLATES, recipient.locale, {
+        ...rest,
+        amount: new Intl.NumberFormat('ro-RO', {
+          style: 'currency',
+          currency,
+        }).format(amount),
+        paidAt: await this.formatDateTime(paidAt),
+        merchant: legalEntity().registeredName,
+      }),
+    );
+  }
+
+  /**
    * A date and time as the practice reads it.
    *
    * `toLocaleString` with no zone formats in the server's, which in a
@@ -103,7 +142,10 @@ export class PatientNotificationsService {
 
   private async formatDate(at: Date): Promise<string> {
     const { timezone } = await this.workingHours.get();
-    return at.toLocaleDateString('ro-RO', { timeZone: timezone, dateStyle: 'long' });
+    return at.toLocaleDateString('ro-RO', {
+      timeZone: timezone,
+      dateStyle: 'long',
+    });
   }
 
   private async send(

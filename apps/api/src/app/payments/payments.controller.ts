@@ -13,7 +13,11 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/jwt.types';
-import { Role, PaymentState, PaymentTargetType } from '../../generated/prisma/enums';
+import {
+  Role,
+  PaymentState,
+  PaymentTargetType,
+} from '../../generated/prisma/enums';
 import { PaymentsService } from './payments.service';
 import { RefundPaymentDto } from './dto/refund-payment.dto';
 import { RecordManualPaymentDto } from './dto/manual-payment.dto';
@@ -29,7 +33,10 @@ export class PaymentsController {
 
   @Get()
   findAll(@Query() query: ListPaymentsQueryDto) {
-    return this.payments.findAll(query, query.state as PaymentState | undefined);
+    return this.payments.findAll(
+      query,
+      query.state as PaymentState | undefined,
+    );
   }
 
   /** Everything one patient has ever paid for. */
@@ -82,6 +89,16 @@ export class PaymentsController {
     if (!p.checkoutId) throw new BadRequestException('not_a_bank_payment');
     await this.payments.syncFromBank(p.checkoutId);
     return this.payments.findOne(id);
+  }
+
+  /**
+   * Send the payment confirmation again. Admin only, and audited: it puts the
+   * order reference and the amount into somebody's inbox.
+   */
+  @Roles(Role.admin)
+  @Post(':id/resend-confirmation')
+  resendConfirmation(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.payments.resendConfirmation(id, user.id);
   }
 
   @Roles(Role.admin)

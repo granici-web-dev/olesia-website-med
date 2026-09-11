@@ -71,6 +71,7 @@ export function QuickQuestionsPage() {
     const c: Record<StatusFilter, number> = {
       all: scoped.length,
       open: 0,
+      unpaid: 0,
       overdue: 0,
       answered: 0,
     };

@@ -45,6 +45,10 @@ export function DeadlineIndicator({
 
   const rem = remainingMs(ticket);
 
+  // No deadline means none is owed yet: the ticket is unpaid, and the clock
+  // starts when the money lands. Showing "0 minutes left" would be a promise.
+  if (rem === null) return null;
+
   if (bucket === 'overdue') {
     return (
       <span
@@ -64,7 +68,9 @@ export function DeadlineIndicator({
     <span
       className={cn(
         'inline-flex items-center gap-1.5 text-xs',
-        urgent ? 'font-medium text-warning-foreground' : 'text-muted-foreground',
+        urgent
+          ? 'font-medium text-warning-foreground'
+          : 'text-muted-foreground',
         className,
       )}
     >

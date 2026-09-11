@@ -206,3 +206,85 @@ export const UPLOAD_LINK_TEMPLATES: Templates<UploadLinkVars> = {
     ],
   }),
 };
+
+/* -------------------------- Payment receipt -------------------------- */
+
+/**
+ * The confirmation maib's go-live checklist requires after every payment
+ * (docs/payments-maib-checkout.md §8).
+ *
+ * It names the merchant and carries the order reference, the amount and the
+ * date, because those are what a person needs when a line on their card
+ * statement does not look like anything they remember buying. The legal entity
+ * comes from the environment, so this reads "the practice" until the client's
+ * incorporation lands rather than naming a company that does not exist yet.
+ */
+export interface PaymentReceiptVars {
+  clientName: string;
+  orderId: string;
+  /** What was bought, in Romanian as the catalog names it. */
+  description: string;
+  /** Already formatted with its currency. */
+  amount: string;
+  /** Already formatted in the practice's timezone. */
+  paidAt: string;
+  /** Registered entity, or an empty string while it is still missing. */
+  merchant: string;
+}
+
+const merchantLine = (merchant: string, label: string): string[] =>
+  merchant ? [`${label}: ${merchant}`] : [];
+
+export const PAYMENT_RECEIPT_TEMPLATES: Templates<PaymentReceiptVars> = {
+  [Locale.Ro]: (v) => ({
+    subject: `Confirmarea plății — comanda ${v.orderId}`,
+    lines: [
+      `Bună ziua, ${v.clientName},`,
+      '',
+      'Am primit plata dumneavoastră. Detaliile comenzii:',
+      '',
+      `Comanda: ${v.orderId}`,
+      `Serviciu: ${v.description}`,
+      `Sumă: ${v.amount}`,
+      `Data plății: ${v.paidAt}`,
+      ...merchantLine(v.merchant, 'Prestator'),
+      '',
+      'Păstrați acest email: conține referința comenzii, utilă dacă aveți întrebări despre plată.',
+      ...SIGNATURE[Locale.Ro],
+    ],
+  }),
+  [Locale.En]: (v) => ({
+    subject: `Payment confirmation — order ${v.orderId}`,
+    lines: [
+      `Hello ${v.clientName},`,
+      '',
+      'We have received your payment. The order details:',
+      '',
+      `Order: ${v.orderId}`,
+      `Service: ${v.description}`,
+      `Amount: ${v.amount}`,
+      `Paid on: ${v.paidAt}`,
+      ...merchantLine(v.merchant, 'Provider'),
+      '',
+      'Keep this email: it carries the order reference, which is what to quote if you have a question about the payment.',
+      ...SIGNATURE[Locale.En],
+    ],
+  }),
+  [Locale.Ru]: (v) => ({
+    subject: `Подтверждение оплаты — заказ ${v.orderId}`,
+    lines: [
+      `Здравствуйте, ${v.clientName}!`,
+      '',
+      'Мы получили вашу оплату. Детали заказа:',
+      '',
+      `Заказ: ${v.orderId}`,
+      `Услуга: ${v.description}`,
+      `Сумма: ${v.amount}`,
+      `Дата оплаты: ${v.paidAt}`,
+      ...merchantLine(v.merchant, 'Исполнитель'),
+      '',
+      'Сохраните это письмо: в нём номер заказа, который пригодится при любом вопросе об оплате.',
+      ...SIGNATURE[Locale.Ru],
+    ],
+  }),
+};

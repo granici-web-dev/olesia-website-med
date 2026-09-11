@@ -21,7 +21,9 @@ export function toPaymentRefundDto(r: PaymentRefund): PaymentRefundDto {
 /**
  * Shape a payment for the back office. `rawCallback` is dropped on purpose —
  * it is the verbatim bank payload kept for disputes, full of payer PII, and
- * nothing in the UI reads it.
+ * nothing in the UI reads it. `checkoutUrl` is dropped for a different reason:
+ * it is a live link to a card form, and a ledger screen has no business
+ * handing one out.
  */
 export function toPaymentDto(
   p: Payment & { refunds?: PaymentRefund[] },
@@ -51,6 +53,7 @@ export function toPaymentDto(
     paidAt: p.paidAt?.toISOString() ?? null,
     failedAt: p.failedAt?.toISOString() ?? null,
     note: p.note,
+    confirmationSentAt: p.confirmationSentAt?.toISOString() ?? null,
     createdAt: p.createdAt.toISOString(),
     refunds: (p.refunds ?? []).map(toPaymentRefundDto),
   };

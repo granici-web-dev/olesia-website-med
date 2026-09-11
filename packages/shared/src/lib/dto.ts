@@ -177,8 +177,13 @@ export interface QuickQuestionDto {
   paymentStatus: PaymentStatus;
   /** Which language to answer in. */
   locale: Locale;
-  /** 48h SLA deadline. */
-  dueAt: string;
+  /**
+   * When the answer is owed, in working time. Null while the ticket is
+   * `awaiting_payment`: the SLA clock starts when the money lands, and an
+   * unpaid ticket carrying a deadline would put people who have not paid into
+   * the back office's overdue counter.
+   */
+  dueAt: string | null;
   answeredAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -718,8 +723,51 @@ export interface PaymentDto {
   failedAt: string | null;
   /** The operator's words on a manual payment; null on everything else. */
   note: string | null;
+  /**
+   * When the bank's required payment confirmation actually left. Null means it
+   * did not: with no SMTP configured nothing is delivered, and the back office
+   * says so rather than showing a receipt that was never sent.
+   */
+  confirmationSentAt: string | null;
   createdAt: string;
   refunds: PaymentRefundDto[];
+}
+
+/**
+ * What the return page is told about a payment, by our own order reference.
+ *
+ * No payer, no card, no bank references. The redirect that lands somebody here
+ * carries a user-controllable `order` parameter, so this answers on the
+ * strength of the reference alone and must therefore say nothing that would
+ * matter if the reference were guessed. The order number, what was bought, the
+ * amount and the date are what a person needs to recognise their own purchase,
+ * and they are all the bank prints on a statement anyway.
+ */
+export interface PublicPaymentStatusDto {
+  orderId: string;
+  state: `${PaymentState}`;
+  amount: number;
+  currency: string;
+  targetType: `${PaymentTargetType}`;
+  /** What was bought, as it was sent to the bank. */
+  description: string;
+  paidAt: string | null;
+}
+
+/**
+ * The registered entity behind the site, served to the public pages that are
+ * legally required to name it.
+ *
+ * Env-owned in the API rather than compiled into the site: /gdpr, /terms and
+ * the bank's compliance review all read the same three fields, and two copies
+ * of them is how they end up disagreeing. Empty strings until the client's
+ * incorporation lands — the pages derive their draft banner from that
+ * emptiness, and the checkout refuses with `legal_entity_missing`.
+ */
+export interface LegalEntityDto {
+  registeredName: string;
+  idno: string;
+  address: string;
 }
 
 // --- The public site's surface ---
