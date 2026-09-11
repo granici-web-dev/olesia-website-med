@@ -14,13 +14,14 @@ import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
 /* ──────────────────────────────────────────────────────────────────────────
    Single-service landing for the Nutrition consultation (group A · video ·
    video). One service, two audience-specific Calendly events — children and
-   adults — surfaced as two booking buttons (see CALENDLY_FALLBACK_URLS).
+   adults — surfaced as two booking buttons, each with its own Calendly event.
    Content is bilingual (RO default · EN) and lives here so the page renders
    fully even if the API is unreachable.
    Two audiences: children (feeding) and adults (personal plan). Visual language
@@ -50,8 +51,6 @@ export async function generateMetadata({
         : 'Consultație de nutriție video pentru copii și adulți: dificultăți de hrănire, diversificare, plan alimentar personalizat. Programează online.',
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 const HELP_CHILDREN: Bi[] = [
   { ro: 'Dificultăți de hrănire și refuzul mâncării', en: 'Feeding difficulties and food refusal', ru: 'Трудности с кормлением и отказ от еды' },
@@ -162,17 +161,15 @@ export default async function NutritionPage({
   ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   // One nutrition service, two audience-specific Calendly events (group A):
   // children / adults. Same price and duration; the patient picks the right one.
   // Both links come from the catalog, like /pediatrics — this page took the
   // built-in test-account fallback every time, so the client's own booking
   // links would never have reached it (audit A6, F13).
-  const schedulingUrl = (code: string) =>
-    services.find((s) => s.code === code)?.calendlySchedulingUrl;
-  const copiiUrl = calendlyUrlFor('nutrition_copii', schedulingUrl('nutrition_copii'));
-  const adultiUrl = calendlyUrlFor('nutrition_adulti', schedulingUrl('nutrition_adulti'));
+  const copiiUrl = calendlyUrlFor('nutrition_copii', services);
+  const adultiUrl = calendlyUrlFor('nutrition_adulti', services);
   // Duration and the EXPRESS promise come from the catalog and the schedule,
   // both of which the client edits (audit A7, F2).
   const duration = formatServiceDuration(

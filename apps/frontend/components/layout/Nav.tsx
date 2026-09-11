@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
-import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import type { BookingTarget } from '@/lib/calendly';
 import { btnNav } from '@/components/ui/cta';
 import styles from './Nav.module.css';
 
@@ -28,9 +28,17 @@ const SERVICE_MENU = [
 
 interface NavProps {
   locale: string;
+  /**
+   * Where the header's booking button points. A client component cannot read
+   * the API, so the locale layout looks it up and hands it down. With a
+   * bookable free consultation it opens the Calendly popup; without one it
+   * navigates to `/services` rather than opening the developer's test account,
+   * which is what the removed fallback did (audit A7).
+   */
+  booking: BookingTarget;
 }
 
-export function Nav({ locale }: NavProps) {
+export function Nav({ locale, booking }: NavProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -181,13 +189,19 @@ export function Nav({ locale }: NavProps) {
           and the burger appears where the inline links are hidden (≤1023px). */}
       <div className={styles.right}>
         {langSwitch}
-        <CalendlyButton
-          url={FREE_CONSULT_CALENDLY_URL}
-          reason="Consultație gratuită"
-          label={t('bookOnline')}
-          className={btnNav}
-          withArrow={false}
-        />
+        {booking.kind === 'calendly' ? (
+          <CalendlyButton
+            url={booking.url}
+            reason="Consultație gratuită"
+            label={t('bookOnline')}
+            className={btnNav}
+            withArrow={false}
+          />
+        ) : (
+          <Link href={booking.href} className={btnNav} onClick={close}>
+            {t('bookOnline')}
+          </Link>
+        )}
         <button
           type="button"
           className={`${styles.burger} ${open ? styles.burgerOpen : ''}`}

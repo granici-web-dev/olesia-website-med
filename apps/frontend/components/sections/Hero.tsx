@@ -1,7 +1,8 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
+import { Link } from '@/i18n/navigation';
 import { HeroVideo } from './HeroVideo';
-import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { freeConsultBooking } from '@/lib/calendly';
 import { btnDark, btnOutline } from '@/components/ui/cta';
 import { siteMedia } from '@/lib/site-media';
 import { api, loc } from '@/lib/api';
@@ -11,11 +12,12 @@ import styles from './Hero.module.css';
 const MAX_STATS = 3;
 
 export async function Hero() {
-  const [locale, t, media, about] = await Promise.all([
+  const [locale, t, media, about, booking] = await Promise.all([
     getLocale(),
     getTranslations('home.hero'),
     siteMedia(),
     api.about(),
+    freeConsultBooking(),
   ]);
 
   // Numbers about the practice are the client's to state: they appear once she
@@ -41,13 +43,19 @@ export async function Hero() {
         <p className={styles.sub}>{t('sub')}</p>
 
         <div className={styles.actions}>
-          <CalendlyButton
-            url={FREE_CONSULT_CALENDLY_URL}
-            reason="Consultație gratuită"
-            label={t('ctaBook')}
-            className={btnDark}
-            withArrow={false}
-          />
+          {booking.kind === 'calendly' ? (
+            <CalendlyButton
+              url={booking.url}
+              reason="Consultație gratuită"
+              label={t('ctaBook')}
+              className={btnDark}
+              withArrow={false}
+            />
+          ) : (
+            <Link href={booking.href} className={btnDark}>
+              {t('ctaBook')}
+            </Link>
+          )}
           <a href="#how-it-works" className={btnOutline}>
             {t('ctaHow')}
           </a>

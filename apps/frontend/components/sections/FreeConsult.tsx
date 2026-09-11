@@ -2,7 +2,7 @@ import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { creamPill } from '@/components/ui/cta';
 import { api } from '@/lib/api';
-import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { calendlyUrlFor } from '@/lib/calendly';
 import { formatServiceDuration } from '@/lib/service-price';
 
 /**
@@ -12,15 +12,21 @@ import { formatServiceDuration } from '@/lib/service-price';
  * minutes" while `free_consult.durationMin` was the client's to change
  * (audit A7, F2); with no catalog answer the heading drops the number rather
  * than guessing it.
+ *
+ * The whole band is skipped when the catalog has no bookable `free_consult`.
+ * Its only purpose is that one button, and a heading offering a free call with
+ * no way to book it is worse than no offer — the same rule the hero's stats
+ * band follows (`docs/shape-no-invented-content.md`).
  */
 export async function FreeConsult({ locale }: { locale: string }) {
   const t = (ro: string, en: string, ru: string) =>
     locale === 'ru' ? ru : locale === 'en' ? en : ro;
-  const duration = formatServiceDuration(
-    locale,
-    (await api.services()).find((s) => s.code === 'free_consult')?.durationMin ??
-      null,
-  );
+  const services = await api.services();
+  const freeConsult = services.find((s) => s.code === 'free_consult');
+  const duration = formatServiceDuration(locale, freeConsult?.durationMin ?? null);
+  const bookingUrl = calendlyUrlFor('free_consult', services);
+  if (!bookingUrl) return null;
+
   return (
     <section className="bg-sage-deep text-cream">
       <div className="shell flex flex-col gap-8 py-16 md:flex-row md:items-center md:justify-between md:py-20">
@@ -47,7 +53,7 @@ export async function FreeConsult({ locale }: { locale: string }) {
         </Reveal>
         <Reveal as="div" className="flex shrink-0 flex-wrap items-center gap-4" delay={120}>
           <CalendlyButton
-            url={FREE_CONSULT_CALENDLY_URL}
+            url={bookingUrl}
             reason={t('Consultație gratuită', 'Free consultation', 'Бесплатная консультация')}
             label={t('Programează discuția', 'Book the call', 'Записаться на разговор')}
             withArrow={false}

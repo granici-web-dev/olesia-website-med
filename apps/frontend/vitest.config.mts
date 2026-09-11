@@ -23,7 +23,7 @@ export default defineConfig({
   test: {
     name: 'frontend',
     environment: 'node',
-    include: ['{app,components,lib,hooks,store}/**/*.spec.{ts,tsx}'],
+    include: ['{app,components,lib,hooks}/**/*.spec.{ts,tsx}'],
     reporters: ['default'],
     passWithNoTests: false,
   },

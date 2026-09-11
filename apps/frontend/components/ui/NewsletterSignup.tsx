@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { subscribe, type SubscribeSource } from '@/lib/newsletter';
+import { LeadError } from '@/lib/leads';
+import { describeLeadError } from '@/lib/form-errors';
 import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import { CaptchaNotice } from './CaptchaNotice';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 /* Newsletter signup (brief §6c). Posts to our own API, so there is nothing to
    configure and nothing to hide behind: the block rendered nowhere for as long
    as it waited on an endpoint variable nobody was ever going to set
    (audit A6, F3). Email + consent, with idle/submitting/success/error states.
    Trilingual via the active locale. `source` tags where the signup happened. */
-
-type Bi = { ro: string; en: string; ru: string };
 
 const T: Record<string, Bi> = {
   title: { ro: 'Abonează-te la newsletter', en: 'Subscribe to the newsletter', ru: 'Подпишитесь на рассылку' },
@@ -34,7 +35,6 @@ const T: Record<string, Bi> = {
   // Nothing is mailed yet, so "check your email" would be a promise the site
   // cannot keep. It says what actually happened instead (audit A6, F3).
   success: { ro: 'Mulțumim! Adresa ta este pe listă.', en: 'Thank you! Your address is on the list.', ru: 'Спасибо! Ваш адрес в списке.' },
-  error: { ro: 'Ceva n-a mers. Încearcă din nou.', en: 'Something went wrong. Try again.', ru: 'Что-то пошло не так. Попробуйте ещё раз.' },
 };
 
 export function NewsletterSignup({
@@ -45,10 +45,14 @@ export function NewsletterSignup({
   className?: string;
 }) {
   const locale = useLocale();
-  const lc = (b: Bi) => (locale === 'ru' ? b.ru : locale === 'en' ? b.en : b.ro);
+  const lc = biFor(locale);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  // The API's own wording for what went wrong, not one sentence for every
+  // failure: a rate limit and a rejected captcha ask for different things
+  // (audit A7).
+  const [error, setError] = useState<string | null>(null);
 
   const valid = isEmailLike(email) && consent;
 
@@ -56,9 +60,16 @@ export function NewsletterSignup({
     e.preventDefault();
     if (!valid || status === 'submitting') return;
     setStatus('submitting');
-    const res = await subscribe(email, { source, locale });
-    setStatus(res === 'ok' ? 'success' : 'error');
-    if (res === 'ok') setEmail('');
+    setError(null);
+    try {
+      await subscribe(email, { source, locale });
+      setStatus('success');
+      setEmail('');
+    } catch (e) {
+      const failure = e instanceof LeadError ? e : new LeadError(0, '');
+      setError(describeLeadError(failure.status, failure.code, locale));
+      setStatus('idle');
+    }
   };
 
   if (status === 'success') {
@@ -110,8 +121,10 @@ export function NewsletterSignup({
           </span>
         </label>
 
-        {status === 'error' && (
-          <p className="mt-2 text-[0.85rem] text-[var(--walnut,#8a5a3a)]">{lc(T.error)}</p>
+        {error && (
+          <p role="alert" className="mt-2 text-[0.85rem] text-[var(--walnut,#8a5a3a)]">
+            {error}
+          </p>
         )}
 
         <CaptchaNotice className="mt-3" />

@@ -4,6 +4,8 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { ApiUnavailableError } from '@/lib/api';
+import { freeConsultBooking, type BookingTarget } from '@/lib/calendly';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { DevTools } from '@/components/DevTools';
@@ -94,7 +96,18 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const [messages, booking] = await Promise.all([
+    getMessages(),
+    // Where the header's booking button points, looked up here because `Nav`
+    // is a client component. An unreachable API sends it to `/services` for
+    // the same reason the footer's contact column goes missing: this layout
+    // renders on the page that exists to report the outage, and must not take
+    // it down.
+    freeConsultBooking().catch((e: unknown): BookingTarget => {
+      if (e instanceof ApiUnavailableError) return { kind: 'page', href: '/services' };
+      throw e;
+    }),
+  ]);
 
   return (
     <html
@@ -112,7 +125,7 @@ export default async function LocaleLayout({
                 ? 'Skip to content'
                 : 'Sari la conținut'}
           </a>
-          <Nav locale={locale} />
+          <Nav locale={locale} booking={booking} />
           <div id="content" tabIndex={-1}>
             {children}
           </div>

@@ -7,9 +7,12 @@
  * has exactly one failure mode to render: "the link no longer works".
  */
 
-const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333/api'
-).replace(/\/+$/, '');
+import { normalizeApiBase } from './api-base';
+
+const API_BASE = normalizeApiBase(
+  process.env.NEXT_PUBLIC_API_URL,
+  'NEXT_PUBLIC_API_URL',
+);
 
 export interface UploadedDocument {
   id: string;

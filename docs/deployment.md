@@ -291,10 +291,12 @@ redeploying and every photo the client uploaded answers 400 from the image
 optimizer while the rest of the page renders normally — which is the hardest
 kind of breakage to attribute. Redeploy after any change to it.
 
-⚠️ `NEXT_PUBLIC_SITE_URL` is **required** from this release on. Without it (and
-without Vercel's own `VERCEL_PROJECT_PRODUCTION_URL`) the production build fails
-rather than shipping a `robots.txt`, a sitemap and a canonical link that all
-point at `localhost` (audit A7, F6).
+⚠️ `NEXT_PUBLIC_SITE_URL`, `API_URL` and `NEXT_PUBLIC_API_URL` are all
+**required** from this release on: the production build fails rather than
+shipping a `robots.txt`, a sitemap and canonical links pointing at `localhost`
+(audit A7, F6), or a site that reads no content and forms that post to the
+visitor's own machine. `NEXT_PUBLIC_SITE_URL` may be omitted on Vercel, which
+sets `VERCEL_PROJECT_PRODUCTION_URL` itself.
 
 📌 **Pictures inside article and About text stay plain `<img>` until this step
 is done** (audit A7, F13). `next/image` only accepts hosts listed in

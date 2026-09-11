@@ -6,9 +6,12 @@ import { Modal } from '@/components/ui/Modal';
 import { cardCta } from '@/components/ui/cta';
 import { track } from '@/lib/analytics';
 import { subscribe } from '@/lib/newsletter';
+import { LeadError } from '@/lib/leads';
+import { describeLeadError } from '@/lib/form-errors';
 import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import type { AgeGroup } from '@/lib/age-taxonomy';
 import type { MaterialCategoryDto, PublicMaterialDto } from '@/lib/api';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Digital Library storefront (brief §6a). Owns the client-side interactions:
@@ -23,8 +26,6 @@ import type { MaterialCategoryDto, PublicMaterialDto } from '@/lib/api';
    ────────────────────────────────────────────────────────────────────────── */
 
 type Locale = 'ro' | 'en' | 'ru';
-type Bi = { ro: string; en: string; ru: string };
-
 const T: Record<string, Bi> = {
   searchPlaceholder: { ro: 'Caută în bibliotecă…', en: 'Search the library…', ru: 'Поиск по библиотеке…' },
   all: { ro: 'Toate', en: 'All', ru: 'Все' },
@@ -48,7 +49,6 @@ const T: Record<string, Bi> = {
   sending: { ro: 'Se salvează…', en: 'Saving…', ru: 'Сохранение…' },
   cancel: { ro: 'Anulează', en: 'Cancel', ru: 'Отмена' },
   ready: { ro: 'Gata! Descărcarea ta este pregătită.', en: 'Done! Your download is ready.', ru: 'Готово! Файл готов к скачиванию.' },
-  gateError: { ro: 'Nu am putut salva adresa. Încearcă din nou.', en: 'We could not save your address. Try again.', ru: 'Не удалось сохранить адрес. Попробуйте ещё раз.' },
   flagRecommended: { ro: 'Recomandat', en: 'Recommended', ru: 'Рекомендуем' },
   flagPopular: { ro: 'Popular', en: 'Popular', ru: 'Популярное' },
   flagNew: { ro: 'Nou', en: 'New', ru: 'Новое' },
@@ -116,7 +116,7 @@ export function MaterialLibrary({
   ages: AgeGroup[];
   contactHref: string;
 }) {
-  const lc = (b: Bi) => b[locale] ?? b.ro;
+  const lc = biFor(locale);
   /** RU falls back to RO, an empty string counting as missing — as everywhere. */
   const tri = (ro: string, en: string, ru: string | null) =>
     locale === 'ru' ? (ru?.trim() ? ru : ro) : locale === 'en' ? en : ro;
@@ -352,15 +352,20 @@ export function MaterialLibrary({
           onSubscribed={async (email) => {
             // The address is what the material is exchanged for, so the file is
             // released only once the API has it (audit A6, F3). A failure keeps
-            // the gate open and says so, rather than unlocking on a promise.
-            const result = await subscribe(email, { source: 'library', locale });
-            if (result !== 'ok') return false;
+            // the gate open and says what happened, rather than unlocking on a
+            // promise or answering every refusal with one sentence (A7).
+            try {
+              await subscribe(email, { source: 'library', locale });
+            } catch (e) {
+              const failure = e instanceof LeadError ? e : new LeadError(0, '');
+              return describeLeadError(failure.status, failure.code, locale);
+            }
             track('material_download', {
               slug: gate.slug,
               category: gate.categorySlug,
             });
             unlock(gate.slug);
-            return true;
+            return null;
           }}
         />
       )}
@@ -380,14 +385,16 @@ function EmailGate({
   fileUrl: string;
   lc: (b: Bi) => string;
   onClose: () => void;
-  /** Stores the address; `false` means it was not stored and nothing unlocks. */
-  onSubscribed: (email: string) => Promise<boolean>;
+  /**
+   * Stores the address. Returns `null` on success, or the sentence to show —
+   * anything other than `null` means nothing unlocks.
+   */
+  onSubscribed: (email: string) => Promise<string | null>;
 }) {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'sending' | 'ready' | 'error'>(
-    'idle',
-  );
+  const [status, setStatus] = useState<'idle' | 'sending' | 'ready'>('idle');
+  const [error, setError] = useState<string | null>(null);
   const titleId = useId();
   const emailId = useId();
   const valid = isEmailLike(email) && consent;
@@ -396,7 +403,10 @@ function EmailGate({
     e.preventDefault();
     if (!valid || status === 'sending') return;
     setStatus('sending');
-    setStatus((await onSubscribed(email)) ? 'ready' : 'error');
+    setError(null);
+    const failure = await onSubscribed(email);
+    setError(failure);
+    setStatus(failure ? 'idle' : 'ready');
   };
 
   return (
@@ -455,9 +465,9 @@ function EmailGate({
                 <span>{lc(T.consent)}</span>
               </label>
 
-              {status === 'error' && (
+              {error && (
                 <p role="alert" className="mt-4 text-[0.85rem] leading-relaxed text-[var(--walnut,#8a5a3a)]">
-                  {lc(T.gateError)}
+                  {error}
                 </p>
               )}
 

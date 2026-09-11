@@ -31,7 +31,7 @@ starts at `docs/payments-maib-checkout.md`, which is the source of truth.
 ## Quick orientation
 
 - **Monorepo:** Nx + pnpm workspaces.
-- **Frontend:** Next.js 16 App Router (16.3.4), React 19, TypeScript strict, Tailwind CSS v4 + CSS Modules, TanStack Query (server state), next-intl. Zustand is named as the UI-state library but lives in exactly one file (`store/ui.store.ts`).
+- **Frontend:** Next.js 16 App Router (16.3.4), React 19, TypeScript strict, Tailwind CSS v4 + CSS Modules, next-intl, react-markdown for the client's own text. **No client state library and no client data-fetching library**: pages are server components that read the API directly, and the handful of interactive pieces use `useState`. Zustand and TanStack Query were both listed here and used nowhere; they went with audit A7.
 - **Content:** **No third-party CMS — fully custom (decided 2026-06-10).** All content is served by the **NestJS content API** (`apps/api`) and edited in the custom back office (`apps/back-office`): services, blog, about, contacts, FAQ, testimonials, media appearances, library materials, site media, working hours. Rationale: the same admin surface must also own appointments, payments, patient files and the `admin`/`editor` roles, which an off-the-shelf CMS cannot host. Sanity was dropped and its integration deleted. See `STACK.md`.
 - **Booking:** **Calendly** (needs a paid plan, ≥ Standard — the free plan allows one active event type, which is why four of the five links currently fail) — webhook-driven into the `appointments` module. The earlier Cal.com integration was deleted.
 - **i18n:** Three locales — `ro` (default), `en`, `ru`. Page copy is authored inline as a locale ternary; the JSON in `i18n/messages/` carries the shared frame only (nav, footer, UI primitives). API content is trilingual with `*Ru` nullable, falling back RU → RO. The rule and its example are `AGENTS.md` R3.
@@ -54,7 +54,6 @@ apps/
       request.ts     next-intl server config
     lib/             api.ts (content client), calendly.ts, analytics.ts,
                      legal-entity.ts, uploads.ts, service-content.ts, …
-    store/           ui.store.ts (the only Zustand store)
     hooks/           Custom React hooks
     types/           Shared TypeScript types
     origin/          READ-ONLY reference design (HTML/JSX prototypes). Never edit.

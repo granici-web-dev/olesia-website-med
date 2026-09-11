@@ -12,6 +12,7 @@ import { ApiUnavailableError, api, loc } from '@/lib/api';
 import { JsonLd } from '@/components/ui/JsonLd';
 import { physicianJsonLd } from '@/lib/structured-data';
 import { renderMarkdown } from '@/lib/markdown';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -48,8 +49,6 @@ export async function generateMetadata({
         : 'Medic pediatru cu master în nutriție umană și experiență în gastroenterologie pediatrică. Consultații în română, rusă și engleză.',
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 const FOCUS: Bi[] = [
   { ro: 'Probleme digestive la copii — un domeniu cu care lucrez încă de la începutul carierei.', en: 'Digestive issues in children — an area I’ve worked in since the start of my career.', ru: 'Проблемы пищеварения у детей — направление, с которым я работаю с самого начала карьеры.' },
@@ -202,7 +201,7 @@ export default async function AboutPage({
   ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   return (
     <main className="bg-cream text-ink">

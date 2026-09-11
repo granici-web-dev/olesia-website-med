@@ -7,7 +7,7 @@ import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FooterLangSwitch } from './FooterLangSwitch';
 import { CookiePreferencesLink } from './CookiePreferencesLink';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
-import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { freeConsultBooking, type BookingTarget } from '@/lib/calendly';
 import { creamBox } from '@/components/ui/cta';
 import styles from './Footer.module.css';
 
@@ -45,6 +45,20 @@ async function contactChannels() {
 }
 
 /**
+ * Where the booking button points, swallowing an outage for the same reason as
+ * above. With no catalog to read it falls through to `/services`, which is
+ * where it would have pointed anyway with no free consultation configured.
+ */
+async function bookingLink(): Promise<BookingTarget> {
+  try {
+    return await freeConsultBooking();
+  } catch (e) {
+    if (e instanceof ApiUnavailableError) return { kind: 'page', href: '/services' };
+    throw e;
+  }
+}
+
+/**
  * The contact column reads `GET /contacts`. It used to be five hardcoded
  * anchors while the back office edited a table nothing rendered (audit A6,
  * F12) — so a changed phone number reached nobody. A kind the client has not
@@ -54,6 +68,7 @@ export async function Footer() {
   const t = await getTranslations('footer');
   const locale = await getLocale();
   const { phones, emails, socials, addresses } = await contactChannels();
+  const booking = await bookingLink();
   const reachable = [...emails, ...phones, ...socials];
 
   return (
@@ -68,13 +83,19 @@ export async function Footer() {
             className={styles.logo}
           />
           <p className={styles.tagline}>{t('tagline')}</p>
-          <CalendlyButton
-            url={FREE_CONSULT_CALENDLY_URL}
-            reason="Consultație gratuită"
-            label={t('book')}
-            className={`${creamBox} mt-[24px]`}
-            withArrow={false}
-          />
+          {booking.kind === 'calendly' ? (
+            <CalendlyButton
+              url={booking.url}
+              reason="Consultație gratuită"
+              label={t('book')}
+              className={`${creamBox} mt-[24px]`}
+              withArrow={false}
+            />
+          ) : (
+            <Link href={booking.href} className={`${creamBox} mt-[24px]`}>
+              {t('book')}
+            </Link>
+          )}
         </div>
 
         <div>

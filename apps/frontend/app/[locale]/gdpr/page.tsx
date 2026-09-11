@@ -8,6 +8,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
 import { LegalDraftNotice } from '@/components/ui/LegalDraftNotice';
 import { LEGAL_ENTITY, LEGAL_UPDATED } from '@/lib/legal-entity';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -88,8 +89,6 @@ const TOC: TocItem[] = [
   { id: 'modificari', ro: 'Modificări', en: 'Changes', ru: 'Изменения' },
   { id: 'contact', ro: 'Contact', en: 'Contact', ru: 'Контакты' },
 ];
-
-type Bi = { ro: string; en: string; ru: string };
 
 /** Cookie categories, mirroring `components/analytics/CookieConsent.tsx`.
  *  Maintained by hand — a self-hosted CMP does no scanning. */
@@ -364,7 +363,7 @@ export default async function GdprPage({
   setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   return (
     <main className="bg-cream text-ink">

@@ -14,6 +14,7 @@ import {
 import { describeUploadError } from '@/lib/form-errors';
 import { btnDark, underline } from '@/components/ui/cta';
 import { CONSENT_VERSION, PATIENT_CONSENT_TEXT } from '@olesia/shared';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 /**
  * The patient's side of §11.14 — send analyses and investigations before the
@@ -30,8 +31,6 @@ import { CONSENT_VERSION, PATIENT_CONSENT_TEXT } from '@olesia/shared';
  *    because "something went wrong" on a page whose whole job is one action is
  *    the same as no message at all.
  */
-
-type Bi = { ro: string; en: string; ru: string };
 
 const T = {
   eyebrow: { ro: 'Documente', en: 'Documents', ru: 'Документы' },

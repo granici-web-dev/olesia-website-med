@@ -10,6 +10,7 @@ import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -45,8 +46,6 @@ export async function generateMetadata({
         : '4 tipuri de abonament (Pediatrie, Nutriție copii, Nutriție adulți, Complex) pe 1, 2, 3 sau 6 luni: monitorizare periodică, ajustarea planului și comunicare directă cu medicul. Durata și prețul se stabilesc individual.',
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 const CHOOSE_WHEN: Bi[] = [
   { ro: 'Vrei sprijin constant, nu o vizită singulară.', en: 'You want steady support, not a one-off visit.', ru: 'Вам нужна постоянная поддержка, а не разовый визит.' },
@@ -176,7 +175,7 @@ export default async function MonitoringPage({
   const portrait = await siteMediaAsset('portrait_monitoring');
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   return (
     <main className="bg-cream text-ink">

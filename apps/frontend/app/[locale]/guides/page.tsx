@@ -9,6 +9,7 @@ import { AGE_GROUPS } from '@/lib/age-taxonomy';
 import { api } from '@/lib/api';
 import { formatSla } from '@/lib/working-hours';
 import { btnDark, underlineLg, creamPill, creamUnderline, cardCta } from '@/components/ui/cta';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -48,8 +49,6 @@ export async function generateMetadata({
   });
 }
 
-type Bi = { ro: string; en: string; ru: string };
-
 
 export default async function LibraryPage({
   params,
@@ -60,7 +59,7 @@ export default async function LibraryPage({
   setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   /** RU falls back to RO, an empty string counting as missing — as everywhere. */
   const tri = (ro: string, enText: string, ruText: string | null) =>

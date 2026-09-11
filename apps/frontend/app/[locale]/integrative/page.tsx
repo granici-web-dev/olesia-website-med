@@ -12,6 +12,7 @@ import { formatServiceDuration } from '@/lib/service-price';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -54,8 +55,6 @@ export async function generateMetadata({
         : `Consultație video aprofundată${inBrackets} care îmbină pediatria și nutriția, cu plan personalizat și monitorizare. Pentru situații complexe.`,
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 const CHOOSE_WHEN: Bi[] = [
   { ro: 'Situația este complexă sau durează de mai mult timp.', en: 'The situation is complex or has been going on for a while.', ru: 'Ситуация сложная или тянется уже давно.' },
@@ -191,13 +190,9 @@ export default async function IntegrativePage({
   ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
-  const integrative = services.find((s) => s.code === 'integrative');
-  const integrativeUrl = calendlyUrlFor(
-    'integrative',
-    integrative?.calendlySchedulingUrl,
-  );
+  const integrativeUrl = calendlyUrlFor('integrative', services);
   const durationFor = (code: string) =>
     formatServiceDuration(
       locale,

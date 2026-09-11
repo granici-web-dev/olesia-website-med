@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Modal } from '@/components/ui/Modal';
 import { Reveal } from '@/components/ui/Reveal';
 import styles from './Certificates.module.css';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Credentials proof for /about — surfaces the doctor's recent training
@@ -16,8 +17,6 @@ import styles from './Certificates.module.css';
    badges — the document image speaks for itself in the lightbox.
    Trilingual (RO default · EN · RU); content is local.
    ────────────────────────────────────────────────────────────────────────── */
-
-type Bi = { ro: string; en: string; ru: string };
 
 interface Certificate {
   id: string;
@@ -64,7 +63,7 @@ const CERTIFICATES: Certificate[] = [
 export function Certificates({ locale }: { locale: string }) {
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   const [active, setActive] = useState<Certificate | null>(null);
 

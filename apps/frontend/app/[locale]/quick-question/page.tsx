@@ -10,6 +10,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
 import { api } from '@/lib/api';
 import { formatSla, formatSlaInHours, withSla } from '@/lib/working-hours';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -49,8 +50,6 @@ export async function generateMetadata({
       : `Ai o întrebare punctuală, non-urgentă? Primești un răspuns scris și documentat de la un medic pediatru în ${inHours}. Poți atașa poze și documente.`,
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 const STEPS: { title: Bi; text: Bi }[] = [
   {
@@ -155,8 +154,9 @@ export default async function QuickQuestionPage({
   const sla = formatSla(locale, minutes);
   const slaInHours = formatSlaInHours(locale, minutes);
   /** Copy with the `{sla}` / `{slaInHours}` slots filled in. */
+  const pick = biFor(locale);
   const lc = (b: Bi) =>
-    withSla(withSla(ru ? b.ru : en ? b.en : b.ro, slaInHours, 'slaInHours'), sla);
+    withSla(withSla(pick(b), slaInHours, 'slaInHours'), sla);
 
   return (
     <main className="bg-cream text-ink">

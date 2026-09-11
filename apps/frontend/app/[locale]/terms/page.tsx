@@ -8,6 +8,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
 import { LegalDraftNotice } from '@/components/ui/LegalDraftNotice';
 import { LEGAL_ENTITY, LEGAL_UPDATED } from '@/lib/legal-entity';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -88,8 +89,6 @@ const TOC: TocItem[] = [
   { id: 'contact', ro: 'Contact', en: 'Contact', ru: 'Контакты' },
 ];
 
-type Bi = { ro: string; en: string; ru: string };
-
 const SUMMARY: Bi[] = [
   {
     ro: 'Acești termeni reglementează folosirea serviciilor noastre.',
@@ -168,7 +167,7 @@ export default async function TermsPage({
   setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   return (
     <main className="bg-cream text-ink">

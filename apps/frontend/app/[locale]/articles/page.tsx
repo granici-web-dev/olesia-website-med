@@ -9,7 +9,8 @@ import {
   type BlogPostItem,
   type BlogCategory,
 } from '@/components/sections/BlogList';
-import { AGE_GROUPS, type Bi } from '@/lib/age-taxonomy';
+import { AGE_GROUPS } from '@/lib/age-taxonomy';
+import { biFor, type Bi } from '@/lib/i18n-types';
 import { formatSla } from '@/lib/working-hours';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
 
@@ -58,7 +59,7 @@ export default async function ArticlesPage({
   setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   const fmtDate = (iso: string | null) =>
     iso

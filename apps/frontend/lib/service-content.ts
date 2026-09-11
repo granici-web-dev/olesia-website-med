@@ -24,12 +24,6 @@ export interface BiList {
   en: string[];
   ru: string[];
 }
-export interface Bi {
-  ro: string;
-  en: string;
-  ru: string;
-}
-
 /** The three description fields, so a caller can pass a narrower object. */
 export interface ServiceDescriptionFields {
   descriptionRo: string;
@@ -57,7 +51,7 @@ export function serviceDescription(
   return (pick?.trim() ? pick : service.descriptionRo).trim();
 }
 
-export const SERVICE_INCLUDED: Record<string, BiList> = {
+const INCLUDED: Record<string, BiList> = {
   pediatric: {
     ro: [
       'Apel video · {duration}',
@@ -125,26 +119,6 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'Письменные рекомендации после консультации',
     ],
   },
-  nutrition_adulti: {
-    ro: [
-      'Apel video · {duration}',
-      'Analiza obiceiurilor alimentare actuale',
-      'Un plan alimentar personalizat',
-      'Recomandări scrise după consultație',
-    ],
-    en: [
-      'Video call · {duration}',
-      'Analysis of current eating patterns',
-      'A personalized nutrition plan',
-      'Written recommendations after the call',
-    ],
-    ru: [
-      'Видеозвонок · {duration}',
-      'Анализ текущих привычек питания',
-      'Персональный план питания',
-      'Письменные рекомендации после консультации',
-    ],
-  },
   integrative: {
     ro: [
       'Apel video amănunțit · {duration}',
@@ -167,18 +141,21 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
   },
   monitoring: {
     ro: [
+      'Patru tipuri: Pediatrie · Nutriție copii · Nutriție adulți · Complex',
       'Monitorizare periodică (greutate, creștere, alimentație, analize)',
       'Ajustarea planului medical sau alimentar pe parcurs',
       'Comunicare directă cu medicul (email/WhatsApp)',
       'Prioritate la programarea consultațiilor',
     ],
     en: [
+      'Four types: Pediatrics · Child nutrition · Adult nutrition · Complex',
       'Periodic monitoring (weight, growth, diet, lab results)',
       'Adjusting the medical or nutrition plan over time',
       'Direct communication with the doctor (email/WhatsApp)',
       'Priority when booking consultations',
     ],
     ru: [
+      'Четыре типа: педиатрия · питание детей · питание взрослых · комплекс',
       'Периодическое наблюдение (вес, рост, питание, анализы)',
       'Корректировка медицинского или пищевого плана',
       'Прямая связь с врачом (email/WhatsApp)',
@@ -202,6 +179,20 @@ export const SERVICE_INCLUDED: Record<string, BiList> = {
       'Один круг уточнений',
     ],
   },
+};
+
+/**
+ * What each service includes, keyed by `code`.
+ *
+ * `nutrition_adulti` is the audience-neutral list rather than a second copy of
+ * it: the two were written out separately and were already identical word for
+ * word, which is a duplicate waiting to drift, not a decision (audit A7).
+ * `nutrition_copii` genuinely differs — it says "the child's" and
+ * "age-appropriate" — so it stays its own entry.
+ */
+export const SERVICE_INCLUDED: Record<string, BiList> = {
+  ...INCLUDED,
+  nutrition_adulti: INCLUDED.nutrition,
 };
 
 /**

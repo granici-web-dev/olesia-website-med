@@ -4,7 +4,9 @@
  * Keys are stable; labels are trilingual (RO default · EN · RU).
  */
 
-export type Bi = { ro: string; en: string; ru: string };
+import type { Bi } from './i18n-types';
+
+export type { Bi };
 
 export interface AgeGroup {
   key: string;

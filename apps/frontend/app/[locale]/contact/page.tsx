@@ -16,6 +16,7 @@ import {
   provisionalNote,
   withSla,
 } from '@/lib/working-hours';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -57,8 +58,6 @@ export async function generateMetadata({
       : 'Contactează-ne pentru întrebări despre consultații online, programări și plată. Pentru întrebări medicale, folosește „Întreabă medicul".',
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 /* Triage routes — intent → destination. */
 const TRIAGE: { situation: Bi; route: Bi; href: string; anchor?: boolean }[] = [
@@ -107,7 +106,7 @@ export default async function ContactPage({
   setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   const [contacts, hours] = await Promise.all([
     api.contacts(),

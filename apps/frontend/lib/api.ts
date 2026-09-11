@@ -39,7 +39,9 @@ export type {
   WorkingHoursDto,
 } from '@olesia/shared';
 
-const API_URL = process.env.API_URL ?? 'http://localhost:3333/api';
+import { normalizeApiBase } from './api-base';
+
+const API_URL = normalizeApiBase(process.env.API_URL, 'API_URL');
 
 /**
  * The API could not answer — it is down, unreachable, or broken.

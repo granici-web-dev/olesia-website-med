@@ -61,9 +61,9 @@ function codesFor(key: string): string[] {
 
 export async function Services() {
   const t = await getTranslations('home.services');
-  const lc = await getLocale();
-  const en = lc === 'en';
-  const ru = lc === 'ru';
+  const locale = await getLocale();
+  const en = locale === 'en';
+  const ru = locale === 'ru';
   const includedLabel = ru ? 'Что входит' : en ? "What's included" : 'Ce include';
 
   // Group-A services (pediatric/nutrition/integrative) are calendar-backed —
@@ -76,14 +76,9 @@ export async function Services() {
     api.services(),
     api.workingHours(),
   ]);
-  const slaInHours = formatSlaInHours(lc, hours.expressSlaMinutes);
+  const slaInHours = formatSlaInHours(locale, hours.expressSlaMinutes);
   const byCode = new Map<string, PublicServiceDto>(
     services.map((s) => [s.code, s]),
-  );
-  const bookingUrl = new Map<string, string | null>(
-    services
-      .filter((s) => s.group === 'A_booking')
-      .map((s) => [s.code, s.calendlySchedulingUrl]),
   );
 
   return (
@@ -103,14 +98,14 @@ export async function Services() {
 
       {SERVICES.map(({ n, key }, i) => {
         const split = SPLIT_BOOKING[key];
-        const url = calendlyUrlFor(key, bookingUrl.get(key));
+        const url = calendlyUrlFor(CONTENT_CODE[key] ?? key, services);
         const leadService = LEAD_SERVICE[key];
         const tileServices = codesFor(key)
           .map((code) => byCode.get(code))
           .filter((s) => s !== undefined);
-        const priceText = formatPriceRange(lc, tileServices);
+        const priceText = formatPriceRange(locale, tileServices);
         const durationText = formatServiceDuration(
-          lc,
+          locale,
           tileServices[0]?.durationMin ?? null,
         );
         const included = SERVICE_INCLUDED[CONTENT_CODE[key] ?? key];
@@ -157,7 +152,7 @@ export async function Services() {
               {split ? (
                 <div className="flex flex-col items-start gap-1">
                   {split.map(({ code, label }) => {
-                    const splitUrl = calendlyUrlFor(code, bookingUrl.get(code));
+                    const splitUrl = calendlyUrlFor(code, services);
                     return splitUrl ? (
                       <CalendlyButton
                         key={code}

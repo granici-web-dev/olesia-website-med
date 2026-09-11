@@ -96,7 +96,6 @@ Rule of three: extract a helper or component only when it appears in 3+ places. 
 | Section component | `PascalCase.tsx` + `PascalCase.module.css` | `Hero.tsx`, `Hero.module.css` |
 | Layout component | `PascalCase.tsx` + `PascalCase.module.css` | `Nav.tsx`, `Nav.module.css` |
 | UI primitive | `PascalCase.tsx` + `PascalCase.module.css` | `Button.tsx`, `Button.module.css` |
-| Zustand store | `<name>.store.ts` | `ui.store.ts` |
 | Page | `page.tsx` (Next.js convention) | `app/[locale]/about/page.tsx` |
 | Shape doc | `docs/shape-<slug>.md` | `docs/shape-booking-form.md` |
 
@@ -108,7 +107,7 @@ Every component file follows this order:
 // 1. Imports — React/Next first, then internal, then styles
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useUIStore } from '@/store/ui.store';
+import { Reveal } from '@/components/ui/Reveal';
 import styles from './Hero.module.css';
 
 // 2. Constants (static data, arrays)

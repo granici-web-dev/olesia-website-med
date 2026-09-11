@@ -29,6 +29,7 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Public site | Next.js App Router, React 19 | `next 16.3.4`, `react ^19` |
 | Public site i18n | next-intl, locales `ro` (default) / `en` / `ru` | — |
 | Public site styling | Tailwind v4 + CSS Modules, brand tokens as CSS variables | `tailwindcss ^4` |
+| Markdown | react-markdown + remark-gfm, in **both** front ends since audit A7 | `^10.1.0` / `^4.0.1` |
 | Back office | React 19 + Vite, react-router-dom | `vite ^8`, `react-router-dom 6.30.3` (exact) |
 | Back office UI | shadcn/ui over Radix primitives, CVA, tailwind-merge, lucide, sonner | — |
 | Back office data | TanStack Query | `^5.101.0` |
@@ -98,16 +99,25 @@ define the visual intent. Never edited; implementations live in `components/` an
 - **No ORM other than Prisma**, and no raw SQL in application code. Hand-written SQL exists
   only in migrations.
 - **No `prisma db push`.** Migrations are generated and committed; see `PRINCIPLES.md`.
-- **No state library in the back office** beyond TanStack Query for server state. Zustand
-  is listed for the public site and used in exactly one file.
+- **No state library anywhere.** The back office has TanStack Query for server state and
+  nothing else. The public site has neither: its pages are server components that read the
+  API directly, and the few interactive pieces hold their state in `useState`. Zustand and
+  TanStack Query were both declared in `apps/frontend/package.json` and imported by two
+  files nobody rendered; all four went with audit A7 on 2026-09-11.
 - **No Edge runtime** on the site; the API is a long-running Node process.
 
 ## Dead or near-dead dependencies
 
 Kept honest so nobody treats them as load-bearing.
 
-- **`agentation`** — dev-tools components only.
-- **`zustand`** — named as the UI state library in `CLAUDE.md`, present in one file.
+- **`agentation`** — dev-tools components only, and a `devDependency` since audit A7:
+  `DevTools` returns null outside development, so it never reached a production bundle,
+  but declaring it as a runtime dependency said otherwise.
+
+**Removed 2026-09-11 (audit A7):** `zustand` and `@tanstack/react-query` from
+`apps/frontend`. Each had exactly one importer — `store/ui.store.ts` and
+`lib/query-client.ts` — and neither file was imported by anything. TanStack Query stays in
+the root manifest, where the back office genuinely uses it.
 
 **Removed 2026-09-10:** `ai` and `@google/genai`, which existed for one parked
 script and nothing else. The script is kept for reference, outside the dependency

@@ -14,6 +14,7 @@ import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { Reveal } from '@/components/ui/Reveal';
 import { btnDark, underlineLg, creamPill, creamUnderline } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -48,8 +49,6 @@ export async function generateMetadata({
       : 'Consultație pediatrică video cu un medic pediatru: simptome, digestie, copilul frecvent bolnav, alergii, creștere. Programează online.',
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 const HELP: { label: Bi; text: Bi }[] = [
   {
@@ -213,13 +212,10 @@ export default async function PediatricsPage({
   ]);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   const pediatric = services.find((s) => s.code === 'pediatric');
-  const pediatricUrl = calendlyUrlFor(
-    'pediatric',
-    pediatric?.calendlySchedulingUrl,
-  );
+  const pediatricUrl = calendlyUrlFor('pediatric', services);
   // The call length and the EXPRESS promise are the client's to edit; this page
   // stated both as literal text while the back office edited them (A7, F2).
   const duration = formatServiceDuration(locale, pediatric?.durationMin ?? null);

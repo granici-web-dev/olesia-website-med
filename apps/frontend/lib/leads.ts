@@ -1,8 +1,8 @@
 /**
  * Public lead-intake client (browser → NestJS API). Posts the group-B service
  * forms (Monitorizare / Întrebare EXPRESS) to the public `/leads/*` endpoints.
- * The API base is `NEXT_PUBLIC_API_URL` (must be browser-reachable); defaults
- * to the local API. CORS for the site origin is enabled server-side.
+ * The API base comes from `normalizeApiBase()` and must be browser-reachable.
+ * CORS for the site origin is enabled server-side.
  */
 import type {
   ContactMessageSubject,
@@ -10,10 +10,12 @@ import type {
 } from '@olesia/shared';
 
 import { getCaptchaToken, type CaptchaAction } from './captcha';
+import { normalizeApiBase } from './api-base';
 
-const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333/api'
-).replace(/\/+$/, '');
+const API_BASE = normalizeApiBase(
+  process.env.NEXT_PUBLIC_API_URL,
+  'NEXT_PUBLIC_API_URL',
+);
 
 export type LeadService = 'monitoring' | 'quick_question';
 
@@ -119,8 +121,13 @@ async function readCode(res: Response): Promise<string> {
  * The token is minted per action, so one form's token cannot be replayed
  * against another. Without a site key `getCaptchaToken` returns null and the
  * header is simply omitted.
+ *
+ * Exported because the newsletter posts to the same API with the same captcha
+ * header and the same failure modes, and had its own copy of all of it — one
+ * that turned every failure into the string `'error'`, so a rate limit and a
+ * rejected captcha reached the visitor as "something went wrong" (audit A7).
  */
-async function postLead(
+export async function postLead(
   path: string,
   body: unknown,
   action: CaptchaAction,

@@ -7,12 +7,14 @@ import { Link } from '@/i18n/navigation';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
 import { Reveal } from '@/components/ui/Reveal';
-import { FREE_CONSULT_CALENDLY_URL } from '@/lib/calendly';
+import { calendlyUrlFor } from '@/lib/calendly';
 import { btnDark, underlineLg, underline } from '@/components/ui/cta';
 import { siteMediaAsset } from '@/lib/site-media';
 import { api } from '@/lib/api';
 import { formatServiceDuration } from '@/lib/service-price';
+import { SERVICE_INCLUDED, fillIncluded } from '@/lib/service-content';
 import { formatSla, formatSlaInHours } from '@/lib/working-hours';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 /** Service code → its dedicated landing page. Rows link here ("Detalii"). */
 const DETAIL_ROUTE: Record<string, string> = {
@@ -58,8 +60,6 @@ export async function generateMetadata({
    mono micro-labels, hairline rules, square dark/outline buttons, olive band.
    ────────────────────────────────────────────────────────────────────────── */
 
-type Bi = { ro: string; en: string; ru: string };
-
 interface ServiceContent {
   /**
    * Service `code`, which doubles as this row's anchor (`/services#nutrition`).
@@ -76,7 +76,6 @@ interface ServiceContent {
   duration: Bi;
   value: Bi;
   bestFor: Bi;
-  included: { ro: string[]; en: string[]; ru: string[] };
   cta: Bi;
   /** Optional callout: a strength to highlight, or an emergency disclaimer. */
   note?: { kind: 'highlight' | 'warning' } & Bi;
@@ -104,26 +103,6 @@ const SERVICES_A: ServiceContent[] = [
       en: 'For parents who want expert pediatric guidance without a clinic visit.',
       ru: 'Для родителей, которым нужен совет педиатра без поездки в клинику.',
     },
-    included: {
-      ro: [
-        'Apel video',
-        'Analiza simptomelor, a istoricului și a documentelor trimise',
-        'Evaluare clară și pașii următori',
-        'Plan scris cu recomandări, în 24 de ore',
-      ],
-      en: [
-        'Video call',
-        'Review of symptoms, history, and any documents you share',
-        'A clear assessment and next steps',
-        'Written summary with recommendations within 24 hours',
-      ],
-      ru: [
-        'Видеозвонок',
-        'Разбор симптомов, истории болезни и присланных документов',
-        'Понятная оценка и следующие шаги',
-        'Письменный план с рекомендациями в течение 24 часов',
-      ],
-    },
     cta: { ro: 'Programează', en: 'Book a time', ru: 'Записаться' },
   },
   {
@@ -146,26 +125,6 @@ const SERVICES_A: ServiceContent[] = [
       ro: 'Pentru dificultăți de alimentație, diversificare, greutate sau obiceiuri sănătoase.',
       en: 'For feeding difficulties, weaning, weight, or healthy-eating goals.',
       ru: 'При трудностях с кормлением, введении прикорма, вопросах веса или здоровых привычках.',
-    },
-    included: {
-      ro: [
-        'Apel video',
-        'Analiza obiceiurilor alimentare actuale',
-        'Un plan alimentar personalizat',
-        'Recomandări scrise după consultație',
-      ],
-      en: [
-        'Video call',
-        'Analysis of current eating and feeding patterns',
-        'A personalized nutrition plan',
-        'Written recommendations after the call',
-      ],
-      ru: [
-        'Видеозвонок',
-        'Анализ текущих пищевых привычек',
-        'Персональный план питания',
-        'Письменные рекомендации после консультации',
-      ],
     },
     note: {
       kind: 'highlight',
@@ -196,26 +155,6 @@ const SERVICES_A: ServiceContent[] = [
       en: 'For complex or ongoing situations that need a thorough assessment.',
       ru: 'Для сложных или длительных ситуаций, требующих всесторонней оценки.',
     },
-    included: {
-      ro: [
-        'Apel video amănunțit',
-        'Evaluare pediatrică și nutrițională combinată',
-        'Un plan de acțiune personalizat',
-        'Prima urmărire / monitorizare inclusă',
-      ],
-      en: [
-        'An in-depth video call',
-        'Combined pediatric and nutrition assessment',
-        'A tailored action plan',
-        'Initial follow-up / monitoring included',
-      ],
-      ru: [
-        'Подробный видеозвонок',
-        'Совместная педиатрическая и нутрициологическая оценка',
-        'Персональный план действий',
-        'Первый контрольный визит / наблюдение включены',
-      ],
-    },
     cta: { ro: 'Programează', en: 'Book a time', ru: 'Записаться' },
   },
 ];
@@ -242,26 +181,6 @@ const SERVICES_B: ServiceContent[] = [
       en: 'For families who want steady support, not a one-off visit.',
       ru: 'Для семей, которым нужна постоянная поддержка, а не разовый визит.',
     },
-    included: {
-      ro: [
-        'Patru tipuri: Pediatrie · Nutriție copii · Nutriție adulți · Complex',
-        'Monitorizare periodică și ajustarea planului pe parcurs',
-        'Comunicare directă cu medicul (email/WhatsApp)',
-        'Prioritate la programarea consultațiilor',
-      ],
-      en: [
-        'Four types: Pediatrics · Child nutrition · Adult nutrition · Complex',
-        'Periodic monitoring and plan adjustments over time',
-        'Direct communication with the doctor (email/WhatsApp)',
-        'Priority when booking consultations',
-      ],
-      ru: [
-        'Четыре типа: педиатрия · питание детей · питание взрослых · комплекс',
-        'Периодическое наблюдение и корректировка плана',
-        'Прямая связь с врачом (email/WhatsApp)',
-        'Приоритет при записи на консультации',
-      ],
-    },
     cta: { ro: 'Solicită un abonament', en: 'Request a subscription', ru: 'Оставить заявку' },
   },
   {
@@ -280,23 +199,6 @@ const SERVICES_B: ServiceContent[] = [
       ro: 'Pentru o întrebare punctuală, non-urgentă, care nu cere o consultație completă.',
       en: "For a specific, non-urgent question that doesn't need a full consultation.",
       ru: 'Для конкретного несрочного вопроса, который не требует полной консультации.',
-    },
-    included: {
-      ro: [
-        'Trimiți întrebarea (cu poze sau documente, dacă e cazul)',
-        'Răspuns scris în {slaInHours}',
-        'O rundă de clarificări',
-      ],
-      en: [
-        'Submit your question (with photos or documents if needed)',
-        'A written reply within {slaInHours}',
-        'One round of clarification',
-      ],
-      ru: [
-        'Отправляете вопрос (с фото или документами, если нужно)',
-        'Письменный ответ в течение {slaInHours}',
-        'Одно уточнение по ответу',
-      ],
     },
     note: {
       kind: 'warning',
@@ -504,12 +406,19 @@ function ServiceRow({
   facts: ServiceFacts;
 }) {
   const detailHref = DETAIL_ROUTE[s.code] ?? '/services';
-  const included = (
-    locale === 'ru' ? s.included.ru : locale === 'en' ? s.included.en : s.included.ro
-  ).map((item) => fillFacts(item, s.code, facts));
+  // The same list the homepage tile and /pricing render. This page kept its
+  // own copy of all five, and fifteen of the fifty-seven lines had already
+  // drifted from it (audit A7).
+  const shared = SERVICE_INCLUDED[s.code];
+  const included = shared
+    ? fillIncluded(locale === 'ru' ? shared.ru : locale === 'en' ? shared.en : shared.ro, {
+        duration: facts.duration(CATALOG_CODE[s.code] ?? s.code),
+        slaInHours: facts.slaInHours,
+      })
+    : [];
   const ru = locale === 'ru';
   const en = locale === 'en';
-  const pick = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const pick = biFor(locale);
   const title = pick(s.title);
 
   return (
@@ -616,10 +525,11 @@ export default async function ServicesPage({
     sla: formatSla(locale, hours.expressSlaMinutes),
     slaInHours: formatSlaInHours(locale, hours.expressSlaMinutes),
   };
+  const freeConsult = calendlyUrlFor('free_consult', services);
 
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   const T = {
     eyebrow: ru
@@ -752,13 +662,15 @@ export default async function ServicesPage({
                 {T.heroTagline}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-                <CalendlyButton
-                  url={FREE_CONSULT_CALENDLY_URL}
-                  reason={T.ctaBook}
-                  label={T.ctaBook}
-                  withArrow={false}
-                  className={btnDark}
-                />
+                {freeConsult && (
+                  <CalendlyButton
+                    url={freeConsult}
+                    reason={T.ctaBook}
+                    label={T.ctaBook}
+                    withArrow={false}
+                    className={btnDark}
+                  />
+                )}
                 <Link href="/pricing" className={underlineLg}>
                   {T.seePricing} →
                 </Link>

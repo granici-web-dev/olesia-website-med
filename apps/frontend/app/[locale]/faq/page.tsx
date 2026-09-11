@@ -8,6 +8,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { btnDark, creamPill, creamUnderline } from '@/components/ui/cta';
 import { api } from '@/lib/api';
 import { formatSla } from '@/lib/working-hours';
+import { biFor, type Bi } from '@/lib/i18n-types';
 
 export const revalidate = 60;
 
@@ -45,8 +46,6 @@ export async function generateMetadata({
         : 'Răspunsuri despre consultațiile online, programare, plată prin transfer și servicii — pediatrie și nutriție.',
   });
 }
-
-type Bi = { ro: string; en: string; ru: string };
 
 interface FaqItem {
   q: Bi;
@@ -103,7 +102,7 @@ export default async function FaqPage({
   setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const lc = (b: Bi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
 
   const [CATEGORIES, hours] = await Promise.all([
     loadCategories(),

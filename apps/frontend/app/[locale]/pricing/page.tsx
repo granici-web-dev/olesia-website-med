@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 
 import { pageMetadata } from '@/lib/page-metadata';
+import { biFor, type Bi } from '@/lib/i18n-types';
 import { DELIVERABLE_CATALOG } from '@olesia/shared';
 import { api, loc, serviceTag } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
@@ -60,8 +61,7 @@ export async function generateMetadata({
    same constant the API stamps onto an order, so this page and the order
    confirmation cannot quote different numbers. Making group C editable from the
    back office is a separate step. */
-type DBi = { ro: string; en: string; ru: string };
-const DELIVERABLE_COPY: Record<DeliverableProduct, { tag: DBi; title: DBi; desc: DBi }> = {
+const DELIVERABLE_COPY: Record<DeliverableProduct, { tag: Bi; title: Bi; desc: Bi }> = {
   menu_7: {
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
     title: { ro: 'Meniu personalizat · 7 zile', en: 'Personalized menu · 7 days', ru: 'Персональное меню · 7 дней' },
@@ -150,7 +150,7 @@ export default async function PricingPage({
     contact: ru ? 'Связаться' : en ? 'Get in touch' : 'Contactează-ne',
   };
 
-  const lc = (b: DBi) => (ru ? b.ru : en ? b.en : b.ro);
+  const lc = biFor(locale);
   const td = {
     eyebrow: ru ? 'Продукты' : en ? 'Deliverables' : 'Livrabile',
     title: ru ? 'Персональные продукты' : en ? 'Personalized products' : 'Produse personalizate',

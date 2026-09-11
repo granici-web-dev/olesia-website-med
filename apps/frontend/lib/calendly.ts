@@ -1,58 +1,70 @@
+import { api } from './api';
+
 /**
- * Site-wide free-consultation Calendly link (module_calendly.md §8.3) used
- * where the service isn't known yet: the header CTA and the free-consult
- * section. Per-service booking links live on `Service.calendlySchedulingUrl`.
- * Override per environment with NEXT_PUBLIC_CALENDLY_FREE_URL.
+ * Booking links come from the catalog, and from nowhere else.
  *
- * Verified: on the test account this slug really is "Consultație gratis", and
- * it is the one event type the free plan keeps active — which is why it is the
- * only booking link on the site that currently opens.
+ * This file used to carry a `CALENDLY_FALLBACK_URLS` table and a
+ * `FREE_CONSULT_CALENDLY_URL` constant, both pointing at events on the
+ * developer's personal `designer-nefele` test account. Audit A6 made the
+ * per-service pages read the API first; audit A7 removed the floor underneath
+ * it, because a floor made of somebody else's calendar is worse than no floor.
+ * Concretely: with the client's own account configured and one link not yet
+ * filled in, a visitor clicking "Rezervă" would have opened a stranger's
+ * booking page and the site would have looked like it worked.
+ *
+ * A **service row** with no scheduling URL now renders no button at all. That
+ * is the honest state of things: on the free Calendly plan only one event type
+ * can be active, and four of the five links answer "This Calendly URL is not
+ * valid". A missing button says "not bookable yet"; a dead one says "broken".
+ * The standing call-to-action in the header, the hero and the footer is the one
+ * exception — see `freeConsultTarget` below.
+ *
+ * The second argument is the catalog rather than a URL the caller extracted,
+ * because six callers were writing the same `find` by hand.
  */
-export const FREE_CONSULT_CALENDLY_URL =
-  process.env.NEXT_PUBLIC_CALENDLY_FREE_URL ??
-  'https://calendly.com/designer-nefele/consulta-ie-integrativa-monitorizare-clone';
 
-/**
- * Per-service fallback scheduling links, keyed by service `code`. Used wherever
- * a booking button needs a Calendly URL but the API hasn't supplied
- * `Service.calendlySchedulingUrl` yet — e.g. before the backend is connected,
- * or in the static preview. The live API value always takes precedence; this is
- * only the floor so booking never silently degrades to a dead button. These are
- * the current test Calendly events — ⚠ swap for the client's before launch,
- * together with FREE_CONSULT_CALENDLY_URL.
- */
-export const CALENDLY_FALLBACK_URLS: Record<string, string> = {
-  // ⚠ PLACEHOLDER events on the `designer-nefele` TEST account. Swap for the
-  // client's paid account before launch, together with FREE_CONSULT_CALENDLY_URL.
-  // Keep in sync with apps/api/prisma/seed.ts.
-  //
-  // Every link below was verified against the account's own event list
-  // (`GET /appointments/calendly/event-types`) rather than assumed from its
-  // slug — two of these used to be wrong: `pediatric` pointed at a slug that
-  // does not exist on the account, and `integrative` at the free call. The
-  // account's slugs do NOT match their event names (a clone artifact), so the
-  // slug is not evidence of anything; the event name and duration are.
-  //
-  // Booking still fails today, and not because the links are wrong: the account
-  // is on the free plan, which allows exactly ONE active event type. Four of
-  // the five are `active: false`, and Calendly answers those with "This
-  // Calendly URL is not valid". The paid plan is what fixes it.
-  pediatric: 'https://calendly.com/designer-nefele/30min',
-  // Nutrition is two catalog services, each with its own Calendly event. The
-  // generic `nutrition` slug it used to share is gone: one link for two
-  // audiences is exactly the ambiguity the webhook cannot resolve.
-  nutrition_copii:
-    'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-copii',
-  nutrition_adulti:
-    'https://calendly.com/designer-nefele/consultatie-nutritionala-pentru-adulti',
-  integrative:
-    'https://calendly.com/designer-nefele/consulta-ie-nutri-ionala-clone',
-};
+/** The two fields `calendlyUrlFor` needs, so a caller can pass a narrower object. */
+export interface SchedulableService {
+  code: string;
+  calendlySchedulingUrl: string | null;
+}
 
-/** Calendly scheduling URL for a service `code`, preferring the API value. */
 export function calendlyUrlFor(
   code: string,
-  apiUrl?: string | null,
-): string | undefined {
-  return apiUrl ?? CALENDLY_FALLBACK_URLS[code];
+  services: SchedulableService[],
+): string | null {
+  return services.find((s) => s.code === code)?.calendlySchedulingUrl ?? null;
+}
+
+/**
+ * Where the "book" call-to-action in the header, the hero and the footer
+ * should send someone.
+ *
+ * These three are not per-service buttons: they are the site's standing
+ * invitation, on every page, and a page with no way to start is worse than one
+ * whose first step is a list of services. So the rule differs from a service
+ * row's. A bookable free consultation opens its Calendly popup; without one the
+ * CTA stays and navigates to `/services`, where every service carries its own
+ * link. Nothing is promised that is not true either way — the labels say
+ * "Programează", never "gratuit".
+ *
+ * The `FreeConsult` band is the exception and renders nothing without a link:
+ * its whole text is an offer of a free call.
+ */
+export type BookingTarget =
+  | { kind: 'calendly'; url: string }
+  | { kind: 'page'; href: string };
+
+const SERVICES_PAGE: BookingTarget = { kind: 'page', href: '/services' };
+
+export function freeConsultTarget(
+  services: SchedulableService[],
+): BookingTarget {
+  const url = calendlyUrlFor('free_consult', services);
+  return url ? { kind: 'calendly', url } : SERVICES_PAGE;
+}
+
+/** The same, reading the catalog itself, for a server component. */
+export async function freeConsultBooking(): Promise<BookingTarget> {
+  return freeConsultTarget(await api.services());
 }
