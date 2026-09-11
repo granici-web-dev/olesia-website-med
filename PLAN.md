@@ -578,7 +578,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A2 | `audit apps/api/src/app/appointments` включая `calendly*.ts`, `prep.service.ts`, `notifications.service.ts` | роли на плане лечения и файле; окно реплея подписи; идемпотентность по `scheduled_event.uri`; неизвестный `event_type`; reschedule = cancel + create; `prepSentAt` до отправки; PII в логах | 11a (роли записей), 11d (Calendly) | `[x]` `2396497` |
 | A3 | `audit apps/api/src/app/patients` + `leads` + `mail` | лид с email `''` → один пациент; `Payment` вне стирания; `@Body('title')`; `LEADS_NOTIFY_EMAIL`; `sendToClient` без вызовов; два пути уведомлений; что обещано пациенту и что реально отправляется | 11c, 11d (почта) | `[x]` `085a3d2`, `c0dd5f6` |
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
-| A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[>]` аудит 2026-09-10, 20 находок, harden в работе |
+| A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[ ]` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[ ]` |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[ ]` |
@@ -841,6 +841,25 @@ A4 закрыт: `harden` `22e0b86`, 39 файлов, 220 тестов (+37), б
 auth, `AppController` и два Nx-спека удаляются; `DELETE` заказа только admin с
 аудит-логом; `/about` и `/working-hours` не читаются сайтом, это A6/A7.
 
+A5 закрыт двумя коммитами: `e5b6aaa` (гарды, валидация, синглтоны: deny-by-default
+с `@Public()` до ролей, порядок гардов Throttler → Jwt → Roles, `CurrentUser`
+бросает без пользователя, порог капчи валидируется, синглтоны с id `singleton`
+и рукописной дедупликацией, `isPlaceholder` только из `days`, `MaxLength` и
+`@IsUploadedFileUrl` на about/faq/users, `AppController` и два Nx-спека удалены)
+и `96aef58` (владельцы состояния: запрет самопонижения и последнего админа,
+квота одним условным `updateMany`, `videoQuotaPerMonth` → `videoQuotaTotal` с
+рукописной миграцией ×3 вместо `DROP COLUMN`, крон истечения подписок,
+`paymentStatus` убран из трёх DTO, `POST /payments/manual` и `void` для admin с
+`note` и `authorId` у платежа, `checkoutId` nullable, `DeliverableOrder.patientId`
+с веткой таймлайна, `DELETE` заказа только admin с аудит-логом). 275 тестов
+(+55, минус два скаффолда). Проверено живьём: десять параллельных звонков дают
+ровно три 201, самопонижение 409, десять анонимных GET `/about` на пустой
+таблице дают одну строку, ручная оплата и void переключают зеркало. Осталась
+одна дыра в зеркале: `PATCH /quick-questions/:id` ещё принимает `paymentStatus`,
+закрыть двумя строками в начале A6. Сказать клиенту: квота видеозвонков теперь
+на срок подписки, не в месяц. Хвосты: `apps/api/tsconfig.spec.json` не
+типизируется (нет в CI), prettier на A11.
+
 Проходы программы аудита: A2 (appointments), A3 (patients, leads, mail),
 A4 (materials, storage, services, contacts, blog), A5 (common, users,
 working-hours, subscriptions, about, faq, deliverable-orders). Тесты на
@@ -1018,6 +1037,9 @@ CI не собирает Docker-образ, поэтому поломка обр
   подтверждённые значения в бэк-офисе, либо блока не будет (`questions_v3.md` §5.1).
 - `[~]` Меню (`/menus`): страница снята до появления реальных меню и модуля для
   них; нужно решение, будет ли этот раздел вообще.
+- `[~]` Подписки: квота видеозвонков считается на весь срок подписки, а не в
+  месяц, и сбрасываться не будет; истёкшие подписки закрываются автоматически.
+  Подтвердить формулировку на сайте и в договоре.
 
 ---
 
