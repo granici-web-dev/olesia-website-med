@@ -37,11 +37,27 @@ function asList<T>(r: T[] | Paginated<T>): T[] {
   return Array.isArray(r) ? r : r.items;
 }
 
+/**
+ * Both lists, deliberately.
+ *
+ * `GET /quick-questions` leaves out `awaiting_payment` by default, so the
+ * doctor's working queue is not padded with questions nobody bought. The panel
+ * still has to show them — that is what the "Neachitate" tab is — so it asks
+ * for them by name and merges the two, newest first.
+ *
+ * Two requests rather than one because the API's default is the right default
+ * for every other caller, and a `status=all` escape hatch would be a way to
+ * undo it by accident.
+ */
 export async function fetchTickets(): Promise<Ticket[]> {
-  const r = await http.get<QuickQuestionDto[] | Paginated<QuickQuestionDto>>(
-    '/quick-questions?pageSize=200',
-  );
-  return asList(r).map(toView);
+  type Response = QuickQuestionDto[] | Paginated<QuickQuestionDto>;
+  const [working, unpaid] = await Promise.all([
+    http.get<Response>('/quick-questions?pageSize=200'),
+    http.get<Response>('/quick-questions?pageSize=200&status=awaiting_payment'),
+  ]);
+  return [...asList(working), ...asList(unpaid)]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(toView);
 }
 
 export async function answerTicket(

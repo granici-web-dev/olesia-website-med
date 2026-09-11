@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
 import { PaymentStateBadge } from '@/features/payments/state-badge';
+import { PaymentConfirmationCell } from '@/features/payments/confirmation-cell';
 import { PaymentDetailSheet } from '@/features/payments/payment-detail-sheet';
 import {
   fetchPayments,
@@ -37,7 +38,13 @@ import { paymentsQueryKey } from '@/features/payments/query-key';
 import type { Payment, PaymentStateFilter } from '@/features/payments/types';
 
 const t = ro.payments;
-const TABS: PaymentStateFilter[] = ['all', 'paid', 'pending', 'refunded', 'failed'];
+const TABS: PaymentStateFilter[] = [
+  'all',
+  'paid',
+  'pending',
+  'refunded',
+  'failed',
+];
 
 /**
  * Which tab a payment belongs under. Deliberately coarser than the state enum:
@@ -104,7 +111,8 @@ export function PaymentsPage() {
   }, [scoped]);
 
   const visible = React.useMemo(
-    () => (bucket === 'all' ? scoped : scoped.filter((p) => bucketOf(p) === bucket)),
+    () =>
+      bucket === 'all' ? scoped : scoped.filter((p) => bucketOf(p) === bucket),
     [scoped, bucket],
   );
 
@@ -216,11 +224,24 @@ export function PaymentsPage() {
                 {/* On a narrow screen the amount and the state are the whole
                     point of this table, so the date yields to them and moves
                     under the client's name instead. */}
-                <TableHead className="hidden sm:table-cell">{t.columns.date}</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  {t.columns.date}
+                </TableHead>
                 <TableHead>{t.columns.client}</TableHead>
-                <TableHead className="hidden md:table-cell">{t.columns.what}</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  {t.columns.what}
+                </TableHead>
                 <TableHead className="text-right">{t.columns.amount}</TableHead>
-                <TableHead className="hidden sm:table-cell">{t.columns.state}</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  {t.columns.state}
+                </TableHead>
+                {/* The bank requires a confirmation email after every payment
+                    and there is no SMTP yet, so this column is currently a
+                    to-do list: it says which receipts have not left, and the
+                    text to send is one click away. */}
+                <TableHead className="hidden lg:table-cell">
+                  {t.columns.confirmation}
+                </TableHead>
                 <TableHead className="hidden w-10 sm:table-cell" />
               </TableRow>
             </TableHeader>
@@ -243,7 +264,9 @@ export function PaymentsPage() {
                     {formatDateTime(p.paidAt ?? p.createdAt)}
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium">{p.payerName ?? p.payerEmail}</span>
+                    <span className="font-medium">
+                      {p.payerName ?? p.payerEmail}
+                    </span>
                     {/* The email drops out below `sm` so the state badge is
                         not the thing that gets clipped. It is one tap away in
                         the detail sheet; the state is why she opened the page. */}
@@ -275,6 +298,9 @@ export function PaymentsPage() {
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <PaymentStateBadge state={p.state} />
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <PaymentConfirmationCell payment={p} />
                   </TableCell>
                   <TableCell className="hidden text-muted-foreground sm:table-cell">
                     <ChevronRight className="size-4" />

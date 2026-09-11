@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Copy,
   Loader2,
+  Lock,
   Mail,
   MailCheck,
   MailX,
@@ -95,6 +96,12 @@ export function TicketDetailSheet({
   const tk = ticket;
   const bucket = tk ? bucketOf(tk) : 'open';
   const isAnswered = tk?.status === 'answered';
+  /**
+   * The API refuses an answer on an unpaid ticket outright. The disabled box is
+   * not the rule, it is the explanation: without it the doctor writes a reply,
+   * presses send and reads a machine code.
+   */
+  const unpaid = tk?.status === 'awaiting_payment';
 
   const submitAnswer = () => {
     if (!tk) return;
@@ -150,8 +157,26 @@ export function TicketDetailSheet({
                 <span className="text-xs text-muted-foreground">
                   {t.detail.received} {formatDateTime(tk.createdAt)}
                 </span>
-                <DeadlineIndicator ticket={tk} />
+                {unpaid ? (
+                  <span className="text-xs text-muted-foreground">
+                    {t.unpaid.noDeadline}
+                  </span>
+                ) : (
+                  <DeadlineIndicator ticket={tk} />
+                )}
               </div>
+
+              {unpaid && (
+                <div className="space-y-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5">
+                  <p className="flex items-start gap-1.5 text-sm text-pretty">
+                    <Lock className="mt-0.5 size-3.5 shrink-0" />
+                    {t.unpaid.notice}
+                  </p>
+                  <p className="pl-5 text-xs text-muted-foreground">
+                    {t.unpaid.autoDelete}
+                  </p>
+                </div>
+              )}
 
               {/* Question */}
               <div className="space-y-2">
@@ -218,8 +243,22 @@ export function TicketDetailSheet({
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
                     rows={5}
-                    placeholder={t.detail.answerPlaceholder}
+                    disabled={unpaid}
+                    aria-describedby={unpaid ? 'answer-blocked' : undefined}
+                    placeholder={
+                      unpaid
+                        ? t.unpaid.answerBlocked
+                        : t.detail.answerPlaceholder
+                    }
                   />
+                  {unpaid && (
+                    <p
+                      id="answer-blocked"
+                      className="text-xs text-muted-foreground"
+                    >
+                      {t.unpaid.answerBlocked}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -232,7 +271,7 @@ export function TicketDetailSheet({
               {!isAnswered && (
                 <Button
                   className="w-full"
-                  disabled={busy || !answer.trim()}
+                  disabled={busy || unpaid || !answer.trim()}
                   onClick={submitAnswer}
                 >
                   {answerMutation.isPending ? (

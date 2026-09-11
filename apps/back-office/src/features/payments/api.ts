@@ -72,6 +72,16 @@ export async function voidPayment(id: string): Promise<Payment> {
   return toView(await http.post<PaymentDto>(`/payments/${id}/void`, {}));
 }
 
+/**
+ * Send the payment confirmation again, for a payment whose first attempt never
+ * left. Admin only server-side; the button is hidden for an editor.
+ */
+export async function resendConfirmation(id: string): Promise<Payment> {
+  return toView(
+    await http.post<PaymentDto>(`/payments/${id}/resend-confirmation`, {}),
+  );
+}
+
 export async function refundPayment(input: {
   id: string;
   amount: number;

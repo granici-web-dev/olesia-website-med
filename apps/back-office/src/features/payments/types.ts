@@ -88,6 +88,12 @@ export interface Payment {
   failedAt: string | null;
   /** The operator's words on a manual payment; null on everything else. */
   note: string | null;
+  /**
+   * When the payment confirmation the bank requires actually left. Null means
+   * it did not: with no SMTP nothing is delivered, and this screen says so
+   * rather than showing a receipt that was never sent (audit A3, F2 again).
+   */
+  confirmationSentAt: string | null;
   createdAt: string; // ISO
   refunds: PaymentRefund[];
 }

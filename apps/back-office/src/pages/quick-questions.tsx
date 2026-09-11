@@ -35,7 +35,19 @@ import { ticketsQueryKey } from '@/features/quick-questions/query-key';
 import type { StatusFilter } from '@/features/quick-questions/types';
 
 const t = ro.quickQuestions;
-const STATUS_TABS: StatusFilter[] = ['all', 'open', 'overdue', 'answered'];
+/**
+ * `unpaid` sits first because it is the one bucket that needs no work: it is
+ * the queue of questions somebody wrote and never paid for, and the doctor's
+ * job there is to look and do nothing. Keeping it visible rather than hidden
+ * is what makes "an answer only after payment" legible instead of mysterious.
+ */
+const STATUS_TABS: StatusFilter[] = [
+  'all',
+  'unpaid',
+  'open',
+  'overdue',
+  'answered',
+];
 
 export function QuickQuestionsPage() {
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
@@ -177,8 +189,20 @@ export function QuickQuestionsPage() {
         ) : visible.length === 0 ? (
           <EmptyState
             icon={filtersActive ? SearchX : MessagesSquare}
-            title={filtersActive ? t.empty.filteredTitle : t.empty.title}
-            description={filtersActive ? t.empty.filteredBody : t.empty.body}
+            title={
+              status === 'unpaid' && !search
+                ? t.empty.unpaidTitle
+                : filtersActive
+                  ? t.empty.filteredTitle
+                  : t.empty.title
+            }
+            description={
+              status === 'unpaid' && !search
+                ? t.empty.unpaidBody
+                : filtersActive
+                  ? t.empty.filteredBody
+                  : t.empty.body
+            }
             className="py-16"
             action={
               filtersActive ? (

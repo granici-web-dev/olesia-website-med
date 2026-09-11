@@ -960,9 +960,25 @@ export const ro = {
 
     empty: {
       title: 'Nicio întrebare',
-      body: 'Tichetele „Întrebare EXPRESS” apar aici după trimiterea formularului de pe site.',
+      body: 'Tichetele „Întrebare EXPRESS” apar aici după ce clientul achită pe site.',
       filteredTitle: 'Niciun rezultat',
       filteredBody: 'Niciun tichet nu corespunde filtrelor selectate.',
+      unpaidTitle: 'Nicio întrebare neachitată',
+      unpaidBody:
+        'Aici ajung întrebările scrise pe site, dar la care plata nu a fost finalizată. Se șterg automat după șapte zile.',
+    },
+
+    /**
+     * Ce vede medicul pe un tichet neachitat. Regula nu este butonul, ci
+     * serverul: API-ul refuză un răspuns la un tichet neplătit. Textul de aici
+     * explică de ce câmpul este blocat, în loc să lase impresia unei erori.
+     */
+    unpaid: {
+      notice:
+        'Întrebare neachitată. Clientul a completat formularul, dar plata nu a fost finalizată — răspunsul se deblochează automat când banii intră.',
+      answerBlocked: 'Răspunsul se poate scrie doar după confirmarea plății.',
+      noDeadline: 'Termenul pornește din momentul plății.',
+      autoDelete: 'Se șterge automat la șapte zile de la trimitere.',
     },
 
     detail: {
@@ -1123,6 +1139,24 @@ export const ro = {
       what: 'Pentru ce',
       amount: 'Sumă',
       state: 'Stare',
+      confirmation: 'Confirmare',
+    },
+
+    /**
+     * Banca cere ca fiecare plată să fie confirmată clientului pe email. Fără
+     * SMTP configurat, emailul nu pleacă — iar panoul spune asta în loc să
+     * lase impresia că a plecat.
+     */
+    confirmation: {
+      sent: 'Trimisă',
+      notSent: 'Confirmare netrimisă',
+      copy: 'copiază',
+      copied: 'Textul confirmării a fost copiat.',
+      resend: 'Trimite confirmarea din nou',
+      resent: 'Confirmarea a plecat către client.',
+      resendFailed:
+        'Confirmarea tot nu a plecat — serverul de email nu este configurat. Copiază textul și trimite-l tu.',
+      onlyPaid: 'Doar plățile confirmate au o confirmare de trimis.',
     },
     filters: {
       searchPlaceholder: 'Caută după nume, email sau RRN…',

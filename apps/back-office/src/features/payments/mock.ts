@@ -89,6 +89,7 @@ let store: Payment[] = [
     paidAt: iso(2 * HOUR),
     failedAt: null,
     note: null,
+    confirmationSentAt: null,
     createdAt: iso(2 * HOUR),
     refunds: [],
   },
@@ -117,6 +118,7 @@ let store: Payment[] = [
     paidAt: iso(30 * HOUR),
     failedAt: null,
     note: null,
+    confirmationSentAt: null,
     createdAt: iso(30 * HOUR),
     refunds: [
       {
@@ -157,6 +159,7 @@ let store: Payment[] = [
     paidAt: null,
     failedAt: null,
     note: null,
+    confirmationSentAt: null,
     createdAt: iso(10 * 60 * 1000),
     refunds: [],
   },
@@ -185,6 +188,7 @@ let store: Payment[] = [
     paidAt: null,
     failedAt: iso(50 * HOUR),
     note: null,
+    confirmationSentAt: null,
     createdAt: iso(50 * HOUR),
     refunds: [],
   },
@@ -213,12 +217,13 @@ let store: Payment[] = [
     paidAt: null,
     failedAt: null,
     note: null,
+    confirmationSentAt: null,
     createdAt: iso(71 * HOUR),
     refunds: [],
   },
 ];
 
-const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
+const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
 const delay = () => new Promise((r) => setTimeout(r, 220));
 
 export async function fetchPayments(): Promise<Payment[]> {
@@ -226,7 +231,9 @@ export async function fetchPayments(): Promise<Payment[]> {
   return clone(store);
 }
 
-export async function fetchPatientPayments(patientId: string): Promise<Payment[]> {
+export async function fetchPatientPayments(
+  patientId: string,
+): Promise<Payment[]> {
   await delay();
   return clone(store.filter((p) => p.patientId === patientId));
 }
@@ -278,11 +285,25 @@ export async function recordManualPayment(
     paidAt: now,
     failedAt: null,
     note: input.note ?? null,
+    confirmationSentAt: null,
     createdAt: now,
     refunds: [],
   };
   store = [created, ...store];
   return clone(created);
+}
+
+/**
+ * The mock has no mail server either, which is the honest default: a resend
+ * that changes nothing is exactly what the real one does without SMTP, and it
+ * is the state the panel has to render correctly.
+ */
+export async function resendConfirmation(id: string): Promise<Payment> {
+  await delay();
+  const p = store.find((x) => x.id === id);
+  if (!p) throw new Error('not_found');
+  if (p.state !== 'paid') throw new Error('payment_not_paid');
+  return clone(p);
 }
 
 export async function voidPayment(id: string): Promise<Payment> {

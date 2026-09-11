@@ -1,7 +1,15 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { CreditCard, Loader2, Mail, Phone, RefreshCw, RotateCcw, UserRound } from 'lucide-react';
+import {
+  CreditCard,
+  Loader2,
+  Mail,
+  Phone,
+  RefreshCw,
+  RotateCcw,
+  UserRound,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -12,6 +20,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { PaymentConfirmationCell } from '@/features/payments/confirmation-cell';
 import { useAuth } from '@/auth/auth-context';
 import { patientDetailPath } from '@/config/routes';
 import { ro } from '@/i18n/ro';
@@ -136,9 +145,17 @@ export function PaymentDetailSheet({
               </p>
               {p.refundedAmount > 0 && (
                 <p className="mt-1 text-sm text-info">
-                  {formatAmount(p.refundedAmount, p.currency)} {t.detail.refundedOf}{' '}
-                  {formatAmount(p.amount, p.currency)}
+                  {formatAmount(p.refundedAmount, p.currency)}{' '}
+                  {t.detail.refundedOf} {formatAmount(p.amount, p.currency)}
                 </p>
+              )}
+              {/* Also here, not only in the ledger's column: that column is
+                  hidden below `lg`, and whether a client was ever told their
+                  money arrived is not a desktop-only question. */}
+              {p.state === 'paid' && (
+                <div className="mt-2">
+                  <PaymentConfirmationCell payment={p} />
+                </div>
               )}
             </div>
 
@@ -173,7 +190,9 @@ export function PaymentDetailSheet({
                   {t.detail.openPatient}
                 </Link>
               ) : (
-                <p className="text-sm text-muted-foreground">{t.detail.unlinked}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t.detail.unlinked}
+                </p>
               )}
             </div>
 
@@ -193,11 +212,16 @@ export function PaymentDetailSheet({
             <div className="space-y-2">
               <SectionTitle>{t.detail.refunds}</SectionTitle>
               {p.refunds.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t.detail.noRefunds}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t.detail.noRefunds}
+                </p>
               ) : (
                 <ul className="space-y-2">
                   {p.refunds.map((r) => (
-                    <li key={r.id} className="rounded-lg border bg-background px-3 py-2.5">
+                    <li
+                      key={r.id}
+                      className="rounded-lg border bg-background px-3 py-2.5"
+                    >
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="font-medium tabular-nums">
                           {formatAmount(r.amount, r.currency)}
