@@ -10,15 +10,7 @@
  */
 
 export type FileSignature =
-  | 'pdf'
-  | 'jpeg'
-  | 'png'
-  | 'webp'
-  | 'heif'
-  | 'zip'
-  | 'ole'
-  | 'mp4'
-  | 'webm';
+  'pdf' | 'jpeg' | 'png' | 'webp' | 'heif' | 'zip' | 'ole' | 'mp4' | 'webm';
 
 /** The extension each detected format is stored under. */
 export const SIGNATURE_EXT: Record<FileSignature, string> = {

@@ -75,8 +75,7 @@ function emitUnauthorized(reason: SessionEndReason) {
 /* --------------------------- refresh flow ---------------------------- */
 
 export type RefreshOutcome =
-  | { ok: true }
-  | { ok: false; reason: SessionEndReason };
+  { ok: true } | { ok: false; reason: SessionEndReason };
 
 /**
  * One refresh at a time across every tab of the panel.

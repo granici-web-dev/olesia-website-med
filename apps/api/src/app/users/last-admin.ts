@@ -33,9 +33,7 @@ export interface AccountChange {
  * all until somebody else can do this job".
  */
 export type AccountChangeRefusal =
-  | 'cannot_demote_self'
-  | 'cannot_deactivate_self'
-  | 'last_admin';
+  'cannot_demote_self' | 'cannot_deactivate_self' | 'last_admin';
 
 function isActiveAdmin(account: AccountState): boolean {
   return account.role === Role.admin && account.isActive;

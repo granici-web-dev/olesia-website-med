@@ -213,7 +213,7 @@ CTA:      Ask your question
 | **Duration** | 50 min       | 60 min         | 90 min            | 3 months           | 48h reply         |
 | **For**      | Child health | Feeding / diet | Complex / ongoing | Continuous support | One question      |
 | **Output**   | Summary      | Nutrition plan | Action plan       | Ongoing plan       | Written answer    |
-| **Price**    | ⚠           | ⚠             | ⚠                | ⚠                 | ⚠                |
+| **Price**    | ⚠            | ⚠              | ⚠                 | ⚠                  | ⚠                 |
 | **Action**   | Book a time  | Book a time    | Book a time       | Request a place    | Ask your question |
 
 ---

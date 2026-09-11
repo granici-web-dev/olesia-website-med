@@ -52,8 +52,7 @@ export function calendlyUrlFor(
  * its whole text is an offer of a free call.
  */
 export type BookingTarget =
-  | { kind: 'calendly'; url: string }
-  | { kind: 'page'; href: string };
+  { kind: 'calendly'; url: string } | { kind: 'page'; href: string };
 
 const SERVICES_PAGE: BookingTarget = { kind: 'page', href: '/services' };
 

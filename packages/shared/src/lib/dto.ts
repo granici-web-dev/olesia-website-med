@@ -248,10 +248,7 @@ export interface ContactDto {
 
 /** Non-medical subjects a Contact-form message can be filed under. */
 export type ContactMessageSubject =
-  | 'appointment'
-  | 'payment'
-  | 'how_it_works'
-  | 'other';
+  'appointment' | 'payment' | 'how_it_works' | 'other';
 
 /** A message submitted from the public Contact form (back-office "Mesaje"). */
 export interface ContactMessageDto {
@@ -697,10 +694,7 @@ export interface PatientLeadConflictDto {
 /** A linked lead interaction shown on the patient timeline. */
 export interface PatientInteractionDto {
   source:
-    | 'appointment'
-    | 'subscription'
-    | 'quick_question'
-    | 'deliverable_order';
+    'appointment' | 'subscription' | 'quick_question' | 'deliverable_order';
   sourceId: string;
   label: string;
   occurredAt: string;

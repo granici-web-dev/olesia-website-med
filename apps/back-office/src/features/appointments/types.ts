@@ -10,10 +10,7 @@ import type { PaymentStatus } from '@/types';
  */
 
 export type AppointmentStatus =
-  | 'scheduled'
-  | 'completed'
-  | 'no_show'
-  | 'canceled';
+  'scheduled' | 'completed' | 'no_show' | 'canceled';
 
 /** Group-A services only — the calendar-backed ones (incl. the free call). */
 export type AppointmentServiceCode =

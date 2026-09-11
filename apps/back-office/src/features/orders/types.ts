@@ -27,11 +27,7 @@ export type OrderProduct =
  * why it sits in its own tab here (docs/shape-paid-deliverables-and-materials.md).
  */
 export type OrderStatus =
-  | 'awaiting_payment'
-  | 'new'
-  | 'in_progress'
-  | 'delivered'
-  | 'canceled';
+  'awaiting_payment' | 'new' | 'in_progress' | 'delivered' | 'canceled';
 
 export interface Order {
   id: string;
