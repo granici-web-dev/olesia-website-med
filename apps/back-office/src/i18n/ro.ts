@@ -946,7 +946,12 @@ export const ro = {
     columns: {
       client: 'Client',
       question: 'Întrebare',
-      deadline: 'Termen (48 h)',
+      deadline: 'Termen',
+      /**
+       * Termenul promis vine din „Program de lucru”, nu din cod: era scris
+       * „48 h” aici, în timp ce pagina de alături edita `expressSlaMinutes`.
+       */
+      deadlineWithSla: (sla: string) => `Termen (${sla})`,
       status: 'Status',
       payment: 'Plată',
     },

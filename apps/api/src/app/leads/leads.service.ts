@@ -236,8 +236,15 @@ export class LeadsService {
     }
 
     // The same form submitted twice. The first ticket is the one the payment
-    // points at; this one has nothing behind it.
+    // points at; this one has nothing behind it. But the second submit is the
+    // later word — somebody went back to the tab, corrected a typo in the
+    // question or fixed their phone number, and pressed pay again. Keeping the
+    // first version would answer a question the patient no longer asked, so the
+    // content moves across before the empty ticket goes (12b follow-up,
+    // 2026-09-11).
     if (started.reused) {
+      if (started.targetId)
+        await this.rewriteUnpaidTicket(started.targetId, dto);
       await this.prisma.quickQuestion.delete({ where: { id: ticket.id } });
     }
 
@@ -245,6 +252,40 @@ export class LeadsService {
       `EXPRESS checkout ${started.reused ? 'resumed' : 'opened'} (order ${started.orderId}).`,
     );
     return { checkoutUrl: started.checkoutUrl, orderId: started.orderId };
+  }
+
+  /**
+   * Carry a repeat submit's content onto the ticket its session already pays for.
+   *
+   * `updateMany` scoped to `awaiting_payment`, not `update`: between the second
+   * submit leaving the browser and this line, the first session can have been
+   * paid and the ticket can be in front of the doctor. Rewriting a question she
+   * is reading — or one she has answered — is worse than losing an edit, so the
+   * condition decides and a ticket that has moved on is left alone.
+   *
+   * Only the ticket. The bank's session was opened with the payer the first
+   * submit carried, the receipt goes to that address, and quietly disagreeing
+   * with what the bank holds would put two versions of the payer in the ledger.
+   */
+  private async rewriteUnpaidTicket(
+    ticketId: string,
+    dto: QuickQuestionCheckoutDto,
+  ): Promise<void> {
+    const { count } = await this.prisma.quickQuestion.updateMany({
+      where: { id: ticketId, status: QuickQuestionStatus.awaiting_payment },
+      data: {
+        clientName: dto.name,
+        clientEmail: dto.email,
+        phone: dto.phone ?? null,
+        question: dto.question,
+        locale: dto.locale ?? Locale.ro,
+      },
+    });
+    if (count === 0) {
+      this.logger.log(
+        `EXPRESS resubmit for ticket ${ticketId} ignored: it is no longer awaiting payment.`,
+      );
+    }
   }
 
   /**

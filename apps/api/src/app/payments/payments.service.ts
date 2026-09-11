@@ -63,12 +63,16 @@ export interface StartPaymentInput {
  *
  * `reused` is for the caller's benefit, not the payer's: the purchase row is
  * written before the session is opened, so a duplicate submit has something to
- * roll back.
+ * roll back. `targetId` then names the purchase the live session is actually
+ * paying for, so the caller can carry the second submit's content over to it
+ * instead of throwing that content away (decided 2026-09-11 after the 12b run).
  */
 export interface StartedPayment {
   checkoutUrl: string;
   orderId: string;
   reused: boolean;
+  /** Set only when `reused`: the purchase the existing session points at. */
+  targetId?: string | null;
 }
 
 /**
@@ -254,6 +258,29 @@ export function resolveIntent(
   return { reuse: existing.checkoutUrl };
 }
 
+/**
+ * When the SLA clock starts: the moment the bank took the money, not the moment
+ * we found out about it.
+ *
+ * The two are the same only when the callback arrives promptly, and the callback
+ * has never been delivered at all (docs/payments-maib-checkout.md §14). What
+ * actually settles a payment here is the return page's poll or the reconcile
+ * sweep, which can run hours after the card was charged — an abandoned tab plus
+ * a half-hourly sweep is the ordinary case, not the pathological one. Counting
+ * from `persist()` would hand the practice back every one of those hours and
+ * tell the patient a deadline they were never promised.
+ *
+ * `paidAt` is the bank's own `paymentExecutedAt` / `completedAt`, carried into
+ * the row by `applyCallback` and `syncFromBank`. It falls back to `now` only
+ * when the bank told us a payment completed without saying when.
+ */
+export function slaClockStart(
+  payment: { paidAt: Date | null },
+  now: Date = new Date(),
+): Date {
+  return payment.paidAt ?? now;
+}
+
 /** States after which nothing more will happen on its own. */
 const TERMINAL: PaymentState[] = [
   PaymentState.paid,
@@ -394,9 +421,11 @@ export class PaymentsService {
    * key has already been detached from its old row, so the unique index does
    * not refuse the new one.
    */
-  private async reuseIntent(
-    intentKey: string,
-  ): Promise<{ checkoutUrl: string; orderId: string } | null> {
+  private async reuseIntent(intentKey: string): Promise<{
+    checkoutUrl: string;
+    orderId: string;
+    targetId: string | null;
+  } | null> {
     const existing = await this.prisma.payment.findUnique({
       where: { intentKey },
       select: {
@@ -405,6 +434,7 @@ export class PaymentsService {
         state: true,
         checkoutUrl: true,
         expiresAt: true,
+        targetId: true,
       },
     });
 
@@ -412,7 +442,11 @@ export class PaymentsService {
 
     const verdict = resolveIntent(existing);
     if ('reuse' in verdict) {
-      return { checkoutUrl: verdict.reuse, orderId: existing.orderId };
+      return {
+        checkoutUrl: verdict.reuse,
+        orderId: existing.orderId,
+        targetId: existing.targetId,
+      };
     }
     if ('detach' in verdict) {
       await this.prisma.payment.update({
@@ -1089,11 +1123,17 @@ export class PaymentsService {
    * already reads `paymentStatus` keeps working without knowing about Payment.
    *
    * An EXPRESS ticket does more than mirror: paying is what makes it exist for
-   * the doctor. It moves out of `awaiting_payment` and its SLA clock starts
-   * here, not at submission, because that is when the promise was bought.
+   * the doctor. It moves out of `awaiting_payment` and its SLA clock starts at
+   * the moment the bank took the money — not at submission, because that is not
+   * when the promise was bought, and not now, because we may be hearing about
+   * it hours late (`slaClockStart`).
    */
   private async markTargetPaid(
-    payment: { targetType: PaymentTargetType; targetId: string | null },
+    payment: {
+      targetType: PaymentTargetType;
+      targetId: string | null;
+      paidAt: Date | null;
+    },
     tx: Prisma.TransactionClient,
   ): Promise<void> {
     const { targetType, targetId } = payment;
@@ -1106,7 +1146,7 @@ export class PaymentsService {
           await tx.appointment.update({ where: { id: targetId }, data });
           break;
         case PaymentTargetType.quick_question:
-          await this.activateTicket(targetId, tx);
+          await this.activateTicket(targetId, slaClockStart(payment), tx);
           break;
         case PaymentTargetType.deliverable_order:
           await tx.deliverableOrder.update({ where: { id: targetId }, data });
@@ -1147,9 +1187,13 @@ export class PaymentsService {
    * which is also why a deleted one raises nothing here.
    *
    * The mirror is set in the same statement, so the two can never disagree.
+   *
+   * `paidAt` is where the clock starts from — the bank's moment, not ours. See
+   * `slaClockStart`.
    */
   private async activateTicket(
     ticketId: string,
+    paidAt: Date,
     tx: Prisma.TransactionClient,
   ): Promise<void> {
     const ticket = await tx.quickQuestion.findUnique({
@@ -1165,7 +1209,7 @@ export class PaymentsService {
 
     const activation = activateTicketData(
       ticket.status,
-      await this.workingHours.expressDueAt(),
+      await this.workingHours.expressDueAt(paidAt),
     );
 
     await tx.quickQuestion.updateMany({

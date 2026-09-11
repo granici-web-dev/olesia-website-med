@@ -33,6 +33,9 @@ import { TicketDetailSheet } from '@/features/quick-questions/ticket-detail-shee
 import { fetchTickets, bucketOf } from '@/features/quick-questions/data';
 import { ticketsQueryKey } from '@/features/quick-questions/query-key';
 import type { StatusFilter } from '@/features/quick-questions/types';
+import { fetchWorkingHours } from '@/features/working-hours/data';
+import { workingHoursQueryKey } from '@/features/working-hours/query-key';
+import { formatSla } from '@/features/working-hours/sla';
 
 const t = ro.quickQuestions;
 /**
@@ -53,6 +56,17 @@ export function QuickQuestionsPage() {
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ticketsQueryKey,
     queryFn: fetchTickets,
+  });
+
+  /**
+   * The promised turnaround, for the column header. Its own query and not part
+   * of the ticket payload: the deadline on each row was computed when that
+   * ticket was paid for, while the header states the promise as it stands now.
+   * A failure here only costs the parenthesis — the column still says "Termen".
+   */
+  const { data: schedule } = useQuery({
+    queryKey: workingHoursQueryKey,
+    queryFn: fetchWorkingHours,
   });
 
   const [status, setStatus] = React.useState<StatusFilter>('all');
@@ -218,7 +232,13 @@ export function QuickQuestionsPage() {
               <TableRow className="hover:bg-transparent">
                 <TableHead>{t.columns.client}</TableHead>
                 <TableHead>{t.columns.question}</TableHead>
-                <TableHead>{t.columns.deadline}</TableHead>
+                <TableHead>
+                  {schedule
+                    ? t.columns.deadlineWithSla(
+                        formatSla(schedule.expressSlaMinutes),
+                      )
+                    : t.columns.deadline}
+                </TableHead>
                 <TableHead>{t.columns.status}</TableHead>
                 <TableHead>{t.columns.payment}</TableHead>
                 <TableHead className="w-10" />
