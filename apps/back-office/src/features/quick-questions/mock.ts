@@ -232,10 +232,3 @@ export async function answerTicket(
   return { ticket, emailSent: false };
 }
 
-export async function setPaymentStatus(
-  id: string,
-  paymentStatus: PaymentStatus,
-): Promise<Ticket> {
-  await delay(450);
-  return mutate(id, { paymentStatus });
-}

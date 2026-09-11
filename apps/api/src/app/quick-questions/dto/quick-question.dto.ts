@@ -1,15 +1,7 @@
-import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-
-import { PaymentStatus } from '../../../generated/prisma/enums';
+import { IsString, MinLength } from 'class-validator';
 
 export class AnswerTicketDto {
   @IsString()
   @MinLength(1)
   answer!: string;
-}
-
-export class UpdateTicketDto {
-  @IsOptional()
-  @IsEnum(PaymentStatus)
-  paymentStatus?: PaymentStatus;
 }

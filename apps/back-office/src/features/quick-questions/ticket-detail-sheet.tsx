@@ -8,7 +8,6 @@ import {
   MailCheck,
   MailX,
   Phone,
-  RotateCcw,
   Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,17 +21,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { ro } from '@/i18n/ro';
 
 import {
@@ -41,7 +29,6 @@ import {
 } from '@/features/quick-questions/status-badges';
 import { DeadlineIndicator } from '@/features/quick-questions/deadline-indicator';
 import {
-  setPaymentStatus,
   answerTicket,
   bucketOf,
   formatDateTime,
@@ -49,8 +36,12 @@ import {
 import { ticketsQueryKey } from '@/features/quick-questions/query-key';
 import type { Ticket } from '@/features/quick-questions/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
+import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
 
 const t = ro.quickQuestions;
+
+/** The EXPRESS question is quoted in EUR, like the rest of the catalog. */
+const TICKET_CURRENCY = 'EUR';
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -80,25 +71,6 @@ export function TicketDetailSheet({
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ticketsQueryKey });
 
-  const payMutation = useMutation({
-    mutationFn: ({
-      id,
-      status,
-    }: {
-      id: string;
-      status: Ticket['paymentStatus'];
-    }) => setPaymentStatus(id, status),
-    onSuccess: (_data, vars) => {
-      toast.success(
-        vars.status === 'confirmed'
-          ? t.toast.paymentConfirmed
-          : t.toast.paymentReverted,
-      );
-      invalidate();
-    },
-    onError: () => toast.error(t.toast.error),
-  });
-
   /**
    * Saving the answer and delivering it are two outcomes, and the doctor is
    * told which happened. The toast used to say "sent to the client" for a
@@ -119,7 +91,7 @@ export function TicketDetailSheet({
     onError: () => toast.error(t.toast.error),
   });
 
-  const busy = payMutation.isPending || answerMutation.isPending;
+  const busy = answerMutation.isPending;
   const tk = ticket;
   const bucket = tk ? bucketOf(tk) : 'open';
   const isAnswered = tk?.status === 'answered';
@@ -189,6 +161,14 @@ export function TicketDetailSheet({
                 </p>
               </div>
 
+              <Separator />
+
+              <ManualPaymentPanel
+                targetType="quick_question"
+                targetId={tk.id}
+                currency={TICKET_CURRENCY}
+                onRecorded={invalidate}
+              />
 
               <Separator />
 
@@ -247,38 +227,7 @@ export function TicketDetailSheet({
             {/* Actions */}
             <div className="flex flex-col gap-2 border-t px-6 py-4">
               {tk.paymentStatus === 'confirmed' && (
-                <>
-                  <AddAsPatientButton
-                    source="quick_question"
-                    sourceId={tk.id}
-                  />
-                  <PaymentAction
-                    icon={<RotateCcw />}
-                    label={t.actions.revertPayment}
-                    title={t.confirm.paymentRevertTitle}
-                    body={t.confirm.paymentRevertBody}
-                    cta={t.confirm.paymentRevertCta}
-                    pending={payMutation.isPending}
-                    disabled={busy}
-                    onConfirm={() =>
-                      payMutation.mutate({ id: tk.id, status: 'pending' })
-                    }
-                  />
-                </>
-              )}
-              {tk.paymentStatus === 'pending' && (
-                <PaymentAction
-                  icon={<CheckCircle2 />}
-                  label={t.actions.confirmPayment}
-                  title={t.confirm.paymentTitle}
-                  body={t.confirm.paymentBody}
-                  cta={t.confirm.paymentCta}
-                  pending={payMutation.isPending}
-                  disabled={busy}
-                  onConfirm={() =>
-                    payMutation.mutate({ id: tk.id, status: 'confirmed' })
-                  }
-                />
+                <AddAsPatientButton source="quick_question" sourceId={tk.id} />
               )}
               {!isAnswered && (
                 <Button
@@ -301,47 +250,5 @@ export function TicketDetailSheet({
         )}
       </SheetContent>
     </Sheet>
-  );
-}
-
-/** Manual payment-status action with confirmation (confirm or revert). */
-function PaymentAction({
-  icon,
-  label,
-  title,
-  body,
-  cta,
-  pending,
-  disabled,
-  onConfirm,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  title: string;
-  body: string;
-  cta: string;
-  pending: boolean;
-  disabled: boolean;
-  onConfirm: () => void;
-}) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline" className="w-full" disabled={disabled}>
-          {pending ? <Loader2 className="animate-spin" /> : icon}
-          {label}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{body}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>{cta}</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

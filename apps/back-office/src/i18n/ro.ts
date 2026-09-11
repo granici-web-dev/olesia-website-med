@@ -156,15 +156,11 @@ export const ro = {
       'Opțional. Dacă lasi gol, pe site se afișează textul în română.',
   },
 
-  // Shared payment-status vocabulary (manual, offline payments). Used by the
-  // inline status switcher in lists; the per-module blocks keep their own copies
-  // for the detail sheets.
+  // The one payment word shared across modules. The rest of the vocabulary went
+  // with the inline status switcher: `paymentStatus` mirrors the ledger, so a
+  // list row states it and the detail sheet's payments panel is where it moves.
   payment: {
-    pending: 'În așteptare',
-    confirmed: 'Confirmată',
     free: 'Gratuit',
-    change: 'Schimbă statusul plății',
-    error: 'Acțiunea a eșuat. Încearcă din nou.',
   },
 
   states: {
@@ -984,26 +980,11 @@ export const ro = {
     },
 
     actions: {
-      confirmPayment: 'Confirmă plata',
-      revertPayment: 'Marchează drept neplătită',
       sendAnswer: 'Trimite răspunsul',
       sending: 'Se trimite…',
     },
 
-    confirm: {
-      paymentTitle: 'Confirmi încasarea plății?',
-      paymentBody:
-        'Marchezi manual plata ca încasată pentru acest tichet. Poți reveni asupra acțiunii ulterior.',
-      paymentCta: 'Confirmă plata',
-      paymentRevertTitle: 'Marchezi plata drept neplătită?',
-      paymentRevertBody:
-        'Statusul plății revine la „În așteptare”. Poți confirma din nou oricând.',
-      paymentRevertCta: 'Marchează drept neplătită',
-    },
-
     toast: {
-      paymentConfirmed: 'Plata a fost confirmată.',
-      paymentReverted: 'Plata a fost marcată drept neplătită.',
       answerSaved: 'Răspunsul a fost salvat și trimis pe email clientului.',
       answerSavedNotSent:
         'Răspunsul a fost salvat, dar emailul nu a plecat. Copiază-l și trimite-l tu.',
@@ -1217,7 +1198,7 @@ export const ro = {
       cancel: 'Renunță',
       manualBadge: 'Manuală',
       recordedBy: 'Înregistrată manual',
-      empty: 'Nicio plată înregistrată pentru această comandă.',
+      empty: 'Nicio plată înregistrată deocamdată.',
       loadError: 'Nu am putut încărca plățile.',
       voidAction: 'Anulează înregistrarea',
       voidTitle: 'Anulezi înregistrarea plății?',

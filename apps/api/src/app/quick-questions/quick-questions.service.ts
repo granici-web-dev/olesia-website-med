@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PatientNotificationsService } from '../mail/patient-notifications.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
 import { toQuickQuestionDto } from './quick-questions.mapper';
-import { AnswerTicketDto, UpdateTicketDto } from './dto/quick-question.dto';
+import { AnswerTicketDto } from './dto/quick-question.dto';
 
 @Injectable()
 export class QuickQuestionsService {
@@ -65,16 +65,6 @@ export class QuickQuestionsService {
     );
 
     return { ...toQuickQuestionDto(saved), emailSent: sent };
-  }
-
-  async update(id: string, dto: UpdateTicketDto): Promise<QuickQuestionDto> {
-    await this.getOrThrow(id);
-    return toQuickQuestionDto(
-      await this.prisma.quickQuestion.update({
-        where: { id },
-        data: { paymentStatus: dto.paymentStatus },
-      }),
-    );
   }
 
   private async getOrThrow(id: string) {
