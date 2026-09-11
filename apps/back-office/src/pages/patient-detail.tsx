@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { DetailField, SectionTitle } from '@/components/common/detail-section';
 import { PageHeader } from '@/components/common/page-header';
 import { EmptyState } from '@/components/common/empty-state';
 import { ConfirmAction } from '@/components/common/confirm-action';
@@ -60,9 +61,9 @@ import {
   deleteEntry,
   setConsent,
   downloadDocument,
-  formatDate,
-  ageYears,
-} from '@/features/patients/data';
+} from '@/features/patients/api';
+import { formatDate } from '@/lib/format';
+import { ageYears } from '@/features/patients/format';
 import {
   patientsQueryKey,
   patientQueryKey,
@@ -596,18 +597,18 @@ function ProfileTab({ patient }: { patient: PatientDto }) {
   return (
     <Card className="p-5">
       <dl className="divide-y">
-        <Field label={t.detail.email}>
+        <DetailField label={t.detail.email}>
           <a
             href={`mailto:${patient.email}`}
             className="text-foreground underline-offset-4 hover:text-primary hover:underline"
           >
             {patient.email}
           </a>
-        </Field>
-        <Field label={t.detail.phone}>
+        </DetailField>
+        <DetailField label={t.detail.phone}>
           {patient.phone || <Muted>{ro.common.none}</Muted>}
-        </Field>
-        <Field label={t.detail.birthDate}>
+        </DetailField>
+        <DetailField label={t.detail.birthDate}>
           {patient.birthDate ? (
             <>
               {formatDate(patient.birthDate)}
@@ -621,17 +622,17 @@ function ProfileTab({ patient }: { patient: PatientDto }) {
           ) : (
             <Muted>{ro.common.none}</Muted>
           )}
-        </Field>
-        <Field label={t.detail.gender}>
+        </DetailField>
+        <DetailField label={t.detail.gender}>
           {patient.gender ? (
             t.gender[patient.gender as 'male' | 'female' | 'other']
           ) : (
             <Muted>{t.gender.unset}</Muted>
           )}
-        </Field>
-        <Field label={t.detail.createdAt}>
+        </DetailField>
+        <DetailField label={t.detail.createdAt}>
           {formatDate(patient.createdAt)}
-        </Field>
+        </DetailField>
       </dl>
 
       <Separator className="my-5" />
@@ -694,31 +695,8 @@ function EntryList({
 
 /* ------------------------------ primitives ---------------------------- */
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="grid grid-cols-[8rem_1fr] gap-3 py-2.5 text-sm">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 font-medium break-words">{children}</dd>
-    </div>
-  );
-}
-
 function Muted({ children }: { children: React.ReactNode }) {
   return <span className="font-normal text-muted-foreground">{children}</span>;
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
-      {children}
-    </p>
-  );
 }
 
 function SectionActions({

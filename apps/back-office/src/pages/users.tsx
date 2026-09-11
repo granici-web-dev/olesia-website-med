@@ -58,13 +58,9 @@ import { useAuth } from '@/auth/auth-context';
 
 import { RoleBadge, UserStatusBadge } from '@/features/users/user-badges';
 import { UserFormSheet } from '@/features/users/user-form-sheet';
-import {
-  fetchUsers,
-  setUserActive,
-  resetPassword,
-  formatDate,
-  initials,
-} from '@/features/users/data';
+import { fetchUsers, setUserActive, resetPassword } from '@/features/users/api';
+import { formatDate } from '@/lib/format';
+import { initials } from '@/features/users/format';
 import { resetUserTotp } from '@/features/users/api';
 import { usersQueryKey } from '@/features/users/query-key';
 import type { User, RoleFilter } from '@/features/users/types';

@@ -1,11 +1,7 @@
 import type { VariantProps } from 'class-variance-authority';
 
 import type { badgeVariants } from '@/components/ui/badge';
-import type {
-  PaymentStatus,
-  Ticket,
-  TicketBucket,
-} from '@/features/quick-questions/types';
+import type { Ticket, TicketBucket } from '@/features/quick-questions/types';
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
@@ -16,18 +12,13 @@ export const bucketBadgeVariant: Record<TicketBucket, BadgeVariant> = {
   answered: 'success',
 };
 
-export const paymentBadgeVariant: Record<PaymentStatus, BadgeVariant> = {
-  pending: 'warning',
-  confirmed: 'success',
-};
-
 /**
  * The deadline is whatever the API computed at intake — working hours, not
  * `createdAt + N`. Recomputing it here used to disagree with the server the
  * moment the SLA changed, and would now be wrong for every question that
  * arrives outside opening hours.
  */
-export function deadlineMs(ticket: Ticket): number | null {
+function deadlineMs(ticket: Ticket): number | null {
   return ticket.dueAt ? new Date(ticket.dueAt).getTime() : null;
 }
 

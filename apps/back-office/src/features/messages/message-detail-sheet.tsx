@@ -9,6 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { SectionTitle } from '@/components/common/detail-section';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -25,19 +26,12 @@ import {
 import { ro } from '@/i18n/ro';
 
 import { StatusBadge, SubjectBadge } from '@/features/messages/status-badges';
-import { markRead, deleteMessage, formatDateTime } from '@/features/messages/data';
+import { markRead, deleteMessage } from '@/features/messages/api';
+import { formatShortDateTime as formatDateTime } from '@/lib/format';
 import { messagesQueryKey } from '@/features/messages/query-key';
 import type { Message } from '@/features/messages/types';
 
 const t = ro.messages;
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
-      {children}
-    </p>
-  );
-}
 
 /** Build a pre-filled mailto: so the doctor can reply from her own mail client
  *  while portal email replies (SMTP) are not yet wired. */

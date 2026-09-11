@@ -22,25 +22,22 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { DetailField, SectionTitle } from '@/components/common/detail-section';
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { ConfirmAction } from '@/components/common/confirm-action';
-import {
-  StatusBadge,
-  PaymentBadge,
-} from '@/features/appointments/status-badges';
+import { StatusBadge } from '@/features/appointments/status-badges';
 import {
   downloadPlanFile,
   markNoShow,
   uploadPlan,
-  serviceLabel,
-  formatDateTime,
-  durationMinutes,
-  isFreeAppointment,
-} from '@/features/appointments/data';
+} from '@/features/appointments/api';
+import { serviceLabel, isFreeService } from '@/features/appointments/format';
+import { formatDateTime, durationMinutes } from '@/lib/format';
 import type { Appointment } from '@/features/appointments/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 import { PatientUploadsPanel } from '@/features/uploads/patient-uploads-panel';
@@ -52,29 +49,6 @@ const t = ro.appointments;
 
 /** The catalog quotes consultations in EUR, like the rest of the services. */
 const APPOINTMENT_CURRENCY = 'EUR';
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="grid grid-cols-[8.5rem_1fr] gap-3 py-2 text-sm">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 font-medium break-words">{children}</dd>
-    </div>
-  );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
-      {children}
-    </p>
-  );
-}
 
 export function AppointmentDetailSheet({
   appointment,
@@ -185,7 +159,7 @@ export function AppointmentDetailSheet({
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={a.status} />
-                {isFreeAppointment(a) ? (
+                {isFreeService(a.service) ? (
                   <Badge variant="secondary">{ro.payment.free}</Badge>
                 ) : (
                   <PaymentBadge status={a.paymentStatus} />
@@ -203,7 +177,7 @@ export function AppointmentDetailSheet({
 
               <SectionTitle>{t.detail.client}</SectionTitle>
               <dl className="mt-1 divide-y">
-                <Field label={t.detail.email}>
+                <DetailField label={t.detail.email}>
                   <a
                     href={`mailto:${a.clientEmail}`}
                     className="inline-flex items-center gap-1.5 text-foreground underline-offset-4 hover:text-primary hover:underline"
@@ -211,27 +185,27 @@ export function AppointmentDetailSheet({
                     <Mail className="size-3.5 text-muted-foreground" />
                     {a.clientEmail}
                   </a>
-                </Field>
-                <Field label={t.detail.reason}>
+                </DetailField>
+                <DetailField label={t.detail.reason}>
                   {a.reason ?? (
                     <span className="font-normal text-muted-foreground">
                       {t.detail.noReason}
                     </span>
                   )}
-                </Field>
+                </DetailField>
               </dl>
 
               <Separator className="my-4" />
 
               <SectionTitle>{t.detail.appointment}</SectionTitle>
               <dl className="mt-1 divide-y">
-                <Field label={t.detail.when}>
+                <DetailField label={t.detail.when}>
                   {formatDateTime(a.startTime)}
-                </Field>
-                <Field label={t.detail.duration}>
+                </DetailField>
+                <DetailField label={t.detail.duration}>
                   {durationMinutes(a.startTime, a.endTime)} min
-                </Field>
-                <Field label={t.detail.video}>
+                </DetailField>
+                <DetailField label={t.detail.video}>
                   {a.videoUrl?.startsWith('https://') ? (
                     <a
                       href={a.videoUrl}
@@ -247,8 +221,8 @@ export function AppointmentDetailSheet({
                       {t.detail.noVideo}
                     </span>
                   )}
-                </Field>
-                <Field label={t.detail.prepSent}>
+                </DetailField>
+                <DetailField label={t.detail.prepSent}>
                   {a.prepSentAt ? (
                     formatDateTime(a.prepSentAt)
                   ) : (
@@ -256,9 +230,9 @@ export function AppointmentDetailSheet({
                       {t.detail.notYet}
                     </span>
                   )}
-                </Field>
+                </DetailField>
                 {rescheduledFrom ? (
-                  <Field label={t.detail.rescheduledFrom}>
+                  <DetailField label={t.detail.rescheduledFrom}>
                     <button
                       type="button"
                       onClick={() => onOpenAppointment(rescheduledFrom.id)}
@@ -268,7 +242,7 @@ export function AppointmentDetailSheet({
                       <History className="size-3.5 text-muted-foreground" />
                       {formatDateTime(rescheduledFrom.startTime)}
                     </button>
-                  </Field>
+                  </DetailField>
                 ) : null}
               </dl>
 
@@ -434,7 +408,7 @@ export function AppointmentDetailSheet({
               )}
 
               {/* A free consultation has nothing to pay, so it has no ledger. */}
-              {!isFreeAppointment(a) && (
+              {!isFreeService(a.service) && (
                 <>
                   <Separator className="my-4" />
                   <ManualPaymentPanel

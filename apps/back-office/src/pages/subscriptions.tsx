@@ -29,14 +29,12 @@ import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { StatusBadge } from '@/features/subscriptions/status-badges';
-import { SubscriptionPaymentCell } from '@/features/subscriptions/payment-cell';
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { QuotaBar } from '@/features/subscriptions/quota-bar';
 import { SubscriptionDetailSheet } from '@/features/subscriptions/subscription-detail-sheet';
-import {
-  fetchSubscriptions,
-  formatDate,
-  daysRemaining,
-} from '@/features/subscriptions/data';
+import { fetchSubscriptions } from '@/features/subscriptions/api';
+import { formatDate } from '@/lib/format';
+import { daysRemaining } from '@/features/subscriptions/format';
 import { subscriptionsQueryKey } from '@/features/subscriptions/query-key';
 import type {
   Subscription,
@@ -246,7 +244,7 @@ export function SubscriptionsPage() {
                       <StatusBadge status={s.status} />
                     </TableCell>
                     <TableCell>
-                      <SubscriptionPaymentCell subscription={s} />
+                      <PaymentBadge status={s.paymentStatus} />
                     </TableCell>
                     <TableCell className="text-right">
                       <Button

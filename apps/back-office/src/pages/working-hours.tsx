@@ -15,7 +15,10 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
-import { fetchWorkingHours, saveWorkingHours } from '@/features/working-hours/data';
+import {
+  fetchWorkingHours,
+  saveWorkingHours,
+} from '@/features/working-hours/api';
 import { workingHoursQueryKey } from '@/features/working-hours/query-key';
 import type { WorkingDay } from '@/features/working-hours/types';
 
@@ -181,9 +184,7 @@ export function WorkingHoursPage() {
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
                   <Checkbox
                     checked={!day.closed}
-                    onCheckedChange={(on) =>
-                      setDay(weekday, { closed: !on })
-                    }
+                    onCheckedChange={(on) => setDay(weekday, { closed: !on })}
                   />
                   {day.closed ? t.closed : t.open}
                 </label>

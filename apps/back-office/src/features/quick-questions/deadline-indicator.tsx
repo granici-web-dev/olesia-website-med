@@ -8,8 +8,8 @@ import {
   remainingMs,
   slaMet,
   formatDuration,
-  formatDateTime,
-} from '@/features/quick-questions/data';
+} from '@/features/quick-questions/format';
+import { formatShortDateTime as formatDateTime } from '@/lib/format';
 
 const d = ro.quickQuestions.deadline;
 const URGENT_MS = 6 * 60 * 60 * 1000;

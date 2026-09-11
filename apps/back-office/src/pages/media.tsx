@@ -35,11 +35,7 @@ import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
 import { MediaFormSheet } from '@/features/media/media-form-sheet';
-import {
-  fetchMedia,
-  deleteMedia,
-  updateMedia,
-} from '@/features/media/data';
+import { fetchMedia, deleteMedia, updateMedia } from '@/features/media/api';
 import { mediaQueryKey } from '@/features/media/query-key';
 import type { MediaAppearance } from '@/features/media/types';
 

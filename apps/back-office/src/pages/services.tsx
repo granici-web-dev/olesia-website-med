@@ -49,10 +49,9 @@ import {
   fetchServices,
   deleteService,
   setServiceActive,
-  formatPrice,
-  groupForCode,
-  ALL_CODES,
-} from '@/features/services/data';
+} from '@/features/services/api';
+import { formatPrice } from '@/lib/format';
+import { groupForCode, ALL_CODES } from '@/features/services/format';
 import { servicesQueryKey } from '@/features/services/query-key';
 import { CalendlyStatus } from '@/features/services/calendly-status';
 import type { Service, ServiceCode } from '@/features/services/types';
@@ -196,7 +195,9 @@ export function ServicesPage() {
                 <TableHead>{t.columns.service}</TableHead>
                 <TableHead>{t.columns.group}</TableHead>
                 <TableHead className="text-right">{t.columns.price}</TableHead>
-                <TableHead className="text-center">{t.columns.active}</TableHead>
+                <TableHead className="text-center">
+                  {t.columns.active}
+                </TableHead>
                 <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
@@ -204,7 +205,10 @@ export function ServicesPage() {
               {services.map((s) => {
                 const isA = groupForCode(s.code) === 'A_booking';
                 return (
-                  <TableRow key={s.id} className={cn(!s.active && 'opacity-60')}>
+                  <TableRow
+                    key={s.id}
+                    className={cn(!s.active && 'opacity-60')}
+                  >
                     <TableCell className="text-sm text-muted-foreground tabular-nums">
                       {s.sortOrder}
                     </TableCell>
@@ -272,7 +276,9 @@ export function ServicesPage() {
 
       <ServiceFormSheet
         service={editing}
-        availableCodes={editing ? ([editing.code] as ServiceCode[]) : availableCodes}
+        availableCodes={
+          editing ? ([editing.code] as ServiceCode[]) : availableCodes
+        }
         nextSortOrder={nextSortOrder}
         open={formOpen}
         onOpenChange={setFormOpen}

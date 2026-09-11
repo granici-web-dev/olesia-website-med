@@ -32,7 +32,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-} from '@/features/blog/data';
+} from '@/features/blog/api';
 import { categoriesQueryKey, postsQueryKey } from '@/features/blog/query-keys';
 import type { Category } from '@/features/blog/types';
 import { ro } from '@/i18n/ro';
@@ -157,10 +157,7 @@ export function CategoriesManagerSheet({
           ) : (
             <ul className="divide-y">
               {categories.map((cat) => (
-                <li
-                  key={cat.id}
-                  className="flex items-center gap-3 py-2.5"
-                >
+                <li key={cat.id} className="flex items-center gap-3 py-2.5">
                   <Tag className="size-4 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">

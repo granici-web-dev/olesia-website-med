@@ -1,3 +1,5 @@
+import type { PaymentStatus } from '@/types';
+
 /**
  * Appointments (Calendly group-A video consultations).
  *
@@ -12,8 +14,6 @@ export type AppointmentStatus =
   | 'completed'
   | 'no_show'
   | 'canceled';
-
-export type PaymentStatus = 'pending' | 'confirmed';
 
 /** Group-A services only — the calendar-backed ones (incl. the free call). */
 export type AppointmentServiceCode =

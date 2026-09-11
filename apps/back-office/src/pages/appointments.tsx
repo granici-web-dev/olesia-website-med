@@ -41,11 +41,9 @@ import { ro } from '@/i18n/ro';
 import { StatusBadge } from '@/features/appointments/status-badges';
 import { AppointmentPaymentCell } from '@/features/appointments/payment-cell';
 import { AppointmentDetailSheet } from '@/features/appointments/appointment-detail-sheet';
-import {
-  fetchAppointments,
-  serviceLabel,
-  formatDateTime,
-} from '@/features/appointments/data';
+import { fetchAppointments } from '@/features/appointments/api';
+import { serviceLabel } from '@/features/appointments/format';
+import { formatDateTime } from '@/lib/format';
 import { syncWithCalendly } from '@/features/appointments/api';
 import { appointmentsQueryKey } from '@/features/appointments/query-key';
 import type {

@@ -5,11 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ro } from '@/i18n/ro';
 
 import { PaymentStateBadge } from '@/features/payments/state-badge';
-import {
-  fetchPatientPayments,
-  formatAmount,
-  formatDateTime,
-} from '@/features/payments/data';
+import { fetchPatientPayments } from '@/features/payments/api';
+import { formatAmount, formatDateTime } from '@/lib/format';
 import { patientPaymentsQueryKey } from '@/features/payments/query-key';
 
 const t = ro.payments;
@@ -41,7 +38,9 @@ export function PatientPayments({ patientId }: { patientId: string }) {
   }
 
   if (isError) {
-    return <p className="text-sm text-muted-foreground">{ro.states.errorBody}</p>;
+    return (
+      <p className="text-sm text-muted-foreground">{ro.states.errorBody}</p>
+    );
   }
 
   const payments = data ?? [];
@@ -56,9 +55,14 @@ export function PatientPayments({ patientId }: { patientId: string }) {
 
   // Only money that stayed. A refunded payment is history, not income, so
   // counting it in the total would overstate what this patient has spent.
-  const settled = payments.filter((p) => p.state === 'paid' || p.state === 'partially_refunded');
+  const settled = payments.filter(
+    (p) => p.state === 'paid' || p.state === 'partially_refunded',
+  );
   const currency = settled[0]?.currency;
-  const total = settled.reduce((sum, p) => sum + p.amount - p.refundedAmount, 0);
+  const total = settled.reduce(
+    (sum, p) => sum + p.amount - p.refundedAmount,
+    0,
+  );
   const singleCurrency = settled.every((p) => p.currency === currency);
 
   return (

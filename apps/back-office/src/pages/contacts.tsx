@@ -43,9 +43,8 @@ import {
   fetchContacts,
   deleteContact,
   setContactActive,
-  contactTypeIcon,
-  contactHref,
-} from '@/features/contacts/data';
+} from '@/features/contacts/api';
+import { contactTypeIcon, contactHref } from '@/features/contacts/format';
 import { contactsQueryKey } from '@/features/contacts/query-key';
 import type { Contact } from '@/features/contacts/types';
 
@@ -160,7 +159,9 @@ export function ContactsPage() {
                 <TableHead className="w-10">{t.columns.order}</TableHead>
                 <TableHead>{t.columns.contact}</TableHead>
                 <TableHead>{t.columns.value}</TableHead>
-                <TableHead className="text-center">{t.columns.active}</TableHead>
+                <TableHead className="text-center">
+                  {t.columns.active}
+                </TableHead>
                 <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
@@ -170,7 +171,10 @@ export function ContactsPage() {
                 const href = contactHref(c);
                 const external = c.type === 'social' || c.type === 'other';
                 return (
-                  <TableRow key={c.id} className={cn(!c.active && 'opacity-60')}>
+                  <TableRow
+                    key={c.id}
+                    className={cn(!c.active && 'opacity-60')}
+                  >
                     <TableCell className="text-sm text-muted-foreground tabular-nums">
                       {c.sortOrder}
                     </TableCell>

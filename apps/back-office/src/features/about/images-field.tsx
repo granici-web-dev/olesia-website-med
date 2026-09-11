@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { IMAGE_MAX_BYTES } from '@olesia/shared';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
-import { uploadImage } from '@/features/about/data';
+import { uploadImage } from '@/features/about/api';
 const a = ro.about;
 
 /**

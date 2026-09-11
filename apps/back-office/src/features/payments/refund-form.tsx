@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ro } from '@/i18n/ro';
-import { formatAmount } from '@/features/payments/data';
+import { formatAmount } from '@/lib/format';
 import type { Payment } from '@/features/payments/types';
 
 const t = ro.payments;
@@ -38,7 +38,8 @@ export function RefundForm({
   const [touched, setTouched] = React.useState(false);
 
   const parsed = Number(amount.replace(',', '.'));
-  const amountValid = Number.isFinite(parsed) && parsed > 0 && parsed <= remaining;
+  const amountValid =
+    Number.isFinite(parsed) && parsed > 0 && parsed <= remaining;
   const reasonValid = reason.trim().length >= 3;
   const valid = amountValid && reasonValid;
 
@@ -49,11 +50,16 @@ export function RefundForm({
   };
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-lg border bg-background p-4">
+    <form
+      onSubmit={submit}
+      className="space-y-3 rounded-lg border bg-background p-4"
+    >
       <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
         {t.refund.title}
       </p>
-      <p className="text-sm text-muted-foreground text-pretty">{t.refund.hint}</p>
+      <p className="text-sm text-muted-foreground text-pretty">
+        {t.refund.hint}
+      </p>
 
       <div className="space-y-1.5">
         <Label htmlFor="refund-amount">{t.refund.amount}</Label>
@@ -70,7 +76,9 @@ export function RefundForm({
         <p
           id="refund-amount-hint"
           className={
-            touched && !amountValid ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'
+            touched && !amountValid
+              ? 'text-xs text-destructive'
+              : 'text-xs text-muted-foreground'
           }
         >
           {touched && !amountValid
@@ -99,12 +107,21 @@ export function RefundForm({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" variant="destructive" disabled={!valid || pending}>
+        <Button
+          type="submit"
+          variant="destructive"
+          disabled={!valid || pending}
+        >
           {pending ? <Loader2 className="animate-spin" /> : <RotateCcw />}
           {t.refund.submit}{' '}
           {formatAmount(amountValid ? parsed : remaining, payment.currency)}
         </Button>
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={pending}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          disabled={pending}
+        >
           {t.actions.cancelRefund}
         </Button>
       </div>

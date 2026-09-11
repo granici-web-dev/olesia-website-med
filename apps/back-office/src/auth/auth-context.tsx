@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { UserDto } from '@olesia/shared';
 
 import type { Role, User } from '@/types';
-import { USE_MOCKS } from '@/api/config';
 import {
   login as apiLogin,
   logout as apiLogout,
@@ -26,8 +25,6 @@ interface AuthContextValue {
   passwordChanged: () => void;
 }
 
-const STORAGE_KEY = 'olesia.bo.session';
-
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
 function toUser(dto: UserDto): User {
@@ -40,20 +37,9 @@ function toUser(dto: UserDto): User {
   };
 }
 
-function readStoredUser(): User | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Auth provider. Real mode (the default) talks to the
- * NestJS `auth` module: access token in memory, refresh token in an httpOnly
- * cookie (module_calendly.md §4). Mock mode keeps a demo admin session in
- * localStorage so the app runs without a backend.
+ * Auth provider. Talks to the NestJS `auth` module: access token in memory,
+ * refresh token in an httpOnly cookie (module_calendly.md §4).
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
@@ -65,13 +51,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Session restore on load.
   React.useEffect(() => {
     let active = true;
-
-    if (USE_MOCKS) {
-      const stored = readStoredUser();
-      setUser(stored);
-      setStatus(stored ? 'authenticated' : 'unauthenticated');
-      return;
-    }
 
     restoreSession().then((dto) => {
       if (!active) return;
@@ -97,22 +76,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(
     async (email: string, password: string, totpCode?: string) => {
-      if (USE_MOCKS) {
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        if (!email || !password) throw new Error('invalid_credentials');
-        const demo: User = {
-          id: 'demo-admin',
-          name: email.split('@')[0] || 'Administrator',
-          email,
-          role: 'admin',
-          mustChangePassword: false,
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
-        setUser(demo);
-        setStatus('authenticated');
-        return;
-      }
-
       const dto = await apiLogin({ email, password, totpCode });
       setUser(toUser(dto));
       setSessionEndReason(null);
@@ -127,11 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * for thirty seconds, and on this panel those answers are patient names.
    */
   const logout = React.useCallback(async () => {
-    if (USE_MOCKS) {
-      localStorage.removeItem(STORAGE_KEY);
-    } else {
-      await apiLogout();
-    }
+    await apiLogout();
     queryClient.clear();
     setUser(null);
     setSessionEndReason(null);

@@ -42,7 +42,7 @@ import {
   fetchMaterialCategories,
   deleteMaterial,
   updateMaterial,
-} from '@/features/library/data';
+} from '@/features/library/api';
 import {
   materialCategoriesQueryKey,
   materialsQueryKey,
@@ -276,9 +276,7 @@ export function LibraryPage() {
                   <Badge
                     variant={m.access === 'paid' ? 'default' : 'secondary'}
                   >
-                    {m.access === 'paid'
-                      ? `${m.price ?? 0} €`
-                      : t.access.free}
+                    {m.access === 'paid' ? `${m.price ?? 0} €` : t.access.free}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {categoryName[m.categoryId] ?? m.categorySlug}

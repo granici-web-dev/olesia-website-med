@@ -13,19 +13,19 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { TextField, TextAreaField } from '@/components/common/form-fields';
+import { LocaleTabsList } from '@/components/common/locale-tabs';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { ro } from '@/i18n/ro';
 
 import {
   createTestimonial,
   updateTestimonial,
-} from '@/features/testimonials/data';
+} from '@/features/testimonials/api';
 import { testimonialsQueryKey } from '@/features/testimonials/query-key';
 import type {
   Testimonial,
@@ -152,25 +152,14 @@ export function TestimonialFormSheet({
         >
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
             <Tabs defaultValue="ro">
-              <TabsList>
-                <TabsTrigger value="ro" className="gap-1.5">
-                  {t.langRo}
-                  {errors.quoteRo && (
-                    <span className="size-1.5 rounded-full bg-destructive" />
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="en" className="gap-1.5">
-                  {t.langEn}
-                  {errors.quoteEn && (
-                    <span className="size-1.5 rounded-full bg-destructive" />
-                  )}
-                </TabsTrigger>
-                {/* RU carries no error dot — none of its fields can fail. */}
-                <TabsTrigger value="ru">{t.langRu}</TabsTrigger>
-              </TabsList>
+              <LocaleTabsList
+                roHasError={!!errors.quoteRo}
+                enHasError={!!errors.quoteEn}
+              />
 
               <TabsContent value="ro" className="mt-4 space-y-4">
                 <TextAreaField
+                  rows={6}
                   id="tst-quote-ro"
                   label={f.quote}
                   placeholder={f.quotePlaceholderRo}
@@ -188,6 +177,7 @@ export function TestimonialFormSheet({
 
               <TabsContent value="en" className="mt-4 space-y-4">
                 <TextAreaField
+                  rows={6}
                   id="tst-quote-en"
                   label={f.quote}
                   placeholder={f.quotePlaceholderEn}
@@ -204,6 +194,7 @@ export function TestimonialFormSheet({
 
               <TabsContent value="ru" className="mt-4 space-y-4">
                 <TextAreaField
+                  rows={6}
                   id="tst-quote-ru"
                   label={f.quote}
                   placeholder={f.quotePlaceholderRu}
@@ -281,45 +272,3 @@ export function TestimonialFormSheet({
     </Sheet>
   );
 }
-
-const TextField = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<'input'> & {
-    label: string;
-    error?: string;
-    hint?: string;
-  }
->(function TextField({ id, label, error, hint, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input id={id} ref={ref} aria-invalid={!!error} {...props} />
-      {error ? (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
-  );
-});
-
-const TextAreaField = React.forwardRef<
-  HTMLTextAreaElement,
-  React.ComponentProps<'textarea'> & {
-    label: string;
-    error?: string;
-    hint?: string;
-  }
->(function TextAreaField({ id, label, error, hint, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Textarea id={id} ref={ref} rows={6} aria-invalid={!!error} {...props} />
-      {error ? (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
-  );
-});

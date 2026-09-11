@@ -26,11 +26,8 @@ import {
 import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
-import {
-  createUser,
-  updateUser,
-  generatePassword,
-} from '@/features/users/data';
+import { createUser, updateUser } from '@/features/users/api';
+import { generatePassword } from '@/features/users/format';
 import { usersQueryKey } from '@/features/users/query-key';
 import type { User } from '@/features/users/types';
 import type { Role } from '@/types';
@@ -157,7 +154,9 @@ export function UserFormSheet({
                 {...form.register('email')}
               />
               {isEdit ? (
-                <p className="text-xs text-muted-foreground">{f.emailReadonly}</p>
+                <p className="text-xs text-muted-foreground">
+                  {f.emailReadonly}
+                </p>
               ) : (
                 errors.email && (
                   <p className="text-xs font-medium text-destructive">

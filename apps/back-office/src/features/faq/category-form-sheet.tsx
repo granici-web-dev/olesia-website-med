@@ -13,14 +13,14 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { TextField } from '@/components/common/form-fields';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { ro } from '@/i18n/ro';
 
-import { createFaqCategory, updateFaqCategory } from '@/features/faq/data';
+import { createFaqCategory, updateFaqCategory } from '@/features/faq/api';
 import { faqQueryKey } from '@/features/faq/query-key';
 import type { FaqCategory, FaqCategoryInput } from '@/features/faq/types';
 
@@ -203,24 +203,3 @@ export function FaqCategoryFormSheet({
     </Sheet>
   );
 }
-
-const TextField = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<'input'> & {
-    label: string;
-    error?: string;
-    hint?: string;
-  }
->(function TextField({ id, label, error, hint, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input id={id} ref={ref} aria-invalid={!!error} {...props} />
-      {error ? (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
-  );
-});

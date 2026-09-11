@@ -6,10 +6,8 @@ import { Button } from '@/components/ui/button';
 import { ro } from '@/i18n/ro';
 import { useAuth } from '@/auth/auth-context';
 
-import {
-  formatDateTime,
-  resendConfirmation,
-} from '@/features/payments/data';
+import { formatDateTime } from '@/lib/format';
+import { resendConfirmation } from '@/features/payments/api';
 import { paymentsQueryKey } from '@/features/payments/query-key';
 import type { Payment } from '@/features/payments/types';
 import { copyToClipboard } from '@/lib/clipboard';
@@ -98,4 +96,3 @@ export function PaymentConfirmationCell({ payment }: { payment: Payment }) {
     </div>
   );
 }
-

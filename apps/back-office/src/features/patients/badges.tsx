@@ -14,7 +14,6 @@ import { ro } from '@/i18n/ro';
 import {
   consentBadgeVariant,
   entryTypeBadgeVariant,
-  paymentBadgeVariant,
 } from '@/features/patients/format';
 import type { EntryType } from '@/features/patients/types';
 
@@ -33,7 +32,9 @@ export function ConsentBadge({ consentAt }: { consentAt: string | null }) {
   const given = !!consentAt;
   const Icon = given ? ShieldCheck : ShieldAlert;
   return (
-    <Badge variant={given ? consentBadgeVariant.given : consentBadgeVariant.missing}>
+    <Badge
+      variant={given ? consentBadgeVariant.given : consentBadgeVariant.missing}
+    >
       <Icon />
       {given ? t.consent.given : t.consent.missing}
     </Badge>
@@ -47,15 +48,6 @@ export function EntryTypeBadge({ type }: { type: EntryType }) {
     <Badge variant={entryTypeBadgeVariant[type]}>
       <Icon />
       {t.entryType[type]}
-    </Badge>
-  );
-}
-
-/** Payment state of a linked interaction. */
-export function PaymentBadge({ status }: { status: string }) {
-  return (
-    <Badge variant={paymentBadgeVariant[status] ?? 'muted'}>
-      {t.payment[status as 'pending' | 'confirmed'] ?? status}
     </Badge>
   );
 }

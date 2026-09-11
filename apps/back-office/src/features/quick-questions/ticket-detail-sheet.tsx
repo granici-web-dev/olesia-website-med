@@ -19,21 +19,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { PaymentBadge } from '@/components/common/payment-badge';
+import { SectionTitle } from '@/components/common/detail-section';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { ro } from '@/i18n/ro';
 
-import {
-  StatusBadge,
-  PaymentBadge,
-} from '@/features/quick-questions/status-badges';
+import { StatusBadge } from '@/features/quick-questions/status-badges';
 import { DeadlineIndicator } from '@/features/quick-questions/deadline-indicator';
-import {
-  answerTicket,
-  bucketOf,
-  formatDateTime,
-} from '@/features/quick-questions/data';
+import { answerTicket } from '@/features/quick-questions/api';
+import { bucketOf } from '@/features/quick-questions/format';
+import { formatShortDateTime as formatDateTime } from '@/lib/format';
 import { ticketsQueryKey } from '@/features/quick-questions/query-key';
 import type { Ticket } from '@/features/quick-questions/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
@@ -44,14 +41,6 @@ const t = ro.quickQuestions;
 
 /** The EXPRESS question is quoted in EUR, like the rest of the catalog. */
 const TICKET_CURRENCY = 'EUR';
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
-      {children}
-    </p>
-  );
-}
 
 export function TicketDetailSheet({
   ticket,

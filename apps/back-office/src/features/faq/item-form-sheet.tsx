@@ -13,13 +13,13 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { TextField, TextAreaField } from '@/components/common/form-fields';
+import { LocaleTabsList } from '@/components/common/locale-tabs';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select';
 import { ro } from '@/i18n/ro';
 
-import { createFaqItem, updateFaqItem } from '@/features/faq/data';
+import { createFaqItem, updateFaqItem } from '@/features/faq/api';
 import { faqQueryKey } from '@/features/faq/query-key';
 import type { FaqCategory, FaqItem, FaqItemInput } from '@/features/faq/types';
 
@@ -182,22 +182,7 @@ export function FaqItemFormSheet({
             <Separator />
 
             <Tabs defaultValue="ro">
-              <TabsList>
-                <TabsTrigger value="ro" className="gap-1.5">
-                  {t.langRo}
-                  {roHasError && (
-                    <span className="size-1.5 rounded-full bg-destructive" />
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="en" className="gap-1.5">
-                  {t.langEn}
-                  {enHasError && (
-                    <span className="size-1.5 rounded-full bg-destructive" />
-                  )}
-                </TabsTrigger>
-                {/* RU carries no error dot — none of its fields can fail. */}
-                <TabsTrigger value="ru">{t.langRu}</TabsTrigger>
-              </TabsList>
+              <LocaleTabsList roHasError={roHasError} enHasError={enHasError} />
 
               <TabsContent value="ro" className="mt-4 space-y-4">
                 <TextField
@@ -208,6 +193,7 @@ export function FaqItemFormSheet({
                   {...form.register('questionRo')}
                 />
                 <TextAreaField
+                  rows={5}
                   id="faq-a-ro"
                   label={f.answer}
                   placeholder={f.answerPlaceholderRo}
@@ -225,6 +211,7 @@ export function FaqItemFormSheet({
                   {...form.register('questionEn')}
                 />
                 <TextAreaField
+                  rows={5}
                   id="faq-a-en"
                   label={f.answer}
                   placeholder={f.answerPlaceholderEn}
@@ -242,6 +229,7 @@ export function FaqItemFormSheet({
                   {...form.register('questionRu')}
                 />
                 <TextAreaField
+                  rows={5}
                   id="faq-a-ru"
                   label={f.answer}
                   placeholder={f.answerPlaceholderRu}
@@ -294,37 +282,3 @@ export function FaqItemFormSheet({
     </Sheet>
   );
 }
-
-const TextField = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<'input'> & {
-    label: string;
-    error?: string;
-    hint?: string;
-  }
->(function TextField({ id, label, error, hint, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input id={id} ref={ref} aria-invalid={!!error} {...props} />
-      {error ? (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
-  );
-});
-
-const TextAreaField = React.forwardRef<
-  HTMLTextAreaElement,
-  React.ComponentProps<'textarea'> & { label: string; error?: string }
->(function TextAreaField({ id, label, error, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Textarea id={id} ref={ref} rows={5} aria-invalid={!!error} {...props} />
-      {error && <p className="text-xs font-medium text-destructive">{error}</p>}
-    </div>
-  );
-});

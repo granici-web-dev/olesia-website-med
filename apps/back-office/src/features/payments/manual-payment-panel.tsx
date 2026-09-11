@@ -26,11 +26,10 @@ import { PaymentStateBadge } from '@/features/payments/state-badge';
 import { parseManualAmount } from '@/features/payments/format';
 import {
   fetchTargetPayments,
-  formatAmount,
-  formatDateTime,
   recordManualPayment,
   voidPayment,
-} from '@/features/payments/data';
+} from '@/features/payments/api';
+import { formatAmount, formatDateTime } from '@/lib/format';
 import { targetPaymentsQueryKey } from '@/features/payments/query-key';
 import type { Payment, PaymentTargetType } from '@/features/payments/types';
 
@@ -214,9 +213,7 @@ function PaymentRow({
         </p>
       )}
 
-      {voidable && (
-        <VoidPayment pending={voiding} onConfirm={onVoid} />
-      )}
+      {voidable && <VoidPayment pending={voiding} onConfirm={onVoid} />}
     </li>
   );
 }

@@ -17,7 +17,8 @@ import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
 import { ImagesField } from '@/features/about/images-field';
-import { fetchAbout, updateAbout, formatDateTime } from '@/features/about/data';
+import { fetchAbout, updateAbout } from '@/features/about/api';
+import { formatDateTime } from '@/lib/format';
 import { aboutQueryKey } from '@/features/about/query-key';
 import {
   aboutFormSchema,

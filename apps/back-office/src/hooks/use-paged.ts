@@ -9,7 +9,8 @@ import { TABLE_PAGE_SIZE } from '@/api/list';
  * whole list, so every row has to be here; what was missing was a table that
  * stops at fifty and says how many there are in total.
  */
-export function usePagedRows<T>(rows: T[], pageSize = TABLE_PAGE_SIZE) {
+export function usePagedRows<T>(rows: T[]) {
+  const pageSize = TABLE_PAGE_SIZE;
   const [page, setPage] = React.useState(1);
 
   // Filtering to a shorter list must not leave the table on a page that no

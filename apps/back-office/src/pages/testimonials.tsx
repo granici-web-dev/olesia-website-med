@@ -37,7 +37,7 @@ import {
   fetchTestimonials,
   deleteTestimonial,
   updateTestimonial,
-} from '@/features/testimonials/data';
+} from '@/features/testimonials/api';
 import { testimonialsQueryKey } from '@/features/testimonials/query-key';
 import type { Testimonial } from '@/features/testimonials/types';
 

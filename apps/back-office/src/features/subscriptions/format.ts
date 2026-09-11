@@ -2,7 +2,6 @@ import type { VariantProps } from 'class-variance-authority';
 
 import type { badgeVariants } from '@/components/ui/badge';
 import type {
-  PaymentStatus,
   Subscription,
   SubscriptionStatus,
 } from '@/features/subscriptions/types';
@@ -13,11 +12,6 @@ export const statusBadgeVariant: Record<SubscriptionStatus, BadgeVariant> = {
   active: 'success',
   expired: 'muted',
   canceled: 'destructive',
-};
-
-export const paymentBadgeVariant: Record<PaymentStatus, BadgeVariant> = {
-  pending: 'warning',
-  confirmed: 'success',
 };
 
 const DAY = 86_400_000;

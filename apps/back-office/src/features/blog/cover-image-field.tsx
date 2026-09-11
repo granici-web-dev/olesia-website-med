@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { IMAGE_MAX_BYTES } from '@olesia/shared';
 import { ro } from '@/i18n/ro';
-import { uploadImage } from '@/features/blog/data';
+import { uploadImage } from '@/features/blog/api';
 
 /**
  * Cover image upload. Uploads to the storage module (converted to WebP) and
@@ -45,11 +45,7 @@ export function CoverImageField({
       {value ? (
         <>
           <div className="relative aspect-video overflow-hidden rounded-lg border bg-muted">
-            <img
-              src={value}
-              alt=""
-              className="size-full object-cover"
-            />
+            <img src={value} alt="" className="size-full object-cover" />
           </div>
           <div className="flex items-center gap-2">
             <Button

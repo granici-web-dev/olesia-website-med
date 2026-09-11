@@ -19,7 +19,7 @@ import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 import { patientDetailPath } from '@/config/routes';
 
-import { fromLead, linkLead } from '@/features/patients/data';
+import { fromLead, linkLead } from '@/features/patients/api';
 import { patientsQueryKey } from '@/features/patients/query-key';
 import type {
   LeadSource,

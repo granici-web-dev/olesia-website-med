@@ -1,3 +1,5 @@
+import type { PaymentStatus } from '@/types';
+
 /**
  * Subscriptions — the "Monitorizare 3 luni" package (service 04, group B).
  *
@@ -10,7 +12,6 @@
  */
 
 export type SubscriptionStatus = 'active' | 'expired' | 'canceled';
-export type PaymentStatus = 'pending' | 'confirmed';
 
 export interface Subscription {
   id: string;

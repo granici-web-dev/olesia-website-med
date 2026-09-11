@@ -3,7 +3,7 @@ import { CircleDot, CheckCheck, MailOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ro } from '@/i18n/ro';
 import type { MessageStatus, MessageSubject } from '@/features/messages/types';
-import { statusBadgeVariant } from '@/features/messages/data';
+import { statusBadgeVariant } from '@/features/messages/format';
 
 const STATUS_ICON = {
   new: CircleDot,

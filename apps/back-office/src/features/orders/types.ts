@@ -1,3 +1,5 @@
+import type { PaymentStatus } from '@/types';
+
 /**
  * Group-C orders — the personalized menus and written protocols ordered from
  * /pricing ("Comenzi" in the back office). Unlike an appointment there is no
@@ -30,7 +32,6 @@ export type OrderStatus =
   | 'in_progress'
   | 'delivered'
   | 'canceled';
-export type OrderPayment = 'pending' | 'confirmed';
 
 export interface Order {
   id: string;
@@ -42,7 +43,7 @@ export interface Order {
   phone: string | null;
   notes: string | null;
   status: OrderStatus;
-  paymentStatus: OrderPayment;
+  paymentStatus: PaymentStatus;
   deliveredAt: string | null;
   createdAt: string; // ISO
 }

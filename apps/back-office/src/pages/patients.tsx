@@ -33,7 +33,8 @@ import { patientDetailPath } from '@/config/routes';
 
 import { ConsentBadge } from '@/features/patients/badges';
 import { PatientFormSheet } from '@/features/patients/patient-form-sheet';
-import { fetchPatients, ageYears } from '@/features/patients/data';
+import { fetchPatients } from '@/features/patients/api';
+import { ageYears } from '@/features/patients/format';
 import { patientsQueryKey } from '@/features/patients/query-key';
 import type { PatientDto } from '@/features/patients/types';
 
@@ -143,7 +144,9 @@ export function PatientsPage() {
               <TableRow className="hover:bg-transparent">
                 <TableHead>{t.columns.patient}</TableHead>
                 <TableHead>{t.columns.contact}</TableHead>
-                <TableHead className="text-right">{t.columns.entries}</TableHead>
+                <TableHead className="text-right">
+                  {t.columns.entries}
+                </TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>

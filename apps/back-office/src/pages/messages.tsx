@@ -30,7 +30,9 @@ import { ro } from '@/i18n/ro';
 
 import { StatusBadge, SubjectBadge } from '@/features/messages/status-badges';
 import { MessageDetailSheet } from '@/features/messages/message-detail-sheet';
-import { fetchMessages, bucketOf, formatDateTime } from '@/features/messages/data';
+import { fetchMessages } from '@/features/messages/api';
+import { bucketOf } from '@/features/messages/format';
+import { formatShortDateTime as formatDateTime } from '@/lib/format';
 import { messagesQueryKey } from '@/features/messages/query-key';
 import type { StatusFilter } from '@/features/messages/types';
 

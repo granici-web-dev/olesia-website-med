@@ -1,5 +1,4 @@
 import { http } from '@/api/http';
-import { USE_MOCKS } from '@/api/config';
 
 /**
  * The event types on the connected Calendly account.
@@ -25,19 +24,6 @@ export interface CalendlyEventTypes {
   eventTypes: CalendlyEventType[];
 }
 
-async function remote(): Promise<CalendlyEventTypes> {
+export function fetchCalendlyEventTypes(): Promise<CalendlyEventTypes> {
   return http.get<CalendlyEventTypes>('/appointments/calendly/event-types');
 }
-
-/**
- * Mock mode reports "not connected" rather than inventing event types.
- *
- * A fake list here would be worse than none: the whole point of the picker is
- * that what it shows is really on her calendar, and a plausible-looking mock
- * would train whoever demos it to trust a list that means nothing.
- */
-async function mock(): Promise<CalendlyEventTypes> {
-  return { configured: false, eventTypes: [] };
-}
-
-export const fetchCalendlyEventTypes = USE_MOCKS ? mock : remote;

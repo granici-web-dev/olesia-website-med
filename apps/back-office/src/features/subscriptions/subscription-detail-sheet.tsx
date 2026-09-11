@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarRange,
@@ -16,24 +15,19 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { DetailField, SectionTitle } from '@/components/common/detail-section';
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ConfirmAction } from '@/components/common/confirm-action';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
-import {
-  StatusBadge,
-  PaymentBadge,
-} from '@/features/subscriptions/status-badges';
+import { StatusBadge } from '@/features/subscriptions/status-badges';
 import { QuotaBar } from '@/features/subscriptions/quota-bar';
-import {
-  cancelSubscription,
-  logVideoCall,
-  formatDate,
-  daysRemaining,
-  quotaRemaining,
-} from '@/features/subscriptions/data';
+import { cancelSubscription, logVideoCall } from '@/features/subscriptions/api';
+import { formatDate } from '@/lib/format';
+import { daysRemaining, quotaRemaining } from '@/features/subscriptions/format';
 import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
 import { subscriptionsQueryKey } from '@/features/subscriptions/query-key';
 import type { Subscription } from '@/features/subscriptions/types';
@@ -50,21 +44,6 @@ function periodSubLabel(sub: Subscription): string {
   if (days <= 0) return t.period.expired;
   if (days === 1) return t.period.lastDay;
   return `${days} ${t.period.daysLeft}`;
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="grid grid-cols-[7rem_1fr] gap-3 py-2 text-sm">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 font-medium break-words">{children}</dd>
-    </div>
-  );
 }
 
 export function SubscriptionDetailSheet({
@@ -136,7 +115,7 @@ export function SubscriptionDetailSheet({
 
               <SectionTitle>{t.detail.client}</SectionTitle>
               <dl className="mt-1 divide-y">
-                <Field label={t.detail.email}>
+                <DetailField label={t.detail.email}>
                   <a
                     href={`mailto:${s.clientEmail}`}
                     className="inline-flex items-center gap-1.5 text-foreground underline-offset-4 hover:text-primary hover:underline"
@@ -144,9 +123,9 @@ export function SubscriptionDetailSheet({
                     <Mail className="size-3.5 text-muted-foreground" />
                     {s.clientEmail}
                   </a>
-                </Field>
+                </DetailField>
                 {s.phone && (
-                  <Field label={t.detail.phone}>
+                  <DetailField label={t.detail.phone}>
                     <a
                       href={`tel:${s.phone}`}
                       className="inline-flex items-center gap-1.5 text-foreground underline-offset-4 hover:text-primary hover:underline"
@@ -154,7 +133,7 @@ export function SubscriptionDetailSheet({
                       <Phone className="size-3.5 text-muted-foreground" />
                       {s.phone}
                     </a>
-                  </Field>
+                  </DetailField>
                 )}
               </dl>
 
@@ -172,13 +151,13 @@ export function SubscriptionDetailSheet({
 
               <SectionTitle>{t.detail.period}</SectionTitle>
               <dl className="mt-1 divide-y">
-                <Field label={t.detail.period}>
+                <DetailField label={t.detail.period}>
                   <span className="inline-flex items-center gap-1.5">
                     <CalendarRange className="size-3.5 text-muted-foreground" />
                     {formatDate(s.startDate)} – {formatDate(s.endDate)}
                   </span>
-                </Field>
-                <Field label={t.detail.price}>{s.price} €</Field>
+                </DetailField>
+                <DetailField label={t.detail.price}>{s.price} €</DetailField>
               </dl>
               <p
                 className={cn(
@@ -264,13 +243,5 @@ export function SubscriptionDetailSheet({
         )}
       </SheetContent>
     </Sheet>
-  );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
-      {children}
-    </p>
   );
 }

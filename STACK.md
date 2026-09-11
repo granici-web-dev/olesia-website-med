@@ -32,14 +32,14 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Markdown | react-markdown + remark-gfm, in **both** front ends since audit A7 | `^10.1.0` / `^4.0.1` |
 | Back office | React 19 + Vite, react-router-dom | `vite ^8`, `react-router-dom 6.30.3` (exact) |
 | Back office UI | shadcn/ui over Radix primitives, CVA, tailwind-merge, lucide, sonner | — |
-| Back office data | TanStack Query | `^5.101.0` |
+| Back office data | TanStack Query over `features/<domain>/api.ts` — no mock layer | `^5.101.0` |
 | Back office forms | react-hook-form + zod | `^7.78.0`, `zod ^4.4.3` |
 | Shared types | `packages/shared` — DTOs and enums, built with `tsc` | workspace |
 | Formatter | Prettier, single option: `singleQuote` | `~3.6.2` |
-| Test runner (API) | Jest with `@swc/jest`, 108 tests in 11 suites | `jest ~30.3.0` |
-| Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only | `vitest ~4.1.0` |
-| Test runner (back office) | Vitest, wired but unused | `vitest ~4.1.0` |
-| CI | GitHub Actions: two typechecks, **both test suites**, three builds, migration check | — |
+| Test runner (API) | Jest with `@swc/jest`, 348 tests in 38 suites | `jest ~30.3.0` |
+| Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only, 89 tests | `vitest ~4.1.0` |
+| Test runner (back office) | Vitest in `vite.config.mts`, 45 tests since audits A9 and A10 | `vitest ~4.1.0` |
+| CI | GitHub Actions: two typechecks, **all three test suites**, three builds, migration check | — |
 | Deploy (site) | Vercel | — |
 | Deploy (API) | Docker Compose + Postgres, nightly backups | `docker-compose.prod.yml` |
 | Dependency updates | Dependabot, grouped | — |
@@ -95,6 +95,12 @@ define the visual intent. Never edited; implementations live in `components/` an
 
 ## Anti-choices
 
+- **No mock data layer in the back office.** Removed on 2026-09-11 (audit A10): 21
+  `mock.ts` files, the 21 `data.ts` switches in front of them, `VITE_API_MOCKS` and the
+  `USE_MOCKS` flag. It was there to demonstrate the panel without a backend, and the
+  failure mode was a build that showed invented patients and a demo admin signed in
+  without a password, with nothing on the screen to say so. Every screen reads the API
+  and reports an outage instead (audit A9). Fixtures live in tests.
 - **No GraphQL.** REST with Swagger.
 - **No ORM other than Prisma**, and no raw SQL in application code. Hand-written SQL exists
   only in migrations.

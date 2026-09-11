@@ -58,7 +58,6 @@ export const ro = {
   },
 
   userMenu: {
-    account: 'Cont',
     settings: 'Setări',
     logout: 'Deconectare',
     logoutFailed:
@@ -162,8 +161,11 @@ export const ro = {
     pageOf: (page: number, last: number) => `Pagina ${page} din ${last}`,
     previousPage: 'Pagina anterioară',
     nextPage: 'Pagina următoare',
-    back: 'Înapoi',
     all: 'Toate',
+    optional: 'opțional',
+    langRo: 'Română',
+    langEn: 'Engleză',
+    langRu: 'Rusă',
     new: 'Nou',
     none: '—',
     /** Shown under every RU field: the site degrades to RO, it never blanks. */
@@ -175,6 +177,8 @@ export const ro = {
   // with the inline status switcher: `paymentStatus` mirrors the ledger, so a
   // list row states it and the detail sheet's payments panel is where it moves.
   payment: {
+    pending: 'Neachitată',
+    confirmed: 'Achitată',
     free: 'Gratuit',
   },
 
@@ -267,11 +271,6 @@ export const ro = {
       canceled: 'Anulată',
     },
 
-    payment: {
-      pending: 'În așteptare',
-      confirmed: 'Confirmată',
-    },
-
     tabs: {
       all: 'Toate',
       scheduled: 'Programate',
@@ -355,7 +354,6 @@ export const ro = {
       attach: 'Atașează un fișier',
       changeFile: 'Schimbă fișierul',
       removeFile: 'Elimină',
-      attachment: 'Atașament',
       download: 'Descarcă',
       save: 'Salvează planul',
       cancel: 'Anulează',
@@ -468,10 +466,6 @@ export const ro = {
       sortOrder: 'Ordine pe site',
       activeField: 'Afișat pe site',
       activeHint: 'Serviciile inactive nu apar public.',
-      langRo: 'Română',
-      langEn: 'Engleză',
-      langRu: 'Rusă',
-      optional: 'opțional',
       placeholderSelectCode: 'Alege codul…',
       save: 'Salvează',
       saving: 'Se salvează…',
@@ -638,11 +632,6 @@ export const ro = {
       canceled: 'Anulat',
     },
 
-    payment: {
-      pending: 'În așteptare',
-      confirmed: 'Confirmată',
-    },
-
     tabs: {
       all: 'Toate',
       active: 'Active',
@@ -664,8 +653,6 @@ export const ro = {
     },
 
     quota: {
-      remaining: 'rămase',
-      used: 'folosite',
       depleted: 'Cotă epuizată',
     },
 
@@ -693,7 +680,6 @@ export const ro = {
       period: 'Perioadă',
       quota: 'Apeluri video',
       price: 'Preț',
-      remaining: 'rămase',
     },
 
     actions: {
@@ -728,11 +714,6 @@ export const ro = {
       missing: 'Fără consimțământ',
       record: 'Înregistrează consimțământul',
       recordedOn: 'Consimțământ înregistrat pe',
-    },
-
-    payment: {
-      pending: 'În așteptare',
-      confirmed: 'Confirmată',
     },
 
     gender: {
@@ -950,11 +931,6 @@ export const ro = {
       open: 'Deschis',
       overdue: 'Întârziat',
       answered: 'Răspuns salvat',
-    },
-
-    payment: {
-      pending: 'În așteptare',
-      confirmed: 'Confirmată',
     },
 
     tabs: {
@@ -1329,8 +1305,6 @@ export const ro = {
     },
 
     payment: {
-      pending: 'Neachitată',
-      confirmed: 'Achitată',
       abandonedHint: 'Plata nu a fost finalizată pe site.',
     },
 
@@ -1742,9 +1716,6 @@ export const ro = {
     title: 'Întrebări frecvente',
     subtitle: 'Secțiunile și întrebările de pe pagina publică /faq.',
     refresh: 'Reîmprospătează',
-    langRo: 'Română',
-    langEn: 'Engleză',
-    langRu: 'Rusă',
     newCategory: 'Secțiune nouă',
     newItem: 'Adaugă întrebare',
     moveUp: 'Mută mai sus',
@@ -1802,7 +1773,6 @@ export const ro = {
       hidden: 'Acum este ascunsă de pe site.',
       // Unused: testimonials have a `sortOrder` the panel never reorders.
       // The drag handle is `PLAN.md` 13d; this string is what it will say.
-      reordered: 'Ordinea a fost actualizată.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
     categoryForm: {
@@ -1902,9 +1872,6 @@ export const ro = {
     newItem: 'Recenzie nouă',
     moveUp: 'Mută mai sus',
     moveDown: 'Mută mai jos',
-    langRo: 'Română',
-    langEn: 'Engleză',
-    langRu: 'Rusă',
     anonymous: 'Nesemnată',
     /** The one rule that matters on this page, kept in front of her eyes. */
     integrityNote:
@@ -1970,9 +1937,6 @@ export const ro = {
     newItem: 'Apariție nouă',
     moveUp: 'Mută mai sus',
     moveDown: 'Mută mai jos',
-    langRo: 'Română',
-    langEn: 'Engleză',
-    langRu: 'Rusă',
     /** The constraint the whole module is built around. */
     embedNote:
       'Înregistrările nu se încarcă pe site — drepturile aparțin televiziunilor. Lipești linkul publicării, iar materialul este redat de acolo, doar după ce vizitatorul apasă play.',
@@ -2072,9 +2036,6 @@ export const ro = {
     categories: 'Categorii',
     moveUp: 'Mută mai sus',
     moveDown: 'Mută mai jos',
-    langRo: 'Română',
-    langEn: 'Engleză',
-    langRu: 'Rusă',
     /** The state the whole library is in right now — worth stating plainly. */
     missingFilesNote: (n: number) =>
       n === 1
@@ -2120,7 +2081,6 @@ export const ro = {
       // Unused: the library's categories can be created and deleted, not
       // renamed, although the API's PATCH route is there. The button is
       // `PLAN.md` 13d; this string is what it will say.
-      categoryUpdated: 'Categoria a fost salvată.',
       categoryDeleted: 'Categoria a fost ștearsă.',
       categoryInUse:
         'Categoria are materiale. Mută-le în altă categorie înainte de a o șterge.',

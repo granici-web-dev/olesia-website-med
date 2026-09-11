@@ -3,11 +3,7 @@ import type { VariantProps } from 'class-variance-authority';
 import { formatAmount, formatDateTime } from '@/lib/format';
 import { ro } from '@/i18n/ro';
 import type { badgeVariants } from '@/components/ui/badge';
-import type {
-  Payment,
-  PaymentState,
-  PaymentTargetType,
-} from '@/features/payments/types';
+import type { Payment, PaymentState } from '@/features/payments/types';
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
@@ -29,15 +25,6 @@ export const stateBadgeVariant: Record<PaymentState, BadgeVariant> = {
   refunded: 'info',
   partially_refunded: 'info',
 };
-
-/** What a payment can be for, in the order the filter lists them. */
-export const TARGET_KEYS: PaymentTargetType[] = [
-  'appointment',
-  'quick_question',
-  'deliverable_order',
-  'subscription',
-  'material',
-];
 
 /**
  * The receipt as plain text, so it can be pasted into whatever the doctor uses

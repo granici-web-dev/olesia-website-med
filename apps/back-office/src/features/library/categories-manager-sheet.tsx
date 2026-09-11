@@ -31,7 +31,7 @@ import {
   createMaterialCategory,
   deleteMaterialCategory,
   updateMaterialCategory,
-} from '@/features/library/data';
+} from '@/features/library/api';
 import {
   materialCategoriesQueryKey,
   materialsQueryKey,

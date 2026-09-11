@@ -29,8 +29,8 @@ import {
   fetchCategories,
   createPost,
   updatePost,
-  formatDate,
-} from '@/features/blog/data';
+} from '@/features/blog/api';
+import { formatDate } from '@/lib/format';
 import {
   postsQueryKey,
   categoriesQueryKey,

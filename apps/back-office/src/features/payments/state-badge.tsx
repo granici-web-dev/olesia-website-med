@@ -10,7 +10,7 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { ro } from '@/i18n/ro';
-import { stateBadgeVariant } from '@/features/payments/data';
+import { stateBadgeVariant } from '@/features/payments/format';
 import type { PaymentState } from '@/features/payments/types';
 
 const STATE_ICON = {

@@ -1,4 +1,4 @@
-import { PaymentBadge } from '@/features/orders/status-badges';
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { ro } from '@/i18n/ro';
 import type { Order } from '@/features/orders/types';
 
@@ -18,9 +18,11 @@ const t = ro.orders;
 export function OrderPaymentCell({ order }: { order: Order }) {
   return (
     <div className="space-y-1">
-      <PaymentBadge payment={order.paymentStatus} />
+      <PaymentBadge status={order.paymentStatus} />
       {order.status === 'awaiting_payment' && (
-        <p className="text-xs text-muted-foreground">{t.payment.abandonedHint}</p>
+        <p className="text-xs text-muted-foreground">
+          {t.payment.abandonedHint}
+        </p>
       )}
     </div>
   );

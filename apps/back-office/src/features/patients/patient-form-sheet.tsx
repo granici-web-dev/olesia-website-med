@@ -26,15 +26,12 @@ import {
 } from '@/components/ui/select';
 import { ro } from '@/i18n/ro';
 
-import { createPatient, updatePatient } from '@/features/patients/data';
+import { createPatient, updatePatient } from '@/features/patients/api';
 import {
   patientsQueryKey,
   patientQueryKey,
 } from '@/features/patients/query-key';
-import type {
-  PatientDto,
-  PatientFormValues,
-} from '@/features/patients/types';
+import type { PatientDto, PatientFormValues } from '@/features/patients/types';
 
 const f = ro.patients.form;
 const GENDERS = ['male', 'female', 'other'] as const;
@@ -102,10 +99,14 @@ export function PatientFormSheet({
     mutationFn: (values: PatientFormValues) =>
       isEdit ? updatePatient(patient.id, values) : createPatient(values),
     onSuccess: (saved) => {
-      toast.success(isEdit ? ro.patients.toast.updated : ro.patients.toast.created);
+      toast.success(
+        isEdit ? ro.patients.toast.updated : ro.patients.toast.created,
+      );
       queryClient.invalidateQueries({ queryKey: patientsQueryKey });
       if (isEdit) {
-        queryClient.invalidateQueries({ queryKey: patientQueryKey(patient.id) });
+        queryClient.invalidateQueries({
+          queryKey: patientQueryKey(patient.id),
+        });
       }
       onOpenChange(false);
       if (!isEdit) onCreated?.(saved);
@@ -215,11 +216,7 @@ export function PatientFormSheet({
 
             <div className="space-y-2">
               <Label htmlFor="pat-notes">{f.notes}</Label>
-              <Textarea
-                id="pat-notes"
-                rows={3}
-                {...form.register('notes')}
-              />
+              <Textarea id="pat-notes" rows={3} {...form.register('notes')} />
               <p className="text-xs text-muted-foreground">{f.notesHint}</p>
             </div>
           </div>

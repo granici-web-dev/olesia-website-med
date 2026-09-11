@@ -31,11 +31,6 @@ const shortDateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
   minute: '2-digit',
 });
 
-const timeFmt = new Intl.DateTimeFormat('ro-RO', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
 /** An em dash for a date that is not set: a blank cell reads as a bug. */
 const NOT_SET = '—';
 
@@ -49,10 +44,6 @@ export function formatDateTime(iso: string | null | undefined): string {
 
 export function formatShortDateTime(iso: string | null | undefined): string {
   return iso ? shortDateTimeFmt.format(new Date(iso)) : NOT_SET;
-}
-
-export function formatTime(iso: string | null | undefined): string {
-  return iso ? timeFmt.format(new Date(iso)) : NOT_SET;
 }
 
 /** Prices are whole euros; the symbol goes after the number in Romanian. */

@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
-import { fetchDashboardStats } from '@/features/dashboard/data';
+import { fetchDashboardStats } from '@/features/dashboard/api';
 import { dashboardQueryKey } from '@/features/dashboard/query-key';
 import { UpcomingPaymentCell } from '@/features/dashboard/upcoming-payment-cell';
 import {

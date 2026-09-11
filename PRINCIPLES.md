@@ -37,8 +37,14 @@ procedure. Where the two disagree, see "Known divergences" at the end.
   API's classes are DTOs, because `class-validator` requires classes.
 - **One module per domain.** `apps/api/src/app/<domain>/` with its own module, service,
   controller, DTOs and mapper. The back office mirrors it as
-  `src/features/<domain>/{types,api,mock,data,query-key}.ts` plus `src/pages/<name>.tsx`,
-  where `data.ts` is the `USE_MOCKS` switch between the mock and the real client.
+  `src/features/<domain>/{types,api,format,query-key}.ts` plus `src/pages/<name>.tsx`.
+  There is no second data source behind `api.ts`: the mock layer that used to sit beside
+  it — 21 `mock.ts` files, 21 `data.ts` switches and `VITE_API_MOCKS` — is gone as of
+  audit A10 (2026-09-11). It existed so the panel could be demonstrated without a
+  backend, and what it actually did was let a build show invented patients, invented
+  payments and a demo admin logged in without a password, indistinguishably from the real
+  thing. Every screen now reads the API and says so when the API is not there
+  (audit A9). A fixture belongs in a test, not in a switch the production bundle ships.
 
 ## Comments and naming
 
@@ -174,10 +180,12 @@ the code here.
   non-standard types `content` and `i18n` are in regular use. Scopes lapsed over the last
   ~25 commits as work moved into `api` and `back-office`; restoring them is welcome, not
   required. Subject ≤ 72 chars, body explains why.
-- **The TODOs in the tree are litter, not a backlog.** 22 lines, 16 of them
-  `TODO(api)` / `TODO(shared)` markers in the back office's `mock.ts` and `types.ts` files,
-  left over from spring and long since done. They should be deleted, not worked through.
-  A new TODO needs a plan next to it or it does not go in.
+- **The TODOs in the tree are litter, not a backlog.** There were 22 lines, 16 of them
+  `TODO(api)` / `TODO(shared)` markers in the back office's `mock.ts` and `types.ts`
+  files, left over from spring and long since done. They went with the mock layer
+  (audit A10); one mention survives, inside a comment in
+  `mail/patient-notifications.service.ts` explaining why a dead branch was removed. A new
+  TODO needs a plan next to it or it does not go in.
 - **`apps/frontend/origin/` is read-only.** Reference design prototypes. Read them,
   never edit them (`AGENTS.md` R2).
 

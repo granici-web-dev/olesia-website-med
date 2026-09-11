@@ -11,8 +11,8 @@ import { ro } from '@/i18n/ro';
 import {
   fetchMaterialGrant,
   revokeMaterialGrant,
-  formatDateTime,
-} from '@/features/payments/data';
+} from '@/features/payments/api';
+import { formatDateTime } from '@/lib/format';
 import { materialGrantQueryKey } from '@/features/payments/query-key';
 import type { Payment } from '@/features/payments/types';
 

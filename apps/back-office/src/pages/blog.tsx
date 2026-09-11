@@ -53,12 +53,8 @@ import { ro } from '@/i18n/ro';
 
 import { PostStatusBadge } from '@/features/blog/post-status-badge';
 import { CategoriesManagerSheet } from '@/features/blog/categories-manager-sheet';
-import {
-  fetchPosts,
-  fetchCategories,
-  deletePost,
-  formatDate,
-} from '@/features/blog/data';
+import { fetchPosts, fetchCategories, deletePost } from '@/features/blog/api';
+import { formatDate } from '@/lib/format';
 import { postsQueryKey, categoriesQueryKey } from '@/features/blog/query-keys';
 import type { Post, StatusFilter } from '@/features/blog/types';
 import { paths, blogEditPath } from '@/config/routes';

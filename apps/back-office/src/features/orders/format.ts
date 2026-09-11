@@ -1,7 +1,7 @@
 import type { VariantProps } from 'class-variance-authority';
 
 import type { badgeVariants } from '@/components/ui/badge';
-import type { OrderPayment, OrderStatus } from '@/features/orders/types';
+import type { OrderStatus } from '@/features/orders/types';
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
@@ -13,9 +13,4 @@ export const statusBadgeVariant: Record<OrderStatus, BadgeVariant> = {
   in_progress: 'warning',
   delivered: 'success',
   canceled: 'secondary',
-};
-
-export const paymentBadgeVariant: Record<OrderPayment, BadgeVariant> = {
-  pending: 'warning',
-  confirmed: 'success',
 };

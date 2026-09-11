@@ -1,6 +1,6 @@
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { Badge } from '@/components/ui/badge';
-import { PaymentBadge } from '@/features/appointments/status-badges';
-import { isFreeAppointment } from '@/features/appointments/data';
+import { isFreeService } from '@/features/appointments/format';
 import { ro } from '@/i18n/ro';
 import type { Appointment } from '@/features/appointments/types';
 
@@ -10,9 +10,13 @@ import type { Appointment } from '@/features/appointments/types';
  * in the detail sheet, where it gets a sum, a date and a note. The switcher
  * that used to live here wrote the mirror and recorded none of that.
  */
-export function AppointmentPaymentCell({ appointment }: { appointment: Appointment }) {
+export function AppointmentPaymentCell({
+  appointment,
+}: {
+  appointment: Appointment;
+}) {
   // Free consultations carry no payment — show a static "Gratuit" tag.
-  if (isFreeAppointment(appointment)) {
+  if (isFreeService(appointment.service)) {
     return <Badge variant="secondary">{ro.payment.free}</Badge>;
   }
   return <PaymentBadge status={appointment.paymentStatus} />;

@@ -31,11 +31,8 @@ import { ro } from '@/i18n/ro';
 import { PaymentStateBadge } from '@/features/payments/state-badge';
 import { PaymentConfirmationCell } from '@/features/payments/confirmation-cell';
 import { PaymentDetailSheet } from '@/features/payments/payment-detail-sheet';
-import {
-  fetchPayments,
-  formatAmount,
-  formatDateTime,
-} from '@/features/payments/data';
+import { fetchPayments } from '@/features/payments/api';
+import { formatAmount, formatDateTime } from '@/lib/format';
 import { paymentsQueryKey } from '@/features/payments/query-key';
 import type { Payment, PaymentStateFilter } from '@/features/payments/types';
 

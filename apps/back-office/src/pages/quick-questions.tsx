@@ -29,13 +29,14 @@ import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { StatusBadge } from '@/features/quick-questions/status-badges';
-import { TicketPaymentCell } from '@/features/quick-questions/payment-cell';
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { DeadlineIndicator } from '@/features/quick-questions/deadline-indicator';
 import { TicketDetailSheet } from '@/features/quick-questions/ticket-detail-sheet';
-import { fetchTickets, bucketOf } from '@/features/quick-questions/data';
+import { fetchTickets } from '@/features/quick-questions/api';
+import { bucketOf } from '@/features/quick-questions/format';
 import { ticketsQueryKey } from '@/features/quick-questions/query-key';
 import type { StatusFilter } from '@/features/quick-questions/types';
-import { fetchWorkingHours } from '@/features/working-hours/data';
+import { fetchWorkingHours } from '@/features/working-hours/api';
 import { workingHoursQueryKey } from '@/features/working-hours/query-key';
 import { formatSla } from '@/features/working-hours/sla';
 
@@ -274,7 +275,7 @@ export function QuickQuestionsPage() {
                     <StatusBadge bucket={bucket} />
                   </TableCell>
                   <TableCell className="align-top">
-                    <TicketPaymentCell ticket={tk} />
+                    <PaymentBadge status={tk.paymentStatus} />
                   </TableCell>
                   <TableCell className="text-right align-top">
                     <Button

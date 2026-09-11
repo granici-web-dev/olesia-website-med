@@ -39,7 +39,7 @@ import {
   deleteFaqItem,
   updateFaqCategory,
   updateFaqItem,
-} from '@/features/faq/data';
+} from '@/features/faq/api';
 import { faqQueryKey } from '@/features/faq/query-key';
 import type { FaqCategory, FaqItem } from '@/features/faq/types';
 
@@ -314,7 +314,9 @@ export function FaqPage() {
                   {deletingCategory.items.length > 0 && (
                     <>
                       {' '}
-                      {t.deleteCategory.withItems(deletingCategory.items.length)}
+                      {t.deleteCategory.withItems(
+                        deletingCategory.items.length,
+                      )}
                     </>
                   )}
                 </>

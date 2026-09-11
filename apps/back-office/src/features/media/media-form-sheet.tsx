@@ -13,13 +13,13 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { TextField, TextAreaField } from '@/components/common/form-fields';
+import { LocaleTabsList } from '@/components/common/locale-tabs';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -35,7 +35,7 @@ import {
   updateMedia,
   fetchThumbnail,
   uploadThumbnail,
-} from '@/features/media/data';
+} from '@/features/media/api';
 import { parsePublicationUrl } from '@/features/media/parse-url';
 import { mediaQueryKey } from '@/features/media/query-key';
 import {
@@ -47,7 +47,6 @@ import {
 
 const t = ro.media;
 const f = t.form;
-
 
 const schema = z.object({
   url: z
@@ -419,22 +418,7 @@ export function MediaFormSheet({
             <Separator />
 
             <Tabs defaultValue="ro">
-              <TabsList>
-                <TabsTrigger value="ro" className="gap-1.5">
-                  {t.langRo}
-                  {roHasError && (
-                    <span className="size-1.5 rounded-full bg-destructive" />
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="en" className="gap-1.5">
-                  {t.langEn}
-                  {enHasError && (
-                    <span className="size-1.5 rounded-full bg-destructive" />
-                  )}
-                </TabsTrigger>
-                {/* RU carries no error dot — none of its fields can fail. */}
-                <TabsTrigger value="ru">{t.langRu}</TabsTrigger>
-              </TabsList>
+              <LocaleTabsList roHasError={roHasError} enHasError={enHasError} />
 
               <TabsContent value="ro" className="mt-4 space-y-4">
                 <TextField
@@ -445,6 +429,7 @@ export function MediaFormSheet({
                   {...form.register('titleRo')}
                 />
                 <TextAreaField
+                  rows={4}
                   id="md-summary-ro"
                   label={f.summary}
                   placeholder={f.summaryPlaceholderRo}
@@ -462,6 +447,7 @@ export function MediaFormSheet({
                   {...form.register('titleEn')}
                 />
                 <TextAreaField
+                  rows={4}
                   id="md-summary-en"
                   label={f.summary}
                   placeholder={f.summaryPlaceholderEn}
@@ -479,6 +465,7 @@ export function MediaFormSheet({
                   {...form.register('titleRu')}
                 />
                 <TextAreaField
+                  rows={4}
                   id="md-summary-ru"
                   label={f.summary}
                   placeholder={f.summaryPlaceholderRu}
@@ -529,37 +516,3 @@ export function MediaFormSheet({
     </Sheet>
   );
 }
-
-const TextField = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<'input'> & {
-    label: string;
-    error?: string;
-    hint?: string;
-  }
->(function TextField({ id, label, error, hint, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input id={id} ref={ref} aria-invalid={!!error} {...props} />
-      {error ? (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
-  );
-});
-
-const TextAreaField = React.forwardRef<
-  HTMLTextAreaElement,
-  React.ComponentProps<'textarea'> & { label: string; error?: string }
->(function TextAreaField({ id, label, error, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Textarea id={id} ref={ref} rows={4} aria-invalid={!!error} {...props} />
-      {error && <p className="text-xs font-medium text-destructive">{error}</p>}
-    </div>
-  );
-});

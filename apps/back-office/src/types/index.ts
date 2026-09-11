@@ -8,6 +8,13 @@ import type { Role as SharedRole } from '@olesia/shared';
 
 export type Role = `${SharedRole}`; // 'admin' | 'editor'
 
+/**
+ * Whether the money arrived. One type, because `paymentStatus` is the same
+ * mirror of the `Payment` ledger on an appointment, a subscription, an EXPRESS
+ * ticket and a group-C order.
+ */
+export type PaymentStatus = 'pending' | 'confirmed';
+
 export interface User {
   id: string;
   name: string;

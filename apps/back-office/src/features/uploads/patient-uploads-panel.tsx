@@ -38,7 +38,7 @@ import {
   issueUploadLink,
   revokeUploadLink,
   sendUploadLink,
-} from '@/features/uploads/data';
+} from '@/features/uploads/api';
 import { uploadLinksQueryKey } from '@/features/uploads/query-key';
 import type { UploadedDocument, UploadTarget } from '@/features/uploads/types';
 

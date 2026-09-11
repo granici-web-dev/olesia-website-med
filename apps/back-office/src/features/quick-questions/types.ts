@@ -1,3 +1,5 @@
+import type { PaymentStatus } from '@/types';
+
 /**
  * Quick-question tickets — the "Întrebare EXPRESS" service (05, group B):
  * a written answer within ~1 working hour.
@@ -13,7 +15,6 @@
  */
 
 export type TicketStatus = 'awaiting_payment' | 'open' | 'answered';
-export type PaymentStatus = 'pending' | 'confirmed';
 
 /**
  * Derived bucket: an open ticket past its deadline is `overdue`.

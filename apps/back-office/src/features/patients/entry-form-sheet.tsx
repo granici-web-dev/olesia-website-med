@@ -24,7 +24,7 @@ import {
 import { MarkdownEditor } from '@/components/markdown/markdown-editor';
 import { ro } from '@/i18n/ro';
 
-import { addEntry, updateEntry } from '@/features/patients/data';
+import { addEntry, updateEntry } from '@/features/patients/api';
 import {
   patientQueryKey,
   patientTimelineQueryKey,
@@ -68,9 +68,7 @@ export function EntryFormSheet({
     if (!open) return;
     if (entry) {
       form.reset({
-        type: (entry.type === 'document'
-          ? 'note'
-          : entry.type) as EditableType,
+        type: (entry.type === 'document' ? 'note' : entry.type) as EditableType,
         title: entry.title ?? '',
         body: entry.body ?? '',
         occurredAt: entry.occurredAt ? entry.occurredAt.slice(0, 10) : '',

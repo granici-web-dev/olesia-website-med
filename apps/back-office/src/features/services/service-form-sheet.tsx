@@ -13,14 +13,14 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { TextField, TextAreaField } from '@/components/common/form-fields';
+import { LocaleTabsList } from '@/components/common/locale-tabs';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -31,13 +31,8 @@ import {
 import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
-import {
-  ALL_CODES,
-  CODE_META,
-  groupForCode,
-  createService,
-  updateService,
-} from '@/features/services/data';
+import { ALL_CODES, CODE_META, groupForCode } from '@/features/services/format';
+import { createService, updateService } from '@/features/services/api';
 import { servicesQueryKey } from '@/features/services/query-key';
 import { CalendlyEventPicker } from '@/features/services/calendly-event-picker';
 import type {
@@ -78,7 +73,10 @@ const schema = z
   })
   .superRefine((val, ctx) => {
     if (groupForCode(val.code) === 'A_booking') {
-      if (!/^\d+$/.test(val.durationMin.trim()) || Number(val.durationMin) < 1) {
+      if (
+        !/^\d+$/.test(val.durationMin.trim()) ||
+        Number(val.durationMin) < 1
+      ) {
         ctx.addIssue({
           path: ['durationMin'],
           code: z.ZodIssueCode.custom,
@@ -206,7 +204,9 @@ export function ServiceFormSheet({
         ? updateService(service.id, toInput(values))
         : createService(toInput(values)),
     onSuccess: () => {
-      toast.success(isEdit ? ro.services.toast.updated : ro.services.toast.created);
+      toast.success(
+        isEdit ? ro.services.toast.updated : ro.services.toast.created,
+      );
       queryClient.invalidateQueries({ queryKey: servicesQueryKey });
       onOpenChange(false);
     },
@@ -268,7 +268,10 @@ export function ServiceFormSheet({
                     control={form.control}
                     name="code"
                     render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <SelectTrigger id="svc-code" className="w-full">
                           <SelectValue placeholder={f.placeholderSelectCode} />
                         </SelectTrigger>
@@ -311,22 +314,10 @@ export function ServiceFormSheet({
             <div className="space-y-3">
               <Label>{f.content}</Label>
               <Tabs defaultValue="ro">
-                <TabsList>
-                  <TabsTrigger value="ro" className="gap-1.5">
-                    {f.langRo}
-                    {roHasError && (
-                      <span className="size-1.5 rounded-full bg-destructive" />
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="en" className="gap-1.5">
-                    {f.langEn}
-                    {enHasError && (
-                      <span className="size-1.5 rounded-full bg-destructive" />
-                    )}
-                  </TabsTrigger>
-                  {/* RU carries no error dot — none of its fields can fail. */}
-                  <TabsTrigger value="ru">{f.langRu}</TabsTrigger>
-                </TabsList>
+                <LocaleTabsList
+                  roHasError={roHasError}
+                  enHasError={enHasError}
+                />
 
                 <TabsContent value="ro" className="mt-4 space-y-4">
                   <TextField
@@ -520,47 +511,3 @@ export function ServiceFormSheet({
 }
 
 /* --------------------------- field helpers --------------------------- */
-
-const TextField = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<'input'> & {
-    label: string;
-    error?: string;
-    hint?: string;
-    optional?: boolean;
-  }
->(function TextField({ id, label, error, hint, optional, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>
-        {label}
-        {optional && (
-          <span className="text-xs font-normal text-muted-foreground">
-            ({f.optional})
-          </span>
-        )}
-      </Label>
-      <Input id={id} ref={ref} aria-invalid={!!error} {...props} />
-      {error ? (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
-  );
-});
-
-const TextAreaField = React.forwardRef<
-  HTMLTextAreaElement,
-  React.ComponentProps<'textarea'> & { label: string; error?: string }
->(function TextAreaField({ id, label, error, ...props }, ref) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Textarea id={id} ref={ref} rows={3} aria-invalid={!!error} {...props} />
-      {error && (
-        <p className="text-xs font-medium text-destructive">{error}</p>
-      )}
-    </div>
-  );
-});

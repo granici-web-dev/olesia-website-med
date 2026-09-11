@@ -32,7 +32,7 @@ import {
   setSiteMedia,
   uploadSiteImage,
   uploadSiteVideo,
-} from '@/features/site-media/data';
+} from '@/features/site-media/api';
 import { siteMediaQueryKey } from '@/features/site-media/query-key';
 import type { SiteMediaOverride } from '@/features/site-media/types';
 
@@ -292,7 +292,9 @@ function SlotCard({
         <input
           ref={inputRef}
           type="file"
-          accept={isVideo ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp'}
+          accept={
+            isVideo ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp'
+          }
           className="hidden"
           onChange={(ev) => {
             const file = ev.target.files?.[0];

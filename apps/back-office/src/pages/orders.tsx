@@ -34,11 +34,11 @@ import { OrderStatusBadge } from '@/features/orders/status-badges';
 import { OrderPaymentCell } from '@/features/orders/payment-cell';
 import { OrderDetailSheet } from '@/features/orders/order-detail-sheet';
 import { OrderFormSheet } from '@/features/orders/order-form-sheet';
+import { fetchOrders } from '@/features/orders/api';
 import {
-  fetchOrders,
-  formatDateTime,
+  formatShortDateTime as formatDateTime,
   formatPrice,
-} from '@/features/orders/data';
+} from '@/lib/format';
 import { ordersQueryKey } from '@/features/orders/query-key';
 import type { OrderStatusFilter } from '@/features/orders/types';
 

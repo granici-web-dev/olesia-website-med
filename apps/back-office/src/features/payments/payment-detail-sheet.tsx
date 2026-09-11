@@ -18,6 +18,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { SectionTitle } from '@/components/common/detail-section';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { PaymentConfirmationCell } from '@/features/payments/confirmation-cell';
@@ -28,24 +29,12 @@ import { ro } from '@/i18n/ro';
 
 import { PaymentStateBadge } from '@/features/payments/state-badge';
 import { RefundForm } from '@/features/payments/refund-form';
-import {
-  formatAmount,
-  formatDateTime,
-  refundPayment,
-  syncPayment,
-} from '@/features/payments/data';
+import { formatAmount, formatDateTime } from '@/lib/format';
+import { refundPayment, syncPayment } from '@/features/payments/api';
 import { paymentsQueryKey } from '@/features/payments/query-key';
 import type { Payment } from '@/features/payments/types';
 
 const t = ro.payments;
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
-      {children}
-    </p>
-  );
-}
 
 /** A bank reference: label left, monospace value right. */
 function Ref({ label, value }: { label: string; value: string | null }) {

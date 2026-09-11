@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Download, Loader2, Pencil, Trash2 } from 'lucide-react';
 
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
@@ -10,7 +11,6 @@ import { cn } from '@/lib/utils';
 import {
   ConsentBadge,
   EntryTypeBadge,
-  PaymentBadge,
   entryTypeIcon,
 } from '@/features/patients/badges';
 import { formatDate, formatDateTime } from '@/lib/format';
@@ -93,9 +93,7 @@ export function EntryCard({
         </div>
       </div>
 
-      {entry.body && (
-        <MarkdownPreview source={entry.body} className="mt-3" />
-      )}
+      {entry.body && <MarkdownPreview source={entry.body} className="mt-3" />}
 
       {isDocument && entry.fileName && (
         <div className="mt-3 flex items-center gap-2 rounded-md bg-muted/40 px-3 py-2 text-sm">

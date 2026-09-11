@@ -27,12 +27,8 @@ import {
 } from '@/components/ui/select';
 import { ro } from '@/i18n/ro';
 
-import {
-  CONTACT_TYPES,
-  contactTypeIcon,
-  createContact,
-  updateContact,
-} from '@/features/contacts/data';
+import { CONTACT_TYPES, contactTypeIcon } from '@/features/contacts/format';
+import { createContact, updateContact } from '@/features/contacts/api';
 import { contactsQueryKey } from '@/features/contacts/query-key';
 import type {
   Contact,
@@ -130,7 +126,9 @@ export function ContactFormSheet({
         ? updateContact(contact.id, toInput(values))
         : createContact(toInput(values)),
     onSuccess: () => {
-      toast.success(isEdit ? ro.contacts.toast.updated : ro.contacts.toast.created);
+      toast.success(
+        isEdit ? ro.contacts.toast.updated : ro.contacts.toast.created,
+      );
       queryClient.invalidateQueries({ queryKey: contactsQueryKey });
       onOpenChange(false);
     },

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Mail, Phone, Reply, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,6 +8,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { PaymentBadge } from '@/components/common/payment-badge';
+import { SectionTitle } from '@/components/common/detail-section';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -32,16 +33,12 @@ import {
 import { useAuth } from '@/auth/auth-context';
 import { ro } from '@/i18n/ro';
 
+import { OrderStatusBadge } from '@/features/orders/status-badges';
+import { deleteOrder, setOrderStatus } from '@/features/orders/api';
 import {
-  OrderStatusBadge,
-  PaymentBadge,
-} from '@/features/orders/status-badges';
-import {
-  deleteOrder,
-  formatDateTime,
+  formatShortDateTime as formatDateTime,
   formatPrice,
-  setOrderStatus,
-} from '@/features/orders/data';
+} from '@/lib/format';
 import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
 import { PatientUploadsPanel } from '@/features/uploads/patient-uploads-panel';
 import { ordersQueryKey } from '@/features/orders/query-key';
@@ -58,14 +55,6 @@ const STATUS_OPTIONS: OrderStatus[] = [
   'delivered',
   'canceled',
 ];
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
-      {children}
-    </p>
-  );
-}
 
 /**
  * Pre-filled mailto: for sending the finished menu or protocol from her own
@@ -133,7 +122,7 @@ export function OrderDetailSheet({
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div className="flex flex-wrap items-center gap-2">
                 <OrderStatusBadge status={o.status} />
-                <PaymentBadge payment={o.paymentStatus} />
+                <PaymentBadge status={o.paymentStatus} />
               </div>
 
               {/* What was ordered — read-only: the price is the one that was

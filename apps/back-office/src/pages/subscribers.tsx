@@ -21,7 +21,8 @@ import { TablePagination } from '@/components/common/table-pagination';
 import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
-import { fetchSubscribers, formatConsentDate } from '@/features/subscribers/data';
+import { fetchSubscribers } from '@/features/subscribers/api';
+import { formatDateTime as formatConsentDate } from '@/lib/format';
 import { subscribersQueryKey } from '@/features/subscribers/query-key';
 
 const t = ro.subscribers;

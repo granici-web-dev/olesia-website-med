@@ -1,7 +1,8 @@
+import { PaymentBadge } from '@/components/common/payment-badge';
 import { Badge } from '@/components/ui/badge';
-import { PaymentBadge } from '@/features/appointments/status-badges';
 import { ro } from '@/i18n/ro';
-import type { PaymentStatus } from '@/features/appointments/types';
+import { isFreeService } from '@/features/appointments/format';
+import type { PaymentStatus } from '@/types';
 
 /**
  * Payment state for the dashboard's "upcoming appointments" list. Read-only,
@@ -15,7 +16,7 @@ export function UpcomingPaymentCell({
   status: PaymentStatus;
   serviceCode: string;
 }) {
-  if (serviceCode === 'free_consult') {
+  if (isFreeService(serviceCode)) {
     return <Badge variant="secondary">{ro.payment.free}</Badge>;
   }
   return <PaymentBadge status={status} />;

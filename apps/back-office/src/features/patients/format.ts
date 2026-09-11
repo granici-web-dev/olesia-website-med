@@ -27,8 +27,3 @@ export const consentBadgeVariant = {
   given: 'success',
   missing: 'warning',
 } satisfies Record<string, BadgeVariant>;
-
-export const paymentBadgeVariant: Record<string, BadgeVariant> = {
-  pending: 'warning',
-  confirmed: 'success',
-};

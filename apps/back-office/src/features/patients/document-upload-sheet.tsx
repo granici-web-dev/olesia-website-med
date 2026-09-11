@@ -17,7 +17,7 @@ import { DOCUMENT_MAX_BYTES, megabytes } from '@olesia/shared';
 import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
-import { uploadDocument } from '@/features/patients/data';
+import { uploadDocument } from '@/features/patients/api';
 import {
   patientQueryKey,
   patientTimelineQueryKey,
@@ -141,7 +141,9 @@ export function DocumentUploadSheet({
                   className="flex w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-muted/20 px-4 py-8 text-sm text-muted-foreground outline-none transition-colors hover:border-ring hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
                 >
                   <UploadCloud className="size-6" strokeWidth={1.75} />
-                  <span className="font-medium text-foreground">{f.choose}</span>
+                  <span className="font-medium text-foreground">
+                    {f.choose}
+                  </span>
                   <span className="text-xs">
                     {f.accept(megabytes(DOCUMENT_MAX_BYTES))}
                   </span>
