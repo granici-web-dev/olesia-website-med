@@ -1,35 +1,4 @@
-import type {
-  Service,
-  ServiceCode,
-  ServiceGroup,
-  ServiceInput,
-} from '@/features/services/types';
-
-/** Fixed catalog of service codes → group + default duration (group A). */
-export const CODE_META: Record<
-  ServiceCode,
-  { group: ServiceGroup; defaultDuration: number | null }
-> = {
-  pediatric: { group: 'A_booking', defaultDuration: 30 },
-  nutrition_copii: { group: 'A_booking', defaultDuration: 60 },
-  nutrition_adulti: { group: 'A_booking', defaultDuration: 60 },
-  integrative: { group: 'A_booking', defaultDuration: 90 },
-  monitoring: { group: 'B_portal', defaultDuration: null },
-  quick_question: { group: 'B_portal', defaultDuration: null },
-  free_consult: { group: 'A_booking', defaultDuration: 30 },
-};
-
-export const ALL_CODES = Object.keys(CODE_META) as ServiceCode[];
-
-export function groupForCode(code: ServiceCode): ServiceGroup {
-  return CODE_META[code].group;
-}
-
-const priceFmt = new Intl.NumberFormat('ro-RO');
-
-export function formatPrice(eur: number): string {
-  return `${priceFmt.format(eur)} €`;
-}
+import type { Service, ServiceInput } from '@/features/services/types';
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory CRUD, shaped like the real REST API.

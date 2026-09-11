@@ -4,7 +4,7 @@ import type { DashboardStatsDto } from '@olesia/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   AppointmentStatus,
-  PaymentStatus,
+  PaymentState,
   QuickQuestionStatus,
   SubscriptionStatus,
 } from '../../generated/prisma/enums';
@@ -25,6 +25,10 @@ export class DashboardService {
     const prevFrom = new Date(from.getTime() - (to.getTime() - from.getTime()));
 
     const inPeriod = { startTime: { gte: from, lte: to } };
+    // The card says "Ultimele 30 de zile", so every number under it is for
+    // those days. Three of the four used to ignore the period entirely and
+    // report an all-time figure beside a dated one (audit A9, F16).
+    const createdInPeriod = { createdAt: { gte: from, lte: to } };
 
     const [
       total,
@@ -64,22 +68,26 @@ export class DashboardService {
       this.prisma.appointment.count({
         where: { ...inPeriod, status: AppointmentStatus.canceled },
       }),
-      this.prisma.appointment.count({
+      // Money that has not arrived, from the ledger rather than from one
+      // table's mirror of it. This counted appointments alone, so an unpaid
+      // order, question, subscription or material was not "in așteptare" for
+      // the doctor at all (audit A9, F15).
+      this.prisma.payment.count({
         where: {
-          paymentStatus: PaymentStatus.pending,
-          status: { not: AppointmentStatus.canceled },
+          ...createdInPeriod,
+          state: { in: [PaymentState.created, PaymentState.pending] },
         },
       }),
       this.prisma.service.findMany(),
       this.prisma.subscription.count({
-        where: { status: SubscriptionStatus.active },
+        where: { ...createdInPeriod, status: SubscriptionStatus.active },
       }),
       this.prisma.subscription.aggregate({
         where: { status: SubscriptionStatus.active },
         _sum: { videoQuotaUsed: true, videoQuotaTotal: true },
       }),
       this.prisma.quickQuestion.count({
-        where: { status: QuickQuestionStatus.open },
+        where: { ...createdInPeriod, status: QuickQuestionStatus.open },
       }),
       this.prisma.quickQuestion.count({
         // Unpaid tickets are questions nobody bought. Counting them here would

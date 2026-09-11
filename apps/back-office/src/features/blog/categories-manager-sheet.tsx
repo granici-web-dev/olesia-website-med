@@ -28,10 +28,10 @@ import { slugify } from '@olesia/shared';
 import { ApiError } from '@/api/http';
 import {
   fetchCategories,
+  fetchPosts,
   createCategory,
   updateCategory,
   deleteCategory,
-  postCountForCategory,
 } from '@/features/blog/data';
 import { categoriesQueryKey, postsQueryKey } from '@/features/blog/query-keys';
 import type { Category } from '@/features/blog/types';
@@ -53,6 +53,17 @@ export function CategoriesManagerSheet({
     enabled: open,
   });
   const categories = data ?? [];
+
+  // Counted from the articles themselves. The helper this replaces counted the
+  // fixture array, so outside mock mode it answered zero for every category
+  // and the warning it feeds never appeared.
+  const { data: posts } = useQuery({
+    queryKey: postsQueryKey,
+    queryFn: fetchPosts,
+    enabled: open,
+  });
+  const postCountForCategory = (id: string) =>
+    (posts ?? []).filter((p) => p.categoryIds.includes(id)).length;
 
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [nameRo, setNameRo] = React.useState('');

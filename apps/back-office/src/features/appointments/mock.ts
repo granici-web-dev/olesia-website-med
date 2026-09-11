@@ -1,35 +1,4 @@
-import type {
-  Appointment,
-  AppointmentServiceCode,
-  AppointmentStatus,
-  PaymentStatus,
-} from '@/features/appointments/types';
-import type { badgeVariants } from '@/components/ui/badge';
-import type { VariantProps } from 'class-variance-authority';
-import { ro } from '@/i18n/ro';
-
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-
-export const statusBadgeVariant: Record<AppointmentStatus, BadgeVariant> = {
-  scheduled: 'info',
-  completed: 'success',
-  no_show: 'warning',
-  canceled: 'muted',
-};
-
-export const paymentBadgeVariant: Record<PaymentStatus, BadgeVariant> = {
-  pending: 'warning',
-  confirmed: 'success',
-};
-
-/** The free orientation call carries no payment (price 0). */
-export function isFreeAppointment(a: Appointment): boolean {
-  return a.service === 'free_consult';
-}
-
-export function serviceLabel(service: AppointmentServiceCode): string {
-  return ro.appointments.service[service];
-}
+import type { Appointment } from '@/features/appointments/types';
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — an in-memory store shaped like the real REST calls:
@@ -289,33 +258,4 @@ export async function downloadPlanFile(
 ): Promise<void> {
   // No real file in mock mode — succeed silently.
   await delay(300);
-}
-
-/* ----------------------------- formatters ----------------------------- */
-
-const dateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const timeFmt = new Intl.DateTimeFormat('ro-RO', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatDateTime(iso: string): string {
-  return dateTimeFmt.format(new Date(iso));
-}
-
-export function formatTime(iso: string): string {
-  return timeFmt.format(new Date(iso));
-}
-
-export function durationMinutes(startIso: string, endIso: string): number {
-  return Math.round(
-    (new Date(endIso).getTime() - new Date(startIso).getTime()) / 60000,
-  );
 }

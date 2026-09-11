@@ -1,6 +1,7 @@
-import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
+import type { DeliverableOrderDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type { Order, OrderStatus } from '@/features/orders/types';
 
 /**
@@ -51,10 +52,6 @@ function toView(d: DeliverableOrderDto): Order {
   };
 }
 
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
-
 /**
  * Both lists, deliberately — the same arrangement the EXPRESS tickets have.
  *
@@ -68,16 +65,21 @@ function asList<T>(r: T[] | Paginated<T>): T[] {
  * undo it by accident.
  */
 export async function fetchOrders(): Promise<Order[]> {
-  type Response = DeliverableOrderDto[] | Paginated<DeliverableOrderDto>;
   const [working, unpaid] = await Promise.all([
-    http.get<Response>('/deliverable-orders?pageSize=200'),
-    http.get<Response>('/deliverable-orders?pageSize=200&status=awaiting_payment'),
+    fetchEveryPage<DeliverableOrderDto>((page) =>
+      http.get(`/deliverable-orders?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
+    ),
+    fetchEveryPage<DeliverableOrderDto>((page) =>
+      http.get(
+        `/deliverable-orders?page=${page}&pageSize=${MAX_PAGE_SIZE}&status=awaiting_payment`,
+      ),
+    ),
   ]);
   // The two answers are not one snapshot. A payment landing between them puts
   // the same order in both lists, and the doctor sees the row twice, once as
   // unpaid. The copy that is no longer awaiting payment is the later truth.
   const byId = new Map<string, DeliverableOrderDto>();
-  for (const row of [...asList(working), ...asList(unpaid)]) {
+  for (const row of [...working, ...unpaid]) {
     const seen = byId.get(row.id);
     if (!seen || seen.status === 'awaiting_payment') byId.set(row.id, row);
   }

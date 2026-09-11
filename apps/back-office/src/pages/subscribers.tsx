@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { fetchSubscribers, formatConsentDate } from '@/features/subscribers/data';
@@ -46,6 +48,8 @@ export function SubscribersPage() {
     if (!q) return subscribers;
     return subscribers.filter((s) => s.email.toLowerCase().includes(q));
   }, [subscribers, search]);
+
+  const paged = usePagedRows(visible);
 
   const searching = search !== '';
 
@@ -131,7 +135,7 @@ export function SubscribersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map((s) => (
+              {paged.rows.map((s) => (
                 <TableRow key={s.id} className="hover:bg-transparent">
                   <TableCell className="font-medium">{s.email}</TableCell>
                   <TableCell className="text-muted-foreground">
@@ -155,6 +159,12 @@ export function SubscribersPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
     </div>
   );

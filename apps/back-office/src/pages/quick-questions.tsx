@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { StatusBadge } from '@/features/quick-questions/status-badges';
@@ -112,6 +114,8 @@ export function QuickQuestionsPage() {
         : scoped.filter(({ bucket }) => bucket === status),
     [scoped, status],
   );
+
+  const paged = usePagedRows(visible);
 
   const selected = React.useMemo(
     () => tickets.find((tk) => tk.id === selectedId) ?? null,
@@ -245,7 +249,7 @@ export function QuickQuestionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map(({ tk, bucket }) => (
+              {paged.rows.map(({ tk, bucket }) => (
                 <TableRow
                   key={tk.id}
                   onClick={() => openDetail(tk.id)}
@@ -291,6 +295,12 @@ export function QuickQuestionsPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
 
       <TicketDetailSheet

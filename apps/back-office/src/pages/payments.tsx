@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { PaymentStateBadge } from '@/features/payments/state-badge';
@@ -115,6 +117,8 @@ export function PaymentsPage() {
       bucket === 'all' ? scoped : scoped.filter((p) => bucketOf(p) === bucket),
     [scoped, bucket],
   );
+
+  const paged = usePagedRows(visible);
 
   const selected = React.useMemo(
     () => payments.find((p) => p.id === selectedId) ?? null,
@@ -246,7 +250,7 @@ export function PaymentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map((p) => (
+              {paged.rows.map((p) => (
                 <TableRow
                   key={p.id}
                   tabIndex={0}
@@ -310,6 +314,12 @@ export function PaymentsPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
 
       <PaymentDetailSheet

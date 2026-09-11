@@ -1,11 +1,11 @@
 import {
   SERVICE_CATALOG,
   ServiceCode,
-  type Paginated,
   type SubscriptionDto,
 } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type { Subscription } from '@/features/subscriptions/types';
 
 /**
@@ -45,15 +45,11 @@ function toView(d: SubscriptionDto): Subscription {
   };
 }
 
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
-
 export async function fetchSubscriptions(): Promise<Subscription[]> {
-  const r = await http.get<SubscriptionDto[] | Paginated<SubscriptionDto>>(
-    '/subscriptions?pageSize=200',
+  const rows = await fetchEveryPage<SubscriptionDto>((page) =>
+    http.get(`/subscriptions?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
   );
-  return asList(r).map(toView);
+  return rows.map(toView);
 }
 
 export async function logVideoCall(id: string): Promise<Subscription> {

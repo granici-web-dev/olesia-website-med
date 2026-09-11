@@ -31,6 +31,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { StatusBadge } from '@/features/appointments/status-badges';
@@ -111,6 +113,8 @@ export function AppointmentsPage() {
     () => (status === 'all' ? scoped : scoped.filter((a) => a.status === status)),
     [scoped, status],
   );
+
+  const paged = usePagedRows(visible);
 
   const selected = React.useMemo(
     () => appointments.find((a) => a.id === selectedId) ?? null,
@@ -264,7 +268,7 @@ export function AppointmentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map((a) => (
+              {paged.rows.map((a) => (
                 <TableRow
                   key={a.id}
                   onClick={() => openDetail(a.id)}
@@ -308,6 +312,12 @@ export function AppointmentsPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
 
       <AppointmentDetailSheet

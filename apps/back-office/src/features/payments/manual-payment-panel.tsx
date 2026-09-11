@@ -23,6 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/auth/auth-context';
 import { ro } from '@/i18n/ro';
 import { PaymentStateBadge } from '@/features/payments/state-badge';
+import { parseManualAmount } from '@/features/payments/format';
 import {
   fetchTargetPayments,
   formatAmount,
@@ -280,15 +281,13 @@ function ManualPaymentForm({
   const [note, setNote] = React.useState('');
   const [touched, setTouched] = React.useState(false);
 
-  // A Romanian keyboard puts a comma on the decimal key, and the doctor types
-  // "1200,50" without thinking about it.
-  const parsed = Number(amount.replace(',', '.'));
-  const valid = Number.isFinite(parsed) && parsed > 0;
+  const parsed = parseManualAmount(amount);
+  const valid = parsed !== null;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (valid && !pending) onSubmit(parsed, note.trim());
+    if (parsed !== null && !pending) onSubmit(parsed, note.trim());
   };
 
   return (

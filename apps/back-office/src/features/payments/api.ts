@@ -1,10 +1,10 @@
 import type {
-  Paginated,
   PaymentDto,
   PurchaseNextStepDto,
 } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type {
   ManualPaymentInput,
   Payment,
@@ -16,10 +16,6 @@ import type {
  * bank's callback; the back office reads them, issues refunds, and records the
  * money that arrived outside the bank.
  */
-
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
 
 /**
  * Same fields, with the shared enums relaxed into the view layer's unions and
@@ -35,10 +31,10 @@ const toView = (d: PaymentDto): Payment => ({
 });
 
 export async function fetchPayments(): Promise<Payment[]> {
-  const r = await http.get<PaymentDto[] | Paginated<PaymentDto>>(
-    '/payments?pageSize=200',
+  const rows = await fetchEveryPage<PaymentDto>((page) =>
+    http.get(`/payments?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
   );
-  return asList(r).map(toView);
+  return rows.map(toView);
 }
 
 export async function fetchPatientPayments(

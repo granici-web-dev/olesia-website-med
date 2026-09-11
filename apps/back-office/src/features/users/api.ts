@@ -1,6 +1,7 @@
-import type { Paginated, UserDto } from '@olesia/shared';
+import type { UserDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type {
   User,
   CreateUserInput,
@@ -21,15 +22,11 @@ function toView(d: UserDto): User {
   };
 }
 
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
-
 export async function fetchUsers(): Promise<User[]> {
-  const r = await http.get<UserDto[] | Paginated<UserDto>>(
-    '/users?pageSize=200',
+  const rows = await fetchEveryPage<UserDto>((page) =>
+    http.get(`/users?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
   );
-  return asList(r).map(toView);
+  return rows.map(toView);
 }
 
 export async function createUser(input: CreateUserInput): Promise<User> {

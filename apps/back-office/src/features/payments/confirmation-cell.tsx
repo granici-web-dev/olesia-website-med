@@ -7,13 +7,13 @@ import { ro } from '@/i18n/ro';
 import { useAuth } from '@/auth/auth-context';
 
 import {
-  formatAmount,
   formatDateTime,
   resendConfirmation,
 } from '@/features/payments/data';
 import { paymentsQueryKey } from '@/features/payments/query-key';
 import type { Payment } from '@/features/payments/types';
 import { copyToClipboard } from '@/lib/clipboard';
+import { confirmationText } from '@/features/payments/format';
 
 const t = ro.payments;
 
@@ -99,19 +99,3 @@ export function PaymentConfirmationCell({ payment }: { payment: Payment }) {
   );
 }
 
-/**
- * The receipt as plain text, so it can be pasted into whatever the doctor uses
- * to write to a client today. Same four facts as the email template in
- * `apps/api/src/app/mail/patient-templates.ts`: the order reference, what was
- * bought, how much and when.
- */
-function confirmationText(p: Payment): string {
-  return [
-    `Confirmarea plății — comanda ${p.orderId}`,
-    '',
-    `Comanda: ${p.orderId}`,
-    `Serviciu: ${t.target[p.targetType]}`,
-    `Sumă: ${formatAmount(p.amount, p.currency)}`,
-    `Data plății: ${formatDateTime(p.paidAt ?? p.createdAt)}`,
-  ].join('\n');
-}

@@ -3,7 +3,7 @@ import { USE_MOCKS } from '@/api/config';
 import * as mock from '@/features/about/mock';
 import * as remote from '@/features/about/api';
 
-export * from '@/features/about/mock';
+export { formatDateTime } from '@/lib/format';
 
 export const fetchAbout = USE_MOCKS ? mock.fetchAbout : remote.fetchAbout;
 export const updateAbout = USE_MOCKS ? mock.updateAbout : remote.updateAbout;

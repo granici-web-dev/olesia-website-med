@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { StatusBadge } from '@/features/subscriptions/status-badges';
@@ -94,6 +96,8 @@ export function SubscriptionsPage() {
       status === 'all' ? scoped : scoped.filter((s) => s.status === status),
     [scoped, status],
   );
+
+  const paged = usePagedRows(visible);
 
   const selected = React.useMemo(
     () => subscriptions.find((s) => s.id === selectedId) ?? null,
@@ -202,7 +206,7 @@ export function SubscriptionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map((s) => {
+              {paged.rows.map((s) => {
                 const hint = periodHint(s);
                 return (
                   <TableRow
@@ -264,6 +268,12 @@ export function SubscriptionsPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
 
       <SubscriptionDetailSheet

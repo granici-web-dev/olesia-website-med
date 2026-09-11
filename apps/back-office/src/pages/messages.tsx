@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { StatusBadge, SubjectBadge } from '@/features/messages/status-badges';
@@ -81,6 +83,8 @@ export function MessagesPage() {
         : scoped.filter(({ bucket }) => bucket === status),
     [scoped, status],
   );
+
+  const paged = usePagedRows(visible);
 
   const selected = React.useMemo(
     () => messages.find((m) => m.id === selectedId) ?? null,
@@ -196,7 +200,7 @@ export function MessagesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map(({ m }) => (
+              {paged.rows.map(({ m }) => (
                 <TableRow
                   key={m.id}
                   onClick={() => openDetail(m.id)}
@@ -255,6 +259,12 @@ export function MessagesPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
 
       <MessageDetailSheet

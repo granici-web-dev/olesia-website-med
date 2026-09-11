@@ -1,10 +1,11 @@
-import type { VariantProps } from 'class-variance-authority';
-import { PatientEntryType, PaymentStatus } from '@olesia/shared';
+import {
+  PatientEntryType,
+  PaymentStatus,
+  type Paginated,
+} from '@olesia/shared';
 
-import type { badgeVariants } from '@/components/ui/badge';
 import type {
   EntryFormValues,
-  EntryType,
   LeadSource,
   PatientDto,
   PatientEntryDto,
@@ -17,62 +18,6 @@ import type {
 /** The same wording the API returns; kept here so mock mode reads the same. */
 const MOCK_CALENDLY_MANUAL_STEP =
   'Ștergeți manual invitatul din contul Calendly: programările sincronizate păstrează acolo numele, emailul și răspunsurile din formular, iar acest sistem nu le poate șterge.';
-
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-
-/* ------------------------------ formatting ------------------------------ */
-
-const dateFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-});
-
-const dateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatDate(iso: string | null | undefined): string {
-  return iso ? dateFmt.format(new Date(iso)) : '—';
-}
-
-export function formatDateTime(iso: string | null | undefined): string {
-  return iso ? dateTimeFmt.format(new Date(iso)) : '—';
-}
-
-/** Whole-year age from a birth date, or null when unset. */
-export function ageYears(birthDate: string | null): number | null {
-  if (!birthDate) return null;
-  const b = new Date(birthDate);
-  const now = new Date();
-  let years = now.getFullYear() - b.getFullYear();
-  const m = now.getMonth() - b.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) years -= 1;
-  return years >= 0 ? years : null;
-}
-
-/* ------------------------------ badge maps ------------------------------ */
-
-export const entryTypeBadgeVariant: Record<EntryType, BadgeVariant> = {
-  anamnesis: 'info',
-  note: 'muted',
-  prescription: 'success',
-  document: 'secondary',
-};
-
-export const consentBadgeVariant = {
-  given: 'success',
-  missing: 'warning',
-} satisfies Record<string, BadgeVariant>;
-
-export const paymentBadgeVariant: Record<string, BadgeVariant> = {
-  pending: 'warning',
-  confirmed: 'success',
-};
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory store shaped like the `patients` REST API
@@ -254,10 +199,14 @@ function toEntryType(t: EntryFormValues['type']): PatientEntryType {
 
 /* --------------------------------- reads -------------------------------- */
 
-export async function fetchPatients(search?: string): Promise<PatientDto[]> {
+export async function fetchPatients(query: {
+  page: number;
+  pageSize: number;
+  search?: string;
+}): Promise<Paginated<PatientDto>> {
   await delay(500);
-  const q = (search ?? '').trim().toLowerCase();
-  return patients
+  const q = (query.search ?? '').trim().toLowerCase();
+  const matching = patients
     .filter(
       (p) =>
         !q ||
@@ -266,6 +215,14 @@ export async function fetchPatients(search?: string): Promise<PatientDto[]> {
     )
     .map((p) => ({ ...p, entryCount: countEntries(p.id) }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  const from = (query.page - 1) * query.pageSize;
+  return {
+    items: matching.slice(from, from + query.pageSize),
+    total: matching.length,
+    page: query.page,
+    pageSize: query.pageSize,
+  };
 }
 
 export async function fetchPatient(id: string): Promise<PatientDto> {

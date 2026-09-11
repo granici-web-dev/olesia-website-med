@@ -1,10 +1,10 @@
 import type {
   AnsweredQuickQuestionDto,
-  Paginated,
   QuickQuestionDto,
 } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type { AnsweredTicket, Ticket } from '@/features/quick-questions/types';
 
 /**
@@ -33,10 +33,6 @@ function toView(d: QuickQuestionDto): Ticket {
   };
 }
 
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
-
 /**
  * Both lists, deliberately.
  *
@@ -50,16 +46,21 @@ function asList<T>(r: T[] | Paginated<T>): T[] {
  * undo it by accident.
  */
 export async function fetchTickets(): Promise<Ticket[]> {
-  type Response = QuickQuestionDto[] | Paginated<QuickQuestionDto>;
   const [working, unpaid] = await Promise.all([
-    http.get<Response>('/quick-questions?pageSize=200'),
-    http.get<Response>('/quick-questions?pageSize=200&status=awaiting_payment'),
+    fetchEveryPage<QuickQuestionDto>((page) =>
+      http.get(`/quick-questions?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
+    ),
+    fetchEveryPage<QuickQuestionDto>((page) =>
+      http.get(
+        `/quick-questions?page=${page}&pageSize=${MAX_PAGE_SIZE}&status=awaiting_payment`,
+      ),
+    ),
   ]);
   // The two answers are not one snapshot. A payment landing between them puts
   // the same question in both lists, and the doctor sees the row twice, once
   // as unpaid. The copy that is no longer awaiting payment is the later truth.
   const byId = new Map<string, QuickQuestionDto>();
-  for (const row of [...asList(working), ...asList(unpaid)]) {
+  for (const row of [...working, ...unpaid]) {
     const seen = byId.get(row.id);
     if (!seen || seen.status === 'awaiting_payment') byId.set(row.id, row);
   }

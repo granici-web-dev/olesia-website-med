@@ -1,36 +1,4 @@
-import type {
-  Message,
-  MessageStatus,
-  StatusFilter,
-} from '@/features/messages/types';
-import type { badgeVariants } from '@/components/ui/badge';
-import type { VariantProps } from 'class-variance-authority';
-
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-
-/* ----------------------------- presentation ----------------------------- */
-
-export const statusBadgeVariant: Record<MessageStatus, BadgeVariant> = {
-  new: 'info',
-  read: 'secondary',
-  replied: 'success',
-};
-
-/** Tab bucket: `new` is unread; `read` and `replied` are both "seen". */
-export function bucketOf(message: Message): Exclude<StatusFilter, 'all'> {
-  return message.status === 'new' ? 'new' : 'read';
-}
-
-const dateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatDateTime(iso: string): string {
-  return dateTimeFmt.format(new Date(iso));
-}
+import type { Message } from '@/features/messages/types';
 
 /* ------------------------------- mock data ------------------------------ */
 /* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`. */

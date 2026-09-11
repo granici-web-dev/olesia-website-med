@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAuth } from '@/auth/auth-context';
 import { ro } from '@/i18n/ro';
 
 import { OrderStatusBadge, PaymentBadge } from '@/features/orders/status-badges';
@@ -62,11 +63,16 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Pre-filled mailto: for sending the finished menu/protocol from her own inbox
- *  — the portal cannot send attachments until SMTP is configured. */
-function deliverMailto(o: Order): string {
+/**
+ * Pre-filled mailto: for sending the finished menu or protocol from her own
+ * inbox — the portal cannot send attachments until SMTP is configured.
+ *
+ * The signature is whoever is signed in. It was the doctor's name in the
+ * source, so an assistant's account sent letters over the doctor's name.
+ */
+function deliverMailto(o: Order, signedBy: string): string {
   const subject = o.titleRo;
-  const body = `Bună ziua, ${o.clientName},\n\nVă transmit atașat ${o.titleRo.toLowerCase()}.\n\nCu drag,\nDr. Olesea Jalba`;
+  const body = `Bună ziua, ${o.clientName},\n\nVă transmit atașat ${o.titleRo.toLowerCase()}.\n\nCu drag,\n${signedBy}`;
   return `mailto:${o.clientEmail}?subject=${encodeURIComponent(
     subject,
   )}&body=${encodeURIComponent(body)}`;
@@ -82,6 +88,7 @@ export function OrderDetailSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ordersQueryKey });
 
@@ -218,7 +225,7 @@ export function OrderDetailSheet({
                   {t.detail.deliverHint}
                 </p>
                 <Button asChild variant="outline" className="w-full">
-                  <a href={deliverMailto(o)}>
+                  <a href={deliverMailto(o, user?.name ?? '')}>
                     <Reply />
                     {t.actions.sendByEmail}
                   </a>

@@ -50,6 +50,8 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { ApiError } from '@/api/http';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 import { useAuth } from '@/auth/auth-context';
 
@@ -107,6 +109,8 @@ export function UsersPage() {
     () => (role === 'all' ? scoped : scoped.filter((u) => u.role === role)),
     [scoped, role],
   );
+
+  const paged = usePagedRows(visible);
 
   const filtersActive = role !== 'all' || search !== '';
   const resetFilters = () => {
@@ -257,7 +261,7 @@ export function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map((u) => {
+              {paged.rows.map((u) => {
                 const self = isSelf(u);
                 return (
                   <TableRow
@@ -351,6 +355,12 @@ export function UsersPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
 
       <UserFormSheet

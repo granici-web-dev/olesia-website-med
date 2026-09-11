@@ -38,6 +38,20 @@ export default defineConfig(() => ({
   // worker: {
   //  plugins: [],
   // },
+  /**
+   * Vitest. `jsdom` rather than `node` because this is a React application and
+   * a test that needs to render a component should not have to add the
+   * environment first; the seven specs here are pure functions and would run
+   * either way.
+   */
+  test: {
+    name: 'back-office',
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    include: ['src/**/*.spec.{ts,tsx}'],
+    reporters: ['default'],
+    passWithNoTests: false,
+  },
   build: {
     outDir: './dist',
     emptyOutDir: true,

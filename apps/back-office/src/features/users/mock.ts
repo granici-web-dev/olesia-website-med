@@ -4,37 +4,7 @@ import type {
   UpdateUserInput,
 } from '@/features/users/types';
 import type { Role } from '@/types';
-
-const dateFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-});
-
-export function formatDate(iso: string): string {
-  return dateFmt.format(new Date(iso));
-}
-
-/** Initials for an avatar fallback. */
-export function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .map((p) => p[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
-
-/** Generate a readable starter password (mock). */
-export function generatePassword(): string {
-  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let out = '';
-  for (let i = 0; i < 12; i += 1) {
-    out += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return out;
-}
+import { generatePassword } from '@/features/users/format';
 
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory CRUD, shaped like the eventual REST API.

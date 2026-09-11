@@ -3,13 +3,15 @@ import { USE_MOCKS } from '@/api/config';
 import * as mock from '@/features/orders/mock';
 import * as remote from '@/features/orders/api';
 
-// Re-export the pure presentation helpers (badge variants, formatters).
+// Orders are worked within days of arriving, so the year is noise in the list.
+export {
+  formatShortDateTime as formatDateTime,
+  formatPrice,
+} from '@/lib/format';
 export {
   statusBadgeVariant,
   paymentBadgeVariant,
-  formatDateTime,
-  formatPrice,
-} from '@/features/orders/mock';
+} from '@/features/orders/format';
 
 export const fetchOrders = USE_MOCKS ? mock.fetchOrders : remote.fetchOrders;
 export const setOrderStatus = USE_MOCKS

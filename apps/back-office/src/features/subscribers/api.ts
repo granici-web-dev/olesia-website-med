@@ -1,6 +1,7 @@
-import type { Paginated, SubscriberDto } from '@olesia/shared';
+import type { SubscriberDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type { Subscriber } from '@/features/subscribers/types';
 
 /**
@@ -21,8 +22,8 @@ function toView(d: SubscriberDto): Subscriber {
 }
 
 export async function fetchSubscribers(): Promise<Subscriber[]> {
-  const r = await http.get<Paginated<SubscriberDto>>(
-    '/newsletter/subscribers?pageSize=200',
+  const rows = await fetchEveryPage<SubscriberDto>((page) =>
+    http.get(`/newsletter/subscribers?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
   );
-  return r.items.map(toView);
+  return rows.map(toView);
 }

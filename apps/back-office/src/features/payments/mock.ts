@@ -1,62 +1,10 @@
-import type { VariantProps } from 'class-variance-authority';
-
 import type { PurchaseNextStepDto } from '@olesia/shared';
 
-import type { badgeVariants } from '@/components/ui/badge';
 import type {
   ManualPaymentInput,
   Payment,
-  PaymentState,
   PaymentTargetType,
 } from '@/features/payments/types';
-
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-
-/* ------------------------- presentation helpers ------------------------- */
-
-/**
- * Colour is information here, so the vocabulary is deliberately narrow:
- * money arrived (success), money is in flight (warning), money went back
- * (info), nothing happened (muted). Only an outright failure is destructive —
- * an expired or abandoned checkout is a non-event, not an error, and painting
- * it red would make the ledger look alarming on an ordinary day.
- */
-export const stateBadgeVariant: Record<PaymentState, BadgeVariant> = {
-  created: 'muted',
-  pending: 'warning',
-  paid: 'success',
-  failed: 'destructive',
-  expired: 'muted',
-  abandoned: 'muted',
-  cancelled: 'muted',
-  refunded: 'info',
-  partially_refunded: 'info',
-};
-
-const dateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatDateTime(iso: string): string {
-  return dateTimeFmt.format(new Date(iso));
-}
-
-/**
- * The bank settles in MDL but may charge in EUR, so the currency travels with
- * every amount and is never assumed. Two decimals always: this is money, and a
- * ledger that shows "160" next to "160,50" reads as a bug.
- */
-export function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat('ro-RO', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
 
 /* ------------------------------- mock data ------------------------------ */
 /* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`.
@@ -379,10 +327,3 @@ export async function refundPayment(input: {
 }
 
 /** Label for what a payment bought. Kept next to the data it describes. */
-export const TARGET_KEYS: PaymentTargetType[] = [
-  'appointment',
-  'quick_question',
-  'deliverable_order',
-  'subscription',
-  'material',
-];

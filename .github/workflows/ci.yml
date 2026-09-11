@@ -60,15 +60,19 @@ jobs:
       - name: Typecheck back office
         run: pnpm exec tsc -p apps/back-office/tsconfig.app.json --noEmit
 
-      # Both suites are unit tests over pure functions and finish in about a
-      # second between them. They ran only on a developer's laptop until
-      # 2026-09-10, which is a strange thing to say about the tests that cover
-      # the money, the dates and the webhook signatures.
+      # All three suites are unit tests over pure functions and finish in
+      # about a second between them. They ran only on a developer's laptop
+      # until 2026-09-10, which is a strange thing to say about the tests that
+      # cover the money, the dates and the webhook signatures. The back office
+      # joined them on 2026-09-11 with the first seven specs it has ever had.
       - name: Test API
         run: pnpm nx test api
 
       - name: Test frontend
         run: pnpm nx test @olesia/frontend
+
+      - name: Test back office
+        run: pnpm nx test back-office
 
       # Only the frontend build typechecks as it goes: `next build` runs tsc.
       # The API is bundled by webpack with SWC and the back office by Vite,

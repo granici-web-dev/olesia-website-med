@@ -1,11 +1,8 @@
-import type {
-  AppointmentDto,
-  Paginated,
-  ServiceDto,
-} from '@olesia/shared';
+import type { AppointmentDto, ServiceDto } from '@olesia/shared';
 
 import { API_BASE_URL } from '@/api/config';
 import { http, tokenStore } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type {
   Appointment,
   AppointmentServiceCode,
@@ -28,9 +25,7 @@ function serviceCodeMap(): Promise<Map<string, AppointmentServiceCode>> {
       .get<ServiceDto[]>('/services')
       .then(
         (list) =>
-          new Map(
-            list.map((s) => [s.id, s.code as AppointmentServiceCode]),
-          ),
+          new Map(list.map((s) => [s.id, s.code as AppointmentServiceCode])),
       );
   }
   return codeMapCache;
@@ -62,18 +57,14 @@ function toView(
   };
 }
 
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
-
 export async function fetchAppointments(): Promise<Appointment[]> {
-  const [r, codes] = await Promise.all([
-    http.get<AppointmentDto[] | Paginated<AppointmentDto>>(
-      '/appointments?pageSize=200',
+  const [rows, codes] = await Promise.all([
+    fetchEveryPage<AppointmentDto>((page) =>
+      http.get(`/appointments?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
     ),
     serviceCodeMap(),
   ]);
-  return asList(r)
+  return rows
     .map((d) => toView(d, codes))
     .sort((a, b) => b.startTime.localeCompare(a.startTime));
 }

@@ -5,7 +5,6 @@ import {
   Repeat2,
   MessagesSquare,
   CalendarClock,
-  Activity,
   AlertTriangle,
   RefreshCw,
   type LucideIcon,
@@ -28,13 +27,17 @@ import { ro } from '@/i18n/ro';
 import { fetchDashboardStats } from '@/features/dashboard/data';
 import { dashboardQueryKey } from '@/features/dashboard/query-key';
 import { UpcomingPaymentCell } from '@/features/dashboard/upcoming-payment-cell';
+import {
+  appointmentsDelta,
+  type MetricDelta,
+} from '@/features/dashboard/format';
 
 interface Metric {
   key: string;
   label: string;
   hint: string;
   value: string;
-  delta?: { value: string; trend: 'up' | 'down' | 'flat' };
+  delta?: MetricDelta;
   icon: LucideIcon;
 }
 
@@ -44,20 +47,6 @@ const upcomingFormatter = new Intl.DateTimeFormat('ro-RO', {
   hour: '2-digit',
   minute: '2-digit',
 });
-
-/** Period-over-period delta for the appointments headline. */
-function appointmentsDelta(total: number, previous: number): Metric['delta'] {
-  if (previous === 0) {
-    return total === 0
-      ? { value: '0', trend: 'flat' }
-      : { value: `+${total}`, trend: 'up' };
-  }
-  const pct = Math.round(((total - previous) / previous) * 100);
-  return {
-    value: `${pct > 0 ? '+' : ''}${pct}%`,
-    trend: pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat',
-  };
-}
 
 /** Map the stats DTO to the four headline cards. */
 function toMetrics(stats: DashboardStatsDto): Metric[] {
@@ -232,8 +221,11 @@ export function DashboardPage() {
               : metrics.map((m) => <StatCard key={m.key} metric={m} />)}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
+          {/* One card, full width: the "Activitate" panel that used to take the
+              third column had no feed behind it and rendered its empty state
+              on every load. */}
+          <div>
+            <Card>
               <CardHeader>
                 <CardTitle className="text-base">
                   {ro.dashboard.upcomingTitle}
@@ -254,25 +246,6 @@ export function DashboardPage() {
                       <UpcomingRow key={item.id} item={item} first={i === 0} />
                     ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {ro.dashboard.activityTitle}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <TableRowsSkeleton rows={4} />
-                ) : (
-                  <EmptyState
-                    icon={Activity}
-                    title={ro.dashboard.activityEmpty}
-                    className="py-10"
-                  />
                 )}
               </CardContent>
             </Card>

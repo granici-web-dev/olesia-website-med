@@ -3,7 +3,13 @@ import { USE_MOCKS } from '@/api/config';
 import * as mock from '@/features/subscriptions/mock';
 import * as remote from '@/features/subscriptions/api';
 
-export * from '@/features/subscriptions/mock';
+export { formatDate } from '@/lib/format';
+export {
+  statusBadgeVariant,
+  paymentBadgeVariant,
+  daysRemaining,
+  quotaRemaining,
+} from '@/features/subscriptions/format';
 
 export const fetchSubscriptions = USE_MOCKS
   ? mock.fetchSubscriptions

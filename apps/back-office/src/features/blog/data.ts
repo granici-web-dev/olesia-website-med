@@ -3,7 +3,7 @@ import { USE_MOCKS } from '@/api/config';
 import * as mock from '@/features/blog/mock';
 import * as remote from '@/features/blog/api';
 
-export * from '@/features/blog/mock';
+export { formatDate } from '@/lib/format';
 
 export const uploadImage = USE_MOCKS ? mock.uploadImage : remote.uploadImage;
 

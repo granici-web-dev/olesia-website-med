@@ -14,6 +14,9 @@
  * deadline.
  */
 export function formatSla(minutes: number): string {
+  // Zero is a value the schedule page accepts, and it means "as soon as it
+  // arrives". "~0 min" states arithmetic where the doctor meant a promise.
+  if (minutes <= 0) return 'imediat';
   if (minutes % 60 !== 0 || minutes < 60) return `~${minutes} min`;
   const hours = minutes / 60;
   return `~${hours} ${hours === 1 ? 'oră' : 'ore'}`;

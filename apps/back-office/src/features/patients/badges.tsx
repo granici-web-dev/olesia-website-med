@@ -15,7 +15,7 @@ import {
   consentBadgeVariant,
   entryTypeBadgeVariant,
   paymentBadgeVariant,
-} from '@/features/patients/mock';
+} from '@/features/patients/format';
 import type { EntryType } from '@/features/patients/types';
 
 const t = ro.patients;

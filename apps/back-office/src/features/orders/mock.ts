@@ -1,45 +1,4 @@
-import type {
-  Order,
-  OrderPayment,
-  OrderStatus,
-} from '@/features/orders/types';
-import type { badgeVariants } from '@/components/ui/badge';
-import type { VariantProps } from 'class-variance-authority';
-
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-
-/* ----------------------------- presentation ----------------------------- */
-
-export const statusBadgeVariant: Record<OrderStatus, BadgeVariant> = {
-  // Muted on purpose: an unpaid order is not work waiting, it is a form
-  // somebody abandoned. It should read as quieter than "Nouă", not louder.
-  awaiting_payment: 'secondary',
-  new: 'info',
-  in_progress: 'warning',
-  delivered: 'success',
-  canceled: 'secondary',
-};
-
-export const paymentBadgeVariant: Record<OrderPayment, BadgeVariant> = {
-  pending: 'warning',
-  confirmed: 'success',
-};
-
-const dateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatDateTime(iso: string): string {
-  return dateTimeFmt.format(new Date(iso));
-}
-
-/** Prices are whole euros; the symbol goes after the number in Romanian. */
-export function formatPrice(eur: number): string {
-  return `${new Intl.NumberFormat('ro-RO').format(eur)} €`;
-}
+import type { Order, OrderStatus } from '@/features/orders/types';
 
 /* ------------------------------- mock data ------------------------------ */
 /* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`.

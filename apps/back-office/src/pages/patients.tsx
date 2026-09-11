@@ -24,6 +24,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TablePagination } from '@/components/common/table-pagination';
+import { TABLE_PAGE_SIZE } from '@/api/list';
+import { useDebounced } from '@/hooks/use-debounced';
 import { ro } from '@/i18n/ro';
 import { cn } from '@/lib/utils';
 import { patientDetailPath } from '@/config/routes';
@@ -38,25 +41,28 @@ const t = ro.patients;
 
 export function PatientsPage() {
   const navigate = useNavigate();
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: patientsQueryKey,
-    queryFn: () => fetchPatients(),
-  });
 
   const [search, setSearch] = React.useState('');
+  const [page, setPage] = React.useState(1);
   const [formOpen, setFormOpen] = React.useState(false);
 
-  const patients = React.useMemo(() => data ?? [], [data]);
+  const query = useDebounced(search);
 
-  const visible = React.useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return patients;
-    return patients.filter(
-      (p) =>
-        p.fullName.toLowerCase().includes(q) ||
-        p.email.toLowerCase().includes(q),
-    );
-  }, [patients, search]);
+  // A new term is a new list, and page four of the old one is not a place in
+  // it. Reset before the request goes out, not after the answer comes back.
+  React.useEffect(() => setPage(1), [query]);
+
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: [...patientsQueryKey, { page, search: query }] as const,
+    queryFn: () =>
+      fetchPatients({ page, pageSize: TABLE_PAGE_SIZE, search: query }),
+    // Paging without this blanks the table between requests, and the doctor
+    // reads a blank table as an empty page rather than as a page turning.
+    placeholderData: (previous) => previous,
+  });
+
+  const visible = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const open = (id: string) => navigate(patientDetailPath(id));
 
@@ -148,6 +154,12 @@ export function PatientsPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={page}
+          pageSize={TABLE_PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+        />
       </Card>
 
       <PatientFormSheet

@@ -1,6 +1,7 @@
 import type { Paginated } from '@olesia/shared';
 
 import { http, tokenStore } from '@/api/http';
+import { asList } from '@/api/list';
 import { API_BASE_URL } from '@/api/config';
 import type {
   EntryFormValues,
@@ -18,10 +19,6 @@ import type {
  * Medical documents are streamed from an authenticated endpoint, never the
  * public `/uploads` path.
  */
-
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
 
 /** Form values → API payload (empty strings collapse to null/undefined). */
 function toPayload(v: PatientFormValues) {
@@ -46,13 +43,30 @@ function toEntryPayload(v: EntryFormValues) {
 
 /* --------------------------------- reads -------------------------------- */
 
-export async function fetchPatients(search?: string): Promise<PatientDto[]> {
-  const params = new URLSearchParams({ pageSize: '200' });
-  if (search?.trim()) params.set('search', search.trim());
-  const r = await http.get<PatientDto[] | Paginated<PatientDto>>(
-    `/patients?${params.toString()}`,
+/**
+ * One page of the dossier list, searched on the server.
+ *
+ * The panel used to pull `pageSize=200` and filter in the browser, which made
+ * every visit to `/pacienti` a download of every patient's name, address and
+ * date of birth so that a substring could be matched locally — and still lost
+ * the 201st record, because 200 is the API's ceiling. The server has the
+ * `?search=` this needs; it was written and never called.
+ */
+export async function fetchPatients(query: {
+  page: number;
+  pageSize: number;
+  search?: string;
+}): Promise<Paginated<PatientDto>> {
+  const params = new URLSearchParams({
+    page: String(query.page),
+    pageSize: String(query.pageSize),
+  });
+  if (query.search?.trim()) params.set('search', query.search.trim());
+  return asList(
+    await http.get<PatientDto[] | Paginated<PatientDto>>(
+      `/patients?${params.toString()}`,
+    ),
   );
-  return asList(r);
 }
 
 export function fetchPatient(id: string): Promise<PatientDto> {

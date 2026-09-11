@@ -13,7 +13,7 @@ import {
   PaymentBadge,
   entryTypeIcon,
 } from '@/features/patients/badges';
-import { formatDate, formatDateTime } from '@/features/patients/mock';
+import { formatDate, formatDateTime } from '@/lib/format';
 import type {
   PatientEntryDto,
   PatientInteractionDto,

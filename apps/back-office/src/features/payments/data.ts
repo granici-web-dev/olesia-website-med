@@ -3,13 +3,8 @@ import { USE_MOCKS } from '@/api/config';
 import * as mock from '@/features/payments/mock';
 import * as remote from '@/features/payments/api';
 
-// Pure presentation helpers live with the mock, as in every other feature.
-export {
-  stateBadgeVariant,
-  formatDateTime,
-  formatAmount,
-  TARGET_KEYS,
-} from '@/features/payments/mock';
+export { formatDateTime, formatAmount } from '@/lib/format';
+export { stateBadgeVariant, TARGET_KEYS } from '@/features/payments/format';
 
 export const fetchPayments = USE_MOCKS
   ? mock.fetchPayments

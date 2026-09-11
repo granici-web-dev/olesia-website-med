@@ -1,6 +1,7 @@
-import type { ContactMessageDto, Paginated } from '@olesia/shared';
+import type { ContactMessageDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type { Message } from '@/features/messages/types';
 
 /**
@@ -36,15 +37,11 @@ function toView(d: ContactMessageDto): Message {
   };
 }
 
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
-
 export async function fetchMessages(): Promise<Message[]> {
-  const r = await http.get<ContactMessageDto[] | Paginated<ContactMessageDto>>(
-    '/contact-messages?pageSize=200',
+  const rows = await fetchEveryPage<ContactMessageDto>((page) =>
+    http.get(`/contact-messages?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
   );
-  return asList(r).map(toView);
+  return rows.map(toView);
 }
 
 export async function markRead(id: string): Promise<Message> {

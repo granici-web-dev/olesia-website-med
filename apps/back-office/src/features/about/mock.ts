@@ -1,17 +1,5 @@
 import type { AboutPage, AboutInput } from '@/features/about/types';
 
-const dateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatDateTime(iso: string): string {
-  return dateTimeFmt.format(new Date(iso));
-}
-
 /* ------------------------------------------------------------------ *
  * Mock data layer — single in-memory document.
  * See module_calendly.md §10.

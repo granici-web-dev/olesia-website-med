@@ -51,7 +51,6 @@ export const ro = {
   header: {
     search: 'Caută…',
     openMenu: 'Deschide meniul',
-    closeMenu: 'Închide meniul',
     notifications: 'Notificări',
   },
 
@@ -149,6 +148,10 @@ export const ro = {
     retry: 'Reîncearcă',
     confirm: 'Confirmă',
     copyFailed: 'Nu am putut copia. Selectează textul și copiază-l manual.',
+    pageCount: (shown: number, total: number) => `${shown} din ${total}`,
+    pageOf: (page: number, last: number) => `Pagina ${page} din ${last}`,
+    previousPage: 'Pagina anterioară',
+    nextPage: 'Pagina următoare',
     back: 'Înapoi',
     all: 'Toate',
     new: 'Nou',
@@ -170,9 +173,6 @@ export const ro = {
     errorBody: 'Nu am putut încărca datele. Verifică conexiunea și reîncearcă.',
     emptyTitle: 'Nimic aici încă',
     emptyBody: 'Nu există înregistrări de afișat deocamdată.',
-    comingSoonTitle: 'Secțiune în construcție',
-    comingSoonBody:
-      'Scheletul acestei secțiuni este pregătit. Funcționalitatea se conectează la API în pașii următori.',
     notFoundTitle: 'Pagina nu a fost găsită',
     notFoundBody: 'Adresa accesată nu există sau a fost mutată.',
     notFoundCta: 'Înapoi la tabloul de bord',
@@ -187,16 +187,13 @@ export const ro = {
     metricAppointments: 'Programări',
     metricAppointmentsHint: 'Consultații video înregistrate',
     metricPendingPayments: 'Plăți în așteptare',
-    metricPendingPaymentsHint: 'De confirmat manual',
+    metricPendingPaymentsHint: 'Începute și neachitate încă',
     metricSubscriptions: 'Abonamente active',
     metricSubscriptionsHint: 'Monitorizare în curs',
     metricQuickQuestions: 'Întrebări deschise',
     metricQuickQuestionsHint: 'Termen ~1 oră în programul de lucru',
     upcomingTitle: 'Programări apropiate',
     upcomingEmpty: 'Nicio programare apropiată.',
-    activityTitle: 'Activitate recentă',
-    activityEmpty: 'Nicio activitate recentă.',
-    trendTitle: 'Evoluția programărilor',
     loadError: 'Nu am putut încărca statisticile.',
     retry: 'Reîncearcă',
   },
@@ -310,7 +307,6 @@ export const ro = {
       noVideo: 'Indisponibil',
       prepSent: 'Pregătire trimisă',
       notYet: 'Încă nu',
-      calendlyRef: 'Referință Calendly',
       cancelLink: 'Anulează în Calendly',
       rescheduleLink: 'Reprogramează',
       rescheduledFrom: 'Reprogramată din',
@@ -319,8 +315,6 @@ export const ro = {
 
     actions: {
       markNoShow: 'Marchează neprezentare',
-      markCompleted: 'Marchează finalizată',
-      processing: 'Se procesează…',
     },
 
     plan: {
@@ -742,10 +736,6 @@ export const ro = {
       entries: 'Înregistrări',
     },
 
-    list: {
-      entriesCount: 'înregistrări',
-    },
-
     empty: {
       title: 'Niciun pacient',
       body: 'Pacienții apar aici după ce un lead plătit este adăugat sau după ce creezi manual un dosar.',
@@ -783,7 +773,6 @@ export const ro = {
       empty: 'Niciun istoric încă',
       emptyBody: 'Anamnezele, notele, rețetele și documentele apar aici, în ordine cronologică.',
       addEntry: 'Adaugă înregistrare',
-      interactionLabel: 'Interacțiune',
       loadErrorTitle: 'Istoricul nu a putut fi încărcat',
       loadErrorBody:
         'Dosarul nu este gol, doar nu am reușit să îl citim. Reîncearcă înainte de a trage o concluzie clinică.',
@@ -849,7 +838,6 @@ export const ro = {
       body: 'Conținut',
       bodyPlaceholder: 'Scrie detaliile (markdown acceptat)…',
       occurredAt: 'Data clinică',
-      occurredAtHint: 'Lasă gol pentru data de azi.',
       save: 'Salvează',
       saving: 'Se salvează…',
     },
@@ -1188,7 +1176,6 @@ export const ro = {
       resent: 'Confirmarea a plecat către client.',
       resendFailed:
         'Confirmarea tot nu a plecat — serverul de email nu este configurat. Copiază textul și trimite-l tu.',
-      onlyPaid: 'Doar plățile confirmate au o confirmare de trimis.',
     },
 
     /**
@@ -1229,7 +1216,6 @@ export const ro = {
       paidAt: 'Achitată',
       failedAt: 'Eșuată',
       startedAt: 'Inițiată',
-      notPaidYet: 'Încă neachitată.',
       payer: 'Plătitor',
       bank: 'Referințe bancare',
       orderRef: 'Referință comandă',
@@ -1290,7 +1276,6 @@ export const ro = {
       submit: 'Înregistrează',
       cancel: 'Renunță',
       manualBadge: 'Manuală',
-      recordedBy: 'Înregistrată manual',
       empty: 'Nicio plată înregistrată deocamdată.',
       loadError: 'Nu am putut încărca plățile.',
       voidAction: 'Anulează înregistrarea',
@@ -1755,6 +1740,8 @@ export const ro = {
       itemDeleted: 'Întrebarea a fost ștearsă.',
       shown: 'Acum este vizibilă pe site.',
       hidden: 'Acum este ascunsă de pe site.',
+      // Unused: testimonials have a `sortOrder` the panel never reorders.
+      // The drag handle is `PLAN.md` 13d; this string is what it will say.
       reordered: 'Ordinea a fost actualizată.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
     },
@@ -2069,6 +2056,9 @@ export const ro = {
       fileTooLarge: 'Fișierul depășește 20 MB.',
       fileType: 'Sunt acceptate doar fișiere PDF, DOC sau DOCX.',
       categoryCreated: 'Categoria a fost adăugată.',
+      // Unused: the library's categories can be created and deleted, not
+      // renamed, although the API's PATCH route is there. The button is
+      // `PLAN.md` 13d; this string is what it will say.
       categoryUpdated: 'Categoria a fost salvată.',
       categoryDeleted: 'Categoria a fost ștearsă.',
       categoryInUse:

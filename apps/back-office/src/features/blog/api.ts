@@ -1,6 +1,7 @@
-import type { Paginated, PostDto, CategoryDto } from '@olesia/shared';
+import type { PostDto, CategoryDto } from '@olesia/shared';
 
 import { http } from '@/api/http';
+import { fetchEveryPage, MAX_PAGE_SIZE } from '@/api/list';
 import type {
   Post,
   PostInput,
@@ -53,17 +54,13 @@ function categoryToView(d: CategoryDto): Category {
   };
 }
 
-function asList<T>(r: T[] | Paginated<T>): T[] {
-  return Array.isArray(r) ? r : r.items;
-}
-
 /* ------------------------------- posts ------------------------------- */
 
 export async function fetchPosts(): Promise<Post[]> {
-  const r = await http.get<PostDto[] | Paginated<PostDto>>(
-    '/blog/posts?pageSize=200',
+  const rows = await fetchEveryPage<PostDto>((page) =>
+    http.get(`/blog/posts?page=${page}&pageSize=${MAX_PAGE_SIZE}`),
   );
-  return asList(r)
+  return rows
     .map(postToView)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }

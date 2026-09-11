@@ -1,19 +1,5 @@
 import type { Subscriber } from '@/features/subscribers/types';
 
-/* ----------------------------- presentation ----------------------------- */
-
-const dateTimeFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatConsentDate(iso: string): string {
-  return dateTimeFmt.format(new Date(iso));
-}
-
 /* ------------------------------- mock data ------------------------------ */
 /* Used only when `VITE_API_MOCKS === 'true'`; the real API is in `api.ts`. */
 

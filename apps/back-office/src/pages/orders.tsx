@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TablePagination } from '@/components/common/table-pagination';
+import { usePagedRows } from '@/hooks/use-paged';
 import { ro } from '@/i18n/ro';
 
 import { OrderStatusBadge } from '@/features/orders/status-badges';
@@ -102,6 +104,8 @@ export function OrdersPage() {
     () => (status === 'all' ? scoped : scoped.filter((o) => o.status === status)),
     [scoped, status],
   );
+
+  const paged = usePagedRows(visible);
 
   const selected = React.useMemo(
     () => orders.find((o) => o.id === selectedId) ?? null,
@@ -230,7 +234,7 @@ export function OrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map((o) => (
+              {paged.rows.map((o) => (
                 <TableRow
                   key={o.id}
                   onClick={() => openDetail(o.id)}
@@ -290,6 +294,12 @@ export function OrdersPage() {
             </TableBody>
           </Table>
         )}
+        <TablePagination
+          page={paged.page}
+          pageSize={paged.pageSize}
+          total={paged.total}
+          onPageChange={paged.setPage}
+        />
       </Card>
 
       <OrderDetailSheet

@@ -15,16 +15,6 @@ export async function uploadImage(file: File): Promise<string> {
   });
 }
 
-const dateFmt = new Intl.DateTimeFormat('ro-RO', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-});
-
-export function formatDate(iso: string | null): string {
-  return iso ? dateFmt.format(new Date(iso)) : '—';
-}
-
 /* ------------------------------------------------------------------ *
  * Mock data layer — in-memory CRUD for posts + categories, shaped like
  * the real REST API. See module_calendly.md §7.
@@ -248,9 +238,4 @@ export async function deleteCategory(id: string): Promise<void> {
       ? { ...p, categoryIds: p.categoryIds.filter((cid) => cid !== id) }
       : p,
   );
-}
-
-/** Count of posts referencing a category — for delete warnings. */
-export function postCountForCategory(id: string): number {
-  return posts.filter((p) => p.categoryIds.includes(id)).length;
 }
