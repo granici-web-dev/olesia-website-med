@@ -99,11 +99,10 @@ export interface MaibCheckout {
  * optional, everything `unknown`-adjacent, because this is what a remote
  * system sent us rather than a shape we control.
  */
-export interface RawMaibCheckout
-  extends Omit<
-    MaibCheckout,
-    'completedAt' | 'failedAt' | 'cancelledAt' | 'payment'
-  > {
+export interface RawMaibCheckout extends Omit<
+  MaibCheckout,
+  'completedAt' | 'failedAt' | 'cancelledAt' | 'payment'
+> {
   completedAt?: string | null;
   CompletedAt?: string | null;
   failedAt?: string | null;
@@ -111,8 +110,7 @@ export interface RawMaibCheckout
   cancelledAt?: string | null;
   CancelledAt?: string | null;
   payment?:
-    | (NonNullable<MaibCheckout['payment']> & { PaymentId?: string })
-    | null;
+    (NonNullable<MaibCheckout['payment']> & { PaymentId?: string }) | null;
 }
 
 /**

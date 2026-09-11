@@ -8,10 +8,7 @@ import { IsIn, IsString } from 'class-validator';
  * by matching the email.
  */
 export type LeadSource =
-  | 'appointment'
-  | 'subscription'
-  | 'quick_question'
-  | 'deliverable_order';
+  'appointment' | 'subscription' | 'quick_question' | 'deliverable_order';
 
 const LEAD_SOURCES: LeadSource[] = [
   'appointment',

@@ -58,7 +58,7 @@ export function formatWorkingWeek(
   const days = [...hours.days].sort((a, b) => a.weekday - b.weekday);
   const rows: WorkingWeekRow[] = [];
 
-  for (let i = 0; i < days.length; ) {
+  for (let i = 0; i < days.length;) {
     let last = i;
     while (last + 1 < days.length && sameHours(days[last + 1], days[i])) last++;
 

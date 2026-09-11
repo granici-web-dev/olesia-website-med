@@ -60,8 +60,7 @@ export interface CalendlyInvitee {
 
 /** The outcome of one Calendly API call: parsed body, or the status it failed with. */
 export type CalendlyApiResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; status: number | null };
+  { ok: true; data: T } | { ok: false; status: number | null };
 
 /** One page of a Calendly list response. */
 export interface CalendlyPage<T> {

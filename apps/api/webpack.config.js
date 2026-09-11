@@ -34,9 +34,8 @@ module.exports = {
       // @nestjs/mapped-types does require('class-transformer/storage') inside a
       // try/catch; the subpath has no root entry so webpack's static analysis
       // fails the build. Point it at the real file (same metadata singleton).
-      'class-transformer/storage': require.resolve(
-        'class-transformer/cjs/storage.js',
-      ),
+      'class-transformer/storage':
+        require.resolve('class-transformer/cjs/storage.js'),
     },
   },
   plugins: [

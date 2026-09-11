@@ -104,8 +104,4 @@ export interface Payment {
  * without money — the doctor thinks in "did it work", not in nine states.
  */
 export type PaymentStateFilter =
-  | 'all'
-  | 'paid'
-  | 'pending'
-  | 'refunded'
-  | 'failed';
+  'all' | 'paid' | 'pending' | 'refunded' | 'failed';
