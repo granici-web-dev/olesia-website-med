@@ -1,9 +1,11 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpCode, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../common/decorators/public.decorator';
 import { PaymentsService } from './payments.service';
+import { FulfilmentService } from './fulfilment.service';
+import { ClaimNextStepDto } from './dto/claim-next-step.dto';
 
 /**
  * Payment status for the return page, by our own order reference.
@@ -24,7 +26,27 @@ import { PaymentsService } from './payments.service';
 @Throttle({ default: { limit: 10, ttl: 60_000 } })
 @Controller('payment-status')
 export class PaymentStatusController {
-  constructor(private readonly payments: PaymentsService) {}
+  constructor(
+    private readonly payments: PaymentsService,
+    private readonly fulfilment: FulfilmentService,
+  ) {}
+
+  /**
+   * What the buyer can do now: the upload link for a group-C order, the
+   * download for a paid material.
+   *
+   * A POST rather than a GET, and declared before `:orderId` so it cannot be
+   * read as one: it carries the intent key, and a key in a path is a key in
+   * every access log and every shared proxy's cache key. `no-store` for the
+   * same reason the body is: what comes back is a capability.
+   */
+  @Public()
+  @Post('next-step')
+  @HttpCode(200)
+  @Header('Cache-Control', 'no-store')
+  nextStep(@Body() dto: ClaimNextStepDto) {
+    return this.fulfilment.claimNextStep(dto.orderId, dto.intentKey);
+  }
 
   @Public()
   @Get(':orderId')

@@ -460,10 +460,38 @@ export interface MaterialDto {
   /** Whole EUR, paid materials only. */
   price: number | null;
   flags: MaterialFlag[];
+  /** Public URL of the PDF — a free material only. */
   fileUrl: string | null;
+  /**
+   * Private storage key of the PDF — a paid material only, and never in the
+   * public payload. The two file columns are exclusive: a paid file lives
+   * outside the public directory and is released by a `MaterialGrant`.
+   */
+  fileKey: string | null;
   fileName: string | null;
   sortOrder: number;
   active: boolean;
+}
+
+/**
+ * What a buyer can do now that they have paid.
+ *
+ * Two purchases hand something over the moment the money lands, and a buyer
+ * who closed their tab has no other way to it while there is no SMTP: a
+ * group-C order gets the link it sends its documents through, a paid material
+ * gets the file. The return page claims this with the order reference *and*
+ * the intent key that minted it — the key never left the buyer's tab, which is
+ * what the reference cannot say for itself.
+ *
+ * The token is inside `url` and appears nowhere else in the payload; there is
+ * nothing useful to do with it but follow it. `downloadsLeft` is null for the
+ * upload link, which is not counted.
+ */
+export interface PurchaseNextStepDto {
+  kind: 'order_documents' | 'material_download';
+  url: string;
+  expiresAt: string;
+  downloadsLeft: number | null;
 }
 
 // --- Media appearances (the /media page) ---
@@ -804,12 +832,20 @@ export type PublicPostDto = Omit<PostDto, 'authorId' | 'status'> & {
 };
 
 /**
- * A material as the storefront sees it. A paid one arrives with
- * `fileUrl: null`, because on a public endpoint the URL *is* the file.
+ * A material as the storefront sees it. Neither file column is in it for a
+ * paid material: `fileUrl` because on a public endpoint the URL *is* the file,
+ * and `fileKey` because it is not a column the storefront has any use for.
+ * What the storefront needs is `hasFile`, which says whether the card offers a
+ * purchase or says "în curând".
  */
-export type PublicMaterialDto = Omit<MaterialDto, 'access' | 'flags'> & {
+export type PublicMaterialDto = Omit<
+  MaterialDto,
+  'access' | 'flags' | 'fileKey'
+> & {
   access: `${MaterialAccess}`;
   flags: `${MaterialFlag}`[];
+  /** Whether a file exists at all, whichever store it is in. */
+  hasFile: boolean;
 };
 
 export type PublicMediaAppearanceDto = Omit<

@@ -4,15 +4,34 @@ import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { writeOrTranslate } from '../common/prisma-errors';
 import { StorageService } from '../storage/storage.service';
-import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
+import { paginate } from '../common/dto/pagination.dto';
 import { DeliverableOrderStatus } from '../../generated/prisma/enums';
 import { toDeliverableOrderDto } from './deliverable-orders.mapper';
 import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
+import { ListOrdersQueryDto } from './dto/list-orders-query.dto';
+
+/**
+ * What paying for a group-C order changes about it, or `null` when nothing
+ * should change.
+ *
+ * The twin of `activateTicketData`, and pure for the same reason: maib may
+ * deliver the same success notification more than once and the reconcile sweep
+ * writes the same transition from the other side, so an unconditional write
+ * would walk a delivered order back to the start of the doctor's queue. Only
+ * an order that is still `awaiting_payment` moves.
+ */
+export function activateOrderData(
+  current: DeliverableOrderStatus,
+): { status: DeliverableOrderStatus } | null {
+  return current === DeliverableOrderStatus.awaiting_payment
+    ? { status: DeliverableOrderStatus.new }
+    : null;
+}
 
 /**
  * Back-office view of the group-C orders ("Comenzi"). Rows are created by the
- * public `LeadsService`; here the doctor lists them, moves them along, records
- * a manual payment, and deletes the ones that came to nothing.
+ * public checkout; here the doctor lists them, moves them along, records a
+ * manual payment, and deletes the ones that came to nothing.
  */
 @Injectable()
 export class DeliverableOrdersService {
@@ -23,16 +42,27 @@ export class DeliverableOrdersService {
     private readonly storage: StorageService,
   ) {}
 
+  /**
+   * The doctor's list. Unpaid orders are excluded unless she asks for them by
+   * name, the same arrangement the EXPRESS tickets have: `awaiting_payment`
+   * means somebody filled in the form and never paid, and mixing those into
+   * the working list would make "Comenzi" read as more work than it is.
+   */
   async findAll(
-    query: PaginationQueryDto,
+    query: ListOrdersQueryDto,
   ): Promise<Paginated<DeliverableOrderDto>> {
+    const where = query.status
+      ? { status: query.status }
+      : { status: { not: DeliverableOrderStatus.awaiting_payment } };
+
     const [items, total] = await Promise.all([
       this.prisma.deliverableOrder.findMany({
+        where,
         orderBy: { createdAt: 'desc' },
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
       }),
-      this.prisma.deliverableOrder.count(),
+      this.prisma.deliverableOrder.count({ where }),
     ]);
     return paginate(items.map(toDeliverableOrderDto), total, query);
   }

@@ -50,6 +50,7 @@ export function toMaterialDto(
     price: m.price,
     flags: m.flags as MaterialDto['flags'],
     fileUrl: m.fileUrl,
+    fileKey: m.fileKey,
     fileName: m.fileName,
     sortOrder: m.sortOrder,
     active: m.active,
@@ -57,18 +58,26 @@ export function toMaterialDto(
 }
 
 /**
- * The storefront shape: a paid material never carries its `fileUrl`.
+ * The storefront shape: neither file column for a paid material, and `hasFile`
+ * instead.
  *
- * Paid PDFs sit in the same public `/uploads` directory as the free ones, so
- * the URL *is* the file (audit A4, F1) — publishing it on an unauthenticated
- * endpoint handed away everything the payment was supposed to buy. Until the
- * paid file moves to private storage and is released by the post-payment link
- * (`PLAN.md` 12c), withholding the URL is what stands between the price and
- * the download.
+ * Withholding `fileUrl` used to be all that stood between the price and the
+ * download, and the comment here said so: the paid PDFs sat in the same public
+ * `/uploads` directory as the free ones, so the URL *was* the file (audit A4,
+ * F1). That is closed — a paid file lives in private storage under `fileKey`
+ * and is released by a `MaterialGrant` — and the key is withheld too, not
+ * because it is dangerous on its own but because the storefront has no use for
+ * it. What the storefront does need is whether a file exists at all, which
+ * decides between a card that sells and one that says "în curând".
  */
 export function toPublicMaterialDto(
   m: Material & { category: Pick<MaterialCategory, 'slug'> },
 ): PublicMaterialDto {
-  const dto = toMaterialDto(m);
-  return dto.access === 'free' ? dto : { ...dto, fileUrl: null };
+  const { fileKey, ...dto } = toMaterialDto(m);
+  const paid = dto.access === 'paid';
+  return {
+    ...dto,
+    fileUrl: paid ? null : dto.fileUrl,
+    hasFile: Boolean(paid ? fileKey : dto.fileUrl),
+  };
 }

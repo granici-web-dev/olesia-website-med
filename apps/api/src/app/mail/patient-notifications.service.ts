@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { PurchaseNextStepDto } from '@olesia/shared';
 
 import { maskEmail } from '../common/mask-email';
 import { legalEntity } from '../common/legal-entity';
@@ -102,13 +103,18 @@ export class PatientNotificationsService {
    */
   async paymentReceipt(
     recipient: Recipient,
-    vars: Omit<PaymentReceiptVars, 'paidAt' | 'amount' | 'merchant'> & {
+    vars: Omit<
+      PaymentReceiptVars,
+      'paidAt' | 'amount' | 'merchant' | 'nextStep'
+    > & {
       paidAt: Date;
       amount: number;
       currency: string;
+      /** Same shape, with the expiry still an ISO string — formatted here. */
+      nextStep?: PurchaseNextStepDto;
     },
   ): Promise<Delivery> {
-    const { amount, currency, paidAt, ...rest } = vars;
+    const { amount, currency, paidAt, nextStep, ...rest } = vars;
     return this.send(
       'payment-receipt',
       recipient,
@@ -120,6 +126,12 @@ export class PatientNotificationsService {
         }).format(amount),
         paidAt: await this.formatDateTime(paidAt),
         merchant: legalEntity().registeredName,
+        nextStep: nextStep && {
+          kind: nextStep.kind,
+          url: nextStep.url,
+          expiresAt: await this.formatDate(new Date(nextStep.expiresAt)),
+          downloads: nextStep.downloadsLeft ?? undefined,
+        },
       }),
     );
   }

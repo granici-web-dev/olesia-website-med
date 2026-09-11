@@ -126,6 +126,14 @@ export enum DeliverableProduct {
 
 /** Lifecycle of a deliverable order, from the form to the delivered file. */
 export enum DeliverableOrderStatus {
+  /**
+   * Ordered, paid for by nobody yet, and invisible to the doctor — the same
+   * arrangement the EXPRESS ticket has, for the same reason. The order exists
+   * from the moment the form is submitted so a closed tab loses nothing, and
+   * it joins the working list only when the bank says the money arrived
+   * (docs/shape-paid-deliverables-and-materials.md, approved 2026-09-11).
+   */
+  AwaitingPayment = 'awaiting_payment',
   /** Just ordered, nobody has looked at it yet. */
   New = 'new',
   /** The doctor is preparing the menu/protocol. */

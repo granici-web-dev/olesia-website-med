@@ -5,11 +5,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import type {
-  DeliverableOrderDto,
-  QuickQuestionDto,
-  SubscriptionDto,
-} from '@olesia/shared';
+import type { QuickQuestionDto, SubscriptionDto } from '@olesia/shared';
 import { deliverableEntry } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,11 +26,14 @@ import {
 import { PaymentsService } from '../payments/payments.service';
 import { canSell } from '../common/legal-entity';
 import { paymentCurrency } from '../common/payment-currency';
-import { QuickQuestionCheckoutDto } from './dto/checkout.dto';
-import { toDeliverableOrderDto } from '../deliverable-orders/deliverable-orders.mapper';
+import { materialPrice } from '../materials/material-price';
+import {
+  DeliverableCheckoutDto,
+  MaterialCheckoutDto,
+  QuickQuestionCheckoutDto,
+} from './dto/checkout.dto';
 import {
   ContactMessageDto,
-  DeliverableLeadDto,
   MonitoringLeadDto,
   QuickQuestionLeadDto,
 } from './dto/create-lead.dto';
@@ -289,18 +288,28 @@ export class LeadsService {
   }
 
   /**
-   * Group-C product order → a `new` DeliverableOrder the doctor works through
-   * in the back office ("Comenzi").
+   * A group-C product, bought: the order first, then the bank.
    *
-   * The label and the price come from the shared catalog, never from the
+   * Same arrangement as the EXPRESS ticket and for the same reason — the
+   * details a menu is written from are collected before the redirect, the
+   * order starts in `awaiting_payment` and is invisible to the doctor, and a
+   * closed tab costs the buyer nothing (the purge collects it after seven
+   * days). What is new is that paying also issues the upload link, because the
+   * documents are the next thing the buyer has to do.
+   *
+   * The label and the price come from `DELIVERABLE_CATALOG`, never from the
    * request: the form posts a product code and nothing else about the product.
-   * An unknown code is a 400 rather than an order nobody can price.
    */
-  async createDeliverable(
-    dto: DeliverableLeadDto,
-  ): Promise<DeliverableOrderDto> {
+  async startDeliverableCheckout(
+    dto: DeliverableCheckoutDto,
+  ): Promise<{ checkoutUrl: string; orderId: string }> {
+    if (!canSell())
+      throw new ServiceUnavailableException('legal_entity_missing');
+
     const entry = deliverableEntry(dto.product);
     if (!entry) throw new BadRequestException('unknown_deliverable_product');
+
+    const locale = dto.locale ?? Locale.ro;
 
     const order = await this.prisma.deliverableOrder.create({
       data: {
@@ -311,27 +320,132 @@ export class LeadsService {
         clientEmail: dto.email,
         phone: dto.phone ?? null,
         notes: dto.message ?? null,
-        locale: dto.locale ?? Locale.ro,
-        status: DeliverableOrderStatus.new,
+        locale,
+        status: DeliverableOrderStatus.awaiting_payment,
         paymentStatus: PaymentStatus.pending,
       },
     });
 
-    await this.mail.sendLeadNotification({
-      subject: `Comandă nouă — ${entry.titleRo}`,
-      lines: [
-        'Comandă nouă pentru un produs personalizat.',
-        `Produs: ${entry.titleRo} (${entry.priceEur} €)`,
-        `Nume: ${dto.name}`,
-        `Email: ${dto.email}`,
-        `Telefon: ${dto.phone ?? '—'}`,
-        '',
-        `Detalii: ${dto.message ?? '—'}`,
-      ],
+    let started;
+    try {
+      started = await this.payments.start({
+        targetType: PaymentTargetType.deliverable_order,
+        targetId: order.id,
+        amount: entry.priceEur,
+        currency: paymentCurrency(),
+        description: entry.titleRo,
+        locale,
+        payerName: dto.name,
+        payerEmail: dto.email,
+        payerPhone: dto.phone,
+        intentKey: dto.intentKey,
+      });
+    } catch (e) {
+      // An order with no session behind it is one nobody can pay for. The
+      // purge would collect it in seven days; deleting it now keeps a refused
+      // price or an unreachable bank from leaving anything behind at all.
+      await this.prisma.deliverableOrder.delete({ where: { id: order.id } });
+      throw e;
+    }
+
+    // The same form submitted twice. As with the ticket, the second submit is
+    // the later word — somebody went back and corrected what they wrote — so
+    // the content moves onto the order the live session actually pays for, and
+    // the empty one goes.
+    if (started.reused) {
+      if (started.targetId) await this.rewriteUnpaidOrder(started.targetId, dto);
+      await this.prisma.deliverableOrder.delete({ where: { id: order.id } });
+    }
+
+    this.logger.log(
+      `Deliverable checkout ${started.reused ? 'resumed' : 'opened'} (order ${started.orderId}).`,
+    );
+    return { checkoutUrl: started.checkoutUrl, orderId: started.orderId };
+  }
+
+  /**
+   * Carry a repeat submit's content onto the order its session already pays
+   * for. `updateMany` scoped to `awaiting_payment`, exactly as the ticket does
+   * it: between the second submit leaving the browser and this line the first
+   * session can have been paid, and rewriting an order the doctor is already
+   * working on is worse than losing an edit.
+   */
+  private async rewriteUnpaidOrder(
+    orderId: string,
+    dto: DeliverableCheckoutDto,
+  ): Promise<void> {
+    const { count } = await this.prisma.deliverableOrder.updateMany({
+      where: {
+        id: orderId,
+        status: DeliverableOrderStatus.awaiting_payment,
+      },
+      data: {
+        clientName: dto.name,
+        clientEmail: dto.email,
+        phone: dto.phone ?? null,
+        notes: dto.message ?? null,
+        locale: dto.locale ?? Locale.ro,
+      },
+    });
+    if (count === 0) {
+      this.logger.log(
+        `Deliverable resubmit for order ${orderId} ignored: it is no longer awaiting payment.`,
+      );
+    }
+  }
+
+  /**
+   * A paid library material, bought.
+   *
+   * Nothing is created before the redirect, because there is nothing to
+   * create: the `Payment` row is the whole record of the purchase, and of an
+   * abandoned one. What paying buys is a `MaterialGrant`, minted by
+   * `FulfilmentService` once the money is committed.
+   *
+   * The price comes off the row, through the same `materialPrice` seam that
+   * refuses a free material offered for sale and a material priced "on
+   * request"; `PaymentsService.start()` then applies the bank's floor to it.
+   */
+  async startMaterialCheckout(
+    dto: MaterialCheckoutDto,
+  ): Promise<{ checkoutUrl: string; orderId: string }> {
+    if (!canSell())
+      throw new ServiceUnavailableException('legal_entity_missing');
+
+    const material = await this.prisma.material.findUnique({
+      where: { slug: dto.slug },
+    });
+    // A hidden material is not on sale either: `active: false` is how the
+    // client takes something out of the storefront, and a checkout that
+    // ignored it would sell what she has withdrawn.
+    if (!material || !material.active)
+      throw new NotFoundException('material_not_found');
+
+    const price = materialPrice(material);
+    if ('refusal' in price) throw new BadRequestException(price.refusal);
+    // A material with no file is "în curând" on the storefront, and selling a
+    // download that does not exist is the one thing this flow must not do.
+    if (!material.fileKey) throw new BadRequestException('material_not_ready');
+
+    const locale = dto.locale ?? Locale.ro;
+
+    const started = await this.payments.start({
+      targetType: PaymentTargetType.material,
+      targetId: material.id,
+      amount: price.amount,
+      currency: paymentCurrency(),
+      description: material.titleRo,
+      locale,
+      payerName: dto.name,
+      payerEmail: dto.email,
+      payerPhone: dto.phone,
+      intentKey: dto.intentKey,
     });
 
-    this.logger.log('Deliverable order created (pending).');
-    return toDeliverableOrderDto(order);
+    this.logger.log(
+      `Material checkout ${started.reused ? 'resumed' : 'opened'} (order ${started.orderId}).`,
+    );
+    return { checkoutUrl: started.checkoutUrl, orderId: started.orderId };
   }
 
   /**

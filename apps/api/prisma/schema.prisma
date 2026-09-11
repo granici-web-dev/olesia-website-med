@@ -98,6 +98,10 @@ enum DeliverableProduct {
 }
 
 enum DeliverableOrderStatus {
+  /// Ordered, not paid for, invisible to the doctor — the same state an
+  /// EXPRESS ticket starts in, for the same reason. See the DeliverableOrder
+  /// model comment and docs/shape-paid-deliverables-and-materials.md.
+  awaiting_payment
   new
   in_progress
   delivered
@@ -445,9 +449,16 @@ model Material {
   price  Int?
   flags  MaterialFlag[]
 
-  /// Public URL of the uploaded PDF. Null while the file is still missing: the
-  /// storefront then shows the card as "în curând" instead of a dead download.
+  /// Public URL of the uploaded PDF, for a FREE material. Null while the file
+  /// is still missing: the storefront then shows the card as "în curând"
+  /// instead of a dead download.
   fileUrl  String?
+  /// Private storage key of the PDF, for a PAID one. The two are exclusive:
+  /// a paid file never has a public URL, because a URL in the same directory
+  /// as the free downloads *is* the file, and withholding it from a DTO is
+  /// obscurity rather than access control (audit A4, F1). Released by
+  /// `MaterialGrant` after payment.
+  fileKey  String?
   fileName String?
 
   sortOrder Int      @default(0)
@@ -455,8 +466,54 @@ model Material {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  grants MaterialGrant[]
+
   @@index([active, sortOrder])
   @@index([categoryId])
+}
+
+/// What paying for a material buys: permission to download one file, for a
+/// while, a bounded number of times.
+///
+/// It is a capability, like `UploadLink` and for the same reasons — the token
+/// in the URL is the whole credential, it is stored in the clear so the back
+/// office can hand the same link over again, and what it opens is one PDF the
+/// buyer paid for rather than anybody's medical document.
+///
+/// The order reference is deliberately *not* the key. It travels to the bank,
+/// lives in the merchant portal and lands on card statements, so it is fine as
+/// the key to a PII-free status lookup and not fine as the key that hands over
+/// a file (docs/shape-express-checkout.md).
+model MaterialGrant {
+  id String @id @default(uuid())
+
+  /// 32 random bytes, base64url. Long enough that guessing is not a strategy.
+  token String @unique
+
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  materialId String
+
+  /// Lowercased, as everywhere a payer's address is stored.
+  payerEmail String
+
+  expiresAt     DateTime
+  maxDownloads  Int       @default(10)
+  downloadCount Int       @default(0)
+  lastDownloadAt DateTime?
+
+  /// Which purchase opened it. Null once that Payment is gone; the grant is
+  /// the record of what the buyer may do, not of what they were charged.
+  paymentId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// One grant per buyer per material, which is the rule rather than an
+  /// optimisation: buying the same guide twice extends the one grant instead
+  /// of leaving two live tokens, and the token is kept so a link already
+  /// sitting in somebody's inbox goes on working.
+  @@unique([materialId, payerEmail])
+  @@index([expiresAt])
 }
 
 // --- Media appearances (the /media page) ---

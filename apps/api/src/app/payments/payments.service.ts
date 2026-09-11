@@ -8,18 +8,19 @@ import {
 import { toE164, type PublicPaymentStatusDto } from '@olesia/shared';
 import { Prisma } from '../../generated/prisma/client';
 import {
+  DeliverableOrderStatus,
   PaymentState,
   PaymentStatus,
   PaymentTargetType,
   QuickQuestionStatus,
   RefundState,
-  ServiceCode,
 } from '../../generated/prisma/enums';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkingHoursService } from '../working-hours/working-hours.service';
-import { PatientNotificationsService } from '../mail/patient-notifications.service';
 import { PaginationQueryDto, paginate } from '../common/dto/pagination.dto';
+import { FulfilmentService } from './fulfilment.service';
+import { describeTarget } from './describe-target';
 import {
   MaibService,
   type MaibCallbackBody,
@@ -27,6 +28,7 @@ import {
 } from './maib.service';
 import { toPaymentDto } from './payments.mapper';
 import { activateTicketData } from '../quick-questions/quick-questions.service';
+import { activateOrderData } from '../deliverable-orders/deliverable-orders.service';
 
 /**
  * What the caller needs to open a checkout for one payable thing.
@@ -297,16 +299,20 @@ export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
   /**
-   * `WorkingHoursService` and `PatientNotificationsService` are both `@Global()`,
-   * so fulfilment lives inside the transaction that records the payment without
-   * a new module import and without a risk of an import cycle. That is the whole
-   * reason there is no event bus here — see the shape's tradeoffs.
+   * What stayed and what left, when the third purchase arrived.
+   *
+   * Everything here writes inside the transaction that records the payment:
+   * the mirror onto the purchase, the ticket and the order moving out of
+   * `awaiting_payment`. Everything that must not be in that transaction — the
+   * receipt, the upload link, the download grant — moved to
+   * `FulfilmentService`, which is the split `docs/shape-express-checkout.md`
+   * said to make once a branch needed collaborators of its own.
    */
   constructor(
     private readonly prisma: PrismaService,
     private readonly maib: MaibService,
     private readonly workingHours: WorkingHoursService,
-    private readonly notifications: PatientNotificationsService,
+    private readonly fulfilment: FulfilmentService,
   ) {}
 
   /* ---------------------------- starting ---------------------------- */
@@ -882,6 +888,10 @@ export class PaymentsService {
         amount: true,
         currency: true,
         targetType: true,
+        // `describeTarget` needs it to name the order or the material. It is
+        // read, never returned: the response stays PII-free, and an internal
+        // row id is not something a return page has any use for.
+        targetId: true,
         paidAt: true,
       },
     });
@@ -892,7 +902,7 @@ export class PaymentsService {
       amount: Number(fresh.amount),
       currency: fresh.currency,
       targetType: fresh.targetType,
-      description: await this.describeTarget(fresh),
+      description: await describeTarget(this.prisma, fresh),
       paidAt: fresh.paidAt?.toISOString() ?? null,
     };
   }
@@ -932,74 +942,23 @@ export class PaymentsService {
       return payment.state === PaymentState.paid;
     });
 
-    // Outside the transaction: sending mail takes a network round-trip, and a
-    // transaction held open across one holds the row lock for an SMTP server's
-    // benefit. `deliverReceipt` is itself idempotent, so a redelivered callback
-    // reaching this line again sends nothing.
-    if (isPaid) await this.deliverReceipt(id);
-  }
-
-  /**
-   * The payment confirmation maib's go-live checklist requires (§8).
-   *
-   * `confirmationSentAt` is stamped only when the message actually left. With
-   * no SMTP configured nothing leaves, and the back office then shows the
-   * payment as unconfirmed with a resend button — the same honesty the answer
-   * and upload-link paths already practise (audit A3, F2). It is deliberately
-   * not a throw: the money has arrived, the purchase is fulfilled, and failing
-   * the callback over an email would make the bank retry a payment we have
-   * already recorded.
-   */
-  private async deliverReceipt(id: string): Promise<void> {
-    const payment = await this.prisma.payment.findUnique({ where: { id } });
-    if (!payment || payment.confirmationSentAt) return;
-
-    try {
-      const { sent } = await this.notifications.paymentReceipt(
-        {
-          to: payment.payerEmail,
-          locale: await this.localeForPayment(payment),
-        },
-        {
-          clientName: payment.payerName ?? payment.payerEmail,
-          orderId: payment.orderId,
-          description: await this.describeTarget(payment),
-          amount: Number(payment.amount),
-          currency: payment.currency,
-          paidAt: payment.paidAt ?? new Date(),
-        },
-      );
-      if (sent) {
-        await this.prisma.payment.update({
-          where: { id },
-          data: { confirmationSentAt: new Date() },
-        });
-      }
-    } catch (e) {
-      this.logger.error(
-        `payment ${id} recorded, confirmation email failed: ${String(e)}`,
-      );
-    }
+    // Outside the transaction: issuing a link writes a second table and
+    // sending mail takes a network round-trip, and a transaction held open
+    // across either holds the payment's row lock for somebody else's benefit.
+    // Every step in there is idempotent, so a redelivered callback reaching
+    // this line again changes nothing.
+    if (isPaid) await this.fulfilment.settle(id);
   }
 
   /**
    * Re-send the confirmation for a payment whose first attempt did not leave.
-   * Clears the stamp first so a resend after a successful one is possible too —
-   * the operator pressing this button has a reason we do not know.
+   *
+   * The audit line stays here because this is the route's service and the line
+   * is about who pressed the button; the message itself is the fulfilment
+   * service's, which also knows what link to put in it.
    */
   async resendConfirmation(id: string, authorId: string) {
-    const payment = await this.prisma.payment.findUnique({ where: { id } });
-    if (!payment) throw new NotFoundException('payment_not_found');
-    if (payment.state !== PaymentState.paid) {
-      throw new BadRequestException('payment_not_paid');
-    }
-
-    await this.prisma.payment.update({
-      where: { id },
-      data: { confirmationSentAt: null },
-    });
-    await this.deliverReceipt(id);
-
+    await this.fulfilment.resendConfirmation(id);
     this.logger.log(
       `audit payment.resend-confirmation paymentId=${id} userId=${authorId}`,
     );
@@ -1073,7 +1032,11 @@ export class PaymentsService {
    * callback takes and it must stay cheap and idempotent.
    */
   private async recomputeTargetMirror(
-    payment: { targetType: PaymentTargetType; targetId: string | null },
+    payment: {
+      id: string;
+      targetType: PaymentTargetType;
+      targetId: string | null;
+    },
     tx: Prisma.TransactionClient,
   ): Promise<void> {
     const { targetType, targetId } = payment;
@@ -1099,8 +1062,24 @@ export class PaymentsService {
         case PaymentTargetType.subscription:
           await tx.subscription.update({ where: { id: targetId }, data });
           break;
-        case PaymentTargetType.material:
+        case PaymentTargetType.material: {
+          // A refund takes the file back with the money. /terms says a
+          // downloaded material is not refundable, so this only fires for a
+          // refund the doctor granted deliberately — which is exactly when she
+          // means it (shape open question 2, decided). The grant is deleted
+          // rather than flagged: what it held was permission, and permission
+          // that has been withdrawn is not a record of anything. The token
+          // then answers 404 like any other dead one.
+          const { count } = await tx.materialGrant.deleteMany({
+            where: { paymentId: payment.id },
+          });
+          if (count > 0) {
+            this.logger.log(
+              `audit material.grant-revoked paymentId=${payment.id}`,
+            );
+          }
           break;
+        }
       }
     } catch (e) {
       // Same reasoning as markTargetPaid: the purchase can be gone, and the
@@ -1149,13 +1128,15 @@ export class PaymentsService {
           await this.activateTicket(targetId, slaClockStart(payment), tx);
           break;
         case PaymentTargetType.deliverable_order:
-          await tx.deliverableOrder.update({ where: { id: targetId }, data });
+          await this.activateOrder(targetId, tx);
           break;
         case PaymentTargetType.subscription:
           await tx.subscription.update({ where: { id: targetId }, data });
           break;
         case PaymentTargetType.material:
-          // Paid materials have no order row yet — the Payment is the record.
+          // A paid material has no row of its own — the Payment is the record,
+          // and what paying buys is the grant `FulfilmentService` issues once
+          // this transaction has committed.
           break;
       }
     } catch (e) {
@@ -1174,6 +1155,43 @@ export class PaymentsService {
       }
       throw e;
     }
+  }
+
+  /**
+   * Put a paid group-C order in front of the doctor.
+   *
+   * `updateMany` scoped to the status we read, for the same reason
+   * `activateTicket` does it: the bank redelivers, the reconcile sweep writes
+   * the same transition from the other side, and an unconditional write would
+   * walk a delivered order back to the start of the queue. An order that has
+   * moved on keeps its status and gains only the mirror.
+   *
+   * There is no clock to start. A menu has no SLA — what the buyer gets the
+   * moment they pay is the upload link, and that is `FulfilmentService`'s,
+   * because issuing it writes a second table and sends mail.
+   */
+  private async activateOrder(
+    orderId: string,
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
+    const order = await tx.deliverableOrder.findUnique({
+      where: { id: orderId },
+      select: { status: true },
+    });
+    if (!order) {
+      this.logger.warn(
+        `paid deliverable_order ${orderId} no longer exists; payment recorded anyway`,
+      );
+      return;
+    }
+
+    const activation = activateOrderData(order.status);
+    await tx.deliverableOrder.updateMany({
+      where: activation
+        ? { id: orderId, status: DeliverableOrderStatus.awaiting_payment }
+        : { id: orderId },
+      data: { paymentStatus: PaymentStatus.confirmed, ...activation },
+    });
   }
 
   /**
@@ -1222,39 +1240,4 @@ export class PaymentsService {
     });
   }
 
-  /** Which language to write the receipt in. */
-  private async localeForPayment(payment: {
-    targetType: PaymentTargetType;
-    targetId: string | null;
-  }): Promise<string | null> {
-    if (
-      payment.targetType !== PaymentTargetType.quick_question ||
-      !payment.targetId
-    ) {
-      return null;
-    }
-    const ticket = await this.prisma.quickQuestion.findUnique({
-      where: { id: payment.targetId },
-      select: { locale: true },
-    });
-    return ticket?.locale ?? null;
-  }
-
-  /**
-   * What the receipt calls the purchase. The bank's own `orderInfo.description`
-   * is not stored, so this is reconstructed from the catalog — which is the
-   * same source that priced it in the first place.
-   */
-  private async describeTarget(payment: {
-    targetType: PaymentTargetType;
-  }): Promise<string> {
-    if (payment.targetType === PaymentTargetType.quick_question) {
-      const service = await this.prisma.service.findUnique({
-        where: { code: ServiceCode.quick_question },
-        select: { titleRo: true },
-      });
-      return service?.titleRo ?? 'Întrebare EXPRESS';
-    }
-    return payment.targetType;
-  }
 }

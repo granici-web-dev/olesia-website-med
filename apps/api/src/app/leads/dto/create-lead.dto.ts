@@ -8,7 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { DeliverableProduct, Locale } from '../../../generated/prisma/enums';
+import { Locale } from '../../../generated/prisma/enums';
 
 /**
  * Fields every public lead form carries.
@@ -92,29 +92,6 @@ export class QuickQuestionLeadDto extends PublicLeadDto {
   @MinLength(1)
   @MaxLength(4000)
   question!: string;
-}
-
-/**
- * Public order for a group-C deliverable (personalized menu or protocol).
- *
- * Only the product *code* is accepted. The label and the price are looked up
- * server-side in `DELIVERABLE_CATALOG`, so a crafted request cannot order a
- * "Meniu 30 zile" for 1 €, and the back office never displays a product name
- * that came from the internet.
- */
-export class DeliverableLeadDto extends PublicLeadDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(40)
-  phone?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(2000)
-  message?: string;
-
-  @IsEnum(DeliverableProduct)
-  product!: DeliverableProduct;
 }
 
 /**

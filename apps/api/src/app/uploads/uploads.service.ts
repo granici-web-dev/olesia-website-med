@@ -159,6 +159,25 @@ export class UploadsService {
   }
 
   /**
+   * The order's live link, without issuing one.
+   *
+   * `linkForOrder` above re-issues — it extends the expiry and un-revokes —
+   * which is right when the doctor presses the button and wrong when a buyer's
+   * return page asks what they can do now: a link she revoked must stay
+   * revoked. Unusable and absent answer the same null, for the reason at the
+   * top of this file.
+   */
+  async liveLinkForOrder(orderId: string): Promise<UploadLinkDto | null> {
+    const link = await this.prisma.uploadLink.findFirst({
+      where: { orderId },
+      include: { documents: { orderBy: { uploadedAt: 'desc' } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!isLinkUsable(link, new Date())) return null;
+    return toUploadLinkDto(link, this.publicUrl(link.token));
+  }
+
+  /**
    * Email the link to the patient. Reports whether it actually left, because
    * with no SMTP configured it does not — and the doctor needs to know that so
    * she sends it herself instead of assuming.

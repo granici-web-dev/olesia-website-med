@@ -230,10 +230,82 @@ export interface PaymentReceiptVars {
   paidAt: string;
   /** Registered entity, or an empty string while it is still missing. */
   merchant: string;
+  /**
+   * What the buyer can do now, for the two purchases that hand something over
+   * the moment they are paid: a group-C order gets the link it sends its
+   * documents through, a paid material gets the file. Absent for the rest, and
+   * the block then does not render.
+   */
+  nextStep?: ReceiptNextStep;
+}
+
+/**
+ * The "what you can do now" block. `expiresAt` is already formatted in the
+ * practice's timezone; `downloads` is how many times the file may still be
+ * fetched, and is present only for a material.
+ */
+export interface ReceiptNextStep {
+  kind: 'order_documents' | 'material_download';
+  url: string;
+  expiresAt: string;
+  downloads?: number;
 }
 
 const merchantLine = (merchant: string, label: string): string[] =>
   merchant ? [`${label}: ${merchant}`] : [];
+
+/**
+ * The next-step block, in one language. Written once per locale rather than
+ * assembled from fragments: these are four sentences a parent reads, and a
+ * sentence stitched from clauses reads like one.
+ */
+const NEXT_STEP_BLOCK: Record<Locale, (s: ReceiptNextStep) => string[]> = {
+  [Locale.Ro]: (s) =>
+    s.kind === 'order_documents'
+      ? [
+          '',
+          'Ce urmează: trimiteți documentele de care avem nevoie (analize, investigații, jurnal alimentar) prin linkul personal de mai jos.',
+          s.url,
+          `Linkul este valabil până la ${s.expiresAt}.`,
+        ]
+      : [
+          '',
+          'Materialul dumneavoastră se descarcă de aici:',
+          s.url,
+          `Linkul este personal, este valabil până la ${s.expiresAt} și permite ${s.downloads} descărcări.`,
+        ],
+  [Locale.En]: (s) =>
+    s.kind === 'order_documents'
+      ? [
+          '',
+          'What happens next: send us the documents we need (test results, investigations, a food diary) through your personal link below.',
+          s.url,
+          `The link works until ${s.expiresAt}.`,
+        ]
+      : [
+          '',
+          'Your material downloads from here:',
+          s.url,
+          `The link is personal, works until ${s.expiresAt} and allows ${s.downloads} downloads.`,
+        ],
+  [Locale.Ru]: (s) =>
+    s.kind === 'order_documents'
+      ? [
+          '',
+          'Что дальше: пришлите нужные нам документы (анализы, обследования, пищевой дневник) по личной ссылке ниже.',
+          s.url,
+          `Ссылка действует до ${s.expiresAt}.`,
+        ]
+      : [
+          '',
+          'Ваш материал можно скачать здесь:',
+          s.url,
+          `Ссылка персональная, действует до ${s.expiresAt} и допускает ${s.downloads} скачиваний.`,
+        ],
+};
+
+const nextStepLines = (locale: Locale, step?: ReceiptNextStep): string[] =>
+  step ? NEXT_STEP_BLOCK[locale](step) : [];
 
 export const PAYMENT_RECEIPT_TEMPLATES: Templates<PaymentReceiptVars> = {
   [Locale.Ro]: (v) => ({
@@ -248,6 +320,7 @@ export const PAYMENT_RECEIPT_TEMPLATES: Templates<PaymentReceiptVars> = {
       `Sumă: ${v.amount}`,
       `Data plății: ${v.paidAt}`,
       ...merchantLine(v.merchant, 'Prestator'),
+      ...nextStepLines(Locale.Ro, v.nextStep),
       '',
       'Păstrați acest email: conține referința comenzii, utilă dacă aveți întrebări despre plată.',
       ...SIGNATURE[Locale.Ro],
@@ -265,6 +338,7 @@ export const PAYMENT_RECEIPT_TEMPLATES: Templates<PaymentReceiptVars> = {
       `Amount: ${v.amount}`,
       `Paid on: ${v.paidAt}`,
       ...merchantLine(v.merchant, 'Provider'),
+      ...nextStepLines(Locale.En, v.nextStep),
       '',
       'Keep this email: it carries the order reference, which is what to quote if you have a question about the payment.',
       ...SIGNATURE[Locale.En],
@@ -282,6 +356,7 @@ export const PAYMENT_RECEIPT_TEMPLATES: Templates<PaymentReceiptVars> = {
       `Сумма: ${v.amount}`,
       `Дата оплаты: ${v.paidAt}`,
       ...merchantLine(v.merchant, 'Исполнитель'),
+      ...nextStepLines(Locale.Ru, v.nextStep),
       '',
       'Сохраните это письмо: в нём номер заказа, который пригодится при любом вопросе об оплате.',
       ...SIGNATURE[Locale.Ru],

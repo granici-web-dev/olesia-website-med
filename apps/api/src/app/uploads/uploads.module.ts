@@ -12,5 +12,8 @@ import {
   imports: [StorageModule],
   controllers: [UploadsPublicController, UploadLinksController],
   providers: [UploadsService],
+  // Exported for `payments`: paying for a group-C order is what issues the
+  // link the buyer sends their documents through.
+  exports: [UploadsService],
 })
 export class UploadsModule {}

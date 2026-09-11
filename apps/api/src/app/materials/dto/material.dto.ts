@@ -96,9 +96,21 @@ export class CreateMaterialDto {
   @IsEnum(MaterialFlag, { each: true })
   flags?: MaterialFlag[];
 
+  /** A free material's PDF, as a public URL. Ignored for a paid one. */
   @IsOptional()
   @IsUploadedFileUrl()
   fileUrl?: string | null;
+
+  /**
+   * A paid material's PDF, as the private storage key `POST
+   * /materials/file/private` answered with. Ignored for a free one. The
+   * pattern is what `savePrivateDocument` writes — a UUID plus the extension
+   * the file's own first bytes earned — so a key naming a path is refused here
+   * rather than reaching the filesystem.
+   */
+  @IsOptional()
+  @Matches(/^[0-9a-f-]{36}\.[a-z0-9]{2,5}$/)
+  fileKey?: string | null;
 
   @IsOptional()
   @IsString()

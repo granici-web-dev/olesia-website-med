@@ -14,8 +14,8 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/jwt.types';
 import { Role } from '../../generated/prisma/enums';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { DeliverableOrdersService } from './deliverable-orders.service';
+import { ListOrdersQueryDto } from './dto/list-orders-query.dto';
 import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
 
 /** Orders for personalized menus and protocols ("Comenzi") — admin/editor. */
@@ -26,8 +26,13 @@ import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
 export class DeliverableOrdersController {
   constructor(private readonly orders: DeliverableOrdersService) {}
 
+  /**
+   * The working list. Without `?status=` it leaves out `awaiting_payment`, so
+   * the "Neachitate" tab asks for that status by name — the same arrangement
+   * the EXPRESS tickets have.
+   */
   @Get()
-  findAll(@Query() query: PaginationQueryDto) {
+  findAll(@Query() query: ListOrdersQueryDto) {
     return this.orders.findAll(query);
   }
 

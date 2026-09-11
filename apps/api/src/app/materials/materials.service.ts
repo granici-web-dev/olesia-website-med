@@ -27,6 +27,26 @@ import {
 /** A category named in a script we cannot transliterate still needs a slug. */
 const CATEGORY_SLUG_FALLBACK = 'categorie';
 
+/**
+ * The two file columns, of which a material may hold exactly one.
+ *
+ * A free material's PDF is a public URL under `/uploads`; a paid one's is an
+ * opaque key in `PRIVATE_UPLOADS_DIR`, released only by a `MaterialGrant`.
+ * Writing both would put a paid file back on the public route, which is the
+ * exact failure this step exists to close (audit A4, F1). The column that does
+ * not apply is nulled rather than left alone, so a material that changes hands
+ * between the two cannot keep a stale pointer into the other store.
+ */
+function fileColumnsFor(
+  access: string,
+  fileUrl: string | null | undefined,
+  fileKey: string | null | undefined,
+): { fileUrl: string | null; fileKey: string | null } {
+  return access === 'paid'
+    ? { fileUrl: null, fileKey: fileKey ?? null }
+    : { fileUrl: fileUrl ?? null, fileKey: null };
+}
+
 const withCategory = { category: { select: { slug: true } } };
 
 @Injectable()
@@ -80,7 +100,7 @@ export class MaterialsService {
           access: dto.access ?? 'free',
           price: dto.price ?? null,
           flags: dto.flags ?? [],
-          fileUrl: dto.fileUrl ?? null,
+          ...fileColumnsFor(dto.access ?? 'free', dto.fileUrl, dto.fileKey),
           fileName: dto.fileName ?? null,
           sortOrder,
           active: dto.active ?? true,
@@ -98,11 +118,22 @@ export class MaterialsService {
       await this.assertSlugFree(dto.slug);
     }
     // Only the keys actually sent are written, so a PATCH that flips `active`
-    // cannot blank the description or drop the age tags.
+    // cannot blank the description or drop the age tags. The exception is the
+    // pair of file columns: flipping `access` clears the file rather than
+    // moving bytes between two volumes, because the two are separate volumes
+    // in docker-compose.prod.yml and a copy-plus-unlink can half-fail. The
+    // storefront already renders a material with no file honestly, as
+    // "în curând", so asking for it again is a visible, recoverable state.
+    const access = dto.access ?? existing.access;
+    const data =
+      dto.access && dto.access !== existing.access
+        ? { ...dto, fileUrl: null, fileKey: null, fileName: null }
+        : { ...dto, ...fileColumnsFor(access, dto.fileUrl, dto.fileKey) };
+
     const updated = await writeOrTranslate(() =>
       this.prisma.material.update({
         where: { id },
-        data: dto,
+        data,
         include: withCategory,
       }),
     );
