@@ -1,46 +1,35 @@
 'use client';
 
-import { useState } from 'react';
-
-import { LeadFormModal } from './LeadFormModal';
-import type { DeliverableProduct } from '@/lib/leads';
+import { Link } from '@/i18n/navigation';
 import { track } from '@/lib/analytics';
 
 /**
- * "Comandă" trigger for group-C deliverable products (menus + protocols):
- * opens the lead-form modal in order mode, carrying the specific product so the
- * back-office lead shows exactly which service was chosen. Styled by the caller
- * via `className`.
+ * "Comandă" for a group-C product: a link to its checkout.
+ *
+ * It used to open the lead-form modal, which wrote an order the doctor saw and
+ * worked on before anybody had paid for it. There is a checkout now, and the
+ * order is written on the way to the bank instead.
+ *
+ * A client component only because of the analytics event — the navigation
+ * itself is an ordinary `<Link>`, so it works with JavaScript off, opens in a
+ * new tab on a middle click, and is a real URL somebody can be sent.
  */
 export function OrderDeliverableButton({
   code,
-  title,
   label,
   className,
 }: {
-  code: DeliverableProduct;
-  title: string;
+  code: string;
   label: string;
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
   return (
-    <>
-      <button
-        type="button"
-        className={className}
-        onClick={() => {
-          track('lead_open', { service: code });
-          setOpen(true);
-        }}
-      >
-        {label}
-      </button>
-      <LeadFormModal
-        deliverable={{ code, title }}
-        open={open}
-        onClose={() => setOpen(false)}
-      />
-    </>
+    <Link
+      href={`/checkout/deliverable/${code}`}
+      className={className}
+      onClick={() => track('checkout_open', { service: code })}
+    >
+      {label}
+    </Link>
   );
 }

@@ -10,7 +10,12 @@ import {
 
 import { Link } from '@/i18n/navigation';
 import { LeadError, leadLocale } from '@/lib/leads';
-import { checkoutIntentKey, startQuickQuestionCheckout } from '@/lib/checkout';
+import {
+  checkoutIntentKey,
+  startDeliverableCheckout,
+  startMaterialCheckout,
+  startQuickQuestionCheckout,
+} from '@/lib/checkout';
 import { describeLeadError } from '@/lib/form-errors';
 import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import { track } from '@/lib/analytics';
@@ -18,23 +23,33 @@ import { CaptchaNotice } from '@/components/ui/CaptchaNotice';
 import styles from '@/components/ui/LeadFormModal.module.css';
 
 /* ──────────────────────────────────────────────────────────────────────────
-   The EXPRESS checkout form. The question is written down and the ticket is
-   created *before* the redirect to the bank, which is the whole of decision 1
-   in `docs/shape-express-checkout.md`: pay-first has no way back into a tab
-   somebody closed, and form-first makes the worst case "a question we keep for
-   seven days and delete". The doctor sees nothing until the money lands.
+   One checkout form, three purchases.
+
+   The payer block, the terms checkbox and the currency notice are the same for
+   all three, because they are the same promise; what differs is one field and
+   one closing sentence. Two of the three write their purchase down *before* the
+   redirect, which is decision 1 in `docs/shape-express-checkout.md`: pay-first
+   has no way back into a tab somebody closed, and form-first makes the worst
+   case "something we keep for seven days and delete". A material writes nothing
+   down at all — there is nothing to write until the money lands.
 
    It borrows `LeadFormModal.module.css` rather than growing a second copy of
    the same eight rules — same fields, same states, same visual language, one
    page instead of a dialog.
    ────────────────────────────────────────────────────────────────────────── */
 
+/** Which purchase this form is opening, and what it needs to name it. */
+export type CheckoutTarget =
+  | { kind: 'express' }
+  | { kind: 'deliverable'; product: string }
+  | { kind: 'material'; slug: string };
+
 type Status = 'idle' | 'submitting' | 'redirecting' | 'error';
 
 interface FieldErrors {
   name?: string;
   email?: string;
-  question?: string;
+  text?: string;
   consent?: string;
   terms?: string;
 }
@@ -55,10 +70,25 @@ const COPY = {
     en: 'Describe the situation as concretely as you can: your child’s age, how long it has lasted, what you have already tried.',
     ru: 'Опишите ситуацию как можно конкретнее: возраст ребёнка, сколько длится, что уже пробовали.',
   },
-  consent: {
+  details: {
+    ro: 'Detalii (opțional)',
+    en: 'Details (optional)',
+    ru: 'Детали (необязательно)',
+  },
+  detailsPlaceholder: {
+    ro: 'Vârsta copilului, alergii sau alimente excluse, obiceiuri de masă, orice ar trebui să știu înainte de a începe.',
+    en: 'Your child’s age, allergies or foods to avoid, mealtime habits, anything I should know before I start.',
+    ru: 'Возраст ребёнка, аллергии или исключённые продукты, привычки в еде — всё, что важно знать до начала.',
+  },
+  consentExpress: {
     ro: 'Sunt de acord ca datele trimise aici să fie folosite pentru a-mi răspunde la întrebare.',
     en: 'I agree that the details I send here are used to answer my question.',
     ru: 'Я согласен(на), что присланные данные будут использованы, чтобы ответить на мой вопрос.',
+  },
+  consentDeliverable: {
+    ro: 'Sunt de acord ca datele trimise aici să fie folosite pentru a pregăti comanda mea.',
+    en: 'I agree that the details I send here are used to prepare my order.',
+    ru: 'Я согласен(на), что присланные данные будут использованы для подготовки моего заказа.',
   },
   required: {
     ro: 'Acest câmp este obligatoriu.',
@@ -91,22 +121,38 @@ const COPY = {
     en: 'Terms and conditions',
     ru: 'Условия использования',
   },
-  afterPayment: {
+  afterExpress: {
     ro: 'Întrebarea ajunge la medic numai după confirmarea plății. Plata se face pe pagina securizată a băncii — noi nu vedem datele cardului.',
     en: 'Your question reaches the doctor only once the payment is confirmed. You pay on the bank’s secure page; we never see your card details.',
     ru: 'Вопрос попадёт к врачу только после подтверждения оплаты. Оплата проходит на защищённой странице банка — данные карты мы не видим.',
   },
+  afterDeliverable: {
+    ro: 'Comanda ajunge la medic numai după confirmarea plății. Imediat după plată primești un link personal prin care trimiți analizele și documentele necesare. Plata se face pe pagina securizată a băncii — noi nu vedem datele cardului.',
+    en: 'Your order reaches the doctor only once the payment is confirmed. Right after paying you get a personal link for sending the test results and documents needed. You pay on the bank’s secure page; we never see your card details.',
+    ru: 'Заказ попадёт к врачу только после подтверждения оплаты. Сразу после оплаты вы получите личную ссылку, по которой пришлёте анализы и нужные документы. Оплата проходит на защищённой странице банка — данные карты мы не видим.',
+  },
+  afterMaterial: {
+    ro: 'Imediat după confirmarea plății primești linkul de descărcare, chiar pe pagina de întoarcere. Plata se face pe pagina securizată a băncii — noi nu vedem datele cardului.',
+    en: 'As soon as the payment is confirmed you get the download link, on the page you come back to. You pay on the bank’s secure page; we never see your card details.',
+    ru: 'Сразу после подтверждения оплаты вы получите ссылку на скачивание — прямо на странице возврата. Оплата проходит на защищённой странице банка — данные карты мы не видим.',
+  },
 } satisfies Record<string, Tri>;
 
-export function ExpressCheckoutForm() {
+export function CheckoutForm({ target }: { target: CheckoutTarget }) {
   const locale = leadLocale(useLocale());
   const t = (key: keyof typeof COPY) => COPY[key][locale];
   const fieldId = useId();
 
+  const isExpress = target.kind === 'express';
+  const isDeliverable = target.kind === 'deliverable';
+  // A material needs a payer and nothing else: there is no brief to write and
+  // no question to ask, only a file to hand over.
+  const hasText = isExpress || isDeliverable;
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [question, setQuestion] = useState('');
+  const [text, setText] = useState('');
   const [consent, setConsent] = useState(false);
   const [terms, setTerms] = useState(false);
   // Honeypot — a hidden field a person never sees and a bot fills.
@@ -118,17 +164,22 @@ export function ExpressCheckoutForm() {
   // `crypto.randomUUID` and `sessionStorage` are both browser-only, so the key
   // is minted after mount rather than during render. Until it exists the submit
   // button is disabled: a checkout with no intent key is one a double click
-  // would turn into two tickets.
+  // would turn into two purchases.
   const [intentKey, setIntentKey] = useState('');
   useEffect(() => setIntentKey(checkoutIntentKey()), []);
+
+  const textLimit = isExpress ? FIELD_LIMITS.question : FIELD_LIMITS.message;
 
   const validate = (): boolean => {
     const e: FieldErrors = {};
     if (!name.trim()) e.name = t('required');
     if (!email.trim()) e.email = t('required');
     else if (!isEmailLike(email)) e.email = t('invalidEmail');
-    if (!question.trim()) e.question = t('required');
-    if (!consent) e.consent = t('required');
+    // Only the EXPRESS question is required text. A menu's brief is welcome
+    // and optional: the doctor asks for what she still needs through the
+    // upload link the payment issues.
+    if (isExpress && !text.trim()) e.text = t('required');
+    if (hasText && !consent) e.consent = t('required');
     if (!terms) e.terms = t('termsRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -143,17 +194,31 @@ export function ExpressCheckoutForm() {
     if (!validate()) return;
 
     setStatus('submitting');
+    const shared = {
+      name: name.trim(),
+      email: email.trim(),
+      locale,
+      phone: phone.trim() || undefined,
+      company: company || undefined,
+      intentKey,
+    };
+
     try {
-      const session = await startQuickQuestionCheckout({
-        name: name.trim(),
-        email: email.trim(),
-        locale,
-        phone: phone.trim() || undefined,
-        question: question.trim(),
-        company: company || undefined,
-        intentKey,
-      });
-      track('checkout_start', { service: 'quick_question' });
+      const session =
+        target.kind === 'express'
+          ? await startQuickQuestionCheckout({
+              ...shared,
+              question: text.trim(),
+            })
+          : target.kind === 'deliverable'
+            ? await startDeliverableCheckout({
+                ...shared,
+                product: target.product,
+                message: text.trim() || undefined,
+              })
+            : await startMaterialCheckout({ ...shared, slug: target.slug });
+
+      track('checkout_start', { service: trackingName(target) });
       // Stay disabled: the navigation is not instant and the form must not
       // look ready to be sent again while the browser is leaving.
       setStatus('redirecting');
@@ -217,40 +282,52 @@ export function ExpressCheckoutForm() {
         autoComplete="tel"
       />
 
-      <div className={styles.field}>
-        <label htmlFor={`${fieldId}-question`} className={styles.label}>
-          {t('question')}
-        </label>
-        <textarea
-          id={`${fieldId}-question`}
-          className={styles.textarea}
-          rows={5}
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder={t('questionPlaceholder')}
-          maxLength={FIELD_LIMITS.question}
-          aria-invalid={!!errors.question}
-        />
-        {question.length > FIELD_LIMITS.question * 0.8 && (
-          <span aria-live="polite" className={styles.counter}>
-            {question.length} / {FIELD_LIMITS.question}
-          </span>
-        )}
-        {errors.question && (
-          <span className={styles.error}>{errors.question}</span>
-        )}
-      </div>
+      {hasText && (
+        <div className={styles.field}>
+          <label htmlFor={`${fieldId}-text`} className={styles.label}>
+            {isExpress ? t('question') : t('details')}
+          </label>
+          <textarea
+            id={`${fieldId}-text`}
+            className={styles.textarea}
+            rows={5}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={
+              isExpress ? t('questionPlaceholder') : t('detailsPlaceholder')
+            }
+            maxLength={textLimit}
+            aria-invalid={!!errors.text}
+          />
+          {/* Only once it matters: a counter above an empty box is noise, and
+              a box that silently stops accepting characters is worse. */}
+          {text.length > textLimit * 0.8 && (
+            <span aria-live="polite" className={styles.counter}>
+              {text.length} / {textLimit}
+            </span>
+          )}
+          {errors.text && <span className={styles.error}>{errors.text}</span>}
+        </div>
+      )}
 
-      <label className={styles.consent}>
-        <input
-          type="checkbox"
-          checked={consent}
-          onChange={(e) => setConsent(e.target.checked)}
-          aria-invalid={!!errors.consent}
-        />
-        <span>{t('consent')}</span>
-      </label>
-      {errors.consent && <span className={styles.error}>{errors.consent}</span>}
+      {hasText && (
+        <>
+          <label className={styles.consent}>
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              aria-invalid={!!errors.consent}
+            />
+            <span>
+              {isExpress ? t('consentExpress') : t('consentDeliverable')}
+            </span>
+          </label>
+          {errors.consent && (
+            <span className={styles.error}>{errors.consent}</span>
+          )}
+        </>
+      )}
 
       <label className={styles.consent}>
         <input
@@ -272,7 +349,11 @@ export function ExpressCheckoutForm() {
         {CURRENCY_NOTICE[locale as TermsLocale]}
       </p>
       <p className="text-[0.82rem] leading-relaxed text-ink-soft">
-        {t('afterPayment')}
+        {isExpress
+          ? t('afterExpress')
+          : isDeliverable
+            ? t('afterDeliverable')
+            : t('afterMaterial')}
       </p>
 
       {status === 'error' && (
@@ -296,6 +377,15 @@ export function ExpressCheckoutForm() {
       <CaptchaNotice className="mt-4" />
     </form>
   );
+}
+
+/** What the analytics event calls this purchase. No PII, ever. */
+function trackingName(target: CheckoutTarget): string {
+  return target.kind === 'express'
+    ? 'quick_question'
+    : target.kind === 'deliverable'
+      ? target.product
+      : `material:${target.slug}`;
 }
 
 function Field({

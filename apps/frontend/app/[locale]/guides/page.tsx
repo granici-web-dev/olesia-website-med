@@ -21,8 +21,10 @@ export const revalidate = 60;
    Route kept as /guides (linked from the footer) to avoid nav churn.
    Trilingual (RO default · EN · RU).
    The gate stores the address through the `newsletter` module and then hands
-   the file over on the spot — nothing is mailed. A material without a PDF shows
-   "în curând" rather than asking for an address it cannot pay back.
+   the file over on the spot — nothing is mailed. A paid material is bought at
+   `/checkout/material/<slug>` and its file is released by a download grant, so
+   nothing is mailed there either. A material without a file shows "în curând"
+   rather than selling or asking for an address it cannot pay back.
    ────────────────────────────────────────────────────────────────────────── */
 
 export async function generateMetadata({
@@ -87,8 +89,8 @@ export default async function LibraryPage({
       text: { ro: 'Caută și filtrează după vârstă și categorie.', en: 'Search and filter by age and category.', ru: 'Ищите и фильтруйте по возрасту и категории.' },
     },
     {
-      title: { ro: 'Descarcă sau comandă', en: 'Download or order', ru: 'Скачайте или закажите' },
-      text: { ro: 'Materialele gratuite cer doar emailul; cele cu plată se comandă simplu.', en: 'Free materials only ask for your email; paid ones are ordered simply.', ru: 'Для бесплатных нужен только email; платные заказываются просто.' },
+      title: { ro: 'Descarcă sau cumpără', en: 'Download or buy', ru: 'Скачайте или купите' },
+      text: { ro: 'Materialele gratuite cer doar emailul; cele cu plată se achită cu cardul și se descarcă imediat.', en: 'Free materials only ask for your email; paid ones are paid for by card and download straight away.', ru: 'Для бесплатных нужен только email; платные оплачиваются картой и скачиваются сразу.' },
     },
     {
       title: { ro: 'Citește în ritmul tău', en: 'Read at your pace', ru: 'Читайте в своём ритме' },
@@ -243,7 +245,6 @@ export default async function LibraryPage({
           materials={materials}
           categories={categories}
           ages={AGE_GROUPS}
-          contactHref={`/${locale}/contact`}
         />
       </section>
 

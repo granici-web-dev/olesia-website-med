@@ -22,7 +22,12 @@ import { biFor, type Bi } from '@/lib/i18n-types';
    subscribe` and only then hands over the file: it used to unlock optimistically
    and throw the address away, under copy promising the material would arrive by
    email (audit A6, F3). Nothing is mailed — the download happens here, and the
-   wording says so. Paid materials route to /contact until payments are wired.
+   wording says so.
+
+   A paid card links to `/checkout/material/<slug>`; a paid material's file is
+   in private storage and is released by the grant the payment mints, so there
+   is no URL here to hand over and nothing to withhold. `hasFile` is what says
+   whether a card sells or says "în curând", for free and paid alike.
    ────────────────────────────────────────────────────────────────────────── */
 
 type Locale = 'ro' | 'en' | 'ru';
@@ -34,7 +39,7 @@ const T: Record<string, Bi> = {
   age: { ro: 'Vârstă', en: 'Age', ru: 'Возраст' },
   free: { ro: 'Gratuit', en: 'Free', ru: 'Бесплатно' },
   download: { ro: 'Descarcă', en: 'Download', ru: 'Скачать' },
-  order: { ro: 'Comandă', en: 'Order', ru: 'Заказать' },
+  buy: { ro: 'Cumpără', en: 'Buy', ru: 'Купить' },
   soon: { ro: 'În curând', en: 'Coming soon', ru: 'Скоро' },
   count: { ro: 'materiale', en: 'materials', ru: 'материалов' },
   emptyTitle: { ro: 'Niciun material găsit', en: 'No materials found', ru: 'Ничего не найдено' },
@@ -108,13 +113,11 @@ export function MaterialLibrary({
   materials,
   categories,
   ages,
-  contactHref,
 }: {
   locale: Locale;
   materials: PublicMaterialDto[];
   categories: MaterialCategoryDto[];
   ages: AgeGroup[];
-  contactHref: string;
 }) {
   const lc = biFor(locale);
   /** RU falls back to RO, an empty string counting as missing — as everywhere. */
@@ -257,7 +260,10 @@ export function MaterialLibrary({
         <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((m, i) => {
             const isUnlocked = unlocked.has(m.slug);
-            const ready = !!m.fileUrl;
+            // One question for both kinds: is there a file at all. For a paid
+            // material the file is private and `hasFile` is the only thing the
+            // storefront is told about it.
+            const ready = m.hasFile;
             return (
               <Reveal key={m.slug} delay={(i % 3) * 70}>
                 <article className="group flex h-full flex-col border border-[var(--rule)] bg-paper transition-colors hover:border-sage">
@@ -301,21 +307,23 @@ export function MaterialLibrary({
                     )}
 
                     <div className="mt-6 pt-1">
-                      {m.access === 'paid' ? (
-                        <a
-                          href={contactHref}
-                          className={cardCta}
-                        >
-                          {lc(T.order)} · {priceLabel(m)}
-                        </a>
-                      ) : !ready ? (
-                        // Say "coming soon" up front. Asking for an email and
-                        // only then admitting there is no file is a bad trade
-                        // for the visitor — and most files are still missing.
+                      {!ready ? (
+                        // Say "coming soon" up front, for a paid material as
+                        // much as a free one: offering to sell a download that
+                        // does not exist is worse than admitting it is not
+                        // ready.
                         <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-ink-soft">
                           {lc(T.soon)}
                         </span>
-                      ) : isUnlocked ? (
+                      ) : m.access === 'paid' ? (
+                        <a
+                          href={`/${locale}/checkout/material/${m.slug}`}
+                          className={cardCta}
+                        >
+                          {lc(T.buy)} · {priceLabel(m)}
+                        </a>
+                      ) : (
+                        isUnlocked ? (
                         <a
                           href={m.fileUrl ?? '#'}
                           download
@@ -331,6 +339,7 @@ export function MaterialLibrary({
                         >
                           {lc(T.download)} <span aria-hidden="true" className="transition-transform group-hover:translate-y-0.5">↓</span>
                         </button>
+                        )
                       )}
                     </div>
                   </div>

@@ -4,10 +4,7 @@
  * The API base comes from `normalizeApiBase()` and must be browser-reachable.
  * CORS for the site origin is enabled server-side.
  */
-import type {
-  ContactMessageSubject,
-  DeliverableProduct as SharedDeliverableProduct,
-} from '@olesia/shared';
+import type { ContactMessageSubject } from '@olesia/shared';
 
 import { getCaptchaToken, type CaptchaAction } from './captcha';
 import { normalizeApiBase } from './api-base';
@@ -54,28 +51,6 @@ export interface MonitoringLeadInput extends PublicLeadInput {
 export interface QuickQuestionLeadInput extends PublicLeadInput {
   phone?: string;
   question: string;
-}
-
-/**
- * Group-C deliverable order (menus + protocols, brief §2). Unlike group-B this
- * is a one-off product, so the order has to carry WHICH product was chosen —
- * `product`, the stable code (e.g. `menu_7`).
- *
- * Only the code goes over the wire. The label and the price are looked up
- * server-side in the shared catalog: a public form must not be able to name its
- * own price, and the back office must never show a product name that came from
- * the internet.
- *
- * The union of codes is `@olesia/shared`'s, not a copy of it (audit A6, F8):
- * a product added to the catalog and not here would have compiled fine and
- * ordered nothing.
- */
-export type DeliverableProduct = `${SharedDeliverableProduct}`;
-
-export interface DeliverableLeadInput extends PublicLeadInput {
-  phone?: string;
-  message?: string;
-  product: DeliverableProduct;
 }
 
 export type ContactSubject = ContactMessageSubject;
@@ -127,9 +102,9 @@ async function readCode(res: Response): Promise<string> {
  * that turned every failure into the string `'error'`, so a rate limit and a
  * rejected captcha reached the visitor as "something went wrong" (audit A7).
  *
- * The response body is returned for the one caller that needs it: the EXPRESS
- * checkout, which is answered with the bank's URL to redirect to. The four
- * lead forms ignore it and are typed `void`.
+ * The response body is returned for the callers that need it: the three
+ * checkouts, each answered with the bank's URL to redirect to. The lead forms
+ * ignore it and are typed `void`.
  */
 export async function postLead<T = void>(
   path: string,
@@ -169,8 +144,3 @@ export function submitContactMessage(input: ContactMessageInput): Promise<void> 
   return postLead('/leads/contact', input, 'lead_contact');
 }
 
-export function submitDeliverableLead(
-  input: DeliverableLeadInput,
-): Promise<void> {
-  return postLead('/leads/deliverable', input, 'lead_deliverable');
-}

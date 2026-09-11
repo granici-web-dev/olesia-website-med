@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
-import type { PublicPaymentStatusDto } from '@olesia/shared';
+import type {
+  PublicPaymentStatusDto,
+  PurchaseNextStepDto,
+} from '@olesia/shared';
 
 import { Link } from '@/i18n/navigation';
 import { normalizeApiBase } from '@/lib/api-base';
-import { clearCheckoutIntent } from '@/lib/checkout';
+import {
+  checkoutIntentKey,
+  claimNextStep,
+  clearCheckoutIntent,
+} from '@/lib/checkout';
 
 /* ──────────────────────────────────────────────────────────────────────────
    What happened to a payment, asked of our API rather than believed from the
@@ -29,6 +36,15 @@ const API_BASE = normalizeApiBase(
 const POLL_MS = 3000;
 /** Three minutes of asking. The reconcile sweep finishes the job after that. */
 const MAX_ATTEMPTS = 60;
+
+/**
+ * The purchases whose return page has a link to claim. An EXPRESS question
+ * does not: what it bought is an answer, which arrives later and by email.
+ */
+const HANDS_SOMETHING_OVER: PublicPaymentStatusDto['targetType'][] = [
+  'deliverable_order',
+  'material',
+];
 
 const TERMINAL: PublicPaymentStatusDto['state'][] = [
   'paid',
@@ -83,6 +99,41 @@ const COPY = {
     ro: 'Întrebarea ta a ajuns la medic. Răspunsul vine pe email, în programul de lucru.',
     en: 'Your question has reached the doctor. The answer comes by email, during working hours.',
     ru: 'Ваш вопрос передан врачу. Ответ придёт на email в рабочее время.',
+  },
+  paidOrderBody: {
+    ro: 'Comanda ta a ajuns la medic. Următorul pas este al tău: trimite analizele și documentele prin linkul personal de mai jos.',
+    en: 'Your order has reached the doctor. The next step is yours: send your test results and documents through the personal link below.',
+    ru: 'Ваш заказ передан врачу. Следующий шаг за вами: пришлите анализы и документы по личной ссылке ниже.',
+  },
+  paidMaterialBody: {
+    ro: 'Mulțumim. Materialul tău este gata de descărcat.',
+    en: 'Thank you. Your material is ready to download.',
+    ru: 'Спасибо. Ваш материал готов к скачиванию.',
+  },
+  uploadLink: {
+    ro: 'Trimite documentele →',
+    en: 'Send your documents →',
+    ru: 'Отправить документы →',
+  },
+  downloadLink: {
+    ro: 'Descarcă materialul →',
+    en: 'Download the material →',
+    ru: 'Скачать материал →',
+  },
+  linkGoodUntil: {
+    ro: 'Linkul este personal și este valabil până la',
+    en: 'The link is personal and works until',
+    ru: 'Ссылка персональная и действует до',
+  },
+  downloadsLeft: {
+    ro: 'descărcări rămase',
+    en: 'downloads left',
+    ru: 'скачиваний осталось',
+  },
+  linkMissing: {
+    ro: 'Nu putem afișa linkul în această fereastră — se pierde dacă navigarea este privată sau dacă ai închis fila între timp. Scrie-ne numărul comenzii de mai sus și ți-l trimitem.',
+    en: 'We cannot show the link in this window: it is lost in private browsing, or if you closed the tab in between. Send us the order number above and we will send it to you.',
+    ru: 'Мы не можем показать ссылку в этом окне: она теряется в приватном режиме или если вкладка была закрыта. Пришлите нам номер заказа выше, и мы отправим ссылку.',
   },
   pendingTitle: {
     ro: 'Plata este în curs de procesare',
@@ -162,6 +213,13 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
     orderId ? 'checking' : 'not-found',
   );
   const [payment, setPayment] = useState<PublicPaymentStatusDto | null>(null);
+  /**
+   * What the buyer can do now, for the two purchases that hand something over.
+   * `undefined` while we have not asked; `null` once we have and the API would
+   * not give it — which is the private-window case, and the one the wording
+   * below has to be honest about.
+   */
+  const [nextStep, setNextStep] = useState<PurchaseNextStepDto | null>();
 
   useEffect(() => {
     if (!orderId) return;
@@ -206,8 +264,15 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
       setOutcome('known');
 
       if (TERMINAL.includes(body.state)) {
+        // Claim before the key is released, and only for the two purchases
+        // that hand something over: the key is the capability, and the whole
+        // point of using it rather than the order reference is that it never
+        // left this tab.
+        if (body.state === 'paid' && HANDS_SOMETHING_OVER.includes(body.targetType)) {
+          setNextStep(await claimNextStep(orderId, checkoutIntentKey()));
+        }
         // The purchase is finished either way. Releasing the intent key means
-        // the next question this person asks opens its own session instead of
+        // the next thing this person buys opens its own session instead of
         // resuming a session that is over.
         clearCheckoutIntent();
         return;
@@ -258,6 +323,8 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
     payment.state === 'refunded' || payment.state === 'partially_refunded';
   const settled = TERMINAL.includes(payment.state);
 
+  const handsOver = HANDS_SOMETHING_OVER.includes(payment.targetType);
+
   const title = paid
     ? t('paidTitle')
     : refunded
@@ -266,7 +333,11 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
         ? t('failedTitle')
         : t('pendingTitle');
   const body = paid
-    ? t('paidBody')
+    ? payment.targetType === 'deliverable_order'
+      ? t('paidOrderBody')
+      : payment.targetType === 'material'
+        ? t('paidMaterialBody')
+        : t('paidBody')
     : refunded
       ? t('refundedBody')
       : settled
@@ -280,6 +351,13 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
       locale={locale}
       retry={settled && !paid && !refunded}
       details={
+        <>
+          {/* Only once the claim has actually been attempted: the block
+              flickering in as "we cannot show the link" while the request is
+              still open would tell somebody who just paid the wrong thing. */}
+          {paid && handsOver && nextStep !== undefined && (
+            <NextStep step={nextStep} locale={locale} />
+          )}
         <dl className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-[0.9375rem]">
           <Row label={t('order')}>
             <span className="mono text-[0.875rem]">{payment.orderId}</span>
@@ -297,8 +375,63 @@ export function PaymentResult({ orderId }: { orderId: string | null }) {
             </Row>
           )}
         </dl>
+        </>
       }
     />
+  );
+}
+
+/**
+ * The link the payment just bought, or an honest sentence about why it is not
+ * here.
+ *
+ * The link is claimed with the intent key, which lives in this tab's
+ * `sessionStorage` — so a buyer in a private window, or one who came back in a
+ * different browser, has no key to present and gets no link. That is the
+ * accepted cost of not making the order reference the capability (shape open
+ * question 3), and the wording says what to do instead rather than pretending
+ * something went wrong.
+ *
+ * The anchor is a plain link, not a fetch: the token is in the URL and the
+ * browser is better at downloading a file than we are.
+ */
+function NextStep({
+  step,
+  locale,
+}: {
+  step: PurchaseNextStepDto | null;
+  locale: keyof Tri;
+}) {
+  const t = (key: keyof typeof COPY) => COPY[key][locale];
+
+  if (!step) {
+    return (
+      <p className="mt-8 max-w-[52ch] rounded-xl border border-[var(--rule)] bg-[var(--cream-2)] p-5 text-[0.9375rem] leading-relaxed text-ink-soft text-pretty">
+        {t('linkMissing')}
+      </p>
+    );
+  }
+
+  const until = new Date(step.expiresAt).toLocaleDateString(
+    INTL_LOCALE[locale],
+    { dateStyle: 'long' },
+  );
+
+  return (
+    <div className="mt-8 max-w-[52ch] rounded-xl border border-[var(--rule)] bg-[var(--cream-2)] p-6">
+      <a
+        href={step.url}
+        className="inline-flex items-center bg-ink px-[22px] py-[13px] text-[13px] font-medium uppercase tracking-[0.04em] text-cream transition-colors hover:bg-sage"
+      >
+        {step.kind === 'material_download' ? t('downloadLink') : t('uploadLink')}
+      </a>
+      <p className="mt-4 text-[0.82rem] leading-relaxed text-ink-soft text-pretty">
+        {t('linkGoodUntil')} {until}
+        {step.downloadsLeft !== null &&
+          ` · ${step.downloadsLeft} ${t('downloadsLeft')}`}
+        .
+      </p>
+    </div>
   );
 }
 
@@ -345,7 +478,7 @@ function Outcome({
       <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
         {retry && (
           <Link
-            href="/quick-question/checkout"
+            href="/checkout/express"
             className="underline underline-offset-4"
           >
             {t('tryAgain')} →

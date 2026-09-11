@@ -17,6 +17,11 @@ import { siteUrl } from '@/lib/site-url';
  * they were excluded on the day they landed rather than on the day somebody
  * noticed an order id in a search result.
  *
+ * `/checkout/*` is a step inside somebody's purchase rather than a page to
+ * arrive at from a search result, and it is `force-dynamic`, so a crawler
+ * walking every product and every material would put a request to the API
+ * behind each one for nothing. It sends `noindex` of its own as well.
+ *
  * Both prefixes are written once per locale as well as bare, because every
  * route on this site carries a locale prefix: the middleware redirects
  * `/incarcare/abc` to `/ro/incarcare/abc`, so the bare rule this file used to
@@ -26,7 +31,7 @@ import { siteUrl } from '@/lib/site-url';
  * ignores, and its only effect here was to publish whatever `siteUrl()`
  * happened to resolve to as the canonical origin of the site.
  */
-const PRIVATE_PREFIXES = ['/incarcare/', '/payment/'] as const;
+const PRIVATE_PREFIXES = ['/incarcare/', '/payment/', '/checkout/'] as const;
 
 export default function robots(): MetadataRoute.Robots {
   return {

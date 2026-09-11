@@ -13,7 +13,7 @@ import { track } from '@/lib/analytics';
  *
  * The two services behind it now go different ways. **Monitorizare** is on
  * request — no price, no checkout — so it still opens the lead-form modal.
- * **Întrebare EXPRESS** is bought: it navigates to `/quick-question/checkout`,
+ * **Întrebare EXPRESS** is bought: it navigates to `/checkout/express`,
  * where the question and the payment are collected together. Sending it to the
  * modal instead would take a medical question and promise an answer nobody had
  * paid for.
@@ -32,7 +32,7 @@ export function BookGroupBButton({
   if (service === 'quick_question') {
     return (
       <Link
-        href="/quick-question/checkout"
+        href="/checkout/express"
         className={className}
         onClick={() => track('checkout_open', { service })}
       >

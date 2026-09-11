@@ -4,6 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 
 import { pageMetadata } from '@/lib/page-metadata';
 import { biFor, type Bi } from '@/lib/i18n-types';
+import { DELIVERABLE_COPY } from '@/lib/deliverable-content';
 import { DELIVERABLE_CATALOG } from '@olesia/shared';
 import { api, loc, serviceTag } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
@@ -13,7 +14,7 @@ import { BookGroupBButton } from '@/components/ui/BookGroupBButton';
 import { OrderDeliverableButton } from '@/components/ui/OrderDeliverableButton';
 import { FreeConsult } from '@/components/sections/FreeConsult';
 import { serviceLink } from '@/components/ui/cta';
-import type { LeadService, DeliverableProduct } from '@/lib/leads';
+import type { LeadService } from '@/lib/leads';
 import {
   SERVICE_INCLUDED,
   fillIncluded,
@@ -52,70 +53,6 @@ export async function generateMetadata({
   });
 }
 
-/* Group C — deliverable products (brief §2): pay → short form/upload → a
-   written/PDF result. No calendar, no portal subscription. Surfaced here as a
-   catalog section with manual ordering (→ /contact) until the dedicated order
-   form + delivery flow lands.
-
-   Only the copy lives here. The price comes from `DELIVERABLE_CATALOG`, the
-   same constant the API stamps onto an order, so this page and the order
-   confirmation cannot quote different numbers. Making group C editable from the
-   back office is a separate step. */
-const DELIVERABLE_COPY: Record<DeliverableProduct, { tag: Bi; title: Bi; desc: Bi }> = {
-  menu_7: {
-    tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: { ro: 'Meniu personalizat · 7 zile', en: 'Personalized menu · 7 days', ru: 'Персональное меню · 7 дней' },
-    desc: {
-      ro: 'Plan alimentar personalizat pe 7 zile, livrat în scris după un formular scurt.',
-      en: 'A personalized 7-day meal plan, delivered in writing after a short form.',
-      ru: 'Персональный план питания на 7 дней — присылается письменно после короткой формы.',
-    },
-  },
-  menu_14: {
-    tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: { ro: 'Meniu personalizat · 14 zile', en: 'Personalized menu · 14 days', ru: 'Персональное меню · 14 дней' },
-    desc: {
-      ro: 'Plan alimentar personalizat pe 14 zile, cu variație și liste de cumpărături.',
-      en: 'A personalized 14-day meal plan, with variety and shopping lists.',
-      ru: 'Персональный план питания на 14 дней — с разнообразием и списками покупок.',
-    },
-  },
-  menu_30: {
-    tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: { ro: 'Meniu personalizat · 30 zile', en: 'Personalized menu · 30 days', ru: 'Персональное меню · 30 дней' },
-    desc: {
-      ro: 'Plan alimentar personalizat pe 30 de zile, pentru obiective de durată.',
-      en: 'A personalized 30-day meal plan, for longer-term goals.',
-      ru: 'Персональный план питания на 30 дней — для долгосрочных целей.',
-    },
-  },
-  protocol_pednutri: {
-    tag: { ro: 'Protocol', en: 'Protocol', ru: 'Протокол' },
-    title: {
-      ro: 'Protocol individualizat pediatrico-nutrițional',
-      en: 'Individual pediatric-nutrition protocol',
-      ru: 'Индивидуальный педиатрическо-нутрициологический протокол',
-    },
-    desc: {
-      ro: 'Protocol individualizat pe baza informațiilor și documentelor trimise, livrat în scris.',
-      en: 'An individualized protocol built from the information and documents you send, delivered in writing.',
-      ru: 'Индивидуальный протокол на основе присланных данных и документов — присылается письменно.',
-    },
-  },
-  protocol_complementary: {
-    tag: { ro: 'Protocol', en: 'Protocol', ru: 'Протокол' },
-    title: {
-      ro: 'Protocol individualizat · alimentație complementară (sugari)',
-      en: 'Individual complementary-feeding protocol (infants)',
-      ru: 'Индивидуальный протокол прикорма (для грудничков)',
-    },
-    desc: {
-      ro: 'Protocol de diversificare individualizat pentru sugari, livrat în scris.',
-      en: 'An individualized complementary-feeding protocol for infants, delivered in writing.',
-      ru: 'Индивидуальный протокол введения прикорма для грудничков — присылается письменно.',
-    },
-  },
-};
 
 export default async function PricingPage({
   params,
@@ -311,7 +248,6 @@ export default async function PricingPage({
                   </div>
                   <OrderDeliverableButton
                     code={entry.code}
-                    title={lc(copy.title)}
                     label={td.order}
                     className="mono inline-flex cursor-pointer items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
                   />

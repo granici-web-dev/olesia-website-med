@@ -175,6 +175,23 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
+  /**
+   * The EXPRESS checkout used to live at `/<locale>/quick-question/checkout`
+   * and now lives at `/<locale>/checkout/express`, along with the other two
+   * purchases. Permanent, and per locale, because the old path was live: it
+   * is what `BookGroupBButton` linked to, what the "try again" link on a
+   * failed payment pointed at, and what anybody who bookmarked the page mid
+   * purchase still holds.
+   */
+  async redirects() {
+    return [
+      {
+        source: '/:locale(ro|en|ru)/quick-question/checkout',
+        destination: '/:locale/checkout/express',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

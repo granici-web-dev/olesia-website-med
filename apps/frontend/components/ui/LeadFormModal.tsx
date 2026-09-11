@@ -9,21 +9,13 @@ import {
   leadLocale,
   submitMonitoringLead,
   submitQuickQuestionLead,
-  submitDeliverableLead,
   type LeadService,
-  type DeliverableProduct,
 } from '@/lib/leads';
 import { track } from '@/lib/analytics';
 import { describeLeadError } from '@/lib/form-errors';
 import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import styles from './LeadFormModal.module.css';
 import { CaptchaNotice } from './CaptchaNotice';
-
-/** Group-C order context — the specific product being ordered. */
-export interface DeliverableContext {
-  code: DeliverableProduct;
-  title: string;
-}
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -34,27 +26,31 @@ interface FieldErrors {
   consent?: string;
 }
 
+/**
+ * The two group-B requests that are not purchases: "Monitorizare" and the free
+ * "Întrebare rapidă".
+ *
+ * It had a third mode, for group-C product orders, which wrote an order the
+ * doctor saw and worked on before anybody paid for it. Ordering goes through
+ * `/checkout/deliverable/<product>` now, and this keeps the two forms that are
+ * genuinely requests rather than sales.
+ */
 export function LeadFormModal({
   service,
-  deliverable,
   open,
   onClose,
 }: {
   service?: LeadService;
-  deliverable?: DeliverableContext;
   open: boolean;
   onClose: () => void;
 }) {
   const t = useTranslations('leadForm');
   const locale = leadLocale(useLocale());
   const fieldId = useId();
-  const isDeliverable = !!deliverable;
   const isQuick = service === 'quick_question';
-  const copy = isDeliverable ? 'deliverable' : isQuick ? 'quick' : 'monitoring';
-  // Header title: for a product order, show the exact product name so the user
-  // sees what they're ordering; otherwise the per-service i18n title.
-  const headerTitle = deliverable ? deliverable.title : t(`${copy}.title`);
-  const trackId = service ?? deliverable?.code ?? 'lead';
+  const copy = isQuick ? 'quick' : 'monitoring';
+  const headerTitle = t(`${copy}.title`);
+  const trackId = service ?? 'lead';
   // The EXPRESS question is the API's longest field; a message is the shorter
   // one. Both caps mirror `create-lead.dto.ts` so the box cannot collect text
   // the server will refuse (audit A6, F9).
@@ -115,13 +111,7 @@ export function LeadFormModal({
         company: company || undefined,
         phone: phone.trim() || undefined,
       };
-      if (isDeliverable) {
-        await submitDeliverableLead({
-          ...shared,
-          message: text.trim() || undefined,
-          product: deliverable!.code,
-        });
-      } else if (isQuick) {
+      if (isQuick) {
         await submitQuickQuestionLead({ ...shared, question: text.trim() });
       } else {
         await submitMonitoringLead({
