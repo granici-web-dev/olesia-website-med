@@ -581,7 +581,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
-| A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[ ]` |
+| A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[>]` architect + shape 2026-09-11, craft в работе |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
 | A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[ ]` |
@@ -989,6 +989,23 @@ working-hours, subscriptions, about, faq, deliverable-orders). Тесты на
 требований к сайту мерчанта из `/checkout/` пропала, её актуальное место
 спросить у `ecom@maib.md`.
 
+Shape 2026-09-11 (`docs/shape-express-checkout.md`) утверждён с пятью решениями:
+(1) порядок **разворачивается против текста 12a**: сначала форма вопроса и
+тикет в новом статусе `awaiting_payment`, привязанный к `Payment` через
+`targetId`, потом редирект в банк; pay-first без SMTP не имеет пути возврата
+для закрытой вкладки, а требование «ответ только после оплаты» выполняется
+невидимостью неоплаченного тикета для врача; (2) неоплаченные тикеты
+удаляются через семь дней, запись в `/gdpr`; (3) юрлицо переезжает в env API
+(`LEGAL_ENTITY_NAME`, `IDNO`, `ADDRESS`) и публичный `/contacts`, константы
+фронта удаляются, но в `REQUIRED_IN_PRODUCTION` не входит: чекаут отвечает
+`503 legal_entity_missing`, пока данных нет; (4) SMTP становится блокером
+запуска платежей, чек банка обязателен; (5) `PAYMENT_CURRENCY` только вне
+production, в production всегда EUR из каталога. Находки shape: `amount` в
+`StartPaymentInput` от вызывающего, публичный маршрут читает цену из каталога;
+`dueAt` становится nullable и стартует от оплаты; `markTargetPaid` через
+условный `updateMany` по `status: awaiting_payment`, повторный callback не
+откроет отвеченный тикет; guard-ы §18 внутри `start()`.
+
 **12b** `[ ]` `/rigorous craft` и живой прогон: API на туннеле, сайт локально,
 sandbox-карта, полный путь EXPRESS → банк → возврат → статус `paid` в бэк-офисе,
 рефанд из бэк-офиса, повторный заход на страницу возврата с чужим `orderId`.
@@ -1123,7 +1140,8 @@ CI не собирает Docker-образ, поэтому поломка обр
   событии. Пока API живёт на временном туннеле, вебхук после этого всё равно
   придётся пересоздавать при переезде на хостинг.
 - `[~]` График работы (`program de lucru`).
-- `[~]` SMTP / рассылка (предложен Brevo) и ящик на домене.
+- `[~]` SMTP / рассылка (предложен Brevo) и ящик на домене. **С 2026-09-11 это
+  блокер запуска платежей**: банк требует письмо-подтверждение оплаты.
 - `[~]` Срок хранения медицинских файлов (сейчас плейсхолдер 180 дней) и срок
   хранения данных плательщика в `rawCallback` платежа (сейчас бессрочно).
 - `[~]` Контент: статьи, PDF для библиотеки, отзывы, тексты услуг, остальные
