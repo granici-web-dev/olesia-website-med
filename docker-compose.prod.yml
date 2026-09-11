@@ -40,14 +40,19 @@ services:
       dockerfile: docker/Dockerfile.caddy
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     environment:
       CADDY_API_HOST: ${CADDY_API_HOST:?set CADDY_API_HOST}
       CADDY_ADMIN_HOST: ${CADDY_ADMIN_HOST:?set CADDY_ADMIN_HOST}
-      # An empty ACME_EMAIL becomes the literal `internal`, which makes Caddy
-      # issue its own certificate instead of asking Let's Encrypt — correct for
-      # a local acceptance run, wrong for the server.
-      CADDY_TLS: ${ACME_EMAIL:-internal}
+      # `internal` makes Caddy issue its own certificate instead of asking
+      # Let's Encrypt, which is what a local acceptance run needs and what a
+      # public host must never get. It used to be the default for an empty
+      # ACME_EMAIL, so a server deployed from a half-filled .env would answer
+      # every browser with a self-signed certificate, and the bank's callback
+      # would fail the TLS handshake without a word anywhere (audit A11, M8).
+      # Now the variable has to be set, to an address or to `internal`.
+      CADDY_TLS: ${ACME_EMAIL:?set ACME_EMAIL to an address, or to `internal` for a local run}
     ports:
       - '80:80'
       - '443:443'
@@ -65,6 +70,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
+      # Log timestamps and `now()` in the timezone the practice works in. Every
+      # date the API computes carries its own zone (working-hours, the EXPRESS
+      # clock); this is for whoever is reading the logs at the time.
+      TZ: ${BACKUP_TZ:-Europe/Chisinau}
+    # Docker's default is 64 MB of shared memory, and Postgres uses it for hash
+    # joins and parallel workers. The dashboard's aggregate over appointments
+    # is the query that would meet it first, and the error it raises there
+    # ("could not resize shared memory segment") reads like a disk fault.
+    shm_size: 256m
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -96,6 +110,14 @@ services:
 
       UPLOADS_DIR: /app/uploads
       PRIVATE_UPLOADS_DIR: /app/private-uploads
+      # What /health reads to say whether last night's backup happened. The
+      # `backups` volume is mounted read-only below, and this is the only file
+      # the API opens in it.
+      BACKUP_STATUS_FILE: /backups/last-run.json
+
+      # Log timestamps in the practice's own time. Nothing the API computes
+      # depends on it: every date it formats passes an explicit timeZone.
+      TZ: ${BACKUP_TZ:-Europe/Chisinau}
 
       # Long random values, different from each other. Rotating them logs
       # everyone out, which is the point.
@@ -141,13 +163,27 @@ services:
     volumes:
       - uploads:/app/uploads
       - private_uploads:/app/private-uploads
+      # Read-only, for one file: the backup status /health reports on.
+      - backups:/backups:ro
+    # A Node process with no ceiling is a Node process that takes the database
+    # down with it when a request goes wrong. 768 MB is several times the
+    # working set (the largest single thing it holds is a 50 MB video upload
+    # buffered by multer) and well under any host worth running this on.
+    mem_limit: 768m
     healthcheck:
+      # Deliberately NOT `r.ok`: /health answers 503 when the backup is stale
+      # too, and a backup that failed last night must not stop Caddy from
+      # starting after a reboot — which is exactly what `depends_on:
+      # service_healthy` would do with a simple status check. The container
+      # gate asks the narrower question, "can this API serve a request", and
+      # the stale backup is left to the uptime monitor, which is what reads
+      # the endpoint's own verdict (docs/deployment.md, "Observability").
       test:
         [
           'CMD',
           'node',
           '-e',
-          "fetch('http://localhost:3333/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+          "fetch('http://localhost:3333/health').then(r=>r.json()).then(b=>process.exit(b.checks.db==='pass'&&b.checks.storage==='pass'?0:1)).catch(()=>process.exit(1))",
         ]
       interval: 30s
       timeout: 5s

@@ -58,6 +58,14 @@ const REQUIRED_IN_PRODUCTION = [
   'PRIVATE_UPLOADS_DIR',
   'PUBLIC_API_URL',
   'PUBLIC_SITE_URL',
+  // Two more with the same shape, found by audit A11 (M11). CORS_ORIGINS falls
+  // back to two localhost origins, so a deployment that forgot it answers the
+  // real back office with a CORS error and the developer's laptop with a
+  // session; UPLOADS_DIR falls back to the working directory, which is inside
+  // the container and empties on the next deploy, taking every image the
+  // client uploaded with it.
+  'CORS_ORIGINS',
+  'UPLOADS_DIR',
 ] as const;
 
 function requireProductionEnv(): void {
