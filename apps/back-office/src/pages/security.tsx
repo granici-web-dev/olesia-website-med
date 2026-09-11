@@ -15,6 +15,7 @@ import { http } from '@/api/http';
 import { disableTotp, enableTotp, startTotpEnrolment } from '@/api/auth';
 import { ChangePasswordForm } from '@/auth/change-password-form';
 import { ro } from '@/i18n/ro';
+import { copyToClipboard } from '@/lib/clipboard';
 
 /* Account security — enrolling in and turning off two-factor authentication
    (client answers v2 §10). Enrolment is deliberately three steps: scan, prove a
@@ -71,9 +72,11 @@ export function SecurityPage() {
     onError: () => toast.error(t.invalidCode),
   });
 
+  // These are shown once. A rejected write with no message would leave the
+  // doctor believing she had saved the only way back into her own account.
   const copyCodes = async () => {
     if (!recoveryCodes) return;
-    await navigator.clipboard.writeText(recoveryCodes.join('\n'));
+    if (!(await copyToClipboard(recoveryCodes.join('\n')))) return;
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

@@ -2,10 +2,11 @@ import * as React from 'react';
 import { useForm, Controller, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { History, Loader2 } from 'lucide-react';
+import { AlertTriangle, History, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/common/page-header';
+import { EmptyState } from '@/components/common/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,10 +24,7 @@ import {
   fromAbout,
   type AboutFormValues as FormValues,
 } from '@/features/about/form-schema';
-import {
-  StatsEditor,
-  CredentialsEditor,
-} from '@/features/about/block-editors';
+import { StatsEditor, CredentialsEditor } from '@/features/about/block-editors';
 
 const a = ro.about;
 
@@ -49,7 +47,7 @@ const LANG_SUFFIX: Record<Lang, 'Ro' | 'En' | 'Ru'> = {
 
 export function AboutPage() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: aboutQueryKey,
     queryFn: fetchAbout,
   });
@@ -107,6 +105,30 @@ export function AboutPage() {
 
   if (isLoading) {
     return <AboutSkeleton />;
+  }
+
+  // `updateAbout` sends the whole page, so an editor opened on a failed read
+  // would blank the public page on the first Salvează. No read, no editor.
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title={a.title} subtitle={a.subtitle} />
+        <Card className="py-0">
+          <EmptyState
+            icon={AlertTriangle}
+            title={a.loadErrorTitle}
+            description={a.loadErrorBody}
+            className="py-16"
+            action={
+              <Button variant="outline" onClick={() => refetch()}>
+                <RefreshCw />
+                {ro.common.retry}
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
   }
 
   const titleError = form.formState.errors.titleRo;

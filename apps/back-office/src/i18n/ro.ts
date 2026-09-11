@@ -148,6 +148,7 @@ export const ro = {
     filter: 'Filtrează',
     retry: 'Reîncearcă',
     confirm: 'Confirmă',
+    copyFailed: 'Nu am putut copia. Selectează textul și copiază-l manual.',
     back: 'Înapoi',
     all: 'Toate',
     new: 'Nou',
@@ -535,6 +536,11 @@ export const ro = {
 
     editor: {
       backToList: 'Înapoi la articole',
+      loadErrorTitle: 'Articolul nu a putut fi încărcat',
+      loadErrorBody:
+        'Nu am citit textul existent, așa că nu îl deschidem pentru editare: salvarea unui formular gol l-ar înlocui cu nimic.',
+      notFoundTitle: 'Articolul nu a fost găsit',
+      notFoundBody: 'Articolul accesat nu există sau a fost șters.',
       newTitle: 'Articol nou',
       editTitle: 'Editează articolul',
       saveDraft: 'Salvează ciorna',
@@ -774,6 +780,9 @@ export const ro = {
       emptyBody: 'Anamnezele, notele, rețetele și documentele apar aici, în ordine cronologică.',
       addEntry: 'Adaugă înregistrare',
       interactionLabel: 'Interacțiune',
+      loadErrorTitle: 'Istoricul nu a putut fi încărcat',
+      loadErrorBody:
+        'Dosarul nu este gol, doar nu am reușit să îl citim. Reîncearcă înainte de a trage o concluzie clinică.',
     },
 
     anamnesis: {
@@ -906,7 +915,6 @@ export const ro = {
       documentUploaded: 'Documentul a fost încărcat.',
       downloadStarted: 'Descărcarea a început.',
       downloadFailed: 'Descărcarea a eșuat.',
-      mockNoFile: 'Fișier indisponibil în modul demo.',
       leadAdded: 'Lead-ul a fost adăugat ca pacient.',
       leadLinked: 'Lead-ul a fost legat de dosarul existent.',
       error: 'Acțiunea a eșuat. Încearcă din nou.',
@@ -1076,6 +1084,8 @@ export const ro = {
     noLink:
       'Pacientul nu are încă un link de încărcare. Generează unul și trimite-i-l — poate încărca analize și documente fără cont.',
     noDocuments: 'Pacientul nu a trimis încă niciun document.',
+    loadError:
+      'Nu am putut verifica dacă pacientul are un link de încărcare. Reîncearcă.',
 
     state: {
       validUntil: 'Valabil până la',
@@ -1095,10 +1105,20 @@ export const ro = {
       deleteDocument: 'Șterge documentul',
     },
 
+    confirm: {
+      revokeTitle: 'Închizi linkul de încărcare?',
+      revokeBody:
+        'Pacientul nu va mai putea încărca documente prin acest link. Documentele deja trimise rămân în dosar, iar un link nou se poate genera oricând.',
+      revokeCta: 'Închide linkul',
+      deleteDocumentTitle: 'Ștergi documentul?',
+      deleteDocumentBody:
+        'Fișierul trimis de pacient se șterge definitiv de pe server. Acțiunea nu poate fi anulată.',
+      deleteDocumentCta: 'Șterge definitiv',
+    },
+
     toast: {
       issued: 'Linkul a fost generat.',
       copied: 'Linkul a fost copiat.',
-      copyFailed: 'Nu am putut copia linkul. Selectează-l manual.',
       sent: 'Linkul a fost trimis pe email.',
       notSent:
         'Emailul nu a putut fi trimis (serverul de email nu este configurat). Copiază linkul și trimite-l tu.',
@@ -1179,6 +1199,8 @@ export const ro = {
       copy: 'Copiază link',
       copied: 'Linkul de descărcare a fost copiat.',
       none: 'Nu există un link activ. Un link nou se deschide doar printr-o nouă achiziție.',
+      loadError:
+        'Nu am putut verifica linkul de descărcare. Nu spune clientului că nu are acces până nu reîncerci.',
       revoke: 'Retrage accesul',
       revoked: 'Accesul a fost retras.',
       revokeTitle: 'Retragi accesul la material?',
@@ -1615,6 +1637,9 @@ export const ro = {
     noImages: 'Nicio imagine adăugată.',
     required: 'Câmp obligatoriu',
     missingTitle: 'Adaugă un titlu (RO) înainte de a salva.',
+    loadErrorTitle: 'Pagina nu a putut fi încărcată',
+    loadErrorBody:
+      'Nu am citit conținutul existent, așa că nu îl deschidem pentru editare: salvarea unui formular gol ar goli pagina de pe site.',
     toast: {
       saved: 'Pagina „Despre noi” a fost salvată.',
       imageTooLarge: 'Imaginea depășește 5 MB.',
@@ -2099,6 +2124,10 @@ export const ro = {
       empty: 'Nicio categorie încă.',
       required: 'Câmp obligatoriu',
       close: 'Închide',
+      deleteTitle: 'Ștergi categoria?',
+      deleteBody:
+        'Categoria poate fi ștearsă doar dacă niciun material nu mai este pus sub ea.',
+      deleteCta: 'Șterge',
     },
   },
 

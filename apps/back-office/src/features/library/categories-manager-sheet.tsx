@@ -10,6 +10,16 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,6 +60,7 @@ export function MaterialCategoriesSheet({
   const [nameRo, setNameRo] = React.useState('');
   const [nameEn, setNameEn] = React.useState('');
   const [nameRu, setNameRu] = React.useState('');
+  const [deleting, setDeleting] = React.useState<MaterialCategory | null>(null);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: materialCategoriesQueryKey });
@@ -77,6 +88,7 @@ export function MaterialCategoriesSheet({
     mutationFn: (id: string) => deleteMaterialCategory(id),
     onSuccess: () => {
       toast.success(t.toast.categoryDeleted);
+      setDeleting(null);
       invalidate();
     },
     onError: (err) => {
@@ -127,9 +139,14 @@ export function MaterialCategoriesSheet({
                       className="size-8 shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                       aria-label={ro.common.delete}
                       disabled={deleteMutation.isPending}
-                      onClick={() => deleteMutation.mutate(c.id)}
+                      onClick={() => setDeleting(c)}
                     >
-                      <Trash2 className="size-4" />
+                      {deleteMutation.isPending &&
+                      deleteMutation.variables === c.id ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-4" />
+                      )}
                     </Button>
                   </li>
                 );
@@ -189,6 +206,45 @@ export function MaterialCategoriesSheet({
           </Button>
         </div>
       </SheetContent>
+
+      <AlertDialog
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{f.deleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleting && (
+                <>
+                  <span className="font-medium text-foreground">
+                    {deleting.nameRo}
+                  </span>{' '}
+                  — {f.deleteBody}
+                  {(countByCategory[deleting.id] ?? 0) > 0 && (
+                    <> ({f.count(countByCategory[deleting.id] ?? 0)})</>
+                  )}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              {ro.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                if (deleting) deleteMutation.mutate(deleting.id);
+              }}
+            >
+              {f.deleteCta}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }

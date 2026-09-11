@@ -1,20 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban, Download, Loader2 } from 'lucide-react';
+import { Ban, Download, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ConfirmAction } from '@/components/common/confirm-action';
 import { useAuth } from '@/auth/auth-context';
+import { copyToClipboard } from '@/lib/clipboard';
 import { ro } from '@/i18n/ro';
 
 import {
@@ -44,7 +35,12 @@ export function MaterialGrantPanel({ payment }: { payment: Payment }) {
   const queryClient = useQueryClient();
   const { hasRole } = useAuth();
 
-  const { data: grant, isLoading } = useQuery({
+  const {
+    data: grant,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: materialGrantQueryKey(payment.id),
     queryFn: () => fetchMaterialGrant(payment.id),
     // Only a paid material has one. Asking about anything else would be a
@@ -63,7 +59,8 @@ export function MaterialGrantPanel({ payment }: { payment: Payment }) {
     onError: () => toast.error(ro.payments.toast.error),
   });
 
-  if (payment.targetType !== 'material' || payment.state !== 'paid') return null;
+  if (payment.targetType !== 'material' || payment.state !== 'paid')
+    return null;
 
   return (
     <div className="space-y-2">
@@ -76,6 +73,19 @@ export function MaterialGrantPanel({ payment }: { payment: Payment }) {
           <Loader2 className="size-3.5 animate-spin" />
           {ro.common.loading}
         </p>
+      ) : isError ? (
+        // Not the same sentence as `none`: telling a buyer who paid that her
+        // link is gone, when in fact we could not ask, sends her to buy the
+        // material a second time.
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground text-pretty">
+            {t.loadError}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw />
+            {ro.common.retry}
+          </Button>
+        </div>
       ) : !grant ? (
         // A refund revokes the grant, and so does the button below. Saying
         // which is not this panel's job; saying that there is no live link,
@@ -97,23 +107,19 @@ export function MaterialGrantPanel({ payment }: { payment: Payment }) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                navigator.clipboard.writeText(grant.url);
-                toast.success(t.copied);
+              onClick={async () => {
+                if (await copyToClipboard(grant.url)) toast.success(t.copied);
               }}
             >
               {t.copy}
             </Button>
 
             {/* Behind a dialog, because it destroys a capability somebody
-                paid for and there is no undo — the buyer would have to buy it
-                again. The pattern is the one `appointment-detail-sheet.tsx`
-                uses; folding the three copies into one component is `PLAN.md`
-                13e, and doing it here would touch two files this change has
-                no business in. */}
+                paid for and there is no undo: the buyer would have to buy it
+                again. */}
             {hasRole(['admin']) && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <ConfirmAction
+                trigger={
                   <Button
                     variant="ghost"
                     size="sm"
@@ -127,25 +133,14 @@ export function MaterialGrantPanel({ payment }: { payment: Payment }) {
                     )}
                     {t.revoke}
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t.revokeTitle}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t.revokeBody}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => revoke.mutate()}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      {t.revoke}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                }
+                title={t.revokeTitle}
+                body={t.revokeBody}
+                cta={t.revoke}
+                pending={revoke.isPending}
+                onConfirm={() => revoke.mutate()}
+                destructive
+              />
             )}
           </div>
         </div>

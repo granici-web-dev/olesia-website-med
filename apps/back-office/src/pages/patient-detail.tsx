@@ -13,6 +13,7 @@ import {
   Pencil,
   Pill,
   Plus,
+  RefreshCw,
   ShieldCheck,
   Trash2,
   UploadCloud,
@@ -21,17 +22,13 @@ import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/common/page-header';
 import { EmptyState } from '@/components/common/empty-state';
+import { ConfirmAction } from '@/components/common/confirm-action';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { PatientPayments } from '@/features/payments/patient-payments';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,12 +38,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 import { paths } from '@/config/routes';
 
-import { ConsentLine, EntryCard, InteractionItem, Timeline } from '@/features/patients/timeline';
+import {
+  ConsentLine,
+  EntryCard,
+  InteractionItem,
+  Timeline,
+} from '@/features/patients/timeline';
 import { PatientFormSheet } from '@/features/patients/patient-form-sheet';
 import { EntryFormSheet } from '@/features/patients/entry-form-sheet';
 import { DocumentUploadSheet } from '@/features/patients/document-upload-sheet';
@@ -98,9 +100,8 @@ export function PatientDetailPage() {
     entry: PatientEntryDto | null;
     defaultType: EditableType;
   } | null>(null);
-  const [pendingDelete, setPendingDelete] = React.useState<PatientEntryDto | null>(
-    null,
-  );
+  const [pendingDelete, setPendingDelete] =
+    React.useState<PatientEntryDto | null>(null);
   const [downloadingId, setDownloadingId] = React.useState<string | null>(null);
 
   const invalidate = () => {
@@ -147,13 +148,8 @@ export function PatientDetailPage() {
     try {
       await downloadDocument(id, entry);
       toast.success(t.toast.downloadStarted);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : '';
-      toast.error(
-        msg.startsWith('mock_no_file')
-          ? t.toast.mockNoFile
-          : t.toast.downloadFailed,
-      );
+    } catch {
+      toast.error(t.toast.downloadFailed);
     } finally {
       setDownloadingId(null);
     }
@@ -164,24 +160,45 @@ export function PatientDetailPage() {
   const openEditEntry = (entry: PatientEntryDto) =>
     setEntrySheet({
       entry,
-      defaultType: (entry.type === 'document' ? 'note' : entry.type) as EditableType,
+      defaultType: (entry.type === 'document'
+        ? 'note'
+        : entry.type) as EditableType,
     });
 
+  // A 404 is a dossier that is gone, and the doctor should go back to the list.
+  // Anything else is our side failing, and going back would lose the address of
+  // a record that still exists, so that branch offers the retry instead.
   if (patientQuery.isError) {
+    const deleted =
+      patientQuery.error instanceof ApiError &&
+      patientQuery.error.status === 404;
     return (
       <div className="space-y-6">
         <BackLink onClick={() => navigate(paths.patients)} />
         <Card>
           <EmptyState
             icon={AlertTriangle}
-            title={t.detail.notFoundTitle}
-            description={t.detail.notFoundBody}
+            title={deleted ? t.detail.notFoundTitle : ro.states.errorTitle}
+            description={deleted ? t.detail.notFoundBody : ro.states.errorBody}
             className="py-16"
             action={
-              <Button variant="outline" onClick={() => navigate(paths.patients)}>
-                <ArrowLeft />
-                {t.backToList}
-              </Button>
+              deleted ? (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(paths.patients)}
+                >
+                  <ArrowLeft />
+                  {t.backToList}
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() => patientQuery.refetch()}
+                >
+                  <RefreshCw />
+                  {ro.common.retry}
+                </Button>
+              )
             }
           />
         </Card>
@@ -218,35 +235,29 @@ export function PatientDetailPage() {
                   <Pencil />
                   {t.detail.edit}
                 </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+                <ConfirmAction
+                  trigger={
                     <Button
                       variant="outline"
                       size="sm"
                       className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      disabled={deletePatientMutation.isPending}
                     >
-                      <Trash2 />
+                      {deletePatientMutation.isPending ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        <Trash2 />
+                      )}
                       {t.detail.delete}
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t.confirm.deleteTitle}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {t.confirm.deleteBody}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => deletePatientMutation.mutate()}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        {t.confirm.deleteCta}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  }
+                  title={t.confirm.deleteTitle}
+                  body={t.confirm.deleteBody}
+                  cta={t.confirm.deleteCta}
+                  pending={deletePatientMutation.isPending}
+                  onConfirm={() => deletePatientMutation.mutate()}
+                  destructive
+                />
               </>
             }
           />
@@ -257,169 +268,192 @@ export function PatientDetailPage() {
             consentPending={consentMutation.isPending}
           />
 
-          <Tabs defaultValue="history">
-            <TabsList className="h-9 w-full justify-start overflow-x-auto">
-              <TabsTrigger value="profile">{t.tabs.profile}</TabsTrigger>
-              <TabsTrigger value="history" className="gap-1.5">
-                {t.tabs.history}
-                <Count n={entries.length + interactions.length} />
-              </TabsTrigger>
-              <TabsTrigger value="anamnesis" className="gap-1.5">
-                {t.tabs.anamnesis}
-                <Count n={anamneses.length} />
-              </TabsTrigger>
-              <TabsTrigger value="prescriptions" className="gap-1.5">
-                {t.tabs.prescriptions}
-                <Count n={prescriptions.length} />
-              </TabsTrigger>
-              <TabsTrigger value="documents" className="gap-1.5">
-                {t.tabs.documents}
-                <Count n={documents.length} />
-              </TabsTrigger>
-              <TabsTrigger value="interactions" className="gap-1.5">
-                {t.tabs.interactions}
-                <Count n={interactions.length} />
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Profil */}
-            <TabsContent value="profile" className="mt-5">
-              <ProfileTab patient={patient} />
-            </TabsContent>
-
-            {/* Istoric — merged timeline */}
-            <TabsContent value="history" className="mt-5 space-y-4">
-              <SectionActions
-                label={t.timeline.title}
+          {timelineQuery.isError ? (
+            <Card>
+              <EmptyState
+                icon={AlertTriangle}
+                title={t.timeline.loadErrorTitle}
+                description={t.timeline.loadErrorBody}
+                className="py-16"
                 action={
-                  <Button size="sm" onClick={() => openAddEntry('anamnesis')}>
-                    <Plus />
-                    {t.timeline.addEntry}
+                  <Button
+                    variant="outline"
+                    onClick={() => timelineQuery.refetch()}
+                  >
+                    <RefreshCw />
+                    {ro.common.retry}
                   </Button>
                 }
               />
-              {timelineQuery.isLoading ? (
-                <TimelineSkeleton />
-              ) : entries.length + interactions.length === 0 ? (
-                <CardEmpty
-                  icon={FileText}
-                  title={t.timeline.empty}
-                  body={t.timeline.emptyBody}
+            </Card>
+          ) : (
+            <Tabs defaultValue="history">
+              <TabsList className="h-9 w-full justify-start overflow-x-auto">
+                <TabsTrigger value="profile">{t.tabs.profile}</TabsTrigger>
+                <TabsTrigger value="history" className="gap-1.5">
+                  {t.tabs.history}
+                  <Count n={entries.length + interactions.length} />
+                </TabsTrigger>
+                <TabsTrigger value="anamnesis" className="gap-1.5">
+                  {t.tabs.anamnesis}
+                  <Count n={anamneses.length} />
+                </TabsTrigger>
+                <TabsTrigger value="prescriptions" className="gap-1.5">
+                  {t.tabs.prescriptions}
+                  <Count n={prescriptions.length} />
+                </TabsTrigger>
+                <TabsTrigger value="documents" className="gap-1.5">
+                  {t.tabs.documents}
+                  <Count n={documents.length} />
+                </TabsTrigger>
+                <TabsTrigger value="interactions" className="gap-1.5">
+                  {t.tabs.interactions}
+                  <Count n={interactions.length} />
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Profil */}
+              <TabsContent value="profile" className="mt-5">
+                <ProfileTab patient={patient} />
+              </TabsContent>
+
+              {/* Istoric — merged timeline */}
+              <TabsContent value="history" className="mt-5 space-y-4">
+                <SectionActions
+                  label={t.timeline.title}
+                  action={
+                    <Button size="sm" onClick={() => openAddEntry('anamnesis')}>
+                      <Plus />
+                      {t.timeline.addEntry}
+                    </Button>
+                  }
                 />
-              ) : (
-                <Timeline
-                  entries={entries}
-                  interactions={interactions}
+                {timelineQuery.isLoading ? (
+                  <TimelineSkeleton />
+                ) : entries.length + interactions.length === 0 ? (
+                  <CardEmpty
+                    icon={FileText}
+                    title={t.timeline.empty}
+                    body={t.timeline.emptyBody}
+                  />
+                ) : (
+                  <Timeline
+                    entries={entries}
+                    interactions={interactions}
+                    onEdit={openEditEntry}
+                    onDelete={setPendingDelete}
+                    onDownload={handleDownload}
+                    downloadingId={downloadingId}
+                  />
+                )}
+              </TabsContent>
+
+              {/* Anamneză */}
+              <TabsContent value="anamnesis" className="mt-5 space-y-4">
+                <SectionActions
+                  label={t.tabs.anamnesis}
+                  action={
+                    <Button size="sm" onClick={() => openAddEntry('anamnesis')}>
+                      <Plus />
+                      {t.anamnesis.add}
+                    </Button>
+                  }
+                />
+                <EntryList
+                  entries={anamneses}
+                  loading={timelineQuery.isLoading}
+                  emptyIcon={FileText}
+                  emptyTitle={t.anamnesis.empty}
+                  emptyBody={t.anamnesis.emptyBody}
                   onEdit={openEditEntry}
                   onDelete={setPendingDelete}
-                  onDownload={handleDownload}
-                  downloadingId={downloadingId}
                 />
-              )}
-            </TabsContent>
+              </TabsContent>
 
-            {/* Anamneză */}
-            <TabsContent value="anamnesis" className="mt-5 space-y-4">
-              <SectionActions
-                label={t.tabs.anamnesis}
-                action={
-                  <Button size="sm" onClick={() => openAddEntry('anamnesis')}>
-                    <Plus />
-                    {t.anamnesis.add}
-                  </Button>
-                }
-              />
-              <EntryList
-                entries={anamneses}
-                loading={timelineQuery.isLoading}
-                emptyIcon={FileText}
-                emptyTitle={t.anamnesis.empty}
-                emptyBody={t.anamnesis.emptyBody}
-                onEdit={openEditEntry}
-                onDelete={setPendingDelete}
-              />
-            </TabsContent>
-
-            {/* Rețete */}
-            <TabsContent value="prescriptions" className="mt-5 space-y-4">
-              <SectionActions
-                label={t.tabs.prescriptions}
-                action={
-                  <Button size="sm" onClick={() => openAddEntry('prescription')}>
-                    <Plus />
-                    {t.prescriptions.add}
-                  </Button>
-                }
-              />
-              <EntryList
-                entries={prescriptions}
-                loading={timelineQuery.isLoading}
-                emptyIcon={Pill}
-                emptyTitle={t.prescriptions.empty}
-                emptyBody={t.prescriptions.emptyBody}
-                onEdit={openEditEntry}
-                onDelete={setPendingDelete}
-              />
-            </TabsContent>
-
-            {/* Documente */}
-            <TabsContent value="documents" className="mt-5 space-y-4">
-              <SectionActions
-                label={t.tabs.documents}
-                hint={t.documents.private}
-                action={
-                  <Button size="sm" onClick={() => setDocOpen(true)}>
-                    <UploadCloud />
-                    {t.documents.upload}
-                  </Button>
-                }
-              />
-              {timelineQuery.isLoading ? (
-                <EntryListSkeleton />
-              ) : documents.length === 0 ? (
-                <CardEmpty
-                  icon={UploadCloud}
-                  title={t.documents.empty}
-                  body={t.documents.emptyBody}
+              {/* Rețete */}
+              <TabsContent value="prescriptions" className="mt-5 space-y-4">
+                <SectionActions
+                  label={t.tabs.prescriptions}
+                  action={
+                    <Button
+                      size="sm"
+                      onClick={() => openAddEntry('prescription')}
+                    >
+                      <Plus />
+                      {t.prescriptions.add}
+                    </Button>
+                  }
                 />
-              ) : (
-                <div className="space-y-3">
-                  {documents.map((entry) => (
-                    <EntryCard
-                      key={entry.id}
-                      entry={entry}
-                      onDelete={setPendingDelete}
-                      onDownload={handleDownload}
-                      downloading={downloadingId === entry.id}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            {/* Interacțiuni */}
-            <TabsContent value="interactions" className="mt-5 space-y-4">
-              <SectionActions label={t.tabs.interactions} />
-              {timelineQuery.isLoading ? (
-                <EntryListSkeleton />
-              ) : interactions.length === 0 ? (
-                <CardEmpty
-                  icon={MessagesSquare}
-                  title={t.interactions.empty}
-                  body={t.interactions.emptyBody}
+                <EntryList
+                  entries={prescriptions}
+                  loading={timelineQuery.isLoading}
+                  emptyIcon={Pill}
+                  emptyTitle={t.prescriptions.empty}
+                  emptyBody={t.prescriptions.emptyBody}
+                  onEdit={openEditEntry}
+                  onDelete={setPendingDelete}
                 />
-              ) : (
-                <div className="space-y-3">
-                  {interactions.map((it, i) => (
-                    <InteractionItem
-                      key={`${it.source}-${it.sourceId}-${i}`}
-                      interaction={it}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+
+              {/* Documente */}
+              <TabsContent value="documents" className="mt-5 space-y-4">
+                <SectionActions
+                  label={t.tabs.documents}
+                  hint={t.documents.private}
+                  action={
+                    <Button size="sm" onClick={() => setDocOpen(true)}>
+                      <UploadCloud />
+                      {t.documents.upload}
+                    </Button>
+                  }
+                />
+                {timelineQuery.isLoading ? (
+                  <EntryListSkeleton />
+                ) : documents.length === 0 ? (
+                  <CardEmpty
+                    icon={UploadCloud}
+                    title={t.documents.empty}
+                    body={t.documents.emptyBody}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {documents.map((entry) => (
+                      <EntryCard
+                        key={entry.id}
+                        entry={entry}
+                        onDelete={setPendingDelete}
+                        onDownload={handleDownload}
+                        downloading={downloadingId === entry.id}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Interacțiuni */}
+              <TabsContent value="interactions" className="mt-5 space-y-4">
+                <SectionActions label={t.tabs.interactions} />
+                {timelineQuery.isLoading ? (
+                  <EntryListSkeleton />
+                ) : interactions.length === 0 ? (
+                  <CardEmpty
+                    icon={MessagesSquare}
+                    title={t.interactions.empty}
+                    body={t.interactions.emptyBody}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {interactions.map((it, i) => (
+                      <InteractionItem
+                        key={`${it.source}-${it.sourceId}-${i}`}
+                        interaction={it}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
 
           <PatientFormSheet
             patient={patient}
@@ -464,12 +498,16 @@ export function PatientDetailPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteEntryMutation.isPending}>
+              {ro.common.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                pendingDelete && deleteEntryMutation.mutate(pendingDelete.id)
-              }
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteEntryMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                if (pendingDelete) deleteEntryMutation.mutate(pendingDelete.id);
+              }}
             >
               {t.confirm.deleteEntryCta}
             </AlertDialogAction>
@@ -530,8 +568,8 @@ function PatientSummary({
       <div className="flex shrink-0 items-center gap-3">
         <ConsentLine consentAt={patient.consentAt} />
         {!patient.consentAt && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
+          <ConfirmAction
+            trigger={
               <Button variant="outline" size="sm" disabled={consentPending}>
                 {consentPending ? (
                   <Loader2 className="animate-spin" />
@@ -540,22 +578,13 @@ function PatientSummary({
                 )}
                 {t.consent.record}
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.confirm.consentTitle}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.confirm.consentBody}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
-                <AlertDialogAction onClick={onRecordConsent}>
-                  {t.confirm.consentCta}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            }
+            title={t.confirm.consentTitle}
+            body={t.confirm.consentBody}
+            cta={t.confirm.consentCta}
+            pending={consentPending}
+            onConfirm={onRecordConsent}
+          />
         )}
       </div>
     </Card>
@@ -729,7 +758,12 @@ function CardEmpty({
 }) {
   return (
     <Card className="py-0">
-      <EmptyState icon={icon} title={title} description={body} className="py-14" />
+      <EmptyState
+        icon={icon}
+        title={title}
+        description={body}
+        className="py-14"
+      />
     </Card>
   );
 }

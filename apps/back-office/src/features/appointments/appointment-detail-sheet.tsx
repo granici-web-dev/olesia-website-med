@@ -27,17 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ConfirmAction } from '@/components/common/confirm-action';
 import {
   StatusBadge,
   PaymentBadge,
@@ -57,7 +47,6 @@ import { PatientUploadsPanel } from '@/features/uploads/patient-uploads-panel';
 import { ro } from '@/i18n/ro';
 import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
 import { appointmentsQueryKey } from '@/features/appointments/query-key';
-import { cn } from '@/lib/utils';
 
 const t = ro.appointments;
 
@@ -505,6 +494,7 @@ export function AppointmentDetailSheet({
                   title={t.confirm.noShowTitle}
                   body={t.confirm.noShowBody}
                   cta={t.confirm.noShowCta}
+                  pending={noShowMutation.isPending}
                   destructive
                   onConfirm={() => noShowMutation.mutate(a.id)}
                 />
@@ -514,45 +504,5 @@ export function AppointmentDetailSheet({
         )}
       </SheetContent>
     </Sheet>
-  );
-}
-
-function ConfirmAction({
-  trigger,
-  title,
-  body,
-  cta,
-  onConfirm,
-  destructive,
-}: {
-  trigger: React.ReactNode;
-  title: string;
-  body: string;
-  cta: string;
-  onConfirm: () => void;
-  destructive?: boolean;
-}) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{body}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className={cn(
-              destructive &&
-                'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-            )}
-          >
-            {cta}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

@@ -13,6 +13,7 @@ import {
 } from '@/features/payments/data';
 import { paymentsQueryKey } from '@/features/payments/query-key';
 import type { Payment } from '@/features/payments/types';
+import { copyToClipboard } from '@/lib/clipboard';
 
 const t = ro.payments;
 
@@ -68,11 +69,12 @@ export function PaymentConfirmationCell({ payment }: { payment: Payment }) {
       <button
         type="button"
         className="text-xs underline underline-offset-2 hover:text-primary"
-        onClick={(e) => {
+        onClick={async (e) => {
           // The row is a button that opens the detail sheet.
           e.stopPropagation();
-          navigator.clipboard.writeText(confirmationText(payment));
-          toast.success(t.confirmation.copied);
+          if (await copyToClipboard(confirmationText(payment))) {
+            toast.success(t.confirmation.copied);
+          }
         }}
       >
         {t.confirmation.copy}

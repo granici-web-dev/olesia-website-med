@@ -18,17 +18,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ConfirmAction } from '@/components/common/confirm-action';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
@@ -264,6 +254,7 @@ export function SubscriptionDetailSheet({
                   title={t.confirm.cancelTitle}
                   body={t.confirm.cancelBody}
                   cta={t.confirm.cancelCta}
+                  pending={cancelMutation.isPending}
                   destructive
                   onConfirm={() => cancelMutation.mutate(s.id)}
                 />
@@ -281,45 +272,5 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <p className="text-[11px] font-semibold tracking-wide text-muted-foreground/80 uppercase">
       {children}
     </p>
-  );
-}
-
-function ConfirmAction({
-  trigger,
-  title,
-  body,
-  cta,
-  onConfirm,
-  destructive,
-}: {
-  trigger: React.ReactNode;
-  title: string;
-  body: string;
-  cta: string;
-  onConfirm: () => void;
-  destructive?: boolean;
-}) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{body}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{ro.common.cancel}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className={cn(
-              destructive &&
-                'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-            )}
-          >
-            {cta}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/common/empty-state';
+import { ApiError } from '@/api/http';
 import { cn } from '@/lib/utils';
 import { ro } from '@/i18n/ro';
 
@@ -217,6 +219,49 @@ export function BlogEditorPage() {
 
   if (isEdit && postQuery.isLoading) {
     return <EditorSkeleton />;
+  }
+
+  // The form starts empty and `save` sends every field, so an editor opened on
+  // a failed read would replace the article with blanks the moment the doctor
+  // pressed Salvează. No read, no editor.
+  if (isEdit && postQuery.isError) {
+    const missing =
+      postQuery.error instanceof ApiError && postQuery.error.status === 404;
+    return (
+      <div className="space-y-6">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="-ml-2 h-7 text-muted-foreground"
+        >
+          <Link to={paths.blog}>
+            <ArrowLeft />
+            {e.backToList}
+          </Link>
+        </Button>
+        <Card className="py-0">
+          <EmptyState
+            icon={AlertTriangle}
+            title={missing ? e.notFoundTitle : e.loadErrorTitle}
+            description={missing ? e.notFoundBody : e.loadErrorBody}
+            className="py-16"
+            action={
+              missing ? (
+                <Button asChild variant="outline">
+                  <Link to={paths.blog}>{e.backToList}</Link>
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={() => postQuery.refetch()}>
+                  <RefreshCw />
+                  {ro.common.retry}
+                </Button>
+              )
+            }
+          />
+        </Card>
+      </div>
+    );
   }
 
   return (

@@ -1,9 +1,34 @@
+import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Copy, Download, Link2, Loader2, Mail, Trash2, X } from 'lucide-react';
+import {
+  Copy,
+  Download,
+  Link2,
+  Loader2,
+  Mail,
+  RefreshCw,
+  ShieldAlert,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfirmAction } from '@/components/common/confirm-action';
+import { EmptyState } from '@/components/common/empty-state';
+import { ApiError } from '@/api/http';
+import { copyToClipboard } from '@/lib/clipboard';
 import { ro } from '@/i18n/ro';
 
 import {
@@ -15,6 +40,7 @@ import {
   sendUploadLink,
 } from '@/features/uploads/data';
 import { uploadLinksQueryKey } from '@/features/uploads/query-key';
+import type { UploadedDocument } from '@/features/uploads/types';
 
 const t = ro.patientUploads;
 
@@ -54,10 +80,13 @@ export function PatientUploadsPanel({
   const queryKey = uploadLinksQueryKey(appointmentId);
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey,
     queryFn: () => fetchUploadLinks(appointmentId),
   });
+
+  const [deletingDocument, setDeletingDocument] =
+    React.useState<UploadedDocument | null>(null);
 
   const issue = useMutation({
     mutationFn: () => issueUploadLink(appointmentId),
@@ -88,18 +117,14 @@ export function PatientUploadsPanel({
     mutationFn: deleteUploadedDocument,
     onSuccess: () => {
       toast.success(t.toast.documentDeleted);
+      setDeletingDocument(null);
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
   });
 
   const copy = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success(t.toast.copied);
-    } catch {
-      toast.error(t.toast.copyFailed);
-    }
+    if (await copyToClipboard(url)) toast.success(t.toast.copied);
   };
 
   const download = async (id: string, fileName: string) => {
@@ -115,6 +140,31 @@ export function PatientUploadsPanel({
       <div className="space-y-2">
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-4 w-40" />
+      </div>
+    );
+  }
+
+  // These routes are `admin` only (uploads.controller.ts), so an editor with
+  // an appointment open gets a 403 here. Reading that as "no link yet" offered
+  // her a button that could only 403 again.
+  if (isError) {
+    const forbidden = error instanceof ApiError && error.status === 403;
+    return forbidden ? (
+      <EmptyState
+        icon={ShieldAlert}
+        title={ro.states.forbiddenTitle}
+        description={ro.states.forbiddenBody}
+        className="gap-3 px-0 py-6"
+      />
+    ) : (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground text-pretty">
+          {t.loadError}
+        </p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <RefreshCw />
+          {ro.common.retry}
+        </Button>
       </div>
     );
   }
@@ -184,16 +234,29 @@ export function PatientUploadsPanel({
             {t.actions.renew}
           </Button>
         ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            disabled={revoke.isPending}
-            onClick={() => revoke.mutate(link.id)}
-          >
-            {revoke.isPending ? <Loader2 className="animate-spin" /> : <X />}
-            {t.actions.revoke}
-          </Button>
+          <ConfirmAction
+            trigger={
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                disabled={revoke.isPending}
+              >
+                {revoke.isPending ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <X />
+                )}
+                {t.actions.revoke}
+              </Button>
+            }
+            title={t.confirm.revokeTitle}
+            body={t.confirm.revokeBody}
+            cta={t.confirm.revokeCta}
+            pending={revoke.isPending}
+            onConfirm={() => revoke.mutate(link.id)}
+            destructive
+          />
         )}
       </div>
 
@@ -226,14 +289,54 @@ export function PatientUploadsPanel({
                 className="size-8 text-muted-foreground hover:text-destructive"
                 aria-label={t.actions.deleteDocument}
                 disabled={removeDoc.isPending}
-                onClick={() => removeDoc.mutate(d.id)}
+                onClick={() => setDeletingDocument(d)}
               >
-                <Trash2 className="size-4" />
+                {removeDoc.isPending && removeDoc.variables === d.id ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Trash2 className="size-4" />
+                )}
               </Button>
             </li>
           ))}
         </ul>
       )}
+
+      <AlertDialog
+        open={deletingDocument !== null}
+        onOpenChange={(open) => !open && setDeletingDocument(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.confirm.deleteDocumentTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deletingDocument && (
+                <>
+                  <span className="font-medium text-foreground">
+                    {deletingDocument.fileName}
+                  </span>{' '}
+                  {t.confirm.deleteDocumentBody}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeDoc.isPending}>
+              {ro.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={removeDoc.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                if (deletingDocument) removeDoc.mutate(deletingDocument.id);
+              }}
+            >
+              {t.confirm.deleteDocumentCta}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

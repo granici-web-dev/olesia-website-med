@@ -457,11 +457,13 @@ export async function uploadDocument(
 
 export async function downloadDocument(
   _id: string,
-  entry: PatientEntryDto,
+  _entry: PatientEntryDto,
 ): Promise<void> {
   await delay(300);
-  // No real bytes in mock mode — surface the intent without a download.
-  throw new Error('mock_no_file:' + (entry.fileName ?? 'document'));
+  // No real bytes in mock mode. The page reports a failed download, which is
+  // what this is: a demo-only wording would have to live in the production
+  // dictionary to be read from there.
+  throw new Error('download_failed:mock');
 }
 
 export async function fromLead(

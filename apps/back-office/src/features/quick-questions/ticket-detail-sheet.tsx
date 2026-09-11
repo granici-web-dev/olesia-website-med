@@ -38,6 +38,7 @@ import { ticketsQueryKey } from '@/features/quick-questions/query-key';
 import type { Ticket } from '@/features/quick-questions/types';
 import { AddAsPatientButton } from '@/features/patients/add-as-patient-button';
 import { ManualPaymentPanel } from '@/features/payments/manual-payment-panel';
+import { copyToClipboard } from '@/lib/clipboard';
 
 const t = ro.quickQuestions;
 
@@ -225,9 +226,10 @@ export function TicketDetailSheet({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(tk.answer ?? '');
-                          toast.success(t.toast.answerCopied);
+                        onClick={async () => {
+                          if (await copyToClipboard(tk.answer ?? '')) {
+                            toast.success(t.toast.answerCopied);
+                          }
                         }}
                       >
                         <Copy />
