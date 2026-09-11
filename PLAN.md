@@ -580,7 +580,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A4 | `audit apps/api/src/app/materials` + `storage` + `services` + `contacts` + `blog` | `fileUrl` платных на публичном `/uploads`; фильтры `active`; `calendlyEventTypeUri` в DTO; `publishedAt <= now`; MIME по заявлению на стаффных загрузках; гонки слагов → 409 | 11b, 11c (слаги) | `[x]` `22e0b86` |
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
-| A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[>]` harden `f5ae6cd`, `efb04eb`, `0dddd11`; сборка при недоступном API падает, фикс до push |
+| A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[ ]` |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
@@ -751,6 +751,20 @@ Report-Only; `efb04eb` доступность, медиа, SLA из API на в�
 английской конвенции репо, переписать до push; `apps/frontend/AGENTS.md` и
 `CLAUDE.md` генерирует `next dev`, добавить в `.gitignore`, ссылку на
 `node_modules/next/dist/docs/` дать в корневом `CLAUDE.md`.
+
+A7 закрыт. Сборка при недоступном API починена в `83f8f24`: на фазе
+`phase-production-build` `getJson` и `getRequired` отдают пустое с одной строкой
+в лог, синглтон рабочих часов получает дефолты Prisma и страница печатает
+«график уточняется». Сообщения трёх коммитов переписаны на английский с
+побайтно тем же патчем (`9df81d0`, `389b59a`, `edaf111`). Файлы `next dev`
+в `.gitignore` (`baf1010`). Push: CI зелёный. **Vercel Production падает**: A7
+намеренно сделал `API_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`
+обязательными, а у проекта на Vercel переменных ноль. Прод отдаёт сборку до
+A7 с выдуманными статьями и ценами из констант. Решение 2026-09-11: задать три
+переменные сейчас, API на действующий туннель; пока туннель жив, прод
+показывает реальные данные, когда мёртв, честное «недоступно». Постоянный
+адрес это хостинг клиента (8b, 8d). Переменная меняется при каждом рестарте
+туннеля, и это ещё один довод поторопить клиента.
 
 Проходы программы аудита: A1 (10a), A6 (10b, 10e), A7 (10c, 10d, 10e).
 
