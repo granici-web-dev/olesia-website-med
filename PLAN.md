@@ -584,7 +584,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[x]` `1f31ba6`…`e345c72`, `4e9cb04`, `640a780`…`f13ffc5` |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[x]` `fb90486`, `57c96d9`, `3c7871a` |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[x]` `227c10e`, `3140447`, `f516c58` |
-| A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[ ]` |
+| A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[>]` аудит 2026-09-11, 17 находок, harden в работе |
 | A12 | без аудита, механика: Dependabot по одному, тесты из списка 15 | зелёный CI после каждого слияния | 14, 15 | `[ ]` |
 | A13 | не `rigorous`: `impeccable` в браузере по сайту и бэк-офису, Lighthouse на проде после A7 | визуальная иерархия, состояния, мобильные, контраст, CWV | отдельный шаг | `[ ]` |
 
@@ -1233,6 +1233,36 @@ CI не собирает Docker-образ, поэтому поломка обр
 который отдаёт `/health`; шаг сборки `Dockerfile.api` в CI без push; CSP на
 сайте после финализации аналитики (отложено осознанно, комментарий в
 `next.config.ts`).
+
+Аудит A11 (2026-09-11, 17 находок, 5 high) подтвердил шаг 16 и добавил:
+`backup.sh` без `pipefail`, упавший `pg_dump` через `gzip` даёт валидный
+архив обрезанного потока, `.part` → `mv` → «backup ok», а ротация через 14
+дней удаляет последний настоящий; `/health` без базы, и на `unhealthy` Docker
+ничего не делает; отказ бэкапа это строка в ротируемом логе; снаружи никто не
+смотрит, четыре упавших прод-деплоя обнаружены глазами; Caddy отдаёт админку
+без единого security-заголовка при пяти на публичном сайте, бэк-офис тянет
+Google Fonts; нет лимита тела на прокси; пустой `ACME_EMAIL` в шаблоне молча
+даёт самоподписанный сертификат, и callback maib упадёт на TLS без единого
+слова; CI не собирает образ, контекст сборки 506 МБ, из них 396 в `docs/`;
+CLI Prisma в долгоживущем образе; `CORS_ORIGINS` и `UPLOADS_DIR` вне
+boot-проверки; `tar 2>/dev/null` прячет «file changed as we read it» и
+обрывает off-site; `restore.sh` применяет обрезанный дамп до среза и печатает
+«restore ok»; prettier-дрейф 253 файла, не 20, `.prettierignore` без
+`generated` и `origin`; runbook: restore после 8e не повторялся, alt-тексты
+всё ещё «A9»; CSP Report-Only можно начинать, отчёты идут в логи Vercel и
+зависят только от зелёного деплоя. Решения: `pipefail` и проверка трейлера
+`PostgreSQL database dump complete` до `mv`; `/health` проверяет `SELECT 1`,
+запись в приватный том и возраст последнего бэкапа по файлу статуса, 503 при
+отказе, Caddy ждёт `service_healthy`; Sentry EU на бесплатном тарифе за
+`SENTRY_DSN` на трёх приложениях с PII-фильтром, пустой DSN выключает; uptime
+снаружи как обязательный шаг runbook; заголовки на обоих хостах Caddy и
+`request_body max_size`, Google Fonts из бэк-офиса убираются; `ACME_EMAIL`
+обязателен; init-контейнер `migrate` с CLI, образ API без него; шаг `docker
+build` в CI и `.dockerignore`; `CORS_ORIGINS` и `UPLOADS_DIR` в
+`REQUIRED_IN_PRODUCTION`; `tar` exit 1 как предупреждение; `gzip -t` и счёт
+строк в restore; лимиты памяти и `TZ`; `.prettierignore`, один коммит
+переформатирования, `prettier --check` в CI; runbook обновить, restore
+повторить на текущей схеме.
 
 Сводный аудит всего проекта: `docs/audit-2026-09-10.md`.
 
