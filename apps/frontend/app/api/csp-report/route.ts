@@ -14,6 +14,10 @@
  * go. Two segments name the page the policy fired on, which is all a fix needs.
  */
 
+import * as Sentry from '@sentry/nextjs';
+
+import { SENTRY_DSN } from '@/sentry.shared';
+
 /** The body Chrome and Firefox send. Every field is optional in practice. */
 interface CspReportBody {
   'csp-report'?: {
@@ -51,12 +55,29 @@ export async function POST(request: Request): Promise<Response> {
     const body = (await request.json()) as CspReportBody;
     const report = body['csp-report'];
     if (report) {
-      console.warn('csp_report', {
+      const fields = {
         documentPath: pagePrefix(report['document-uri']),
         directive:
           report['effective-directive'] ?? report['violated-directive'] ?? '',
         blockedOrigin: originOnly(report['blocked-uri']),
-      });
+      };
+
+      /**
+       * With error tracking configured these become searchable and countable,
+       * which is what decides whether the policy can be enforced rather than
+       * reported (audit A11, L17). Without it they stay where they were: a
+       * line in the Vercel log, which is better than nothing and worse than
+       * being able to group by directive.
+       */
+      if (SENTRY_DSN) {
+        Sentry.captureMessage('csp_report', {
+          level: 'warning',
+          tags: { directive: fields.directive },
+          extra: fields,
+        });
+      } else {
+        console.warn('csp_report', fields);
+      }
     }
   } catch {
     // A body that is not the JSON we expect says nothing useful and is not

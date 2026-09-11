@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
@@ -34,6 +34,7 @@ import { LeadsModule } from './leads/leads.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { PaymentsModule } from './payments/payments.module';
 import { CaptchaModule } from './common/captcha/captcha.module';
+import { SentryReportingFilter } from './common/sentry-reporting.filter';
 
 @Module({
   imports: [
@@ -95,6 +96,12 @@ import { CaptchaModule } from './common/captcha/captcha.module';
    * The per-route limit still overrides the default through `@Throttle`.
    */
   providers: [
+    /**
+     * Nest catches every exception a handler throws, so without this filter
+     * nothing an endpoint fails with would reach Sentry — only a crash that
+     * took the process down with it (audit A11, H3).
+     */
+    { provide: APP_FILTER, useClass: SentryReportingFilter },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },

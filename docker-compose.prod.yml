@@ -38,6 +38,12 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.caddy
+      args:
+        # The panel reports to the same Sentry project as the API: one inbox for
+        # the half of the system that runs on this server. Compiled into the
+        # bundle at build time, so changing it means rebuilding this image.
+        VITE_SENTRY_DSN: ${SENTRY_DSN:-}
+        VITE_SENTRY_RELEASE: ${SENTRY_RELEASE:-}
     restart: unless-stopped
     depends_on:
       api:
@@ -138,6 +144,11 @@ services:
       # Log timestamps in the practice's own time. Nothing the API computes
       # depends on it: every date it formats passes an explicit timeZone.
       TZ: ${BACKUP_TZ:-Europe/Chisinau}
+
+      # Error tracking. Empty means the SDK is never initialised and nothing
+      # leaves the container (audit A11, H3).
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_RELEASE: ${SENTRY_RELEASE:-}
 
       # Long random values, different from each other. Rotating them logs
       # everyone out, which is the point.

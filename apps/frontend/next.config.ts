@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import { withSentryConfig } from '@sentry/nextjs';
 
 /**
  * next-intl resolves this path against `process.cwd()`, and the cwd differs by
@@ -194,4 +195,22 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+/**
+ * Sentry's build step (audit A11, H3). It is a no-op for the bundle when no
+ * DSN is set — the SDK's own entry points check that themselves — and what it
+ * adds here is the source-map upload, which happens only when
+ * `SENTRY_AUTH_TOKEN` is present. `deleteSourcemapsAfterUpload` is what keeps
+ * the maps from being served with the site: a stack trace readable in Sentry
+ * is the point, one readable by anyone who opens devtools is not.
+ */
+export default withSentryConfig(withNextIntl(nextConfig), {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+  // One request less on every page, and the tunnel exists to get around ad
+  // blockers rather than to make anything work.
+  tunnelRoute: false,
+  disableLogger: true,
+});

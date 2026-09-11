@@ -38,6 +38,7 @@ docker compose -f docker-compose.prod.yml up -d
 | ---------- | ------------------------------------------------------------------------------------------------- |
 | `caddy`    | TLS on two hostnames, and the back office as static files. The only service that publishes a port |
 | `postgres` | Postgres 16, reachable on the compose network and nowhere else                                    |
+| `migrate`  | applies pending migrations once and exits; everything else waits for it to succeed                |
 | `api`      | NestJS, `3333` on the compose network, no published port                                          |
 | `backup`   | `pg_dump` + a tar of the uploaded files at 03:00 Chișinău, 14-day rotation                        |
 | `restore`  | idle unless started by name; the only service that can write to the upload volumes                |
@@ -47,9 +48,18 @@ Compose derives the project from the directory, which both compose files share,
 and the production stack would adopt the development Postgres and its data
 volume — where `down -v` would delete it.
 
-Prisma migrations run on container start (`docker/Dockerfile.api`), so a deploy
-applies pending migrations by itself. **The seed does not**; it is a runbook
-step below.
+Migrations are the `migrate` service's job (audit A11, M10). It is built from
+the same Dockerfile as the API, at its `migrate` target, runs
+`prisma migrate deploy` and exits; the API declares
+`depends_on: migrate: service_completed_successfully`, so a failed migration
+means the server does not start rather than serving against a half-applied
+schema. A deploy therefore still applies migrations by itself. **The seed does
+not**; it is a runbook step below.
+
+They used to run in the API's own `CMD`. What that cost was not only the order:
+the Prisma CLI had to live in the long-lived image, so a container serving
+patient data carried a tool that can rewrite the schema. ⚠ Note that moving it
+out did **not** shrink the image — see "Still open" at the end.
 
 ### Two hostnames, one origin for the back office
 
@@ -109,7 +119,7 @@ Worth naming because they change behaviour rather than where things point:
 
 | Variable                                   | Notes                                                                                                                      |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `ACME_EMAIL`                               | empty makes Caddy issue its own certificate instead of asking Let's Encrypt. Correct for a local run, wrong for the server |
+| `ACME_EMAIL`                               | **required** — the stack refuses to start without it. An address asks Let's Encrypt; the literal `internal` makes Caddy issue its own, which is right on a laptop and never on the server |
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | at least 32 characters, random, different from each other — the API exits at boot otherwise                                |
 | `LEADS_NOTIFY_EMAIL`                       | **required in production** — the API exits at boot without it. No default: it used to fall back to a developer's Gmail    |
 | `RECAPTCHA_SECRET`                         | **required in production** — the API exits at boot without it. Empty disables captcha verification entirely               |
@@ -121,10 +131,14 @@ Worth naming because they change behaviour rather than where things point:
 | `BACKUP_HOUR` / `BACKUP_TZ`                | the nightly run, default 03:00 Europe/Chișinău                                                                             |
 | `RCLONE_REMOTE`                            | empty skips the off-site copy and says so in the log                                                                       |
 
-**Five variables are checked at boot when `NODE_ENV=production`** and the API
+**Seven variables are checked at boot when `NODE_ENV=production`** and the API
 exits rather than start without them: `LEADS_NOTIFY_EMAIL`,
 `RECAPTCHA_SECRET`, `PRIVATE_UPLOADS_DIR`, `PUBLIC_API_URL`,
-`PUBLIC_SITE_URL`. Each used to fall back to something that looked like it
+`PUBLIC_SITE_URL`, and — since audit A11 — `CORS_ORIGINS` and `UPLOADS_DIR`.
+The last two fall back to `localhost` and to the container's working directory
+respectively: a deployment that forgot them answers the real back office with a
+CORS error, and writes every uploaded photograph somewhere the next deploy
+erases. Each used to fall back to something that looked like it
 worked — a personal mailbox, a disabled captcha, a directory that empties on
 the next deploy — and every one of those failures is silent. This mirrors the
 JWT check that has been there since the secrets were found committed.
@@ -219,15 +233,38 @@ names the missing variable. It will not invent a password.
 
 - `db-<stamp>.sql.gz` — schema-scoped `pg_dump`
 - `files-<stamp>.tar.gz` — `private-uploads/` and `uploads/`
+- `last-run.json` — `{ at, ok, dbBytes, filesBytes, error }`, rewritten every
+  run, success or failure
 
-Both, deliberately: a dump alone restores appointments that reference analyses
-nobody can open any more. Files are written under a `.part` name and renamed on
-success, so a truncated dump never sits there looking like safety. Rotation
-keeps `BACKUP_KEEP_DAYS` days.
+Both archives, deliberately: a dump alone restores appointments that reference
+analyses nobody can open any more. Rotation keeps `BACKUP_KEEP_DAYS` days.
+
+**What makes a dump count as finished.** Files are written under a `.part` name
+and renamed on success — but until audit A11 that said less than it looked.
+`pg_dump | gzip` reported gzip's exit status, so a dump that died on the third
+table was compressed, renamed, and announced as `backup ok`, and fourteen days
+later rotation deleted the last real one. The script now sets `pipefail` and,
+because that option does not exist in every shell, reads the dump back and
+checks for `PostgreSQL database dump complete` — the line `pg_dump` writes last
+— before the rename. A truncated dump is deleted and the run exits 1.
+
+**And how anybody finds out.** `last-run.json` is what `/health` reads (below).
+Before it, a failed backup was a line in a container log under a 10 MB rotation
+that nobody was reading.
 
 The container sleeps until the next `BACKUP_HOUR` rather than for a fixed 24
 hours, so a reboot does not move the backup to whatever time the server came
 back up.
+
+**A note on `PGPASSWORD`.** The `backup` and `restore` services carry the
+database password in their environment, which anyone with `docker inspect` on
+this host can read. That is deliberate and it is the same trust boundary as the
+`postgres` service, which carries `POSTGRES_PASSWORD` for the same reason — a
+person with Docker access on this machine can read the database directly
+anyway. It is worth knowing before somebody is given a shell here "just to
+check the logs": on this host, shell access is database access. The
+administrator password is the one thing kept out of a long-lived environment,
+and the seed step below says how.
 
 **Off-site**: set `RCLONE_REMOTE` and the script syncs the whole backup
 directory after each run; leave it empty and it logs `off-site sync skipped`.
@@ -250,6 +287,15 @@ docker compose -f docker-compose.prod.yml --profile restore down
 The script drops and recreates the `public` schema. Point `PGDATABASE` at a
 scratch database for a drill; only aim it at production during a real recovery.
 
+**It checks the archive before it destroys anything** (audit A11, L14):
+`gzip -t` on both files, and the same completion trailer the backup checks. It
+used to drop the schema first and apply whatever the dump contained, so a
+truncated dump took out a working database and printed `restore ok` over the
+half of it that came back. Refusing, and telling you to reach for an older
+backup, is the useful answer. Afterwards it prints a row count per table — no
+number it could assert is right, but zero users is wrong after any restore at
+all.
+
 **Drill history — read the dates, they are not interchangeable:**
 
 - **2026-08-04, dev Postgres.** Dropped the `Service` table and deleted an
@@ -262,8 +308,109 @@ scratch database for a drill; only aim it at production during a real recovery.
   The `restore` service above is the fix.
 - **2026-09-10, this stack.** Database and files both restored through the
   `restore` profile, on a local acceptance run.
+- **2026-09-11, this stack, current schema.** Repeated after audit A11 because
+  the schema had moved on eight migrations and the scripts had changed. Local
+  run on `internal` certificates, seeded with `SEED_PROFILE=prod`: **40
+  migrations, 30 tables**, restored into a scratch `olesia_drill` — 7 services,
+  2 testimonials, 3 media appearances, 1 administrator, all back. A file
+  deleted from `private-uploads` after the backup came back through the
+  `restore` service and was readable from the API container. The refusal path
+  was checked with the same run: a deliberately truncated dump is rejected
+  before the schema is dropped, and the live database was untouched.
 - **Against production: never.** Do it after the first deploy and after any
   Postgres major upgrade, and record the date here.
+
+
+---
+
+## Observability
+
+Three things, none of which existed before audit A11 (H2, H3, H5): the health
+endpoint says something true, errors reach somebody, and something outside this
+server watches it.
+
+### `/health`
+
+```json
+{ "status": "ok", "checks": { "db": "pass", "storage": "pass", "backup": "pass" } }
+```
+
+It answers **503** when any check fails, and each check is pass or fail and
+nothing more — the route is public, and which dependency is down is a useful
+thing for a stranger to learn.
+
+| Check     | What it does                                                                           |
+| --------- | -------------------------------------------------------------------------------------- |
+| `db`      | `SELECT 1` through Prisma                                                              |
+| `storage` | writes a byte into `PRIVATE_UPLOADS_DIR` and removes it                                |
+| `backup`  | reads `/backups/last-run.json`: fail if the last run said `ok: false` or is over 26h old |
+
+It used to be `return { status: 'ok' }`, so a container whose Postgres had died
+reported itself healthy, and Docker's healthcheck agreed.
+
+Two deliberate details:
+
+- **A missing `last-run.json` is a pass.** The first deployment has no backup
+  until step 11 below takes one by hand, and an endpoint that answers 503 from
+  the first `up` until 03:00 the next morning is one nobody believes. From the
+  first run on, the file exists and its age is watched.
+- **The container healthcheck gates on `db` and `storage` only**, not on the
+  endpoint's own verdict. Caddy waits for the API to be healthy, and a backup
+  that failed last night must not be what keeps the site down after a reboot.
+  The stale backup is the uptime monitor's business, below.
+
+The `backups` volume is mounted into the API **read-only**, and `last-run.json`
+is the only file it opens there.
+
+### Error tracking — Sentry, behind `SENTRY_DSN`
+
+All three applications report: the API (`@sentry/nestjs`), the site
+(`@sentry/nextjs`) and the back office (`@sentry/react`). **Empty DSN means the
+SDK is never initialised** — no client, no transport, not one request — which
+is the state this ships in until the account exists.
+
+What to set up, when there is an account:
+
+1. A project in the **EU region** (`sentry.io` offers one). These reports carry
+   URLs and identifiers from a system whose data stays in the EU.
+2. `SENTRY_DSN` in `.env` for the API and the back office — one project for the
+   half of the system that runs on this server. ⚠ The panel compiles its DSN
+   into the bundle, so this needs `up -d --build`, not a restart.
+3. `NEXT_PUBLIC_SENTRY_DSN` on Vercel for the site, plus `SENTRY_ORG`,
+   `SENTRY_PROJECT` and `SENTRY_AUTH_TOKEN` if you want readable stack traces:
+   with the token the build uploads source maps and then deletes them, so they
+   are readable in Sentry and not from the site.
+4. `SENTRY_RELEASE=$(git rev-parse --short HEAD)` at deploy time, so a trace
+   names a version.
+
+**What is filtered before anything is sent** (`packages/shared/src/lib/sentry-scrub.ts`,
+under test): the request body, the query string, cookies, the `Authorization`
+and `Cookie` headers, and the segment after `/incarcare/`, `/uploads/` and
+`/download/` in any URL — that first one is a patient's whole credential for
+their upload link. `sendDefaultPii` is off, so no IP address either. A report is
+a log that leaves the building, and this system's request bodies are medical.
+
+4xx responses are not reported: they are the API doing its job, and forwarding
+them would spend the free tier's quota on the request log. 5xx and anything
+thrown that was never meant as an HTTP answer are.
+
+### Uptime — **a required step on deploy day**
+
+Nothing outside this server watches it. Four production deployments of the
+site have failed and been noticed by eye (audit A11, H5); a server that stops
+answering at 02:00 on a Sunday has nothing at all to notice it.
+
+Set up an external check, from whichever service you like (UptimeRobot,
+Better Stack and Hetzner's own all have a free tier big enough for two checks):
+
+| URL                              | Expect                                   |
+| -------------------------------- | ---------------------------------------- |
+| `https://api.<domain>/health`    | 200, and the body containing `"status":"ok"` |
+| `https://admin.<domain>/`        | 200                                      |
+
+Five-minute interval, alerts to an address somebody reads. The first URL is
+what turns a failed backup, a dead database and a full disk into a message;
+the second is what notices that TLS or Caddy itself has gone.
 
 ---
 
@@ -283,13 +430,24 @@ name that does not resolve fails:
 | `admin.oleseajalba.md`     | A record, the server's IP |
 | `oleseajalba.md` and `www` | Vercel, unchanged         |
 
+⚠ **Both names have to resolve before the first `up`, and `ACME_EMAIL` has to
+be an address.** Caddy asks Let's Encrypt for a certificate the moment it
+starts, and the HTTP-01 challenge answers on the name itself: a domain that is
+not delegated yet fails the challenge, and Caddy then retries with a backoff
+rather than serving. If the domain is still with the old registrar on the day,
+either finish the delegation first or accept that the stack cannot be brought
+up publicly yet — a local run with `ACME_EMAIL=internal` proves the images and
+nothing about TLS.
+
 **3. Environment.** `cp .env.prod.example .env`, then fill every blank.
 Generate the secrets with the commands written next to them; `JWT_ACCESS_SECRET`
 and `JWT_REFRESH_SECRET` must differ.
 
-**4. Start.** `docker compose -f docker-compose.prod.yml up -d --build`. Watch
-`docker compose -f docker-compose.prod.yml logs -f api` until the migrations
-finish and the API reports its port. Confirm `https://api.oleseajalba.md/health`.
+**4. Start.** `docker compose -f docker-compose.prod.yml up -d --build`. The
+order is fixed by the compose file: Postgres becomes healthy, `migrate` applies
+the migrations and exits, the API starts, Caddy starts behind it. Watch
+`docker compose -f docker-compose.prod.yml logs -f migrate api`. Confirm
+`https://api.oleseajalba.md/health` answers 200 with three `pass`.
 
 **5. Seed**, then log in at `https://admin.oleseajalba.md` and change the
 administrator password when prompted. Enrol the second factor in the same
@@ -332,12 +490,6 @@ there would render nothing at all. Once `api.oleseajalba.md` is live and step 6
 has been done once, `lib/markdown.tsx` and `app/[locale]/articles/[slug]` can
 move to `next/image`.
 
-📌 **The photographs on `/about` have no `alt` text**, and will not until the
-back office has a field for it — the images come from `AboutPage.images`, which
-is a list of URLs with nothing to describe them. Adding that field is audit pass
-**A9**; until then they are `alt=""`, which is the correct way to mark a picture
-as decorative and the wrong description of what they are.
-
 **7. Calendly.** Point the webhook at `https://api.oleseajalba.md`. Recreate the
 subscription rather than editing it, and check the signing key matches
 `CALENDLY_WEBHOOK_SIGNING_KEY`.
@@ -353,11 +505,20 @@ saving it is what clears `isPlaceholder`.
 **10. Prices.** If the database did not come from the new seed, run the
 `UPDATE` for `quick_question.priceLabel*` recorded in `PLAN.md` step 8.
 
-**11. Backups.** Run `backup.sh` once by hand, confirm both archives appear,
-then do the restore drill against a scratch database and write the date into the
-drill history above. Decide the off-site destination and set `RCLONE_REMOTE`.
+**11. Backups.** Run `backup.sh` once by hand and confirm three things, not
+one: both archives are there, `last-run.json` says `ok: true`, and
+`gzip -dc db-<stamp>.sql.gz | tail -3` ends with
+`-- PostgreSQL database dump complete`. That last line is what separates a
+backup from a file (audit A11, H1). Then do the restore drill against a scratch
+database, read the row counts it prints, and write the date into the drill
+history above. Decide the off-site destination and set `RCLONE_REMOTE`.
 
-**12. ClamAV.** Decide whether malware scanning goes in now or is accepted as a
+**12. Uptime.** Register the two external checks from "Observability" above and
+send a test alert to the address that will receive them. This is not optional
+and it is not a later task: until it exists, an outage at 02:00 on a Sunday is
+noticed by whoever tries to book an appointment.
+
+**13. ClamAV.** Decide whether malware scanning goes in now or is accepted as a
 known gap in writing.
 
 ---
@@ -416,7 +577,24 @@ client can see it.
 - **Retention period** is a placeholder.
 - **Restore drill against production** — untested by definition until there is
   a production.
-- **API image size**: 1 GB on `node:22-slim`. Roughly 160 MB of that is the
-  Prisma CLI's own dependencies (`@prisma/studio-core`, `effect`, `pglite`,
-  `typescript`), shipped because migrations run at container start. Dropping it
-  means another way to apply migrations.
+- **API image size**: 1 GB on `node:22-slim`, and roughly 160 MB of that is
+  still the Prisma CLI's own dependencies (`@prisma/studio-core`, `effect`,
+  `pglite`, `typescript`). This entry used to say they were shipped "because
+  migrations run at container start", and that was wrong: migrations moved to
+  their own container on 2026-09-11 and the image did not change size
+  (218,656,582 bytes before, 218,646,950 after). `@prisma/client` declares
+  `prisma` as an optional peer dependency, so the pruned lockfile installs it
+  either way. Getting those bytes out means not having the CLI in the workspace
+  at all — `pnpm dlx` in the builder and in CI — which trades a deterministic
+  install for a fetch, and is a bigger decision than it looks.
+- **`alt` text for the photographs on `/about`.** They render as `alt=""`,
+  which marks them decorative; they are a doctor at work, which is not the same
+  thing. The images come from `AboutPage.images`, a list of URLs with nothing to
+  describe them, so this needs a field in the back office and a migration. It
+  was listed here as "audit pass A9" — A9 came and went (2026-09-11) without
+  touching it, and it is nobody's task until it is scheduled as one.
+- **Error tracking is configured and off.** All three applications carry the
+  Sentry SDK and none of them has a DSN, which is correct until the account
+  exists and is also indistinguishable from an integration that silently does
+  not work. The first real report is the evidence, the same way the first maib
+  callback is.

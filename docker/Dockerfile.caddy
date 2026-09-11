@@ -11,6 +11,15 @@ WORKDIR /app
 
 COPY . .
 RUN pnpm install --frozen-lockfile
+
+# Vite compiles its variables into the bundle, so error tracking for the panel
+# is decided here rather than in the container's environment. Both are empty by
+# default, and an empty DSN means the SDK is never initialised.
+ARG VITE_SENTRY_DSN=""
+ARG VITE_SENTRY_RELEASE=""
+ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
+ENV VITE_SENTRY_RELEASE=$VITE_SENTRY_RELEASE
+
 RUN pnpm nx build back-office
 
 # --- runtime ---

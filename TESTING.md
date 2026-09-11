@@ -3,7 +3,7 @@
 Testing posture for `olesia-website-med`, as observed on **2026-09-11** and corrected by
 the maintainer.
 
-**486 tests cover the arithmetic that would be expensive to get wrong, and CI runs all of
+**502 tests cover the arithmetic that would be expensive to get wrong, and CI runs all of
 them on every PR.** The suite was 3 files in August and 124 tests on 2026-09-10; the audit
 programme (A2–A11) is what put the rest there, because a finding worth fixing is usually a
 finding worth pinning. What follows describes what is covered, what deliberately is not,
@@ -15,16 +15,17 @@ and the defaults for adding to it.
 
 | Runner | Where | Tests | Files |
 | --- | --- | ---: | ---: |
-| Jest + `@swc/jest` | `apps/api` — and, through its roots, `packages/shared` | 352 | 39 |
+| Jest + `@swc/jest` | `apps/api` — and, through its roots, `packages/shared` | 368 | 41 |
 | Vitest | `apps/frontend`, config `vitest.config.mts`, environment `node` | 89 | 9 |
 | Vitest | `apps/back-office`, `test` block in `vite.config.mts`, environment `jsdom` | 45 | 8 |
 
 All three are unit tests over pure functions: no database, no Nest test module, no rendered
 component. Together they take about four seconds.
 
-Two of the API's suites sit outside `src/app`: `src/seed/profile.spec.ts`, and
-`packages/shared/src/lib/phone.spec.ts` — the shared package has no runner of its own, and
-the API's Jest is the only one in the tree that sees it.
+Three of the API's suites sit outside `src/app`: `src/seed/profile.spec.ts`, plus
+`phone.spec.ts` and `sentry-scrub.spec.ts` in `packages/shared/src/lib/` — the shared
+package has no runner of its own, and the API's Jest is the only one in the tree that sees
+it.
 
 ## What exists today
 
@@ -84,6 +85,13 @@ the API's Jest is the only one in the tree that sees it.
 | `common/patient-email.spec.ts` | 5 | The dedup key for a medical record — the cases that used to merge two people. |
 | `common/mask-email.spec.ts` | 5 |  |
 | `mail/patient-templates.spec.ts` | 12 | Which language a patient is written to in, and the fallback for every row predating the `locale` column. |
+
+**What leaves the building.**
+
+| Suite | Tests | What it pins |
+| --- | ---: | --- |
+| `shared/sentry-scrub.spec.ts` | 9 | The filter every Sentry report passes through: no request body, no query string, no `Authorization` or `Cookie`, and the segment after `/incarcare/`, `/uploads/` and `/download/` redacted — that one is a patient's whole credential for their upload link. The failure mode is silent by construction, because the report goes to a third party and nobody here ever sees what was in it. |
+| `health/backup-status.spec.ts` | 7 | What `/health` makes of `last-run.json`: a failed run, a stale one, a file it cannot parse, and a `"false"` that is a string. It is the only thing standing between a backup that stopped running and nobody noticing for a fortnight. |
 
 **Boundaries and plumbing.**
 
@@ -160,9 +168,13 @@ the only integration test here: it proves the committed migrations apply in orde
 empty database and leave a schema that matches `schema.prisma`. Given that five migrations
 are hand-corrected, that check earns its keep every time it runs.
 
+A third job, added 2026-09-11 (audit A11, M9), builds the API image with buildx and does
+not push it. The image had broken twice and both times it was found at deploy time.
+
 **What CI still does not tell you:** whether a page renders correctly, whether Calendly or
-the bank works end to end, and whether the Docker image builds — no job touches
-`docker/` or `docker-compose.prod.yml`, so a broken image is found at deploy time.
+the bank works end to end, and whether the *stack* comes up — `docker-compose.prod.yml`,
+the Caddyfile and the two shell scripts are exercised by hand, on a laptop, which is what
+the acceptance runs recorded in `docs/deployment.md` are.
 
 ## What is still open
 

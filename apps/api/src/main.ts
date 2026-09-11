@@ -4,6 +4,11 @@ import { config as loadEnv } from 'dotenv';
 // comes from compose, the file is absent, and this is a harmless no-op.
 loadEnv({ path: join(__dirname, '..', '.env') });
 
+import { initSentry } from './sentry';
+// Before Nest, before express, before pg: the SDK instruments those modules as
+// they are required, and one already loaded is one it cannot see.
+initSentry();
+
 import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';

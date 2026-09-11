@@ -20,6 +20,7 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | API validation | class-validator + class-transformer DTOs | `^0.15.1` / `^0.5.1` |
 | API docs | Swagger at `/api/docs` | `@nestjs/swagger ^11.4.4` |
 | API hardening | helmet, @nestjs/throttler | `^8.3.0`, `^6.5.0` |
+| Error tracking | Sentry, one SDK per app, all behind a DSN that is currently empty | `@sentry/nestjs` / `@sentry/nextjs` / `@sentry/react` `10.74.0` |
 | Scheduled work | @nestjs/schedule | `^6.1.3` |
 | Mail | nodemailer | `^8.0.11` |
 | Images | sharp, in the API's storage pipeline | `^0.35.0` |
@@ -36,10 +37,10 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Back office forms | react-hook-form + zod | `^7.78.0`, `zod ^4.4.3` |
 | Shared types | `packages/shared` — DTOs and enums, built with `tsc` | workspace |
 | Formatter | Prettier, single option: `singleQuote` | `~3.6.2` |
-| Test runner (API) | Jest with `@swc/jest`, 352 tests in 39 suites | `jest ~30.3.0` |
+| Test runner (API) | Jest with `@swc/jest`, 368 tests in 41 suites | `jest ~30.3.0` |
 | Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only, 89 tests | `vitest ~4.1.0` |
 | Test runner (back office) | Vitest in `vite.config.mts`, 45 tests since audits A9 and A10 | `vitest ~4.1.0` |
-| CI | GitHub Actions: two typechecks, **all three test suites**, three builds, migration check | — |
+| CI | GitHub Actions: two typechecks, **all three test suites**, three builds, migration check, **the API Docker image** | — |
 | Deploy (site) | Vercel | — |
 | Deploy (API) | Docker Compose + Postgres, nightly backups | `docker-compose.prod.yml` |
 | Dependency updates | Dependabot, grouped | — |
@@ -60,6 +61,13 @@ legacy Cal.com directory went earlier, booking having moved to Calendly.
 
 This is a settled decision, not an absence to be filled later. New editable content gets a
 module here, not an external service.
+
+**The Prisma CLI is a devDependency, and migrations are their own container.** Since
+2026-09-11 the API image runs `node main.js` and nothing else; `docker/Dockerfile.api` has
+a second target, `migrate`, which installs the dev set and runs `prisma migrate deploy`
+once per deploy. The CLI's 160 MB is still inside the runtime image anyway, because
+`@prisma/client` declares `prisma` as an optional peer — measured, and written down in
+`docs/deployment.md` rather than assumed away.
 
 **Prisma 7 through the pg driver adapter, not the default engine.** `PrismaService`
 constructs the client with `new PrismaPg({ connectionString })`. Anything instantiating
@@ -154,6 +162,38 @@ delivered — that needs a public HTTPS host, which does not exist yet. Treat
 `docs/payments-maib-checkout.md` as the source of truth: it records the bank's API, four
 places where the sandbox disagrees with the documentation, and what is still blocked on
 the client and on the acquirer.
+
+## Error tracking — Sentry, configured and switched off
+
+Added 2026-09-11 (audit A11, H3), because nothing reported a failure: a patient
+whose upload threw a 500 saw an error page and the practice found out if the
+patient telephoned.
+
+`@sentry/nestjs` in the API, `@sentry/nextjs` on the site, `@sentry/react` in
+the back office, each initialised only when its DSN is set — `SENTRY_DSN`,
+`NEXT_PUBLIC_SENTRY_DSN`, `VITE_SENTRY_DSN` (compiled in at build time, which is
+why the panel's is a Docker build argument). **All three are empty today**, so
+no client is created and nothing is sent. The account is not a technical
+decision: it is the EU region, on the free tier, in the client's name, and it
+waits with the hosting.
+
+One filter for the three, in `packages/shared/src/lib/sentry-scrub.ts` and under
+test: the request body, query string, cookies and the `Authorization` / `Cookie`
+headers never leave, and the segment after `/incarcare/`, `/uploads/` and
+`/download/` is redacted out of every URL — the first of those is a patient's
+entire credential for their upload link. It lives in `packages/shared` because
+it is the same decision three times, and the SDKs pass the same shape through
+`beforeSend`.
+
+**`SentryGlobalFilter` from `@sentry/nestjs/setup` is deliberately not used.**
+pnpm resolves a second copy of `@nestjs/core` for `@sentry/nestjs`, so that
+filter extends a `BaseExceptionFilter` bound to a different `HttpAdapterHost`
+token than the container holds; the optional injection stays undefined and every
+500 becomes `Cannot read properties of undefined (reading 'isHeadersSent')` —
+the real error replaced by an error in the reporter. `SentryReportingFilter` in
+`apps/api/src/app/common/` extends the class we import ourselves, changes no
+response, and decides what is worth reporting (5xx and anything not meant as an
+HTTP answer; not 4xx).
 
 ## Environment
 

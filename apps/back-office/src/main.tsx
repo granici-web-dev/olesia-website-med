@@ -4,11 +4,14 @@ import * as ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import App from './app/app';
+import { initSentry } from './sentry';
 import { AuthProvider } from '@/auth/auth-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import { DevTools } from '@/components/dev-tools';
 import './styles.css';
+
+initSentry();
 
 const queryClient = new QueryClient({
   defaultOptions: {
