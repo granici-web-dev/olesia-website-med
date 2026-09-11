@@ -581,7 +581,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A5 | `audit apps/api/src/app/common` + `users` + `working-hours` + `subscriptions` + `about` + `faq` + `deliverable-orders` | `RolesGuard` allow-by-default; последний admin; timezone IANA; квота видеозвонков; синглтоны без unique; `editor` удаляет заказы; `RECAPTCHA_SECRET` и `PRIVATE_UPLOADS_DIR` обязательны в prod | 11a (guard, orders), 11c, 11d (конфиг) | `[x]` `e5b6aaa`, `96aef58` |
 | A6 | `audit apps/frontend/lib` + `components/forms*` + `components/sections/{MaterialLibrary,PatientUpload,NewsletterSignup,ContactForm,LeadFormModal}` + `components/ui/CalendlyButton` | Calendly до согласия; email-гейт без сохранения; honeypot; четыре regex; `serviceTag` без RU; поведение при мёртвом API по страницам; `siteUrl()` и `API_URL` без env | 10b, 10e (i18n) | `[x]` `f0e1c0d`, `2ca0dc6` |
 | A7 | `audit apps/frontend/app` по SEO/медиа/a11y + `critique apps/frontend/components` + `lib` | metadata, hreflang, canonical, OG, favicon, `metadataBase`; 38 МБ активов, `<img>`, шрифты без кириллицы; heading order, фокус, `alt`; мёртвые `PainPoints`, `query-client`, `ui.store`, `react-query`, `zustand` | 10c, 10d, 10e | `[x]` `9df81d0`, `389b59a`, `edaf111`, `83f8f24`, `baf1010` |
-| A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[>]` 12a и 12b закрыты `1f31ba6`…`e345c72`; 12c следующий |
+| A8 | `architect payments + leads + mail + quick-questions`, затем `shape` 12a, `craft` 12b | как три модуля договорятся: pay-first для EXPRESS, кто создаёт `QuickQuestion`, письмо-подтверждение по требованию банка, `orderInfo.items`, приватное хранилище платных материалов | 12a, 12b, 12c | `[x]` `1f31ba6`…`e345c72`, `4e9cb04`, `640a780`…`f13ffc5` |
 | A9 | `audit apps/back-office/src/features` + `pages` по состояниям и данным | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках | 13a, 13b | `[ ]` |
 | A10 | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features` | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e | `[ ]` |
 | A11 | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health` | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров | 16 | `[ ]` |
@@ -965,7 +965,7 @@ working-hours, subscriptions, about, faq, deliverable-orders). Тесты на
 `CalendlyService.verifySignature`, `youtubeVideoId`, слаг, `extractReason`,
 `normalizeDays`, `deliverableEntry` пишутся внутри соответствующего `harden`.
 
-### 12. `[ ]` Чекаут на сайте и проверка в sandbox
+### 12. `[x]` Чекаут на сайте и проверка в sandbox
 
 Это шаг 9, пункты 1–3, вынесенные вперёд: их можно построить и проверить без
 хостинга. Callback банка при этом не придёт, статус страница возврата возьмёт
@@ -1041,9 +1041,30 @@ Shape 12c утверждён 2026-09-11 (`docs/shape-paid-deliverables-and-mater
 рефанд отзывает grant; приватное окно теряет ссылку, врач отдаёт её кнопкой
 «copiază link» из бэк-офиса; заказ по телефону это форма в бэк-офисе, 13d.
 
-**12c** `[ ]` Deliverables и платные материалы тем же чекаутом; для материалов
+**12c** `[x]` Deliverables и платные материалы тем же чекаутом; для материалов
 файл переезжает в приватное хранилище и отдаётся по ссылке из письма после
 оплаты (зависит от 11b и 11d).
+
+12c закрыт 2026-09-11 четырьмя коммитами: `640a780` API (миграции
+`awaiting_payment` у заказов и `MaterialGrant`, `fulfilment.service.ts` с
+тремя ветками, три маршрута чекаута, `GET /materials/download/:token`,
+`POST /payment-status/next-step` по `intentKey` для ссылки на файл и ссылки
+загрузки документов, перенос платных файлов в приватное хранилище скриптом с
+dry-run, `POST /leads/deliverable` удалён), `b12d8cb` сайт (одна страница
+`checkout/[...target]`, библиотека продаёт, а не отсылает в контакты),
+`47ca5b3` бэк-офис («Neachitate» у заказов, панель grant с «Copiază link» и
+ручным отзывом), `f13ffc5` тест на блок чека. 431 тест. Приёмка против
+sandbox в MDL: 14 пунктов, все пройдены, включая одиннадцатое скачивание и
+purge. Отступление принято: claim через `payment-status/next-step`, а не
+`materials/grant`, потому что странице возврата нужна и ссылка загрузки
+документов для протокола, а `orderId` ключом быть не должен. Известное окно:
+рефанд отзывает grant при следующей синхронизации с банком, не в момент
+нажатия, файл в этом окне ещё скачивается. Callback банка по-прежнему ни разу
+не доставлен: quick-туннель за сессию не резолвился в DNS.
+
+Шаг 12 закрыт целиком. Сайт умеет брать деньги за EXPRESS, меню, протоколы и
+материалы; до продакшна остаются хостинг (callback), EUR и MIA на профиле,
+SMTP для чека, юрлицо и договор с банком.
 
 ### 13. `[ ]` Бэк-офис: состояния, права, объём данных
 
