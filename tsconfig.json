@@ -11,6 +11,9 @@
     },
     {
       "path": "./apps/back-office"
+    },
+    {
+      "path": "./apps/frontend-e2e"
     }
   ]
 }

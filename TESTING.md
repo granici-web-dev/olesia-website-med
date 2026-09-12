@@ -20,7 +20,8 @@ and the defaults for adding to it.
 | Vitest             | `apps/back-office`, `test` block in `vite.config.mts`, environment `jsdom` |    45 |     8 |
 
 All three are unit tests over pure functions: no database, no Nest test module, no rendered
-component. Together they take about four seconds.
+component. Together they take about four seconds. A fourth suite — one Playwright spec in
+`apps/frontend-e2e` — is run by hand and never in CI; see "The end-to-end path".
 
 Four of the API's suites sit outside `src/app`: `src/seed/profile.spec.ts`, plus
 `phone.spec.ts`, `sentry-scrub.spec.ts` and `deliverables.spec.ts` in
@@ -149,6 +150,100 @@ should not be "cleaned up":
 - `transformIgnorePatterns` re-includes `otplib`, `@scure` and `@noble`, which ship ESM
   only. Everything else in `node_modules` is left alone, which is what the default does.
 
+## The end-to-end path
+
+One Playwright spec, `apps/frontend-e2e/src/smoke.spec.ts`, covers the one thing no unit
+test can: a stranger's money turning into a ticket on the doctor's desk. It fills the
+EXPRESS checkout on a production build of the site, opens a real session at maib's
+sandbox, pays with the sandbox test card, waits for the return page to say **"Plata a fost
+confirmată"**, and then asks the back office's own API — logging in as the administrator —
+whether the ticket is `open`, `confirmed`, and carrying a `dueAt`. It also asserts the
+negative twice: before the form is submitted and again while the payment is in flight, the
+ticket must **not** appear in the back office, because an unpaid question is deliberately
+invisible to the doctor.
+
+Every piece of this is already pinned by a unit test — `checkoutAmount`, `toPaymentState`,
+both signature verifiers, `addWorkingMinutes`, `dueAt` from the bank's moment. None of that
+proves the pieces are wired to each other, and this is the only test here that does.
+
+**Run it by hand. It is not in CI, and should not be put there**: it needs a database, the
+maib sandbox credentials, and a network round trip to somebody else's payment page.
+
+```sh
+# 1. Postgres, with the dev seed applied.
+docker compose up -d postgres
+# once, if the database is empty — the dev profile creates
+# admin@olesia.md / admin12345 (apps/api/src/seed/seed.ts)
+pnpm nx build api && (cd apps/api && npx prisma db seed)
+
+# 2. The API, with four things the default .env does not have.
+pnpm nx build api
+CORS_ORIGINS=http://localhost:3100 \
+PUBLIC_SITE_URL=http://localhost:3100 \
+PUBLIC_API_URL=http://localhost:3333/api \
+PAYMENT_CURRENCY=MDL \
+LEGAL_ENTITY_NAME='SRL Test E2E' \
+LEGAL_ENTITY_IDNO='1000000000000' \
+LEGAL_ENTITY_ADDRESS='mun. Chisinau, str. Test 1' \
+  node apps/api/dist/main.js
+
+# 3. A production build of the site, on 3100.
+NEXT_PUBLIC_SITE_URL=http://localhost:3100 \
+API_URL=http://localhost:3333/api \
+NEXT_PUBLIC_API_URL=http://localhost:3333/api \
+  pnpm nx next:build @olesia/frontend
+cd apps/frontend && NEXT_PUBLIC_SITE_URL=http://localhost:3100 \
+API_URL=http://localhost:3333/api NEXT_PUBLIC_API_URL=http://localhost:3333/api \
+  npx next start -p 3100
+
+# 4. The test. First run only: npx playwright install chromium
+pnpm nx e2e-smoke frontend-e2e
+```
+
+Each of those environment variables is there for a reason that has already cost a run:
+
+- **`PAYMENT_CURRENCY=MDL`** — the sandbox merchant profile has no EUR enabled
+  (`docs/payments-maib-checkout.md` §7.1). The summary card still quotes euro from the
+  catalog and the bank charges lei; that mismatch is the sandbox's, and
+  `paymentCurrency()` refuses the override in production precisely so it cannot become
+  ours.
+- **`LEGAL_ENTITY_*`** — `canSell()` is all three fields or none, and the checkout route
+  is the single thing that refuses without them, with 503 `legal_entity_missing`. The
+  practice has no registered entity yet, so this test cannot run without placeholders.
+- **`CORS_ORIGINS`** — must name the site's origin, or the form's POST is blocked in the
+  browser and the page simply sits there. Port **3100** rather than 3000 because 3000 is
+  the port most likely already taken.
+- **`PUBLIC_SITE_URL`** — the bank is given this as the return address. Unset, it builds
+  `/ro/payment/success` with no origin.
+
+`src/global-setup.ts` checks all four before the browser opens, plus that the API can
+reach its database, and fails with a sentence naming the one that is wrong. Each of those
+checks is there because that failure first appeared as a sixty-second timeout in the middle
+of a purchase.
+
+**What it does not cover.** The bank's callback: it has never once been delivered, because
+there is no public HTTPS host for it to reach, so the status here arrives by polling — the
+same way it did in the live acceptance runs recorded in `PLAN.md` 12b and 12c. A tunnel is
+not needed for this test and was not used: the bank redirects the _browser_, and the
+browser is on this laptop. Refunds, the group-C and paid-material checkouts, and the
+doctor answering the ticket are all covered by hand against the sandbox (14 acceptance
+points, `PLAN.md` 12c) rather than here; this spec is deliberately one path.
+
+**Two things learned writing it, worth knowing before touching it:**
+
+- The acquirer's expiry field is a **keypress-driven mask** that splits what you type into
+  two hidden inputs, and those are what the form posts. `fill()` sets the visible value and
+  fires one `input` event, so the mask never runs: the field looks right, the hidden pair
+  stays empty, and "Achită" is silently rejected — which reads exactly like a bank that
+  never answered. The card details are typed with `pressSequentially`, and the spec
+  asserts the hidden pair before clicking.
+- The checkout form's inputs are addressed **by label**. Their ids come from React's
+  `useId` and change between builds.
+
+The suite runs in about 12 seconds, carries a trace and a video on every run, and leaves
+its ticket in the local database — dev data, and the order id is on the return page if you
+want to find it.
+
 ## What CI does, and does not do
 
 `.github/workflows/ci.yml` runs on every PR and every push to `main`:
@@ -173,8 +268,8 @@ are hand-corrected, that check earns its keep every time it runs.
 A third job, added 2026-09-11 (audit A11, M9), builds the API image with buildx and does
 not push it. The image had broken twice and both times it was found at deploy time.
 
-**What CI still does not tell you:** whether a page renders correctly, whether Calendly or
-the bank works end to end, and whether the _stack_ comes up — `docker-compose.prod.yml`,
+**What CI still does not tell you:** whether a page renders correctly, whether Calendly
+works end to end, and whether the _stack_ comes up — `docker-compose.prod.yml`,
 the Caddyfile and the two shell scripts are exercised by hand, on a laptop, which is what
 the acceptance runs recorded in `docs/deployment.md` are.
 
@@ -190,7 +285,9 @@ the acceptance runs recorded in `docs/deployment.md` are.
   are pinned, but nothing drives a recorded body through the controller and asserts the
   state transition, or that a second delivery of the same payload changes nothing. The
   maib callback has additionally never been delivered by the bank — the first real one
-  will be the first end-to-end evidence that path works.
+  will be the first end-to-end evidence that path works. The Playwright smoke path does
+  not close this: it reaches a paid ticket by polling, which is what the live runs do,
+  and the callback stays unexercised until there is a public host.
 - **The seed itself**, as opposed to the decision it makes first, needs a database and has
   no coverage.
 

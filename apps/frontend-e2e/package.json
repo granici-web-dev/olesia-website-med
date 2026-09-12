@@ -1,0 +1,18 @@
+{
+  "name": "frontend-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "e2e-smoke": {
+        "executor": "nx:run-commands",
+        "//": "Never cached and never in CI: it charges a card on maib's sandbox and writes a row to a real database. See TESTING.md, 'The end-to-end path'.",
+        "cache": false,
+        "options": {
+          "command": "playwright test",
+          "cwd": "apps/frontend-e2e"
+        }
+      }
+    }
+  }
+}
