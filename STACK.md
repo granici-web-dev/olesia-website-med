@@ -140,6 +140,69 @@ way — the client uploads them in the back office, into the site-media slots an
 the storage pipeline. Reviving the generator means re-adding both packages
 deliberately, which is the point of moving it out.
 
+## Transitive advisories we do not act on
+
+`pnpm audit` on 2026-09-12 went from 17 high / 17 moderate / 1 low to
+**6 high / 13 moderate / 0 low**, no critical at any point, and not one
+`pnpm.overrides` entry added. Sixteen advisories cleared, each by the smallest
+version move that actually clears it (step 15):
+
+- **`nodemailer` 8.0.11 → 9.1.1** (five advisories, two high): the
+  message-level `raw` option and `resolveContent()`'s legacy signature both
+  bypassed `disableFileAccess`/`disableUrlAccess`, and `addressparser` was
+  quadratic. This is the one package on the list we import ourselves. v9's
+  breaking change is that fetching remote content now validates TLS
+  certificates; `MailService` attaches nothing by URL and speaks SMTP, so
+  nothing in it is affected. Verified against a local MailHog: `verify()`
+  succeeds, the Romanian and Russian patient templates arrive with their
+  diacritics and Cyrillic intact, a refused port still logs `code=ESOCKET` and
+  no address, and the no-SMTP branch still answers `false` rather than claiming
+  a send. `@types/nodemailer` stays at 8.0.1 — DefinitelyTyped has no 9.x line
+  yet, and the four options we pass are unchanged.
+- **`@nestjs/swagger` 11.4.4 → 11.4.7** (four `js-yaml` advisories, three
+  high): `js-yaml` 4.1.1 was pinned exactly, so in-range was the only way to
+  move it without an override. 11.4.7 carries `js-yaml` 5.3.0. Swagger only
+  ever calls `dump()`, never `load()`, so the quadratic-parse advisories were
+  unreachable here anyway — but a patch bump costs nothing. `/api/docs`,
+  `/api/docs-json` (108 paths) and `/api/docs-yaml` all verified on a booted
+  API afterwards.
+- **`fast-uri` 3.1.2 → 3.1.7** (six high, SSRF and host confusion) and
+  **`qs` 6.15.2 → 6.16.0** with **`body-parser` 2.2.2 → 2.3.0** (two moderate,
+  one low) were stale lockfile resolutions inside ranges their parents already
+  allowed. A plain `pnpm update` moved all three; `express` 5.2.1 did not have
+  to change. The API's query parsing was re-checked on a booted instance.
+
+What remains, and why nothing is being forced for it:
+
+- **`mysql2`** (one high — plaintext credentials on an auth-plugin downgrade;
+  one moderate) and **`deepmerge-ts`** (one high) are dependencies of the
+  `prisma` CLI, which carries a MySQL driver and a config loader it never uses
+  here. This is not a TypeORM branch of NestJS, which is what an earlier note
+  guessed. We run PostgreSQL through `@prisma/adapter-pg` and never open a MySQL
+  connection. Because `prisma` is a peer of `@prisma/client`, `pnpm install
+--prod` does materialise its files inside the runtime image's pnpm store — but
+  neither `prisma` nor `mysql2` is linked into `/app/node_modules` or onto PATH,
+  so the server cannot load either, and since audit A11 migrations run in the
+  separate `migrate` container that does have the CLI. Checked inside a built
+  image rather than assumed: `require.resolve('mysql2')` fails and
+  `node_modules/.bin/prisma` does not exist.
+- **`brace-expansion`** (Sentry's bundler plugin), **`image-size`** (`less`
+  under Vite), **`smol-toml`**, **`adm-zip`**, **`baseline-browser-mapping`**,
+  **`uuid`**, **`vitest`/`@vitest/mocker`** and the remaining **`qs`** (6.15.3,
+  inside the `express` 4 that `webpack-dev-server` pulls in) are build and test
+  tooling. Each is a DoS or a local file-access issue reachable only by feeding
+  the tool a crafted input, and the only inputs are this repository's own files.
+- **`react-router` / `@remix-run/router` / `react-router-dom`** (five moderate:
+  open redirect, SSR-hydration injection) are in the back office — a
+  client-side Vite SPA behind a login on an admin host, with no SSR hydration
+  to poison and no untrusted link source. The fix is a `react-router` major,
+  which is its own step rather than a forced resolution.
+
+The rule: an advisory against something the API actually loads gets fixed, by
+the smallest version move that clears it. An advisory against a build tool or an
+unreachable path gets written down here instead, so the next `pnpm audit` is
+read rather than re-investigated.
+
 ## Payments — maib e-Commerce Checkout
 
 **Part of the stack since 2026-09-10** (merge `4fb7161`), which reverses the earlier
