@@ -592,7 +592,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A9     | `audit apps/back-office/src/features` + `pages` по состояниям и данным                                                                                                              | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках                                                    | 13a, 13b                               | `[x]` `fb90486`, `57c96d9`, `3c7871a`                       |
 | A10    | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features`                                                               | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e                          | `[x]` `227c10e`, `3140447`, `f516c58`                       |
 | A11    | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health`                                                                                        | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров                                                                                         | 16                                     | `[x]` `a1d3914`, `0d560f2`, `86a3c65`, `1cd5a8b`            |
-| A12    | без аудита, механика: Dependabot по одному, тесты из списка 15                                                                                                                      | зелёный CI после каждого слияния                                                                                                                                                                                                         | 14, 15                                 | `[ ]`                                                       |
+| A12    | без аудита, механика: Dependabot по одному, тесты из списка 15                                                                                                                      | зелёный CI после каждого слияния                                                                                                                                                                                                         | 14, 15                                 | `[>]` 14 закрыт `f4bb966`…`b243aeb`, 15 в работе                                                       |
 | A13    | не `rigorous`: `impeccable` в браузере по сайту и бэк-офису, Lighthouse на проде после A7                                                                                           | визуальная иерархия, состояния, мобильные, контраст, CWV                                                                                                                                                                                 | отдельный шаг                          | `[ ]`                                                       |
 
 Оценка: A2–A5 по полдня-дню каждый, A6–A7 два дня, A8 четыре-пять дней (это
@@ -1206,7 +1206,7 @@ A10 закрыт тремя коммитами: `227c10e` (сессия: пус�
 делом Vitest-конфиг бэк-офиса и тесты на `deadlineMs`/`slaMet`,
 `parsePublicationUrl`, `appointmentsDelta`, `formatDuration`, `aboutFormSchema`.
 
-### 14. `[ ]` Зависимости: семь PR Dependabot
+### 14. `[x]` Зависимости: семь PR Dependabot
 
 Открыты с июля: групповой на 57 routine-обновлений (сегодняшний), три на
 GitHub Actions v6/v7 (`checkout`, `setup-node`, `pnpm/action-setup`), `jsdom`
@@ -1214,6 +1214,22 @@ GitHub Actions v6/v7 (`checkout`, `setup-node`, `pnpm/action-setup`), `jsdom`
 нет в дереве. Остальные сливать по одному после зелёного CI, начиная с Actions
 (снимают аннотацию про Node 20), потом routine, потом два dev-мажора с проверкой
 типов. Каждое слияние деплоит фронт, так что по одному в день, не пачкой.
+
+Шаг 14 закрыт 2026-09-11 (A12, часть 1): семь PR Dependabot разобраны по
+одному, `ai` закрыт без слияния (пакета нет в дереве), три бампа Actions
+(`f4bb966`, `924937e`, `f679f4c`), групповой на 56 обновлений (`4593b69`, внутри
+`reflect-metadata` 0.1→0.2, `argon2` 0.44→0.45, Prisma 7.8→7.10, `prettier`
+3.6→3.9 с переформатированием 16 файлов до слияния), `jsdom` 22→30 (`e5f5ed2`),
+`@types/node` 20→26 (`c14ba26`), каждый после зелёного CI и локальной проверки
+трёх `tsc`, трёх наборов тестов, трёх сборок и Docker-образа. `pnpm audit`: 53
+high / 52 moderate / 7 low → 17 / 19 / 1, critical 0, новых нет; остаток
+транзитивный, в рантайме API только `nodemailer` и `js-yaml`, разобрать в
+шаге 15. Побочно: первый прогон CI со сборкой образа и Prettier упал на
+`PLAN.md` (таблица A11 требовала выравнивания, исправлено `a527766`, без
+force-push); после третьего слияния GitHub не создал push-прогон, добавлен
+`workflow_dispatch` (`31170b8`); `next-env.d.ts` генерируется сборкой и ломал
+локальный `prettier --check`, добавлен в `.prettierignore` (`b243aeb`). Сборка
+образа в CI с кешем 23–25 с, без кеша 200–330 с.
 
 ### 15. `[ ]` Тесты второго уровня
 
