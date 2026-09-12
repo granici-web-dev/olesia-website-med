@@ -3,7 +3,7 @@
 Testing posture for `olesia-website-med`, as observed on **2026-09-11** and corrected by
 the maintainer.
 
-**502 tests cover the arithmetic that would be expensive to get wrong, and CI runs all of
+**512 tests cover the arithmetic that would be expensive to get wrong, and CI runs all of
 them on every PR.** The suite was 3 files in August and 124 tests on 2026-09-10; the audit
 programme (A2–A11) is what put the rest there, because a finding worth fixing is usually a
 finding worth pinning. What follows describes what is covered, what deliberately is not,
@@ -15,17 +15,17 @@ and the defaults for adding to it.
 
 | Runner             | Where                                                                      | Tests | Files |
 | ------------------ | -------------------------------------------------------------------------- | ----: | ----: |
-| Jest + `@swc/jest` | `apps/api` — and, through its roots, `packages/shared`                     |   368 |    41 |
+| Jest + `@swc/jest` | `apps/api` — and, through its roots, `packages/shared`                     |   378 |    43 |
 | Vitest             | `apps/frontend`, config `vitest.config.mts`, environment `node`            |    89 |     9 |
 | Vitest             | `apps/back-office`, `test` block in `vite.config.mts`, environment `jsdom` |    45 |     8 |
 
 All three are unit tests over pure functions: no database, no Nest test module, no rendered
 component. Together they take about four seconds.
 
-Three of the API's suites sit outside `src/app`: `src/seed/profile.spec.ts`, plus
-`phone.spec.ts` and `sentry-scrub.spec.ts` in `packages/shared/src/lib/` — the shared
-package has no runner of its own, and the API's Jest is the only one in the tree that sees
-it.
+Four of the API's suites sit outside `src/app`: `src/seed/profile.spec.ts`, plus
+`phone.spec.ts`, `sentry-scrub.spec.ts` and `deliverables.spec.ts` in
+`packages/shared/src/lib/` — the shared package has no runner of its own, and the API's
+Jest is the only one in the tree that sees it.
 
 ## What exists today
 
@@ -40,6 +40,7 @@ it.
 | `payments/mirror-status.spec.ts`           |     6 | `paymentStatus` as a mirror of the `Payment` row, including the direction that used to be wrong — a payment that stops being paid.                                                                                                                     |
 | `payments/sla-clock.spec.ts`               |     4 | Where the EXPRESS clock starts: the bank's moment, not the moment the sweep noticed.                                                                                                                                                                   |
 | `materials/material-price.spec.ts`         |     6 | What a paid material costs, and its composition with `checkoutAmount`.                                                                                                                                                                                 |
+| `shared/deliverables.spec.ts`              |     6 | The group-C catalog: the brief's price for each of the five products, and `undefined` for an unknown code. Both order paths stamp `titleRo` and `priceEur` from here, because a price arriving in a request body is not a price.                       |
 | `shared/phone.spec.ts`                     |     8 | E.164 normalisation. maib refuses a whole checkout with error 42005 over a payer phone, so this function decides whether a sale happens.                                                                                                               |
 
 **Dates, deadlines and the promise to a patient.**
@@ -95,15 +96,16 @@ it.
 
 **Boundaries and plumbing.**
 
-| Suite                                     | Tests | What it pins                                                                                                                                    |
-| ----------------------------------------- | ----: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `appointments/calendly.payload.spec.ts`   |    20 | What we keep from a Calendly payload and what we refuse to keep, including the reschedule link the free test account cannot reproduce live.     |
-| `appointments/calendly.signature.spec.ts` |    13 | Calendly's webhook signature, against recorded bodies.                                                                                          |
-| `common/prisma-errors.spec.ts`            |    14 | Four writes that answered 500 — a taken slug, a taken event type, a service still carrying appointments, a post pointing at a deleted category. |
-| `common/captcha/captcha.service.spec.ts`  |    13 | The captcha is fail-open by design, and a _hanging_ Google has to fail open too: Node's `fetch` has no default timeout.                         |
-| `common/slugify.spec.ts`                  |     8 | One `slugify` in `packages/shared`, after three copies disagreed about the cedilla.                                                             |
-| `common/dto/pagination.spec.ts`           |     7 | The envelope and its ceiling; `page` becomes an SQL OFFSET.                                                                                     |
-| `blog/post-visibility.spec.ts`            |     6 | Deferred publication, boundary included. An article dated next spring used to be live and sorted to the top.                                    |
+| Suite                                                 | Tests | What it pins                                                                                                                                                                                  |
+| ----------------------------------------------------- | ----: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appointments/calendly.payload.spec.ts`               |    20 | What we keep from a Calendly payload and what we refuse to keep, including the reschedule link the free test account cannot reproduce live.                                                   |
+| `appointments/calendly.signature.spec.ts`             |    13 | Calendly's webhook signature, against recorded bodies.                                                                                                                                        |
+| `media-appearances/media-appearances.service.spec.ts` |     5 | `youtubeVideoId`, which is the SSRF guard on `thumbnailFromUrl`: its return value is interpolated into the host the API then fetches. Five accepted URL shapes, and every other host refused. |
+| `common/prisma-errors.spec.ts`                        |    14 | Four writes that answered 500 — a taken slug, a taken event type, a service still carrying appointments, a post pointing at a deleted category.                                               |
+| `common/captcha/captcha.service.spec.ts`              |    13 | The captcha is fail-open by design, and a _hanging_ Google has to fail open too: Node's `fetch` has no default timeout.                                                                       |
+| `common/slugify.spec.ts`                              |     8 | One `slugify` in `packages/shared`, after three copies disagreed about the cedilla.                                                                                                           |
+| `common/dto/pagination.spec.ts`                       |     7 | The envelope and its ceiling; `page` becomes an SQL OFFSET.                                                                                                                                   |
+| `blog/post-visibility.spec.ts`                        |     6 | Deferred publication, boundary included. An article dated next spring used to be live and sorted to the top.                                                                                  |
 
 **The public site** (`apps/frontend`, Vitest) — all of it under `lib/`.
 
