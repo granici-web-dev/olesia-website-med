@@ -592,7 +592,7 @@ HTTPS (callback банка проверить нельзя без него).
 | A9     | `audit apps/back-office/src/features` + `pages` по состояниям и данным                                                                                                              | `timelineQuery.isError`; пустые редакторы при ошибке; 403 как «нет ссылки»; `pageSize=200` без `total`; клиентский поиск по PII; удаление без диалога; `isPending` на опасных кнопках                                                    | 13a, 13b                               | `[x]` `fb90486`, `57c96d9`, `3c7871a`                       |
 | A10    | `audit apps/back-office/src/api` + `auth` + `config` + `app` (роутер, nav) и `simplify apps/back-office/src/features`                                                               | `queryClient.clear()`; истечение сессии без сообщения; blob-скачивания мимо refresh; гейт `/pacienti` и панели загрузок; мёртвые кнопки; `asList` × 9, `ConfirmAction` × 2, `section-stub`, ключи `ro.ts`; `agentation` в `dependencies` | 13c, 13d, 13e                          | `[x]` `227c10e`, `3140447`, `f516c58`                       |
 | A11    | `audit docker` + `docker-compose.prod.yml` + `.github/workflows` + `apps/api/src/app/health`                                                                                        | `/health` без пинга базы; трекинг ошибок; uptime; статус бэкапа; сборка образа в CI; размер образа и CLI Prisma; секреты в CI; права контейнеров                                                                                         | 16                                     | `[x]` `a1d3914`, `0d560f2`, `86a3c65`, `1cd5a8b`            |
-| A12    | без аудита, механика: Dependabot по одному, тесты из списка 15                                                                                                                      | зелёный CI после каждого слияния                                                                                                                                                                                                         | 14, 15                                 | `[>]` 14 закрыт `f4bb966`…`b243aeb`, 15 в работе                                                       |
+| A12    | без аудита, механика: Dependabot по одному, тесты из списка 15                                                                                                                      | зелёный CI после каждого слияния                                                                                                                                                                                                         | 14, 15                                 | `[x]` `f4bb966`…`06df33e`                                   |
 | A13    | не `rigorous`: `impeccable` в браузере по сайту и бэк-офису, Lighthouse на проде после A7                                                                                           | визуальная иерархия, состояния, мобильные, контраст, CWV                                                                                                                                                                                 | отдельный шаг                          | `[ ]`                                                       |
 
 Оценка: A2–A5 по полдня-дню каждый, A6–A7 два дня, A8 четыре-пять дней (это
@@ -1231,7 +1231,7 @@ force-push); после третьего слияния GitHub не создал
 локальный `prettier --check`, добавлен в `.prettierignore` (`b243aeb`). Сборка
 образа в CI с кешем 23–25 с, без кеша 200–330 с.
 
-### 15. `[ ]` Тесты второго уровня
+### 15. `[x]` Тесты второго уровня
 
 Юниты, которые обходы назвали первыми по цене ошибки и которых нет:
 `CalendlyService.verifySignature` (единственная аутентификация публичного
@@ -1315,6 +1315,25 @@ workspace это отдельное решение. Sentry и uptime настр�
 бэкапы, ClamAV, реальный ACME, регистрация uptime и Sentry.
 
 Сводный аудит всего проекта: `docs/audit-2026-09-10.md`.
+
+Шаг 15 закрыт 2026-09-12 (A12, часть 2): `30c48e8` тесты на `youtubeVideoId`
+(SSRF-гард) и `deliverableEntry`, 512 юнитов на трёх раннерах (378 + 89 + 45);
+`5a81efd` `nodemailer` 9.1.1 (проверен живьём против MailHog с диакритикой и
+кириллицей), `@nestjs/swagger` 11.4.7 ради `js-yaml` 4.1.1, `fast-uri`, `qs`,
+`body-parser` в пределах диапазонов, ни одного `pnpm.overrides`; `pnpm audit` 6
+high / 13 moderate / 0 low / 0 critical, остаток перечислен в `STACK.md`
+«Transitive advisories we do not act on» с причиной по каждой (react-router
+moderate до мажора, `mysql2` и `deepmerge-ts` это CLI Prisma, недостижимы из
+сервера, проверено `require.resolve` в образе); `06df33e` Playwright в
+`apps/frontend-e2e`, один сквозной спек: форма EXPRESS → sandbox maib → страница
+возврата → тикет `open` с `dueAt` через API бэк-офиса, три прогона по 11–20 с,
+без туннеля, потому что редирект банка идёт в локальный браузер; запуск только
+локально, описан в `TESTING.md`. Две поправки к предпосылкам плана: `js-yaml`
+это рантайм API через Swagger, а не только jest; `qs` и `body-parser` идут через
+наш Express, не через TypeORM. Callback банка по-прежнему ни разу не доставлен.
+
+Программа аудита: A1–A12 закрыты. Остался A13, визуальный проход, и он не
+`rigorous`.
 
 ### Решения второго обхода, принятые 2026-09-10
 
