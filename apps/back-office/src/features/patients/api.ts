@@ -10,6 +10,7 @@ import type {
   PatientErasureReportDto,
   PatientFormValues,
   PatientTimeline,
+  UploadEntryType,
 } from '@/features/patients/types';
 
 /**
@@ -128,15 +129,17 @@ export function deleteEntry(id: string, entryId: string): Promise<void> {
 export function uploadDocument(
   id: string,
   file: File,
+  type: UploadEntryType,
   title?: string,
 ): Promise<PatientEntryDto> {
   const form = new FormData();
   form.append('file', file);
+  form.append('type', type);
   if (title?.trim()) form.append('title', title.trim());
   return http.post<PatientEntryDto>(`/patients/${id}/documents`, form);
 }
 
-/** Authenticated, streamed download of a document in the patient's file. */
+/** Authenticated, streamed download of the file on a document or a prescription. */
 export function downloadDocument(
   id: string,
   entry: PatientEntryDto,

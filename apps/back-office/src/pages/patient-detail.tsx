@@ -74,6 +74,7 @@ import type {
   PatientDto,
   PatientEntryDto,
   PatientErasureReportDto,
+  UploadEntryType,
 } from '@/features/patients/types';
 
 const t = ro.patients;
@@ -97,7 +98,10 @@ export function PatientDetailPage() {
   });
 
   const [editOpen, setEditOpen] = React.useState(false);
-  const [docOpen, setDocOpen] = React.useState(false);
+  const [upload, setUpload] = React.useState<{
+    open: boolean;
+    type: UploadEntryType;
+  }>({ open: false, type: 'document' });
   const [entrySheet, setEntrySheet] = React.useState<{
     entry: PatientEntryDto | null;
     defaultType: EditableType;
@@ -380,13 +384,25 @@ export function PatientDetailPage() {
                 <SectionActions
                   label={t.tabs.prescriptions}
                   action={
-                    <Button
-                      size="sm"
-                      onClick={() => openAddEntry('prescription')}
-                    >
-                      <Plus />
-                      {t.prescriptions.add}
-                    </Button>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setUpload({ open: true, type: 'prescription' })
+                        }
+                      >
+                        <UploadCloud />
+                        {t.prescriptions.upload}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => openAddEntry('prescription')}
+                      >
+                        <Plus />
+                        {t.prescriptions.add}
+                      </Button>
+                    </div>
                   }
                 />
                 <EntryList
@@ -398,6 +414,8 @@ export function PatientDetailPage() {
                   onEdit={openEditEntry}
                   onDelete={setPendingDelete}
                   onSend={setSendingEntry}
+                  onDownload={handleDownload}
+                  downloadingId={downloadingId}
                 />
               </TabsContent>
 
@@ -407,7 +425,12 @@ export function PatientDetailPage() {
                   label={t.tabs.documents}
                   hint={t.documents.private}
                   action={
-                    <Button size="sm" onClick={() => setDocOpen(true)}>
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        setUpload({ open: true, type: 'document' })
+                      }
+                    >
                       <UploadCloud />
                       {t.documents.upload}
                     </Button>
@@ -478,8 +501,9 @@ export function PatientDetailPage() {
           )}
           <DocumentUploadSheet
             patientId={id}
-            open={docOpen}
-            onOpenChange={setDocOpen}
+            defaultType={upload.type}
+            open={upload.open}
+            onOpenChange={(open) => setUpload((u) => ({ ...u, open }))}
           />
           <SendEntryDialog
             patient={patient}
@@ -679,6 +703,8 @@ function EntryList({
   onEdit,
   onDelete,
   onSend,
+  onDownload,
+  downloadingId,
 }: {
   entries: PatientEntryDto[];
   loading: boolean;
@@ -688,6 +714,8 @@ function EntryList({
   onEdit: (entry: PatientEntryDto) => void;
   onDelete: (entry: PatientEntryDto) => void;
   onSend?: (entry: PatientEntryDto) => void;
+  onDownload?: (entry: PatientEntryDto) => void;
+  downloadingId?: string | null;
 }) {
   if (loading) return <EntryListSkeleton />;
   if (entries.length === 0)
@@ -701,6 +729,8 @@ function EntryList({
           onEdit={onEdit}
           onDelete={onDelete}
           onSend={onSend}
+          onDownload={onDownload}
+          downloading={downloadingId === entry.id}
         />
       ))}
     </div>

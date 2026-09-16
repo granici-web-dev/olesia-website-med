@@ -13,6 +13,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DOCUMENT_MAX_BYTES, megabytes } from '@olesia/shared';
 import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
@@ -22,35 +29,51 @@ import {
   patientQueryKey,
   patientTimelineQueryKey,
 } from '@/features/patients/query-key';
+import type { UploadEntryType } from '@/features/patients/types';
 
 const f = ro.patients.docForm;
 const ACCEPT = '.pdf,.doc,.docx';
+const UPLOAD_TYPES: UploadEntryType[] = ['prescription', 'document'];
 
+/**
+ * Uploads a file as a document or as a prescription
+ * (docs/shape-prescription-file.md). The tab it is opened from presets the
+ * type; the text of a prescription is written afterwards in its edit form.
+ */
 export function DocumentUploadSheet({
   patientId,
+  defaultType,
   open,
   onOpenChange,
 }: {
   patientId: string;
+  defaultType: UploadEntryType;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const queryClient = useQueryClient();
+  const [type, setType] = React.useState<UploadEntryType>(defaultType);
   const [title, setTitle] = React.useState('');
   const [file, setFile] = React.useState<File | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (!open) {
+    if (open) {
+      setType(defaultType);
+    } else {
       setTitle('');
       setFile(null);
     }
-  }, [open]);
+  }, [open, defaultType]);
 
   const mutation = useMutation({
-    mutationFn: () => uploadDocument(patientId, file!, title),
+    mutationFn: () => uploadDocument(patientId, file!, type, title),
     onSuccess: () => {
-      toast.success(ro.patients.toast.documentUploaded);
+      toast.success(
+        type === 'prescription'
+          ? ro.patients.toast.prescriptionUploaded
+          : ro.patients.toast.documentUploaded,
+      );
       queryClient.invalidateQueries({
         queryKey: patientTimelineQueryKey(patientId),
       });
@@ -94,19 +117,39 @@ export function DocumentUploadSheet({
         className="w-full gap-0 bg-card text-card-foreground sm:max-w-md"
       >
         <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle>{f.title}</SheetTitle>
-          <SheetDescription>{f.subtitle}</SheetDescription>
+          <SheetTitle>{f.title[type]}</SheetTitle>
+          <SheetDescription>{f.subtitle[type]}</SheetDescription>
         </SheetHeader>
 
         <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+            <div className="space-y-2">
+              <Label htmlFor="doc-type">{f.type}</Label>
+              <Select
+                value={type}
+                onValueChange={(value) => setType(value as UploadEntryType)}
+                disabled={mutation.isPending}
+              >
+                <SelectTrigger id="doc-type" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {UPLOAD_TYPES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {ro.patients.entryType[value]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="doc-title">{f.titleLabel}</Label>
               <Input
                 id="doc-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={f.titlePlaceholder}
+                placeholder={f.titlePlaceholder[type]}
               />
             </div>
 

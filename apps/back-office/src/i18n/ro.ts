@@ -886,6 +886,7 @@ export const ro = {
       empty: 'Nicio rețetă',
       emptyBody: 'Rețetele și planurile prescrise apar aici.',
       add: 'Adaugă rețetă',
+      upload: 'Încarcă rețetă',
     },
 
     documents: {
@@ -939,15 +940,24 @@ export const ro = {
       body: 'Conținut',
       bodyPlaceholder: 'Scrie detaliile (markdown acceptat)…',
       occurredAt: 'Data clinică',
+      typeLockedByFile:
+        'Rețeta are un fișier atașat, care rămâne cu ea, deci tipul nu se schimbă.',
       save: 'Salvează',
       saving: 'Se salvează…',
+      errors: {
+        empty:
+          'Rețeta nu poate fi goală. Scrie conținutul sau încarcă rețeta ca fișier, cu „Încarcă rețetă".',
+        fileNotAllowed:
+          'Înregistrarea are un fișier, iar anamneza și notele nu pot avea fișiere. Păstrează tipul Rețetă sau Document.',
+      },
     },
 
     send: {
       action: 'Trimite pacientului',
       title: 'Trimite pacientului',
-      prescriptionBody: 'Rețeta pleacă pe email, ca text în corpul mesajului.',
-      documentBody: 'Documentul pleacă pe email, ca atașament.',
+      contents: 'Ce pleacă',
+      contentsText: 'Textul rețetei, în corpul emailului',
+      contentsAttachment: (fileName: string) => `Atașament: ${fileName}`,
       recipient: 'Destinatar',
       recipientHint:
         'Adresa din dosar. Dacă nu e cea corectă, corecteaz-o în profil înainte de trimitere.',
@@ -955,7 +965,6 @@ export const ro = {
       languageUnknown:
         'Pacientul nu ne-a scris niciodată prin site, deci limba nu e cunoscută. Alege-o tu.',
       locale: { ro: 'Română', en: 'Engleză', ru: 'Rusă' },
-      attachment: 'Atașament',
       previous: (count: number, when: string) =>
         count === 1
           ? `Emailul a mai plecat o dată, pe ${when}.`
@@ -981,10 +990,21 @@ export const ro = {
     },
 
     docForm: {
-      title: 'Încarcă document',
-      subtitle: 'Document medical privat (PDF, DOC, DOCX).',
+      title: {
+        document: 'Încarcă document',
+        prescription: 'Încarcă rețetă',
+      },
+      subtitle: {
+        document: 'Document medical privat (PDF, DOC, DOCX).',
+        prescription:
+          'Rețetă ca fișier (PDF, DOC, DOCX). Textul îl poți adăuga după încărcare, din editarea rețetei.',
+      },
+      type: 'Tip',
       titleLabel: 'Titlu',
-      titlePlaceholder: 'Opțional — implicit numele fișierului',
+      titlePlaceholder: {
+        document: 'Opțional — implicit numele fișierului',
+        prescription: 'Opțional — implicit „Rețetă"',
+      },
       file: 'Fișier',
       choose: 'Alege fișier',
       save: 'Încarcă',
@@ -1046,6 +1066,7 @@ export const ro = {
       entryUpdated: 'Înregistrarea a fost actualizată.',
       entryDeleted: 'Înregistrarea a fost ștearsă.',
       documentUploaded: 'Documentul a fost încărcat.',
+      prescriptionUploaded: 'Rețeta a fost încărcată.',
       downloadStarted: 'Descărcarea a început.',
       downloadFailed: 'Descărcarea a eșuat.',
       leadAdded: 'Lead-ul a fost adăugat ca pacient.',

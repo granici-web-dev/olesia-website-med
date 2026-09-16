@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MarkdownEditor } from '@/components/markdown/markdown-editor';
+import { ApiError } from '@/api/http';
 import { ro } from '@/i18n/ro';
 
 import { addEntry, updateEntry } from '@/features/patients/api';
@@ -58,6 +59,9 @@ export function EntryFormSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const isEdit = entry !== null;
+  // The file stays with its prescription, and notes cannot hold one
+  // (docs/shape-prescription-file.md).
+  const typeLockedByFile = entry?.fileUrl != null;
   const queryClient = useQueryClient();
 
   const form = useForm<EntryFormValues>({
@@ -94,7 +98,16 @@ export function EntryFormSheet({
       queryClient.invalidateQueries({ queryKey: patientQueryKey(patientId) });
       onOpenChange(false);
     },
-    onError: () => toast.error(ro.patients.toast.error),
+    onError: (error) => {
+      const code = error instanceof ApiError ? error.message : null;
+      toast.error(
+        code === 'entry_empty'
+          ? f.errors.empty
+          : code === 'entry_file_not_allowed'
+            ? f.errors.fileNotAllowed
+            : ro.patients.toast.error,
+      );
+    },
   });
 
   return (
@@ -120,7 +133,11 @@ export function EntryFormSheet({
                   control={form.control}
                   name="type"
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={typeLockedByFile}
+                    >
                       <SelectTrigger id="ent-type" className="w-full">
                         <SelectValue />
                       </SelectTrigger>
@@ -144,6 +161,11 @@ export function EntryFormSheet({
                 />
               </div>
             </div>
+            {typeLockedByFile && (
+              <p className="-mt-3 text-xs text-muted-foreground">
+                {f.typeLockedByFile}
+              </p>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="ent-title">{f.titleLabel}</Label>

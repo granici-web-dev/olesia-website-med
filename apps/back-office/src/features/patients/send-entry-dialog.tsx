@@ -111,7 +111,9 @@ export function SendEntryDialog({
   });
 
   const lastSend = entry?.sends[0];
-  const isDocument = entry?.type === 'document';
+  // Derived from the entry, not from its type: a prescription can be text, a
+  // file, or both (docs/shape-prescription-file.md).
+  const sendsText = entry?.type === 'prescription' && !!entry.body?.trim();
 
   return (
     <AlertDialog
@@ -121,8 +123,20 @@ export function SendEntryDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t.title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {isDocument ? t.documentBody : t.prescriptionBody}
+          <AlertDialogDescription asChild>
+            <div className="space-y-1">
+              <p>{t.contents}</p>
+              {entry && (
+                <ul className="space-y-0.5 text-foreground">
+                  {sendsText && <li>{t.contentsText}</li>}
+                  {entry.fileUrl && (
+                    <li className="truncate">
+                      {t.contentsAttachment(entry.fileName ?? 'document')}
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -166,13 +180,6 @@ export function SendEntryDialog({
                 </dd>
               )}
             </div>
-
-            {isDocument && entry.fileName && (
-              <div className="space-y-1">
-                <dt className="text-muted-foreground">{t.attachment}</dt>
-                <dd className="truncate">{entry.fileName}</dd>
-              </div>
-            )}
           </dl>
         )}
 

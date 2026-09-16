@@ -40,6 +40,7 @@ export function EntryCard({
 }) {
   const isDocument = entry.type === 'document';
   const sendable = isDocument || entry.type === 'prescription';
+  const hasFile = entry.fileUrl !== null;
   return (
     <div className="rounded-lg border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
@@ -67,7 +68,7 @@ export function EntryCard({
               <span className="hidden sm:inline">{t.send.action}</span>
             </Button>
           )}
-          {isDocument && onDownload && (
+          {hasFile && onDownload && (
             <Button
               variant="ghost"
               size="icon"
@@ -110,7 +111,7 @@ export function EntryCard({
 
       {entry.body && <MarkdownPreview source={entry.body} className="mt-3" />}
 
-      {isDocument && entry.fileName && (
+      {hasFile && entry.fileName && (
         <div className="mt-3 flex items-center gap-2 rounded-md bg-muted/40 px-3 py-2 text-sm">
           <span className="min-w-0 flex-1 truncate text-muted-foreground">
             {entry.fileName}

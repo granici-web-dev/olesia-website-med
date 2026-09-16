@@ -26,6 +26,9 @@ export { PatientEntryType };
 /** The four medical-record entry types, in display order. */
 export type EntryType = `${PatientEntryType}`; // 'anamnesis' | 'note' | 'prescription' | 'document'
 
+/** The two types a file can be uploaded as (docs/shape-prescription-file.md). */
+export type UploadEntryType = Extract<EntryType, 'prescription' | 'document'>;
+
 /** `GET /patients/:id/timeline` — merged, date-sorted record. */
 export interface PatientTimeline {
   entries: PatientEntryDto[];
