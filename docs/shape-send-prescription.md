@@ -72,6 +72,7 @@ PatientEntrySend
 ## Files
 
 API
+
 - `apps/api/prisma/schema.prisma`, `migrations/<ts>_patient_entry_sends/`
 - `apps/api/src/app/mail/mail.service.ts` — `attachments`, `replyTo` on `ClientMail`
 - `apps/api/src/app/mail/patient-templates.ts` (+ spec) — the two template sets
@@ -88,6 +89,7 @@ API
   DTOs, `ATTACHMENT_MAX_BYTES`
 
 Back office
+
 - `apps/back-office/src/features/patients/send-entry-dialog.tsx` — new: recipient
   address, language select, attachment name and size, previous sends, confirm
 - `apps/back-office/src/features/patients/timeline.tsx` — action on the two entry
@@ -96,6 +98,7 @@ Back office
 - `apps/back-office/src/i18n/ro.ts` — action, dialog, the four error messages
 
 Infra and docs
+
 - `docker-compose.yml` — `mailpit` service under profile `mail` (1025 SMTP, 8025 UI,
   `MP_SMTP_AUTH_ACCEPT_ANY=1`, `MP_SMTP_AUTH_ALLOW_INSECURE=1`, because `MailService`
   requires user and password)
@@ -119,6 +122,7 @@ Infra and docs
 ## Test plan
 
 Unit, pure, no database (`TESTING.md`):
+
 - `send-refusal.spec.ts` — each refusal; the order (`mail_not_configured` before
   `attachment_too_large`, type before emptiness); exactly 10 MB passes, one byte more
   refuses.
@@ -132,6 +136,7 @@ Manual, with Mailpit (`docker compose --profile mail up -d mailpit`, API started
 `SMTP_HOST=localhost SMTP_PORT=1025 SMTP_USER=dev SMTP_PASS=dev
 SMTP_FROM=cabinet@test.local DOCTOR_REPLY_TO_EMAIL=doctor@test.local`, inbox at
 `http://localhost:8025`):
+
 1. Without `SMTP_*`: 503, back office shows "poșta nu este configurată", no row.
 2. Prescription, patient whose last booking is `ru`: Russian message, From and
    Reply-To headers correct, body text intact with diacritics and Cyrillic.
