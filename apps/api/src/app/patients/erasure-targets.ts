@@ -100,6 +100,7 @@ export interface ErasurePlan {
     Prisma.PaymentUncheckedUpdateManyInput
   >;
   patientEntry: Cascade;
+  patientEntrySend: Cascade;
   patient: Delete<Prisma.PatientWhereUniqueInput>;
 }
 
@@ -116,6 +117,7 @@ export const ERASURE_ORDER = [
   'contactMessage',
   'payment',
   'patientEntry',
+  'patientEntrySend',
   'patient',
 ] as const satisfies readonly ErasureTable[];
 
@@ -234,6 +236,10 @@ export function erasureTargets(patientId: string, email: string): ErasurePlan {
     },
 
     patientEntry: { action: 'cascade', cascadesFrom: 'patient' },
+
+    // Each row holds the address the email went to, so it has to go with the
+    // entry rather than outlive the dossier (docs/shape-send-prescription.md).
+    patientEntrySend: { action: 'cascade', cascadesFrom: 'patientEntry' },
 
     patient: { action: 'delete', where: { id: patientId } },
   };

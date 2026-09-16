@@ -10,9 +10,17 @@ export interface LeadMail {
   lines: string[];
 }
 
+/** A file on disk, streamed into the message rather than read into memory. */
+export interface MailAttachment {
+  filename: string;
+  path: string;
+}
+
 /** An email addressed to a patient rather than to the practice. */
 export interface ClientMail extends LeadMail {
   to: string;
+  replyTo?: string;
+  attachments?: MailAttachment[];
 }
 
 /**
@@ -99,8 +107,10 @@ export class MailService {
       await this.transport.sendMail({
         from: this.from,
         to: mail.to,
+        replyTo: mail.replyTo,
         subject: mail.subject,
         text: mail.lines.join('\n'),
+        attachments: mail.attachments,
       });
       this.logger.log(
         `Client mail sent → ${maskEmail(mail.to)} · ${mail.subject}`,

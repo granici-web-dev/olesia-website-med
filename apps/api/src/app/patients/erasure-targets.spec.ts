@@ -50,7 +50,7 @@ describe('erasureTargets', () => {
 
   it('covers every table that holds this person, in execution order', () => {
     expect(Object.keys(plan)).toEqual([...ERASURE_ORDER]);
-    expect(ERASURE_ORDER).toHaveLength(10);
+    expect(ERASURE_ORDER).toHaveLength(11);
   });
 
   it('reaches an appointment that was never linked to the dossier', () => {
@@ -156,6 +156,15 @@ describe('erasureTargets', () => {
     expect(plan.uploadedDocument).toEqual({
       action: 'cascade',
       cascadesFrom: 'uploadLink',
+    });
+  });
+
+  it('takes the record of every email an entry left in with the entry', () => {
+    // A send row keeps the address the email went to; outliving the dossier
+    // would keep the person.
+    expect(plan.patientEntrySend).toEqual({
+      action: 'cascade',
+      cascadesFrom: 'patientEntry',
     });
   });
 

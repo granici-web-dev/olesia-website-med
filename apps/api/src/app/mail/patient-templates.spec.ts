@@ -10,8 +10,10 @@ import { Locale } from '@olesia/shared';
 
 import {
   ANSWER_TEMPLATES,
+  DOCUMENT_TEMPLATES,
   PAYMENT_RECEIPT_TEMPLATES,
   PREP_TEMPLATES,
+  PRESCRIPTION_TEMPLATES,
   UPLOAD_LINK_TEMPLATES,
   render,
   templateLocale,
@@ -71,6 +73,8 @@ describe('render', () => {
       ANSWER_TEMPLATES,
       PREP_TEMPLATES,
       UPLOAD_LINK_TEMPLATES,
+      PRESCRIPTION_TEMPLATES,
+      DOCUMENT_TEMPLATES,
     ]) {
       expect(Object.keys(templates).sort()).toEqual(['en', 'ro', 'ru']);
     }
@@ -177,5 +181,57 @@ describe('the payment receipt', () => {
         nextStep: step,
       }).lines.join('\n'),
     ).toContain('скачать здесь');
+  });
+});
+
+/** Sent from the dossier (docs/shape-send-prescription.md). */
+describe('the prescription and the document', () => {
+  const PRESCRIPTION = {
+    title: 'Tratament otită',
+    body: '1. Amoxicilină 250 mg — de 2 ori pe zi, 7 zile.\n2. Nurofen la nevoie.',
+  };
+
+  it('carries the prescription text verbatim, in every language', () => {
+    for (const locale of ['ro', 'en', 'ru']) {
+      const { lines } = render(PRESCRIPTION_TEMPLATES, locale, PRESCRIPTION);
+      expect(lines).toContain(PRESCRIPTION.body);
+      expect(lines).toContain(PRESCRIPTION.title);
+    }
+  });
+
+  it('leaves no empty title line when the prescription has none', () => {
+    const untitled = render(PRESCRIPTION_TEMPLATES, 'ro', {
+      ...PRESCRIPTION,
+      title: null,
+    });
+    const titled = render(PRESCRIPTION_TEMPLATES, 'ro', PRESCRIPTION);
+    expect(untitled.lines).toHaveLength(titled.lines.length - 2);
+  });
+
+  it('names the document it attaches, in every language', () => {
+    for (const locale of ['ro', 'en', 'ru']) {
+      const { lines } = render(DOCUMENT_TEMPLATES, locale, {
+        title: 'Analize iunie.pdf',
+      });
+      expect(lines.join('\n')).toContain('Analize iunie.pdf');
+    }
+  });
+
+  it('greets nobody by name: the dossier may be the child, the inbox the parent', () => {
+    expect(render(PRESCRIPTION_TEMPLATES, 'ro', PRESCRIPTION).lines[0]).toBe(
+      'Bună ziua,',
+    );
+    expect(render(DOCUMENT_TEMPLATES, 'ru', { title: 'x' }).lines[0]).toBe(
+      'Здравствуйте!',
+    );
+  });
+
+  it('writes Romanian for a language it does not have', () => {
+    expect(render(PRESCRIPTION_TEMPLATES, 'de', PRESCRIPTION)).toEqual(
+      render(PRESCRIPTION_TEMPLATES, 'ro', PRESCRIPTION),
+    );
+    expect(render(DOCUMENT_TEMPLATES, null, { title: 'x' }).subject).toBe(
+      'Un document medical pentru dumneavoastră',
+    );
   });
 });

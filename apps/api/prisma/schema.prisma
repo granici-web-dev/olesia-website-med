@@ -146,6 +146,7 @@ model User {
 
   posts           Post[]
   refreshSessions RefreshSession[]
+  entrySends      PatientEntrySend[]
 }
 
 /// One issued refresh token, so that a session can be ended rather than only
@@ -1022,7 +1023,29 @@ model PatientEntry {
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 
+  sends PatientEntrySend[]
+
   @@index([patientId, occurredAt])
+}
+
+/// One email that left with a prescription or a document in it
+/// (docs/shape-send-prescription.md). Written only after the transport accepted
+/// the message, so the history lists what the patient was actually sent.
+/// Failed attempts are not rows: they are the error on the doctor's screen.
+model PatientEntrySend {
+  id       String       @id @default(uuid())
+  entry    PatientEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId  String
+  sentBy   User?        @relation(fields: [sentById], references: [id], onDelete: SetNull)
+  sentById String?
+  /// The address at that moment; the dossier's email may change later.
+  toEmail  String
+  locale   Locale
+  /// The attachment's name for a document; null for a prescription.
+  fileName String?
+  sentAt   DateTime     @default(now())
+
+  @@index([entryId, sentAt])
 }
 
 /// One maib checkout session and the payment that completed it.

@@ -363,3 +363,106 @@ export const PAYMENT_RECEIPT_TEMPLATES: Templates<PaymentReceiptVars> = {
     ],
   }),
 };
+
+/* --------------------- Prescription and document --------------------- */
+
+/*
+ * Sent by the doctor from the dossier (docs/shape-send-prescription.md). The
+ * greeting carries no name: a dossier is often the child's, and the address
+ * the parent's, so "Hello Maria" would be written to her mother.
+ */
+
+export interface PrescriptionVars {
+  title: string | null;
+  /** The entry's text as she wrote it; markdown goes out as typed. */
+  body: string;
+}
+
+const titleLines = (title: string | null): string[] =>
+  title ? [title, ''] : [];
+
+export const PRESCRIPTION_TEMPLATES: Templates<PrescriptionVars> = {
+  [Locale.Ro]: (v) => ({
+    subject: 'Rețeta dumneavoastră',
+    lines: [
+      'Bună ziua,',
+      '',
+      'Mai jos este rețeta de la Dr. Olesea Jalba.',
+      '',
+      ...titleLines(v.title),
+      v.body,
+      '',
+      'Dacă aveți întrebări despre administrare, răspundeți la acest email.',
+      ...SIGNATURE[Locale.Ro],
+    ],
+  }),
+  [Locale.En]: (v) => ({
+    subject: 'Your prescription',
+    lines: [
+      'Hello,',
+      '',
+      'Below is your prescription from Dr. Olesea Jalba.',
+      '',
+      ...titleLines(v.title),
+      v.body,
+      '',
+      'If you have questions about how to take it, reply to this email.',
+      ...SIGNATURE[Locale.En],
+    ],
+  }),
+  [Locale.Ru]: (v) => ({
+    subject: 'Ваш рецепт',
+    lines: [
+      'Здравствуйте!',
+      '',
+      'Ниже рецепт от доктора Олеси Жалбы.',
+      '',
+      ...titleLines(v.title),
+      v.body,
+      '',
+      'Если есть вопросы о приёме, ответьте на это письмо.',
+      ...SIGNATURE[Locale.Ru],
+    ],
+  }),
+};
+
+export interface DocumentVars {
+  /** The entry's title, or the file's name when it has none. */
+  title: string;
+}
+
+export const DOCUMENT_TEMPLATES: Templates<DocumentVars> = {
+  [Locale.Ro]: (v) => ({
+    subject: 'Un document medical pentru dumneavoastră',
+    lines: [
+      'Bună ziua,',
+      '',
+      `Vă trimit documentul „${v.title}". Îl găsiți atașat la acest email.`,
+      '',
+      'Dacă aveți întrebări, răspundeți la acest email.',
+      ...SIGNATURE[Locale.Ro],
+    ],
+  }),
+  [Locale.En]: (v) => ({
+    subject: 'A medical document for you',
+    lines: [
+      'Hello,',
+      '',
+      `Please find the document "${v.title}" attached to this email.`,
+      '',
+      'If you have any questions, reply to this email.',
+      ...SIGNATURE[Locale.En],
+    ],
+  }),
+  [Locale.Ru]: (v) => ({
+    subject: 'Медицинский документ для вас',
+    lines: [
+      'Здравствуйте!',
+      '',
+      `Отправляю документ «${v.title}», он во вложении к этому письму.`,
+      '',
+      'Если есть вопросы, ответьте на это письмо.',
+      ...SIGNATURE[Locale.Ru],
+    ],
+  }),
+};

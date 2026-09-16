@@ -1,6 +1,10 @@
+import { stat } from 'node:fs/promises';
+
 import {
+  BadGatewayException,
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
   Logger,
   NotFoundException,
@@ -19,9 +23,16 @@ import { writeOrTranslate } from '../common/prisma-errors';
 import { StorageService, type UploadedImage } from '../storage/storage.service';
 import { paginate } from '../common/dto/pagination.dto';
 import { normalizePatientEmail } from '../common/patient-email';
-import { PatientEntryType } from '../../generated/prisma/enums';
+import { PatientNotificationsService } from '../mail/patient-notifications.service';
+import { Locale, PatientEntryType } from '../../generated/prisma/enums';
 import { Prisma } from '../../generated/prisma/client';
-import { toPatientDto, toPatientEntryDto } from './patients.mapper';
+import {
+  ENTRY_INCLUDE,
+  toPatientDto,
+  toPatientEntryDto,
+} from './patients.mapper';
+import { lastKnownLocale } from './patient-locale';
+import { sendRefusal, type SendRefusal } from './send-refusal';
 import { CALENDLY_MANUAL_STEP, erasureTargets } from './erasure-targets';
 import { toInteractions } from './interactions';
 import {
@@ -39,6 +50,7 @@ export class PatientsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly notifications: PatientNotificationsService,
   ) {}
 
   /** Upload a private medical document → a `document` timeline entry. */
@@ -59,6 +71,7 @@ export class PatientsService {
         fileName: file!.originalname,
         authorId,
       },
+      include: ENTRY_INCLUDE,
     });
     this.audit('document.upload', {
       patientId: id,
@@ -115,10 +128,22 @@ export class PatientsService {
 
   async findOne(id: string): Promise<PatientDto> {
     const p = await this.getOrThrow(id);
-    const entryCount = await this.prisma.patientEntry.count({
+    const newest = {
       where: { patientId: id },
+      orderBy: { createdAt: 'desc' },
+      select: { locale: true, createdAt: true },
+    } as const;
+    const [entryCount, ...newestPerTable] = await Promise.all([
+      this.prisma.patientEntry.count({ where: { patientId: id } }),
+      this.prisma.appointment.findFirst(newest),
+      this.prisma.subscription.findFirst(newest),
+      this.prisma.quickQuestion.findFirst(newest),
+      this.prisma.deliverableOrder.findFirst(newest),
+    ]);
+    return toPatientDto(p, {
+      entryCount,
+      lastKnownLocale: lastKnownLocale(newestPerTable),
     });
-    return toPatientDto(p, { entryCount });
   }
 
   async create(dto: CreatePatientDto): Promise<PatientDto> {
@@ -291,6 +316,13 @@ export class PatientsService {
         'cascade',
         await tx.patientEntry.count({ where: { patientId: id } }),
       );
+      record(
+        'PatientEntrySend',
+        'cascade',
+        await tx.patientEntrySend.count({
+          where: { entry: { patientId: id } },
+        }),
+      );
       await tx.patient.delete({ where: plan.patient.where });
       record('Patient', 'delete', 1);
 
@@ -323,6 +355,7 @@ export class PatientsService {
       this.prisma.patientEntry.findMany({
         where: { patientId: id },
         orderBy: { occurredAt: 'desc' },
+        include: ENTRY_INCLUDE,
       }),
       this.prisma.appointment.findMany({ where: { patientId: id } }),
       this.prisma.subscription.findMany({ where: { patientId: id } }),
@@ -356,6 +389,7 @@ export class PatientsService {
           occurredAt: dto.occurredAt ? new Date(dto.occurredAt) : new Date(),
           authorId,
         },
+        include: ENTRY_INCLUDE,
       }),
     );
   }
@@ -377,6 +411,7 @@ export class PatientsService {
           authorId,
           ...(dto.occurredAt ? { occurredAt: new Date(dto.occurredAt) } : {}),
         },
+        include: ENTRY_INCLUDE,
       }),
     );
   }
@@ -393,6 +428,74 @@ export class PatientsService {
     if (e.type === PatientEntryType.document && e.fileUrl) {
       await this.storage.deletePrivateDocument(e.fileUrl);
     }
+  }
+
+  /**
+   * Email a prescription (as text) or a document (as an attachment) to the
+   * address on the dossier, in the language the doctor chose
+   * (docs/shape-send-prescription.md). The recipient is never an argument: a
+   * typed address is how a medical file reaches the wrong parent.
+   */
+  async sendEntry(
+    id: string,
+    entryId: string,
+    locale: Locale,
+    userId: string,
+  ): Promise<PatientEntryDto> {
+    const patient = await this.getOrThrow(id);
+    const entry = await this.getEntryOrThrow(id, entryId);
+
+    const filePath =
+      entry.type === PatientEntryType.document && entry.fileUrl
+        ? this.storage.privateDocPath(entry.fileUrl)
+        : null;
+    const refusal = sendRefusal(
+      entry,
+      this.notifications.canSend,
+      filePath ? await this.storedFileSize(filePath) : null,
+    );
+    if (refusal) throw refusalException(refusal);
+
+    const recipient = { to: patient.email, locale };
+    const fileName = filePath ? (entry.fileName ?? 'document') : null;
+    const { sent } = filePath
+      ? await this.notifications.document(
+          recipient,
+          { title: entry.title ?? fileName! },
+          { filename: fileName!, path: filePath },
+        )
+      : await this.notifications.prescription(recipient, {
+          title: entry.title,
+          body: entry.body!,
+        });
+    if (!sent) throw new BadGatewayException('mail_send_failed');
+
+    // The row is written after the transport has answered, never before: the
+    // history must list only what actually left. The price, accepted on
+    // purpose, is the moment in between. If the database fails right here, the
+    // patient has the email and the dossier has no trace of it; the only
+    // record is the masked `patient mail … sent` log line.
+    const send = await this.prisma.patientEntrySend.create({
+      data: {
+        entryId,
+        sentById: userId,
+        toEmail: patient.email,
+        locale,
+        fileName,
+      },
+    });
+    this.audit('entry.send', {
+      patientId: id,
+      entryId,
+      sendId: send.id,
+      userId,
+    });
+    return toPatientEntryDto(
+      await this.prisma.patientEntry.findUniqueOrThrow({
+        where: { id: entryId },
+        include: ENTRY_INCLUDE,
+      }),
+    );
   }
 
   /**
@@ -527,6 +630,15 @@ export class PatientsService {
     }
   }
 
+  /** A row pointing at a file that is not on disk is a missing document. */
+  private async storedFileSize(path: string): Promise<number> {
+    try {
+      return (await stat(path)).size;
+    } catch {
+      throw new NotFoundException('document_not_found');
+    }
+  }
+
   private async getOrThrow(id: string) {
     const p = await this.prisma.patient.findUnique({ where: { id } });
     if (!p) throw new NotFoundException('patient_not_found');
@@ -542,4 +654,12 @@ export class PatientsService {
     }
     return e;
   }
+}
+
+/** Same body shape as the other coded errors: `message` is the code. */
+function refusalException({ status, code, ...details }: SendRefusal) {
+  return new HttpException(
+    { statusCode: status, message: code, ...details },
+    status,
+  );
 }

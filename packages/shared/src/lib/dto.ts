@@ -655,6 +655,24 @@ export interface PatientEntryDto {
   authorId: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Emails this entry left in, newest first. Only prescriptions and documents have any. */
+  sends: PatientEntrySendDto[];
+}
+
+/** One email that carried an entry to the patient (docs/shape-send-prescription.md). */
+export interface PatientEntrySendDto {
+  id: string;
+  sentAt: string;
+  toEmail: string;
+  locale: Locale;
+  fileName: string | null;
+  /** Null once the account that sent it is deleted. */
+  sentByName: string | null;
+}
+
+/** `POST /patients/:id/entries/:entryId/send`. */
+export interface SendPatientEntryInput {
+  locale: Locale;
 }
 
 /** A patient profile. `entryCount` is populated in lists. */
@@ -670,6 +688,13 @@ export interface PatientDto {
   createdAt: string;
   updatedAt: string;
   entryCount?: number;
+  /**
+   * The language of this person's most recent booking, subscription, EXPRESS
+   * ticket or group-C order; null when there is none. `Patient` has no locale
+   * of its own. Present on the single-patient read, which is where a message
+   * to them starts.
+   */
+  lastKnownLocale?: Locale | null;
 }
 
 /**

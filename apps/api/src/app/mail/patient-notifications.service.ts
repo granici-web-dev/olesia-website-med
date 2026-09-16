@@ -4,16 +4,20 @@ import type { PurchaseNextStepDto } from '@olesia/shared';
 import { maskEmail } from '../common/mask-email';
 import { legalEntity } from '../common/legal-entity';
 import { WorkingHoursService } from '../working-hours/working-hours.service';
-import { MailService } from './mail.service';
+import { MailService, type MailAttachment } from './mail.service';
 import {
   ANSWER_TEMPLATES,
+  DOCUMENT_TEMPLATES,
   PAYMENT_RECEIPT_TEMPLATES,
   PREP_TEMPLATES,
+  PRESCRIPTION_TEMPLATES,
   UPLOAD_LINK_TEMPLATES,
   render,
   type AnswerVars,
+  type DocumentVars,
   type PaymentReceiptVars,
   type PrepVars,
+  type PrescriptionVars,
   type UploadLinkVars,
 } from './patient-templates';
 
@@ -137,6 +141,43 @@ export class PatientNotificationsService {
   }
 
   /**
+   * A prescription, as text in the body, from the dossier.
+   *
+   * These two are the only messages with a Reply-To: the patient's reply is
+   * about the treatment and belongs with the doctor, not in the practice
+   * inbox. `DOCTOR_REPLY_TO_EMAIL` is optional, and unset means the reply
+   * goes to From, which still reaches the practice.
+   */
+  async prescription(
+    recipient: Recipient,
+    vars: PrescriptionVars,
+  ): Promise<Delivery> {
+    return this.send(
+      'prescription',
+      recipient,
+      render(PRESCRIPTION_TEMPLATES, recipient.locale, vars),
+      { replyTo: process.env.DOCTOR_REPLY_TO_EMAIL || undefined },
+    );
+  }
+
+  /** A stored document, as an attachment, from the dossier. */
+  async document(
+    recipient: Recipient,
+    vars: DocumentVars,
+    attachment: MailAttachment,
+  ): Promise<Delivery> {
+    return this.send(
+      'document',
+      recipient,
+      render(DOCUMENT_TEMPLATES, recipient.locale, vars),
+      {
+        replyTo: process.env.DOCTOR_REPLY_TO_EMAIL || undefined,
+        attachments: [attachment],
+      },
+    );
+  }
+
+  /**
    * A date and time as the practice reads it.
    *
    * `toLocaleString` with no zone formats in the server's, which in a
@@ -164,14 +205,21 @@ export class PatientNotificationsService {
     kind: string,
     recipient: Recipient,
     message: { subject: string; lines: string[] },
+    extra: { replyTo?: string; attachments?: MailAttachment[] } = {},
   ): Promise<Delivery> {
     const sent = await this.mail.sendToClient({
       to: recipient.to,
       subject: message.subject,
       lines: message.lines,
+      ...extra,
     });
+    const outcome = sent
+      ? 'sent'
+      : this.mail.isConfigured
+        ? 'NOT sent (transport failed)'
+        : 'NOT sent (no SMTP)';
     this.logger.log(
-      `patient mail ${kind} ${sent ? 'sent' : 'NOT sent (no SMTP)'} → ${maskEmail(recipient.to)}`,
+      `patient mail ${kind} ${outcome} → ${maskEmail(recipient.to)}`,
     );
     return { sent };
   }

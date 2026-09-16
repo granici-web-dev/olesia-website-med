@@ -32,6 +32,7 @@ import {
   UpdatePatientDto,
 } from './dto/patient.dto';
 import { CreateEntryDto, UpdateEntryDto } from './dto/entry.dto';
+import { SendEntryDto } from './dto/send-entry.dto';
 import { AddDocumentDto } from './dto/add-document.dto';
 import { FromLeadDto } from './dto/from-lead.dto';
 
@@ -113,6 +114,23 @@ export class PatientsController {
     @CurrentUser() user: AuthUser,
   ) {
     return this.patients.updateEntry(id, entryId, dto, user.id);
+  }
+
+  /**
+   * Email a prescription or a document to the patient. Refusals carry a code
+   * in `message`: `entry_not_sendable` and `entry_empty` (422),
+   * `mail_not_configured` (503, nothing is faked without SMTP),
+   * `attachment_too_large` (422, with `sizeBytes` and `maxBytes`),
+   * `mail_send_failed` (502). Only a message that left is recorded.
+   */
+  @Post(':id/entries/:entryId/send')
+  sendEntry(
+    @Param('id') id: string,
+    @Param('entryId') entryId: string,
+    @Body() dto: SendEntryDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.patients.sendEntry(id, entryId, dto.locale, user.id);
   }
 
   @Delete(':id/entries/:entryId')
