@@ -1,7 +1,7 @@
 # STACK.md
 
 Technology choices for `olesia-website-med`, read off the repository on **2026-09-10** and
-corrected by the maintainer. Versions are as pinned in the manifests.
+corrected by the maintainer, last on 2026-09-16. Versions are as pinned in the manifests.
 
 An Nx monorepo with three applications and one shared package: a public marketing and
 booking site, a NestJS content and operations API, and a Romanian-only back office.
@@ -22,7 +22,7 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | API hardening             | helmet, @nestjs/throttler                                                                                          | `^8.3.0`, `^6.5.0`                                              |
 | Error tracking            | Sentry, one SDK per app, all behind a DSN that is currently empty                                                  | `@sentry/nestjs` / `@sentry/nextjs` / `@sentry/react` `10.74.0` |
 | Scheduled work            | @nestjs/schedule                                                                                                   | `^6.1.3`                                                        |
-| Mail                      | nodemailer                                                                                                         | `^8.0.11`                                                       |
+| Mail                      | nodemailer                                                                                                         | `^9.1.1`                                                        |
 | Images                    | sharp, in the API's storage pipeline                                                                               | `^0.35.0`                                                       |
 | Uploads                   | multer, pinned across the tree by a pnpm override                                                                  | `2.3.0`                                                         |
 | Second factor             | otplib (TOTP + recovery codes), `TotpModule` under `auth`                                                          | `^13.4.1`                                                       |
@@ -37,9 +37,9 @@ booking site, a NestJS content and operations API, and a Romanian-only back offi
 | Back office forms         | react-hook-form + zod                                                                                              | `^7.78.0`, `zod ^4.4.3`                                         |
 | Shared types              | `packages/shared` — DTOs and enums, built with `tsc`                                                               | workspace                                                       |
 | Formatter                 | Prettier, single option: `singleQuote`                                                                             | `~3.6.2`                                                        |
-| Test runner (API)         | Jest with `@swc/jest`, 368 tests in 41 suites                                                                      | `jest ~30.3.0`                                                  |
-| Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts` — `lib/` helpers only, 89 tests                                          | `vitest ~4.1.0`                                                 |
-| Test runner (back office) | Vitest in `vite.config.mts`, 45 tests since audits A9 and A10                                                      | `vitest ~4.1.0`                                                 |
+| Test runner (API)         | Jest with `@swc/jest`; counts in `docs/test-inventory.md`                                                          | `jest ~30.3.0`                                                  |
+| Test runner (public site) | Vitest, `apps/frontend/vitest.config.mts`, `lib/` helpers only                                                     | `vitest ~4.1.0`                                                 |
+| Test runner (back office) | Vitest in `vite.config.mts`, since audits A9 and A10                                                               | `vitest ~4.1.0`                                                 |
 | CI                        | GitHub Actions: two typechecks, **all three test suites**, three builds, migration check, **the API Docker image** | —                                                               |
 | Deploy (site)             | Vercel                                                                                                             | —                                                               |
 | Deploy (API)              | Docker Compose + Postgres, nightly backups                                                                         | `docker-compose.prod.yml`                                       |
@@ -120,143 +120,49 @@ define the visual intent. Never edited; implementations live in `components/` an
   files nobody rendered; all four went with audit A7 on 2026-09-11.
 - **No Edge runtime** on the site; the API is a long-running Node process.
 
-## Dead or near-dead dependencies
+## Dependencies: removed and advisories
 
-Kept honest so nobody treats them as load-bearing.
-
-- **`agentation`** — dev-tools components only, and a `devDependency` since audit A7:
-  `DevTools` returns null outside development, so it never reached a production bundle,
-  but declaring it as a runtime dependency said otherwise.
-
-**Removed 2026-09-11 (audit A7):** `zustand` and `@tanstack/react-query` from
-`apps/frontend`. Each had exactly one importer — `store/ui.store.ts` and
-`lib/query-client.ts` — and neither file was imported by anything. TanStack Query stays in
-the root manifest, where the back office genuinely uses it.
-
-**Removed 2026-09-10:** `ai` and `@google/genai`, which existed for one parked
-script and nothing else. The script is kept for reference, outside the dependency
-tree, at `docs/parked/generate-images.ts`. Images reach the site the supported
-way — the client uploads them in the back office, into the site-media slots and
-the storage pipeline. Reviving the generator means re-adding both packages
-deliberately, which is the point of moving it out.
-
-## Transitive advisories we do not act on
-
-`pnpm audit` on 2026-09-12 went from 17 high / 17 moderate / 1 low to
-**6 high / 13 moderate / 0 low**, no critical at any point, and not one
-`pnpm.overrides` entry added. Sixteen advisories cleared, each by the smallest
-version move that actually clears it (step 15):
-
-- **`nodemailer` 8.0.11 → 9.1.1** (five advisories, two high): the
-  message-level `raw` option and `resolveContent()`'s legacy signature both
-  bypassed `disableFileAccess`/`disableUrlAccess`, and `addressparser` was
-  quadratic. This is the one package on the list we import ourselves. v9's
-  breaking change is that fetching remote content now validates TLS
-  certificates; `MailService` attaches nothing by URL and speaks SMTP, so
-  nothing in it is affected. Verified against a local MailHog: `verify()`
-  succeeds, the Romanian and Russian patient templates arrive with their
-  diacritics and Cyrillic intact, a refused port still logs `code=ESOCKET` and
-  no address, and the no-SMTP branch still answers `false` rather than claiming
-  a send. `@types/nodemailer` stays at 8.0.1 — DefinitelyTyped has no 9.x line
-  yet, and the four options we pass are unchanged.
-- **`@nestjs/swagger` 11.4.4 → 11.4.7** (four `js-yaml` advisories, three
-  high): `js-yaml` 4.1.1 was pinned exactly, so in-range was the only way to
-  move it without an override. 11.4.7 carries `js-yaml` 5.3.0. Swagger only
-  ever calls `dump()`, never `load()`, so the quadratic-parse advisories were
-  unreachable here anyway — but a patch bump costs nothing. `/api/docs`,
-  `/api/docs-json` (108 paths) and `/api/docs-yaml` all verified on a booted
-  API afterwards.
-- **`fast-uri` 3.1.2 → 3.1.7** (six high, SSRF and host confusion) and
-  **`qs` 6.15.2 → 6.16.0** with **`body-parser` 2.2.2 → 2.3.0** (two moderate,
-  one low) were stale lockfile resolutions inside ranges their parents already
-  allowed. A plain `pnpm update` moved all three; `express` 5.2.1 did not have
-  to change. The API's query parsing was re-checked on a booted instance.
-
-What remains, and why nothing is being forced for it:
-
-- **`mysql2`** (one high — plaintext credentials on an auth-plugin downgrade;
-  one moderate) and **`deepmerge-ts`** (one high) are dependencies of the
-  `prisma` CLI, which carries a MySQL driver and a config loader it never uses
-  here. This is not a TypeORM branch of NestJS, which is what an earlier note
-  guessed. We run PostgreSQL through `@prisma/adapter-pg` and never open a MySQL
-  connection. Because `prisma` is a peer of `@prisma/client`, `pnpm install
---prod` does materialise its files inside the runtime image's pnpm store — but
-  neither `prisma` nor `mysql2` is linked into `/app/node_modules` or onto PATH,
-  so the server cannot load either, and since audit A11 migrations run in the
-  separate `migrate` container that does have the CLI. Checked inside a built
-  image rather than assumed: `require.resolve('mysql2')` fails and
-  `node_modules/.bin/prisma` does not exist.
-- **`brace-expansion`** (Sentry's bundler plugin), **`image-size`** (`less`
-  under Vite), **`smol-toml`**, **`adm-zip`**, **`baseline-browser-mapping`**,
-  **`uuid`**, **`vitest`/`@vitest/mocker`** and the remaining **`qs`** (6.15.3,
-  inside the `express` 4 that `webpack-dev-server` pulls in) are build and test
-  tooling. Each is a DoS or a local file-access issue reachable only by feeding
-  the tool a crafted input, and the only inputs are this repository's own files.
-- **`react-router` / `@remix-run/router` / `react-router-dom`** (five moderate:
-  open redirect, SSR-hydration injection) are in the back office — a
-  client-side Vite SPA behind a login on an admin host, with no SSR hydration
-  to poison and no untrusted link source. The fix is a `react-router` major,
-  which is its own step rather than a forced resolution.
-
-The rule: an advisory against something the API actually loads gets fixed, by
-the smallest version move that clears it. An advisory against a build tool or an
-unreachable path gets written down here instead, so the next `pnpm audit` is
-read rather than re-investigated.
+`agentation` is a `devDependency` (dev-tools overlay, never in a production
+bundle). The packages removed during the audits (`zustand`, `@tanstack/react-query`
+on the site, `ai`, `@google/genai`) and the full record of `pnpm audit` advisories,
+fixed and deliberately left, live in `docs/dependency-advisories.md`. The rule: an
+advisory against something the API actually loads gets fixed by the smallest
+version move that clears it; an advisory against a build tool or an unreachable
+path gets written down there, so the next `pnpm audit` is read rather than
+re-investigated.
 
 ## Payments — maib e-Commerce Checkout
 
-**Part of the stack since 2026-09-10** (merge `4fb7161`), which reverses the earlier
-"payments out of scope — manual" position in `module_calendly.md`.
+Part of the stack since 2026-09-10 (merge `4fb7161`), reversing the earlier
+"payments out of scope — manual" position in `module_calendly.md`. Hand-written
+client (`maib.service.ts`, maib publishes PHP and .NET SDKs only), callback receiver
+with HMAC verification, reconciliation sweep, refunds, `Payment` and
+`PaymentRefund` tables. `paymentStatus` on an appointment, order, subscription or
+question is a **mirror** of the `Payment` row, written by the fulfilment step;
+offline payments are recorded as `Payment` rows with method `manual` through
+`POST /payments/manual`.
 
-`apps/api/src/app/payments/` holds a hand-written maib client (`maib.service.ts`), the
-checkout and status controllers, the callback receiver with HMAC signature verification,
-a scheduled reconciliation sweep, and refunds. `Payment` and `PaymentRefund` are their own
-tables (migrations `20260910120000_payments`, `20260910140000_payment_refund_guards`); the
-`paymentStatus` field on an appointment, order, subscription or question is a **mirror**
-of the payment row, written by `markTargetPaid()`, not a field anyone edits. The DTOs live
-in `packages/shared`, the back office renders them on the `Plăți` page, and 39 unit tests
-cover the state mapping and the signature.
-
-**No third-party payment SDK**, because maib publishes PHP and .NET only.
-
-**The flow is not connected.** Nothing calls `PaymentsService.start()`, the site has no
-pre-checkout step and no return pages, and the bank's back-channel callback has never been
-delivered — that needs a public HTTPS host, which does not exist yet. Treat
-`docs/payments-maib-checkout.md` as the source of truth: it records the bank's API, four
-places where the sandbox disagrees with the documentation, and what is still blocked on
-the client and on the acquirer.
+**The flow is connected since 2026-09-11** (step 12, `docs/plan-log.md`): the site
+sells EXPRESS questions, group-C deliverables and paid library materials through
+one checkout page; tickets and orders wait in `awaiting_payment` until the bank
+confirms; paid materials are served from private storage through `MaterialGrant`
+tokens. Verified end to end in the sandbox in MDL. The bank's back-channel
+callback has never been delivered, because there is no public HTTPS host yet;
+status arrives by polling. `docs/payments-maib-checkout.md` is the source of
+truth for the bank's API and its sandbox quirks.
 
 ## Error tracking — Sentry, configured and switched off
 
-Added 2026-09-11 (audit A11, H3), because nothing reported a failure: a patient
-whose upload threw a 500 saw an error page and the practice found out if the
-patient telephoned.
-
-`@sentry/nestjs` in the API, `@sentry/nextjs` on the site, `@sentry/react` in
-the back office, each initialised only when its DSN is set — `SENTRY_DSN`,
-`NEXT_PUBLIC_SENTRY_DSN`, `VITE_SENTRY_DSN` (compiled in at build time, which is
-why the panel's is a Docker build argument). **All three are empty today**, so
-no client is created and nothing is sent. The account is not a technical
-decision: it is the EU region, on the free tier, in the client's name, and it
-waits with the hosting.
-
-One filter for the three, in `packages/shared/src/lib/sentry-scrub.ts` and under
-test: the request body, query string, cookies and the `Authorization` / `Cookie`
-headers never leave, and the segment after `/incarcare/`, `/uploads/` and
-`/download/` is redacted out of every URL — the first of those is a patient's
-entire credential for their upload link. It lives in `packages/shared` because
-it is the same decision three times, and the SDKs pass the same shape through
-`beforeSend`.
-
-**`SentryGlobalFilter` from `@sentry/nestjs/setup` is deliberately not used.**
-pnpm resolves a second copy of `@nestjs/core` for `@sentry/nestjs`, so that
-filter extends a `BaseExceptionFilter` bound to a different `HttpAdapterHost`
-token than the container holds; the optional injection stays undefined and every
-500 becomes `Cannot read properties of undefined (reading 'isHeadersSent')` —
-the real error replaced by an error in the reporter. `SentryReportingFilter` in
-`apps/api/src/app/common/` extends the class we import ourselves, changes no
-response, and decides what is worth reporting (5xx and anything not meant as an
-HTTP answer; not 4xx).
+Added 2026-09-11 (audit A11). `@sentry/nestjs`, `@sentry/nextjs`, `@sentry/react`,
+each initialised only when its DSN is set (`SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
+`VITE_SENTRY_DSN`); all three are empty today, so nothing is sent. One scrub filter
+for the three in `packages/shared/src/lib/sentry-scrub.ts`, under test: no request
+body, query, cookies or auth headers leave, and the token segment after
+`/incarcare/`, `/uploads/` and `/download/` is redacted. `SentryGlobalFilter` from
+`@sentry/nestjs/setup` is deliberately not used: pnpm resolves a second
+`@nestjs/core` for it and every 500 became an error in the reporter;
+`SentryReportingFilter` in `apps/api/src/app/common/` replaces it. The account is
+EU region, free tier, in the client's name, and waits with the hosting.
 
 ## Environment
 
