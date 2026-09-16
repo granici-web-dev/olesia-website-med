@@ -173,6 +173,20 @@ export function PatientDetailPage() {
         : entry.type) as EditableType,
     });
 
+  // Rendered in every branch below. Erasure invalidates the dossier, whose
+  // refetch answers 404 and switches the page to "not found"; a dialog that
+  // lived only in the dossier branch was unmounted before she could read the
+  // report and its Calendly step. The list opens when she closes it.
+  const erasureReportDialog = (
+    <ErasureReportDialog
+      report={erasureReport}
+      onClose={() => {
+        setErasureReport(null);
+        navigate(paths.patients);
+      }}
+    />
+  );
+
   // A 404 is a dossier that is gone, and the doctor should go back to the list.
   // Anything else is our side failing, and going back would lose the address of
   // a record that still exists, so that branch offers the retry instead.
@@ -210,6 +224,7 @@ export function PatientDetailPage() {
             }
           />
         </Card>
+        {erasureReportDialog}
       </div>
     );
   }
@@ -513,13 +528,7 @@ export function PatientDetailPage() {
         </>
       )}
 
-      <ErasureReportDialog
-        report={erasureReport}
-        onClose={() => {
-          setErasureReport(null);
-          navigate(paths.patients);
-        }}
-      />
+      {erasureReportDialog}
 
       {/* Delete-entry confirmation (shared across tabs) */}
       <AlertDialog
