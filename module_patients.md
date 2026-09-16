@@ -50,7 +50,7 @@ model PatientEntry {
   type       PatientEntryType
   title      String?
   body       String?          // markdown (anamnesis/note/prescription text)
-  fileUrl    String?          // for `document` / prescription PDF — AUTHENTICATED url
+  fileUrl    String?          // for `document` / prescription file — AUTHENTICATED url
   fileName   String?
   occurredAt DateTime         @default(now()) // clinical date (editable)
   authorId   String?          // User who wrote it
@@ -76,12 +76,17 @@ All endpoints `@Roles(admin, editor)` (no public access).
 - `GET /patients/:id/timeline` — merged, date-sorted entries + interactions.
 - `POST /patients/:id/entries` / `PATCH|DELETE /patients/:id/entries/:entryId`.
 - `POST /patients/from-lead` — body `{ source: 'appointment'|'subscription'|'quick_question', sourceId }`: create-or-link by email, set the source's `patientId`. (Called by the "Adaugă ca pacient" button.)
-- `POST /patients/:id/documents` — multipart upload of a medical document.
-- `GET /patients/:id/documents/:docId` — **authenticated** download (streamed),
+- `POST /patients/:id/documents` — multipart upload of a medical document, or of a
+  prescription with `type=prescription` (optional, default `document`; added
+  2026-09-16, plan step 20). PDF, DOC, DOCX, at most 20 MB. An untitled
+  prescription is "Rețetă"; an untitled document takes the file's name.
+- `GET /patients/:id/documents/:docId` — **authenticated** download (streamed) of
+  the file on a document or a prescription,
   NOT served from the public `/uploads` static path.
 - `POST /patients/:id/entries/:entryId/send` — body `{ locale }`, admin only.
-  Emails a prescription (text in the body) or a document (attachment, at most
-  10 MB) to the dossier's address. Added 2026-09-16, plan step 19; see below.
+  Emails a prescription (text in the body, file attached, or both) or a document
+  (attachment) to the dossier's address; attachments at most 10 MB. Added
+  2026-09-16, plan steps 19 and 20; see below.
 
 ### Sending to the patient (added 2026-09-16)
 
@@ -96,6 +101,19 @@ database failure at that instant leaves an email without a row; accepted.
 Send rows cascade with the entry on erasure. Reply-To is `DOCTOR_REPLY_TO_EMAIL`
 when set.
 
+### What an entry holds (added 2026-09-16, plan step 20)
+
+Design: `docs/shape-prescription-file.md`. A `prescription` holds text, a file,
+or both, never neither; a `document` holds a file; `anamnesis` and `note` hold
+text and never a file. Checked on every write (`patients/entry-content.ts`), on
+the row as it will be stored after a PATCH: `422 entry_file_not_allowed`,
+`422 entry_empty`. A file prescription's text is added afterwards through the
+edit form, where the type is locked while the entry has a file. There is no
+attaching a file to an existing text prescription and no replacing a file.
+Download, entry deletion, erasure and sending key on `fileUrl`, not on the type.
+A prescription with text and a file over 10 MB is refused whole; it never goes
+out as text only.
+
 ## Back office — page "Pacienți"
 
 Sidebar item under **Administrare** (or its own group). Two screens:
@@ -105,6 +123,8 @@ Sidebar item under **Administrare** (or its own group). Two screens:
 - **Detail:** header (name, contact, consent badge) + tabs:
   `Profil` · `Istoric` (timeline, all types) · `Anamneză` · `Rețete` ·
   `Documente` · `Programări/Interacțiuni` (linked appts/subs/tickets).
+  `Rețete` has "Adaugă rețetă" (text) and "Încarcă rețetă" (file, the upload
+  sheet preset to Rețetă); `Documente` has "Încarcă document" (step 20).
 - **"Adaugă ca pacient"** button on paid Appointment/Subscription/QuickQuestion
   detail sheets → calls `POST /patients/from-lead` → links + opens the patient.
 
