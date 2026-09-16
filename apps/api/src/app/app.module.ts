@@ -14,6 +14,7 @@ import { ServicesModule } from './services/services.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { ContactMessagesModule } from './contact-messages/contact-messages.module';
+import { DeliverablesModule } from './deliverables/deliverables.module';
 import { DeliverableOrdersModule } from './deliverable-orders/deliverable-orders.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { WorkingHoursModule } from './working-hours/working-hours.module';
@@ -58,6 +59,7 @@ import { SentryReportingFilter } from './common/sentry-reporting.filter';
     AppointmentsModule,
     ContactsModule,
     ContactMessagesModule,
+    DeliverablesModule,
     DeliverableOrdersModule,
     UploadsModule,
     WorkingHoursModule,

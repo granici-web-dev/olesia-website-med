@@ -1,5 +1,6 @@
 /**
- * Seed: bootstrap admin (closed registration needs one) + the service catalog.
+ * Seed: bootstrap admin (closed registration needs one) + the service and
+ * group-C catalogs.
  *
  * Two profiles, chosen by `SEED_PROFILE` (see `profile.ts`). `prod` writes only
  * what a live practice cannot open without — the administrator, the catalog,
@@ -22,6 +23,7 @@ import { FAQ_SECTIONS } from './seed-faq';
 import { TESTIMONIALS } from './seed-testimonials';
 import { MEDIA_APPEARANCES } from './seed-media';
 import { MATERIAL_CATEGORIES, MATERIALS } from './seed-materials';
+import { DELIVERABLES } from './seed-deliverables';
 
 /** Both singletons live under this fixed primary key. See the schema. */
 const SINGLETON_ID = 'singleton';
@@ -615,6 +617,26 @@ async function seedServices() {
   console.log(`✓ seeded ${SERVICES.length} services`);
 }
 
+/**
+ * The five group-C products. Create-only on purpose: a price or a title the
+ * client has edited in the back office is the current one, and a seed that
+ * ran again after a deployment must not put 28 € back.
+ */
+async function seedDeliverables() {
+  let created = 0;
+  for (const d of DELIVERABLES) {
+    const existing = await prisma.deliverableCatalog.findUnique({
+      where: { code: d.code },
+    });
+    if (existing) continue;
+    await prisma.deliverableCatalog.create({ data: d });
+    created += 1;
+  }
+  console.log(
+    `✓ deliverable catalog: ${created} created, ${DELIVERABLES.length - created} already present`,
+  );
+}
+
 async function seedContacts() {
   if ((await prisma.contact.count()) > 0) {
     console.log('• contacts already present — skipped (edit in back office)');
@@ -630,6 +652,7 @@ async function main() {
 
   await seedAdmin(admin ?? DEV_ADMIN, profile === 'prod');
   await seedServices();
+  await seedDeliverables();
   await seedContacts();
   await seedTestimonials();
   await seedMedia();

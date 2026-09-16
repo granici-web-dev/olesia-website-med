@@ -267,7 +267,27 @@ export interface ContactMessageDto {
   updatedAt: string;
 }
 
-// --- Deliverable orders (group C) ---
+// --- Deliverable catalog and orders (group C) ---
+
+/**
+ * What one of the five group-C products is called and what it costs today.
+ *
+ * Edited in the back office since `PLAN.md` step 18; before that it was
+ * `DELIVERABLE_CATALOG`, a constant only a deployment could change
+ * (`docs/shape-deliverable-catalog.md`). The set of codes is still the
+ * `DeliverableProduct` enum: this row says what a product costs, never that a
+ * product exists.
+ */
+export interface DeliverableCatalogDto {
+  code: DeliverableProduct;
+  /** Whole EUR. `0` means "on request" and refuses a checkout. */
+  priceEur: number;
+  titleRo: string;
+  titleEn: string;
+  titleRu: string;
+  sortOrder: number;
+  active: boolean;
+}
 
 /**
  * An order for a personalized menu or a written protocol. `titleRo` and
@@ -845,6 +865,18 @@ export type PublicMaterialDto = Omit<
   flags: `${MaterialFlag}`[];
   /** Whether a file exists at all, whichever store it is in. */
   hasFile: boolean;
+};
+
+/**
+ * A group-C product as the site sees it. `active` is gone for the reason it is
+ * gone from `PublicServiceDto`: the endpoint filters on it, so no reader has
+ * to remember to.
+ */
+export type PublicDeliverableCatalogDto = Omit<
+  DeliverableCatalogDto,
+  'code' | 'active'
+> & {
+  code: `${DeliverableProduct}`;
 };
 
 export type PublicMediaAppearanceDto = Omit<

@@ -15,7 +15,7 @@ import { PublicLeadDto } from './create-lead.dto';
  * The two fields every purchase carries on top of its own form.
  *
  * **There is deliberately no `amount` on any checkout DTO.** The price is read
- * server-side — from the services catalog, from `DELIVERABLE_CATALOG`, or from
+ * server-side — from the services catalog, from `DeliverableCatalog`, or from
  * `Material.price` — and a public form that could name its own price would
  * sell an 8 € consultation for 1.01, which is the single most expensive
  * mistake available in this flow.
@@ -66,7 +66,7 @@ export class QuickQuestionCheckoutDto extends CheckoutFields {
 
 /**
  * A group-C product, bought. Only the product *code* is accepted: the label
- * and the price are looked up in `DELIVERABLE_CATALOG`, so the back office
+ * and the price are read from its `DeliverableCatalog` row, so the back office
  * never displays a product name that came from the internet.
  */
 export class DeliverableCheckoutDto extends CheckoutFields {

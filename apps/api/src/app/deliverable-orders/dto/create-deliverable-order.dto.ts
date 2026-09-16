@@ -15,7 +15,7 @@ import { DeliverableProduct, Locale } from '../../../generated/prisma/enums';
  * The same fields the public checkout collects, minus everything that only
  * makes sense in a browser: no captcha, no terms version, no intent key. What
  * it keeps is the rule that matters — only the product *code* is accepted, and
- * the label and the price are stamped from `DELIVERABLE_CATALOG`, so an order
+ * the label and the price are stamped from `DeliverableCatalog`, so an order
  * typed by hand records the same price as one bought on the site.
  */
 export class CreateDeliverableOrderDto {

@@ -6,7 +6,6 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import type { QuickQuestionDto, SubscriptionDto } from '@olesia/shared';
-import { deliverableEntry } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -27,6 +26,8 @@ import { PaymentsService } from '../payments/payments.service';
 import { canSell } from '../common/legal-entity';
 import { paymentCurrency } from '../common/payment-currency';
 import { materialPrice } from '../materials/material-price';
+import { DeliverablesService } from '../deliverables/deliverables.service';
+import { deliverablePrice } from '../deliverables/deliverable-price';
 import {
   DeliverableCheckoutDto,
   MaterialCheckoutDto,
@@ -65,6 +66,7 @@ export class LeadsService {
     private readonly mail: MailService,
     private readonly workingHours: WorkingHoursService,
     private readonly payments: PaymentsService,
+    private readonly deliverables: DeliverablesService,
   ) {}
 
   /**
@@ -297,8 +299,12 @@ export class LeadsService {
    * days). What is new is that paying also issues the upload link, because the
    * documents are the next thing the buyer has to do.
    *
-   * The label and the price come from `DELIVERABLE_CATALOG`, never from the
-   * request: the form posts a product code and nothing else about the product.
+   * The label and the price come from the catalog row, never from the request:
+   * the form posts a product code and nothing else about the product. Since
+   * `PLAN.md` step 18 that row is in the database and the client edits it, so
+   * this reads the same `deliverablePrice` seam the material checkout reads —
+   * a withdrawn product and one priced "on request" refuse here rather than at
+   * the bank.
    */
   async startDeliverableCheckout(
     dto: DeliverableCheckoutDto,
@@ -306,16 +312,17 @@ export class LeadsService {
     if (!canSell())
       throw new ServiceUnavailableException('legal_entity_missing');
 
-    const entry = deliverableEntry(dto.product);
-    if (!entry) throw new BadRequestException('unknown_deliverable_product');
+    const product = await this.deliverables.getOrThrow(dto.product);
+    const price = deliverablePrice(product);
+    if ('refusal' in price) throw new BadRequestException(price.refusal);
 
     const locale = dto.locale ?? Locale.ro;
 
     const order = await this.prisma.deliverableOrder.create({
       data: {
         product: dto.product,
-        titleRo: entry.titleRo,
-        priceEur: entry.priceEur,
+        titleRo: product.titleRo,
+        priceEur: price.amount,
         clientName: dto.name,
         clientEmail: dto.email,
         phone: dto.phone ?? null,
@@ -331,9 +338,9 @@ export class LeadsService {
       started = await this.payments.start({
         targetType: PaymentTargetType.deliverable_order,
         targetId: order.id,
-        amount: entry.priceEur,
+        amount: price.amount,
         currency: paymentCurrency(),
-        description: entry.titleRo,
+        description: product.titleRo,
         locale,
         payerName: dto.name,
         payerEmail: dto.email,

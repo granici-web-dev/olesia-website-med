@@ -4,7 +4,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { deliverableEntry } from '@olesia/shared';
 import type { DeliverableOrderDto, Paginated } from '@olesia/shared';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,6 +15,8 @@ import {
   Locale,
   PaymentStatus,
 } from '../../generated/prisma/enums';
+import { DeliverablesService } from '../deliverables/deliverables.service';
+import { deliverablePrice } from '../deliverables/deliverable-price';
 import { toDeliverableOrderDto } from './deliverable-orders.mapper';
 import { CreateDeliverableOrderDto } from './dto/create-deliverable-order.dto';
 import { UpdateDeliverableOrderDto } from './dto/update-deliverable-order.dto';
@@ -51,6 +52,7 @@ export class DeliverableOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly deliverables: DeliverablesService,
   ) {}
 
   /**
@@ -89,19 +91,22 @@ export class DeliverableOrdersService {
    *
    * The title and the price are stamped from the catalog, never taken from the
    * request, for the same reason the public checkout does it: the back office
-   * has to show what was sold, not what somebody typed.
+   * has to show what was sold, not what somebody typed. A product the client
+   * has withdrawn refuses here too — it is off the form's select, so reaching
+   * this line with one means the catalog changed while the sheet was open.
    */
   async create(dto: CreateDeliverableOrderDto): Promise<DeliverableOrderDto> {
-    const entry = deliverableEntry(dto.product);
-    if (!entry) throw new BadRequestException('unknown_deliverable_product');
+    const product = await this.deliverables.getOrThrow(dto.product);
+    const price = deliverablePrice(product);
+    if ('refusal' in price) throw new BadRequestException(price.refusal);
 
     return toDeliverableOrderDto(
       await writeOrTranslate(() =>
         this.prisma.deliverableOrder.create({
           data: {
             product: dto.product,
-            titleRo: entry.titleRo,
-            priceEur: entry.priceEur,
+            titleRo: product.titleRo,
+            priceEur: price.amount,
             clientName: dto.clientName,
             clientEmail: dto.clientEmail,
             phone: dto.phone ?? null,

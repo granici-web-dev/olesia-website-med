@@ -726,15 +726,45 @@ model Subscriber {
 // `QuickQuestion`.
 //
 // `product` is an enum and `titleRo`/`priceEur` are stamped server-side from
-// `DELIVERABLE_CATALOG` in packages/shared. Nothing about what was bought, or
-// what it costs, is taken from the request body: a public form must not be able
-// to name its own price.
+// `DeliverableCatalog` below. Nothing about what was bought, or what it costs,
+// is taken from the request body: a public form must not be able to name its
+// own price.
+
+/// What the five group-C products are called and what they cost, edited in the
+/// back office (`docs/shape-deliverable-catalog.md`, approved 2026-09-16). It
+/// replaces `DELIVERABLE_CATALOG`, a constant in packages/shared that could
+/// only be changed by a deployment.
+///
+/// Keyed by the enum, like `SiteMedia` is keyed by its slot: there are exactly
+/// five rows, they are never created or deleted, and no surrogate id would be
+/// referenced by anything. `DeliverableOrder` deliberately has no foreign key
+/// to this table — its `product` column is already the same enum, so the
+/// constraint would add nothing, and it would force the five rows into a
+/// migration instead of the seed.
+model DeliverableCatalog {
+  code      DeliverableProduct @id
+  /// Price in whole EUR. `0` means "on request" here as it does everywhere
+  /// else in this schema, and refuses a checkout rather than selling for free.
+  priceEur  Int
+  /// All three are required: we write these five ourselves and they are not
+  /// the client's own copy, which is what R3 makes `*Ru` nullable for.
+  titleRo   String
+  titleEn   String
+  titleRu   String
+  sortOrder Int                @default(0)
+  /// Withdrawn from sale. The public endpoint filters on it, so no reader has
+  /// to remember to (audit A4).
+  active    Boolean            @default(true)
+
+  updatedAt DateTime @updatedAt
+}
 
 model DeliverableOrder {
   id      String             @id @default(uuid())
   product DeliverableProduct
-  /// Romanian label and price at the moment of ordering, copied from the shared
-  /// catalog. Kept on the row so a later price change does not rewrite history.
+  /// Romanian label and price at the moment of ordering, copied from
+  /// `DeliverableCatalog`. Kept on the row so a later price change does not
+  /// rewrite history.
   titleRo String
   priceEur Int
 
