@@ -62,3 +62,5 @@ Sixteen advisories cleared, each by the smallest version move that clears it:
 - **2026-09-16, #15 closed, major ignored:** Nest 12 moves to ESM and Jest breaks; needs its own migration.
 - **2026-09-16, #16 closed, major ignored:** `webpack-cli` 7 dropped `--node-env`, which Nx passes; wait for Nx.
 - **2026-09-16, #18 closed, major ignored:** TypeScript 6 breaks on `baseUrl` in `apps/back-office/tsconfig.app.json`; revisit with the stack upgrade.
+- **2026-09-16, #19 closed by Dependabot itself** as superseded after a rebase request; replaced by #20.
+- **2026-09-16, #20 merged** (`a46d054`): `next` 16.3.5, `lucide-react` 1.45, `react-hook-form` 7.88, `tailwind-merge` 3.7, `zod` 4.6.4, `next-intl` 4.14.4; 568 tests and CI green.
