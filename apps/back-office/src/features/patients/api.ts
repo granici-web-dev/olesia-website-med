@@ -1,4 +1,4 @@
-import type { Paginated } from '@olesia/shared';
+import type { Locale, Paginated, SendPatientEntryInput } from '@olesia/shared';
 
 import { http } from '@/api/http';
 import { asList } from '@/api/list';
@@ -145,6 +145,21 @@ export function downloadDocument(
     `/patients/${id}/documents/${entry.id}`,
     entry.fileName ?? 'document',
   );
+}
+
+/**
+ * Email a prescription or a document to the address on the dossier. Refusals
+ * arrive as `ApiError` with the code in `message`; only a message that left is
+ * recorded, and the answer is the entry with its send history.
+ */
+export function sendEntry(
+  id: string,
+  entryId: string,
+  locale: Locale,
+): Promise<PatientEntryDto> {
+  return http.post<PatientEntryDto>(`/patients/${id}/entries/${entryId}/send`, {
+    locale,
+  } satisfies SendPatientEntryInput);
 }
 
 /**

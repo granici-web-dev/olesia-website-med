@@ -943,6 +943,43 @@ export const ro = {
       saving: 'Se salvează…',
     },
 
+    send: {
+      action: 'Trimite pacientului',
+      title: 'Trimite pacientului',
+      prescriptionBody: 'Rețeta pleacă pe email, ca text în corpul mesajului.',
+      documentBody: 'Documentul pleacă pe email, ca atașament.',
+      recipient: 'Destinatar',
+      recipientHint:
+        'Adresa din dosar. Dacă nu e cea corectă, corecteaz-o în profil înainte de trimitere.',
+      language: 'Limba mesajului',
+      languageUnknown:
+        'Pacientul nu ne-a scris niciodată prin site, deci limba nu e cunoscută. Alege-o tu.',
+      locale: { ro: 'Română', en: 'Engleză', ru: 'Rusă' },
+      attachment: 'Atașament',
+      previous: (count: number, when: string) =>
+        count === 1
+          ? `Emailul a mai plecat o dată, pe ${when}.`
+          : `Emailul a mai plecat de ${count} ori, ultima dată pe ${when}.`,
+      cta: 'Trimite',
+      ctaAgain: 'Trimite din nou',
+      sending: 'Se trimite…',
+      sent: 'Emailul a plecat către pacient.',
+      history: 'Trimiteri către pacient',
+      sentBy: 'de',
+      errors: {
+        mailNotConfigured:
+          'Poșta nu este configurată, așa că emailul nu a plecat. Trimite pacientului rețeta sau documentul pe alt canal.',
+        tooLarge: (size: string, max: string) =>
+          `Fișierul are ${size} MB, iar pe email pleacă cel mult ${max} MB. Trimite-l pacientului pe alt canal.`,
+        transportFailed:
+          'Serverul de email a refuzat mesajul și nu s-a trimis nimic. Încearcă din nou peste câteva minute.',
+        empty: 'Înregistrarea nu are conținut de trimis.',
+        unknownOutcome:
+          'Nu am primit răspuns de la server, deci nu știm dacă emailul a plecat. Verifică istoricul de sub înregistrare înainte să trimiți din nou.',
+        generic: 'Emailul nu a putut fi trimis. Încearcă din nou.',
+      },
+    },
+
     docForm: {
       title: 'Încarcă document',
       subtitle: 'Document medical privat (PDF, DOC, DOCX).',

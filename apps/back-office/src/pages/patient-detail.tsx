@@ -54,6 +54,7 @@ import { PatientFormSheet } from '@/features/patients/patient-form-sheet';
 import { EntryFormSheet } from '@/features/patients/entry-form-sheet';
 import { DocumentUploadSheet } from '@/features/patients/document-upload-sheet';
 import { ErasureReportDialog } from '@/features/patients/erasure-report-dialog';
+import { SendEntryDialog } from '@/features/patients/send-entry-dialog';
 import {
   fetchPatient,
   fetchTimeline,
@@ -104,6 +105,8 @@ export function PatientDetailPage() {
   const [pendingDelete, setPendingDelete] =
     React.useState<PatientEntryDto | null>(null);
   const [downloadingId, setDownloadingId] = React.useState<string | null>(null);
+  const [sendingEntry, setSendingEntry] =
+    React.useState<PatientEntryDto | null>(null);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: patientQueryKey(id) });
@@ -344,6 +347,7 @@ export function PatientDetailPage() {
                     onEdit={openEditEntry}
                     onDelete={setPendingDelete}
                     onDownload={handleDownload}
+                    onSend={setSendingEntry}
                     downloadingId={downloadingId}
                   />
                 )}
@@ -393,6 +397,7 @@ export function PatientDetailPage() {
                   emptyBody={t.prescriptions.emptyBody}
                   onEdit={openEditEntry}
                   onDelete={setPendingDelete}
+                  onSend={setSendingEntry}
                 />
               </TabsContent>
 
@@ -424,6 +429,7 @@ export function PatientDetailPage() {
                         entry={entry}
                         onDelete={setPendingDelete}
                         onDownload={handleDownload}
+                        onSend={setSendingEntry}
                         downloading={downloadingId === entry.id}
                       />
                     ))}
@@ -474,6 +480,11 @@ export function PatientDetailPage() {
             patientId={id}
             open={docOpen}
             onOpenChange={setDocOpen}
+          />
+          <SendEntryDialog
+            patient={patient}
+            entry={sendingEntry}
+            onClose={() => setSendingEntry(null)}
           />
         </>
       )}
@@ -667,6 +678,7 @@ function EntryList({
   emptyBody,
   onEdit,
   onDelete,
+  onSend,
 }: {
   entries: PatientEntryDto[];
   loading: boolean;
@@ -675,6 +687,7 @@ function EntryList({
   emptyBody: string;
   onEdit: (entry: PatientEntryDto) => void;
   onDelete: (entry: PatientEntryDto) => void;
+  onSend?: (entry: PatientEntryDto) => void;
 }) {
   if (loading) return <EntryListSkeleton />;
   if (entries.length === 0)
@@ -687,6 +700,7 @@ function EntryList({
           entry={entry}
           onEdit={onEdit}
           onDelete={onDelete}
+          onSend={onSend}
         />
       ))}
     </div>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Download, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { Download, Loader2, Pencil, Send, Trash2 } from 'lucide-react';
 
 import { PaymentBadge } from '@/components/common/payment-badge';
 import { Button } from '@/components/ui/button';
@@ -28,15 +28,18 @@ export function EntryCard({
   onEdit,
   onDelete,
   onDownload,
+  onSend,
   downloading,
 }: {
   entry: PatientEntryDto;
   onEdit?: (entry: PatientEntryDto) => void;
   onDelete?: (entry: PatientEntryDto) => void;
   onDownload?: (entry: PatientEntryDto) => void;
+  onSend?: (entry: PatientEntryDto) => void;
   downloading?: boolean;
 }) {
   const isDocument = entry.type === 'document';
+  const sendable = isDocument || entry.type === 'prescription';
   return (
     <div className="rounded-lg border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
@@ -52,6 +55,18 @@ export function EntryCard({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          {sendable && onSend && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-muted-foreground"
+              aria-label={t.send.action}
+              onClick={() => onSend(entry)}
+            >
+              <Send className="size-4" />
+              <span className="hidden sm:inline">{t.send.action}</span>
+            </Button>
+          )}
           {isDocument && onDownload && (
             <Button
               variant="ghost"
@@ -102,6 +117,36 @@ export function EntryCard({
           </span>
         </div>
       )}
+
+      {entry.sends.length > 0 && <SendHistory sends={entry.sends} />}
+    </div>
+  );
+}
+
+/** Every email this entry left in, newest first: when, to whom, by whom. */
+function SendHistory({ sends }: { sends: PatientEntryDto['sends'] }) {
+  return (
+    <div className="mt-3 border-t pt-3">
+      <p className="text-xs font-medium text-muted-foreground">
+        {t.send.history}
+      </p>
+      <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
+        {sends.map((send) => (
+          <li key={send.id} className="flex flex-wrap items-center gap-x-2">
+            <Send className="size-3 shrink-0" aria-hidden />
+            <span className="tabular-nums text-foreground/80">
+              {formatDateTime(send.sentAt)}
+            </span>
+            <span className="break-all">{send.toEmail}</span>
+            <span className="uppercase">{send.locale}</span>
+            {send.sentByName && (
+              <span>
+                {t.send.sentBy} {send.sentByName}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -154,6 +199,7 @@ export function Timeline({
   onEdit,
   onDelete,
   onDownload,
+  onSend,
   downloadingId,
 }: {
   entries: PatientEntryDto[];
@@ -161,6 +207,7 @@ export function Timeline({
   onEdit: (entry: PatientEntryDto) => void;
   onDelete: (entry: PatientEntryDto) => void;
   onDownload: (entry: PatientEntryDto) => void;
+  onSend: (entry: PatientEntryDto) => void;
   downloadingId: string | null;
 }) {
   const rows: TimelineRow[] = React.useMemo(() => {
@@ -207,6 +254,7 @@ export function Timeline({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onDownload={onDownload}
+                onSend={onSend}
                 downloading={downloadingId === row.entry.id}
               />
             ) : (
