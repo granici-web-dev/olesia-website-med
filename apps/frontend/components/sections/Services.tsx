@@ -156,7 +156,7 @@ export async function Services() {
                 <div className={styles.serviceDuration}>{durationText}</div>
               )}
               {split ? (
-                <div className="flex flex-col items-start gap-1">
+                <div className="flex flex-col items-end gap-1 max-[600px]:items-start">
                   {split.map(({ code, label }) => {
                     const splitUrl = calendlyUrlFor(code, services);
                     return splitUrl ? (
