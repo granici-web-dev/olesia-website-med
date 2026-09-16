@@ -44,9 +44,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# agent rules written by `next dev`
-# It regenerates both on every start (the `nextjs-agent-rules` block at the top
-# of AGENTS.md, which CLAUDE.md only imports), so they are build output, not the
-# project's own rules — those are the repo-root CLAUDE.md and AGENTS.md.
-/AGENTS.md
-/CLAUDE.md
+# AGENTS.md and CLAUDE.md here are committed on purpose (2026-09-16): `next dev`
+# writes the `nextjs-agent-rules` block at the top of AGENTS.md and a one-line
+# CLAUDE.md that imports it, and the project's frontend rules live below that
+# block. Keep the generated block; Claude Code loads this file only when working
+# inside apps/frontend, which is the point.
