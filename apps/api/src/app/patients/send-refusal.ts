@@ -11,6 +11,7 @@
 import { ATTACHMENT_MAX_BYTES } from '@olesia/shared';
 
 import { PatientEntryType } from '../../generated/prisma/enums';
+import { isEntryEmpty, type EntryContent } from './entry-content';
 
 export type SendRefusal =
   | { status: 422; code: 'entry_not_sendable' }
@@ -23,16 +24,10 @@ export type SendRefusal =
       maxBytes: number;
     };
 
-export interface SendableEntry {
-  type: PatientEntryType;
-  body: string | null;
-  fileUrl: string | null;
-}
-
 export function sendRefusal(
-  entry: SendableEntry,
+  entry: EntryContent,
   canSend: boolean,
-  /** The stored file's size for a document; null for a prescription. */
+  /** The stored file's size when the entry has one, whatever its type. */
   fileSizeBytes: number | null,
 ): SendRefusal | null {
   if (
@@ -41,11 +36,7 @@ export function sendRefusal(
   ) {
     return { status: 422, code: 'entry_not_sendable' };
   }
-  const empty =
-    entry.type === PatientEntryType.prescription
-      ? !entry.body?.trim()
-      : !entry.fileUrl;
-  if (empty) return { status: 422, code: 'entry_empty' };
+  if (isEntryEmpty(entry)) return { status: 422, code: 'entry_empty' };
   if (!canSend) return { status: 503, code: 'mail_not_configured' };
   if (fileSizeBytes !== null && fileSizeBytes > ATTACHMENT_MAX_BYTES) {
     return {

@@ -189,6 +189,7 @@ describe('the prescription and the document', () => {
   const PRESCRIPTION = {
     title: 'Tratament otită',
     body: '1. Amoxicilină 250 mg — de 2 ori pe zi, 7 zile.\n2. Nurofen la nevoie.',
+    attached: false,
   };
 
   it('carries the prescription text verbatim, in every language', () => {
@@ -233,5 +234,85 @@ describe('the prescription and the document', () => {
     expect(render(DOCUMENT_TEMPLATES, null, { title: 'x' }).subject).toBe(
       'Un document medical pentru dumneavoastră',
     );
+  });
+
+  describe('with a file (docs/shape-prescription-file.md)', () => {
+    const LOCALES = ['ro', 'en', 'ru'];
+    const ATTACHED_ALSO = [
+      'Rețeta este atașată și ca fișier la acest email.',
+      'The prescription is also attached to this email as a file.',
+      'Рецепт также приложен к письму файлом.',
+    ];
+
+    it('keeps the text-only message exactly as step 19 sent it', () => {
+      expect(render(PRESCRIPTION_TEMPLATES, 'ro', PRESCRIPTION).lines).toEqual([
+        'Bună ziua,',
+        '',
+        'Mai jos este rețeta de la Dr. Olesea Jalba.',
+        '',
+        PRESCRIPTION.title,
+        '',
+        PRESCRIPTION.body,
+        '',
+        'Dacă aveți întrebări despre administrare, răspundeți la acest email.',
+        '',
+        'Cu drag,',
+        'Dr. Olesea Jalba',
+      ]);
+    });
+
+    it('says a file-only prescription is attached, with no empty body block', () => {
+      LOCALES.forEach((locale, i) => {
+        const { lines } = render(PRESCRIPTION_TEMPLATES, locale, {
+          title: 'Rețetă',
+          body: null,
+          attached: true,
+        });
+        expect(lines[2]).toMatch(/atașată|attached|вложении/);
+        expect(lines).not.toContain(ATTACHED_ALSO[i]);
+        expect(lines.slice(4)).toEqual([
+          'Rețetă',
+          '',
+          ...render(PRESCRIPTION_TEMPLATES, locale, PRESCRIPTION).lines.slice(
+            8,
+          ),
+        ]);
+      });
+    });
+
+    it('carries the text verbatim and one line naming the attachment', () => {
+      LOCALES.forEach((locale, i) => {
+        const textOnly = render(PRESCRIPTION_TEMPLATES, locale, PRESCRIPTION);
+        const { lines } = render(PRESCRIPTION_TEMPLATES, locale, {
+          ...PRESCRIPTION,
+          attached: true,
+        });
+        expect(lines).toContain(PRESCRIPTION.body);
+        expect(lines).toEqual([
+          ...textOnly.lines.slice(0, 8),
+          ATTACHED_ALSO[i],
+          '',
+          ...textOnly.lines.slice(8),
+        ]);
+      });
+    });
+
+    it('keeps the prescription subject in every shape', () => {
+      for (const locale of LOCALES) {
+        const subject = render(
+          PRESCRIPTION_TEMPLATES,
+          locale,
+          PRESCRIPTION,
+        ).subject;
+        for (const vars of [
+          { ...PRESCRIPTION, attached: true },
+          { ...PRESCRIPTION, body: null, attached: true },
+        ]) {
+          expect(render(PRESCRIPTION_TEMPLATES, locale, vars).subject).toBe(
+            subject,
+          );
+        }
+      }
+    });
   });
 });

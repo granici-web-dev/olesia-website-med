@@ -19,7 +19,7 @@ import type { Response } from 'express';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/jwt.types';
-import { Role } from '../../generated/prisma/enums';
+import { PatientEntryType, Role } from '../../generated/prisma/enums';
 import {
   DOCUMENT_MAX_BYTES,
   type UploadedImage,
@@ -143,7 +143,10 @@ export class PatientsController {
     return this.patients.removeEntry(id, entryId, user.id);
   }
 
-  /** Upload a private medical document (PDF/DOC/DOCX). */
+  /**
+   * Upload a private file (PDF/DOC/DOCX) as a `document` entry, or as a
+   * `prescription` when `type` says so (docs/shape-prescription-file.md).
+   */
   @Post(':id/documents')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', uploadLimits(DOCUMENT_MAX_BYTES)))
@@ -153,10 +156,19 @@ export class PatientsController {
     @Body() dto: AddDocumentDto,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.patients.addDocument(id, file, dto.title, user.id);
+    return this.patients.addDocument(
+      id,
+      file,
+      dto.title,
+      dto.type ?? PatientEntryType.document,
+      user.id,
+    );
   }
 
-  /** Authenticated streamed download — never a public URL. */
+  /**
+   * Authenticated streamed download of the file on a document or a
+   * prescription — never a public URL.
+   */
   @Get(':id/documents/:entryId')
   async download(
     @Param('id') id: string,

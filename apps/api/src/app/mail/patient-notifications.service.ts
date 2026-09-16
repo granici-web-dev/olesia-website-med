@@ -141,7 +141,8 @@ export class PatientNotificationsService {
   }
 
   /**
-   * A prescription, as text in the body, from the dossier.
+   * A prescription from the dossier: its text in the body, its file as an
+   * attachment, or both (docs/shape-prescription-file.md).
    *
    * These two are the only messages with a Reply-To: the patient's reply is
    * about the treatment and belongs with the doctor, not in the practice
@@ -150,13 +151,20 @@ export class PatientNotificationsService {
    */
   async prescription(
     recipient: Recipient,
-    vars: PrescriptionVars,
+    vars: Omit<PrescriptionVars, 'attached'>,
+    attachment?: MailAttachment,
   ): Promise<Delivery> {
     return this.send(
       'prescription',
       recipient,
-      render(PRESCRIPTION_TEMPLATES, recipient.locale, vars),
-      { replyTo: process.env.DOCTOR_REPLY_TO_EMAIL || undefined },
+      render(PRESCRIPTION_TEMPLATES, recipient.locale, {
+        ...vars,
+        attached: attachment !== undefined,
+      }),
+      {
+        replyTo: process.env.DOCTOR_REPLY_TO_EMAIL || undefined,
+        attachments: attachment && [attachment],
+      },
     );
   }
 

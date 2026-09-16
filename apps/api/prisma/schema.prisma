@@ -1041,7 +1041,7 @@ model PatientEntrySend {
   /// The address at that moment; the dossier's email may change later.
   toEmail  String
   locale   Locale
-  /// The attachment's name for a document; null for a prescription.
+  /// The attachment's name, if the email had one.
   fileName String?
   sentAt   DateTime     @default(now())
 

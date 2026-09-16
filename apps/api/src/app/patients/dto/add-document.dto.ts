@@ -1,7 +1,9 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+
+import { PatientEntryType } from '../../../generated/prisma/enums';
 
 /**
- * The title field of a medical-document upload.
+ * The fields of a medical-document or prescription-file upload.
  *
  * Audit A3 (F13): this used to arrive as `@Body('title')`. A parameter whose
  * metatype is `String` is skipped by the global `ValidationPipe`, so nothing
@@ -13,4 +15,10 @@ export class AddDocumentDto {
   @IsString()
   @MaxLength(200)
   title?: string;
+
+  /** A file is a document unless she uploads it as a prescription
+   * (docs/shape-prescription-file.md). Notes and anamnesis carry no file. */
+  @IsOptional()
+  @IsIn([PatientEntryType.prescription, PatientEntryType.document])
+  type?: 'prescription' | 'document';
 }

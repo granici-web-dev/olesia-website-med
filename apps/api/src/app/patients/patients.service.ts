@@ -8,6 +8,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import type {
   Paginated,
@@ -33,6 +34,11 @@ import {
 } from './patients.mapper';
 import { lastKnownLocale } from './patient-locale';
 import { sendRefusal, type SendRefusal } from './send-refusal';
+import {
+  entryContentRefusal,
+  hasEntryText,
+  type EntryContent,
+} from './entry-content';
 import { CALENDLY_MANUAL_STEP, erasureTargets } from './erasure-targets';
 import { toInteractions } from './interactions';
 import {
@@ -53,11 +59,17 @@ export class PatientsService {
     private readonly notifications: PatientNotificationsService,
   ) {}
 
-  /** Upload a private medical document → a `document` timeline entry. */
+  /**
+   * Upload a private file → a `document` or a `prescription` timeline entry.
+   * An untitled document takes the file's name; an untitled prescription is
+   * "Rețetă" (docs/shape-prescription-file.md, open question 5, answered
+   * 2026-09-16).
+   */
   async addDocument(
     id: string,
     file: UploadedImage | undefined,
     title: string | undefined,
+    type: 'prescription' | 'document',
     authorId: string,
   ): Promise<PatientEntryDto> {
     await this.getOrThrow(id);
@@ -65,8 +77,12 @@ export class PatientsService {
     const entry = await this.prisma.patientEntry.create({
       data: {
         patientId: id,
-        type: PatientEntryType.document,
-        title: title ?? file!.originalname,
+        type,
+        title:
+          title ??
+          (type === PatientEntryType.prescription
+            ? 'Rețetă'
+            : file!.originalname),
         fileUrl: key,
         fileName: file!.originalname,
         authorId,
@@ -76,19 +92,23 @@ export class PatientsService {
     this.audit('document.upload', {
       patientId: id,
       entryId: entry.id,
+      type,
       userId: authorId,
     });
     return toPatientEntryDto(entry);
   }
 
-  /** Resolve a private document for streaming (auth-checked by the route). */
+  /**
+   * Resolve the private file of a document or a prescription for streaming
+   * (auth-checked by the route). Only those two types can hold a file.
+   */
   async getDocument(
     id: string,
     entryId: string,
     userId: string,
   ): Promise<{ path: string; fileName: string }> {
     const e = await this.getEntryOrThrow(id, entryId);
-    if (e.type !== PatientEntryType.document || !e.fileUrl) {
+    if (!e.fileUrl) {
       throw new NotFoundException('document_not_found');
     }
     this.audit('document.download', { patientId: id, entryId, userId });
@@ -179,7 +199,7 @@ export class PatientsService {
    * "every trace of the person", and audit A3 (F1) found seven places where
    * it did not:
    * - deletes the dossier, which cascades its `PatientEntry` rows, and the
-   *   private document files those entries point at;
+   *   private files those entries point at, prescriptions' included;
    * - deletes every upload link reaching this person, by its own address or
    *   through the appointment it was issued for, and with them the medical
    *   documents the patient sent — rows and bytes;
@@ -204,11 +224,7 @@ export class PatientsService {
     // the cascade removes the rows these file references live on.
     const [docs, plans, links] = await Promise.all([
       this.prisma.patientEntry.findMany({
-        where: {
-          patientId: id,
-          type: PatientEntryType.document,
-          fileUrl: { not: null },
-        },
+        where: { patientId: id, fileUrl: { not: null } },
         select: { fileUrl: true },
       }),
       this.prisma.appointment.findMany({
@@ -379,13 +395,15 @@ export class PatientsService {
     authorId: string,
   ): Promise<PatientEntryDto> {
     await this.getOrThrow(id);
+    const body = dto.body ?? null;
+    assertEntryContent({ type: dto.type, body, fileUrl: null });
     return toPatientEntryDto(
       await this.prisma.patientEntry.create({
         data: {
           patientId: id,
           type: dto.type,
           title: dto.title ?? null,
-          body: dto.body ?? null,
+          body,
           occurredAt: dto.occurredAt ? new Date(dto.occurredAt) : new Date(),
           authorId,
         },
@@ -400,7 +418,14 @@ export class PatientsService {
     dto: UpdateEntryDto,
     authorId: string,
   ): Promise<PatientEntryDto> {
-    await this.getEntryOrThrow(id, entryId);
+    const stored = await this.getEntryOrThrow(id, entryId);
+    // The rule holds for the row as it will be stored: clearing the text of a
+    // file-only prescription is fine, of a text-only one is not.
+    assertEntryContent({
+      type: dto.type ?? stored.type,
+      body: dto.body === undefined ? stored.body : dto.body,
+      fileUrl: stored.fileUrl,
+    });
     return toPatientEntryDto(
       await this.prisma.patientEntry.update({
         where: { id: entryId },
@@ -425,15 +450,16 @@ export class PatientsService {
     await this.prisma.patientEntry.delete({ where: { id: entryId } });
     this.audit('entry.delete', { patientId: id, entryId, userId });
     // Right-to-erasure also applies per entry: drop the physical file.
-    if (e.type === PatientEntryType.document && e.fileUrl) {
+    if (e.fileUrl) {
       await this.storage.deletePrivateDocument(e.fileUrl);
     }
   }
 
   /**
-   * Email a prescription (as text) or a document (as an attachment) to the
-   * address on the dossier, in the language the doctor chose
-   * (docs/shape-send-prescription.md). The recipient is never an argument: a
+   * Email a prescription (its text in the body, its file attached, or both)
+   * or a document (as an attachment) to the address on the dossier, in the
+   * language the doctor chose (docs/shape-send-prescription.md,
+   * docs/shape-prescription-file.md). The recipient is never an argument: a
    * typed address is how a medical file reaches the wrong parent.
    */
   async sendEntry(
@@ -445,10 +471,9 @@ export class PatientsService {
     const patient = await this.getOrThrow(id);
     const entry = await this.getEntryOrThrow(id, entryId);
 
-    const filePath =
-      entry.type === PatientEntryType.document && entry.fileUrl
-        ? this.storage.privateDocPath(entry.fileUrl)
-        : null;
+    const filePath = entry.fileUrl
+      ? this.storage.privateDocPath(entry.fileUrl)
+      : null;
     const refusal = sendRefusal(
       entry,
       this.notifications.canSend,
@@ -458,16 +483,24 @@ export class PatientsService {
 
     const recipient = { to: patient.email, locale };
     const fileName = filePath ? (entry.fileName ?? 'document') : null;
-    const { sent } = filePath
-      ? await this.notifications.document(
-          recipient,
-          { title: entry.title ?? fileName! },
-          { filename: fileName!, path: filePath },
-        )
-      : await this.notifications.prescription(recipient, {
-          title: entry.title,
-          body: entry.body!,
-        });
+    const attachment = filePath
+      ? { filename: fileName!, path: filePath }
+      : undefined;
+    const { sent } =
+      entry.type === PatientEntryType.document
+        ? await this.notifications.document(
+            recipient,
+            { title: entry.title ?? fileName! },
+            attachment!,
+          )
+        : await this.notifications.prescription(
+            recipient,
+            {
+              title: entry.title,
+              body: hasEntryText(entry.body) ? entry.body : null,
+            },
+            attachment,
+          );
     if (!sent) throw new BadGatewayException('mail_send_failed');
 
     // The row is written after the transport has answered, never before: the
@@ -654,6 +687,12 @@ export class PatientsService {
     }
     return e;
   }
+}
+
+/** `entry_file_not_allowed` or `entry_empty`, as a 422 with the code in `message`. */
+function assertEntryContent(entry: EntryContent): void {
+  const refusal = entryContentRefusal(entry);
+  if (refusal) throw new UnprocessableEntityException(refusal);
 }
 
 /** Same body shape as the other coded errors: `message` is the code. */

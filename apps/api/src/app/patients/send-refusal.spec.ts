@@ -1,14 +1,15 @@
 import { ATTACHMENT_MAX_BYTES } from '@olesia/shared';
 
 import { PatientEntryType } from '../../generated/prisma/enums';
-import { sendRefusal, type SendableEntry } from './send-refusal';
+import type { EntryContent } from './entry-content';
+import { sendRefusal } from './send-refusal';
 
-const PRESCRIPTION: SendableEntry = {
+const PRESCRIPTION: EntryContent = {
   type: PatientEntryType.prescription,
   body: 'Paracetamol 120 mg, la nevoie.',
   fileUrl: null,
 };
-const DOCUMENT: SendableEntry = {
+const DOCUMENT: EntryContent = {
   type: PatientEntryType.document,
   body: null,
   fileUrl: 'b5f1.pdf',
@@ -66,6 +67,50 @@ describe('sendRefusal', () => {
       code: 'attachment_too_large',
       sizeBytes: ATTACHMENT_MAX_BYTES + 1,
       maxBytes: ATTACHMENT_MAX_BYTES,
+    });
+  });
+
+  describe('a prescription with a file', () => {
+    const FILE_ONLY: EntryContent = {
+      type: PatientEntryType.prescription,
+      body: null,
+      fileUrl: 'c7a2.pdf',
+    };
+    const TEXT_AND_FILE: EntryContent = {
+      ...FILE_ONLY,
+      body: PRESCRIPTION.body,
+    };
+
+    it('lets a file-only prescription through', () => {
+      expect(sendRefusal(FILE_ONLY, true, 1024)).toBeNull();
+    });
+
+    it('refuses a prescription with neither text nor file', () => {
+      expect(sendRefusal({ ...FILE_ONLY, fileUrl: null }, true, null)).toEqual({
+        status: 422,
+        code: 'entry_empty',
+      });
+    });
+
+    it('refuses the whole send when the file is over the limit, text or not', () => {
+      expect(
+        sendRefusal(TEXT_AND_FILE, true, ATTACHMENT_MAX_BYTES + 1),
+      ).toEqual({
+        status: 422,
+        code: 'attachment_too_large',
+        sizeBytes: ATTACHMENT_MAX_BYTES + 1,
+        maxBytes: ATTACHMENT_MAX_BYTES,
+      });
+    });
+
+    it('says mail is off before it says the file is too large', () => {
+      expect(
+        sendRefusal(TEXT_AND_FILE, false, ATTACHMENT_MAX_BYTES * 2)?.code,
+      ).toBe('mail_not_configured');
+    });
+
+    it('sends exactly the limit, as for a document', () => {
+      expect(sendRefusal(FILE_ONLY, true, ATTACHMENT_MAX_BYTES)).toBeNull();
     });
   });
 });

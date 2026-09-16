@@ -374,12 +374,32 @@ export const PAYMENT_RECEIPT_TEMPLATES: Templates<PaymentReceiptVars> = {
 
 export interface PrescriptionVars {
   title: string | null;
-  /** The entry's text as she wrote it; markdown goes out as typed. */
-  body: string;
+  /** The entry's text as she wrote it; markdown goes out as typed. Null when
+   * the prescription is only a file. */
+  body: string | null;
+  /** Whether the prescription's file goes with the message
+   * (docs/shape-prescription-file.md). */
+  attached: boolean;
 }
 
 const titleLines = (title: string | null): string[] =>
   title ? [title, ''] : [];
+
+/*
+ * Three shapes from one template: text only (the step 19 message, line for
+ * line), text and file (plus a line naming the attachment), file only (an
+ * intro that says it is attached, and no empty body). The email makes no claim
+ * about what the file is worth at a pharmacy: that is the client's to say
+ * (docs/questions_v3.md §8.4).
+ */
+const prescriptionBody = (
+  v: PrescriptionVars,
+  attachedAlsoLine: string,
+): string[] => [
+  ...titleLines(v.title),
+  ...(v.body === null ? [] : [v.body, '']),
+  ...(v.body !== null && v.attached ? [attachedAlsoLine, ''] : []),
+];
 
 export const PRESCRIPTION_TEMPLATES: Templates<PrescriptionVars> = {
   [Locale.Ro]: (v) => ({
@@ -387,11 +407,14 @@ export const PRESCRIPTION_TEMPLATES: Templates<PrescriptionVars> = {
     lines: [
       'Bună ziua,',
       '',
-      'Mai jos este rețeta de la Dr. Olesea Jalba.',
+      v.body === null
+        ? 'Rețeta de la Dr. Olesea Jalba este atașată la acest email.'
+        : 'Mai jos este rețeta de la Dr. Olesea Jalba.',
       '',
-      ...titleLines(v.title),
-      v.body,
-      '',
+      ...prescriptionBody(
+        v,
+        'Rețeta este atașată și ca fișier la acest email.',
+      ),
       'Dacă aveți întrebări despre administrare, răspundeți la acest email.',
       ...SIGNATURE[Locale.Ro],
     ],
@@ -401,11 +424,14 @@ export const PRESCRIPTION_TEMPLATES: Templates<PrescriptionVars> = {
     lines: [
       'Hello,',
       '',
-      'Below is your prescription from Dr. Olesea Jalba.',
+      v.body === null
+        ? 'Your prescription from Dr. Olesea Jalba is attached to this email.'
+        : 'Below is your prescription from Dr. Olesea Jalba.',
       '',
-      ...titleLines(v.title),
-      v.body,
-      '',
+      ...prescriptionBody(
+        v,
+        'The prescription is also attached to this email as a file.',
+      ),
       'If you have questions about how to take it, reply to this email.',
       ...SIGNATURE[Locale.En],
     ],
@@ -415,11 +441,11 @@ export const PRESCRIPTION_TEMPLATES: Templates<PrescriptionVars> = {
     lines: [
       'Здравствуйте!',
       '',
-      'Ниже рецепт от доктора Олеси Жалбы.',
+      v.body === null
+        ? 'Рецепт от доктора Олеси Жалбы во вложении к этому письму.'
+        : 'Ниже рецепт от доктора Олеси Жалбы.',
       '',
-      ...titleLines(v.title),
-      v.body,
-      '',
+      ...prescriptionBody(v, 'Рецепт также приложен к письму файлом.'),
       'Если есть вопросы о приёме, ответьте на это письмо.',
       ...SIGNATURE[Locale.Ru],
     ],
