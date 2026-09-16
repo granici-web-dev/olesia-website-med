@@ -13,6 +13,7 @@ import { AGE_GROUPS } from '@/lib/age-taxonomy';
 import { biFor, type Bi } from '@/lib/i18n-types';
 import { formatSla } from '@/lib/working-hours';
 import { creamPill, creamUnderline } from '@/components/ui/cta';
+import { NewsletterBand } from '@/components/sections/NewsletterBand';
 
 export const revalidate = 60;
 
@@ -403,6 +404,8 @@ export default async function ArticlesPage({
           </div>
         </div>
       </section>
+
+      <NewsletterBand source="article" />
     </main>
   );
 }

@@ -1868,6 +1868,8 @@ export const ro = {
 
     source: {
       library: 'Bibliotecă',
+      article: 'Articole',
+      /** Historical: the signup left the footer on 2026-09-16. */
       footer: 'Subsol',
     },
 

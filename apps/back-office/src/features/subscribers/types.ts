@@ -6,7 +6,8 @@
  * agreed to. Shapes mirror `SubscriberDto` in `packages/shared`.
  */
 
-export type SubscriberSource = 'library' | 'footer';
+/** `footer` is historical: the signup became a band of its own on 2026-09-16. */
+export type SubscriberSource = 'library' | 'article' | 'footer';
 
 export interface Subscriber {
   id: string;

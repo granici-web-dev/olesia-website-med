@@ -55,7 +55,10 @@
       "eyebrow": "Услуги · Пять форматов",
       "title": "Как мы работаем<br></br><accent>вместе.</accent>",
       "headerSub": "Пять форматов работы — от короткого вопроса до абонемента с наблюдением. Выберите подходящий ритм.",
-      "audience": { "children": "дети", "adults": "взрослые" },
+      "audience": {
+        "children": "дети",
+        "adults": "взрослые"
+      },
       "items": {
         "pediatric": {
           "tag": "Педиатрия",
@@ -121,6 +124,8 @@
       "faq": "Частые вопросы"
     },
     "contactLabel": "Контакты",
+    "followLabel": "Следите за нами",
+    "newsletter": "Рассылка",
     "rights": "© Olesea Jalba · {year}",
     "legal": "GDPR · Условия",
     "legalGdpr": "GDPR",

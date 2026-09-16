@@ -24,8 +24,15 @@
 import { track } from './analytics';
 import { leadLocale, postLead, type LeadLocale } from './leads';
 
-/** Where the signup happened. The API records it and never changes it. */
-export type SubscribeSource = 'footer' | 'library';
+/**
+ * Where the signup happened. The API records it and never changes it.
+ *
+ * `footer` was the other surface until 2026-09-16; the block moved out of the
+ * footer into `NewsletterBand`, and the footer keeps a link to the library
+ * band instead. The value stays in the shared union for the rows that would
+ * have carried it, and nothing sends it.
+ */
+export type SubscribeSource = 'library' | 'article';
 
 export interface SubscribeOpts {
   source: SubscribeSource;

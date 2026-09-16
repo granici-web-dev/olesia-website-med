@@ -692,9 +692,14 @@ model ContactMessage {
 // against a populated table.
 
 enum SubscriberSource {
-  /// The email gate in front of a free library material (/guides).
+  /// The library page (/guides): its email gate in front of a free material,
+  /// and the signup band the footer's "Newsletter" link points at.
   library
-  /// The signup block in the site footer.
+  /// The signup band on /articles and at the end of an article.
+  article
+  /// Historical. The footer carried the signup block until 2026-09-16, when it
+  /// moved to a band of its own; no surface writes this value any more, and no
+  /// row ever carried it.
   footer
 }
 

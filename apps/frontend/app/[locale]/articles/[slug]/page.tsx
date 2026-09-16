@@ -7,6 +7,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { JsonLd } from '@/components/ui/JsonLd';
 import { pageMetadata } from '@/lib/page-metadata';
 import { articleJsonLd } from '@/lib/structured-data';
+import { NewsletterBand } from '@/components/sections/NewsletterBand';
 
 export const revalidate = 60;
 
@@ -113,6 +114,10 @@ export default async function ArticlePage({
           )}
         </div>
       </article>
+
+      {/* After the reading column, not inside it: the band is full width like
+          every other closing section on the site. */}
+      <NewsletterBand source="article" />
     </main>
   );
 }

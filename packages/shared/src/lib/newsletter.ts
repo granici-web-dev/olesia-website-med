@@ -20,8 +20,14 @@ export const NEWSLETTER_CONSENT_TEXT: Record<NewsletterConsentLocale, string> =
     ru: 'Согласен(на) получать новости по email и на хранение моего адреса для этой цели. Отписаться можно в любой момент.',
   };
 
-/** Where a signup happened. Both surfaces are on the public site. */
-export type SubscriberSource = 'library' | 'footer';
+/**
+ * Where a signup happened. Every surface is on the public site.
+ *
+ * `footer` is historical: the signup block lived in the footer until
+ * 2026-09-16, when it became a band of its own and the footer kept a
+ * "Newsletter" link to it instead. Nothing writes the value now.
+ */
+export type SubscriberSource = 'library' | 'article' | 'footer';
 
 /**
  * One address on the list, as the back office reads it.

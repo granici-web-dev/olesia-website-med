@@ -5,9 +5,13 @@
   padding-inline: max(var(--gutter), (100% - var(--container)) / 2);
 }
 
+/* Brand, then four link columns: Servicii · Resurse · Contact · Urmărește.
+   The brand block gives up some width for the fourth column — the social
+   links moved out of Contact on 2026-09-16, when the newsletter signup left
+   the footer for a band of its own. */
 .grid {
   display: grid;
-  grid-template-columns: 2.6fr 1fr 1fr 1fr;
+  grid-template-columns: 2.1fr 1fr 1fr 1fr 1fr;
   gap: 48px;
   margin-bottom: 56px;
 }
@@ -85,6 +89,7 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .grid {
+    grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
     gap: 32px;
   }
 
@@ -102,6 +107,11 @@
     grid-template-columns: 1fr 1fr;
     gap: 36px 24px;
     margin-bottom: 40px;
+  }
+
+  /* The brand block keeps the full row it had before the fifth column. */
+  .grid > :first-child {
+    grid-column: 1 / -1;
   }
 
   .logo {

@@ -18,9 +18,9 @@
   --rule: rgba(44, 33, 23, 0.16);
   /* Form validation — muted brick that reads on cream/paper at AA (5.9:1). */
   --danger: #9a3b2e;
-  /* The same brick lifted for the brown footer, where --danger lands at 1.56:1
-     and this clears AA at 6.3:1. The footer is the site's one dark surface and
-     the newsletter form is the one thing on it that can fail (audit A13). */
+  /* The same brick lifted for the dark bands, where --danger lands at 1.9:1
+     on --sage-deep and this clears AA at 7.8:1. The newsletter band is the one
+     thing on a dark surface that can fail (audit A13). */
   --danger-soft: #f0b9ab;
 
   /* Layout: centered content container with full-bleed backgrounds.

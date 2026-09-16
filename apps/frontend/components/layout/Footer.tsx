@@ -6,7 +6,6 @@ import { contactHref, groupContacts } from '@/lib/contacts';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
 import { FooterLangSwitch } from './FooterLangSwitch';
 import { CookiePreferencesLink } from './CookiePreferencesLink';
-import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
 import { freeConsultBooking, type BookingTarget } from '@/lib/calendly';
 import { creamBox } from '@/components/ui/cta';
 import styles from './Footer.module.css';
@@ -64,13 +63,18 @@ async function bookingLink(): Promise<BookingTarget> {
  * anchors while the back office edited a table nothing rendered (audit A6,
  * F12) — so a changed phone number reached nobody. A kind the client has not
  * entered simply does not appear.
+ *
+ * Her social links sit in their own "Urmărește" column, as in
+ * `origin/variants/01-cabinet.jsx`, alongside a link to the newsletter band on
+ * `/guides`. The signup form itself left the footer on 2026-09-16: it was a
+ * form in the quietest part of the page, and it is a band now (audit A13).
  */
 export async function Footer() {
   const t = await getTranslations('footer');
   const locale = await getLocale();
   const { phones, emails, socials, addresses } = await contactChannels();
   const booking = await bookingLink();
-  const reachable = [...emails, ...phones, ...socials];
+  const reachable = [...emails, ...phones];
 
   return (
     <footer className={styles.footer}>
@@ -128,18 +132,9 @@ export async function Footer() {
               {reachable.map((c) => {
                 const href = contactHref(c);
                 if (!href) return null;
-                const external = c.type === 'social';
                 return (
-                  <a
-                    key={c.id}
-                    href={href}
-                    {...(external
-                      ? { target: '_blank', rel: 'noopener noreferrer' }
-                      : {})}
-                  >
-                    {c.type === 'social'
-                      ? loc(locale, c.labelRo, c.labelEn, c.labelRu)
-                      : c.value}
+                  <a key={c.id} href={href}>
+                    {c.value}
                   </a>
                 );
               })}
@@ -149,11 +144,29 @@ export async function Footer() {
             </div>
           </div>
         )}
-      </div>
 
-      {/* `--rule` is an ink tint and drew nothing on brown. */}
-      <div className="mt-12 border-t border-cream/20 pb-4 pt-10">
-        <NewsletterSignup source="footer" className="max-w-[520px]" />
+        <div>
+          <div className={styles.colLabel}>{t('followLabel')}</div>
+          <div className={styles.colLinks}>
+            {socials.map((c) => {
+              const href = contactHref(c);
+              if (!href) return null;
+              return (
+                <a
+                  key={c.id}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {loc(locale, c.labelRo, c.labelEn, c.labelRu)}
+                </a>
+              );
+            })}
+            {/* The signup itself is a band on /guides; this is how the footer
+                still offers it. */}
+            <Link href="/guides#newsletter">{t('newsletter')}</Link>
+          </div>
+        </div>
       </div>
 
       <div className={styles.bottom}>

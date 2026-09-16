@@ -16,6 +16,7 @@ import {
   cardCta,
 } from '@/components/ui/cta';
 import { biFor, type Bi } from '@/lib/i18n-types';
+import { NewsletterBand } from '@/components/sections/NewsletterBand';
 
 export const revalidate = 60;
 
@@ -532,6 +533,8 @@ export default async function LibraryPage({
           </div>
         </div>
       </section>
+
+      <NewsletterBand source="library" id="newsletter" />
     </main>
   );
 }
