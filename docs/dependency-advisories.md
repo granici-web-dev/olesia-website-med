@@ -54,3 +54,11 @@ Sixteen advisories cleared, each by the smallest version move that clears it:
 - **2026-09-10:** `ai` and `@google/genai`, which existed for one parked script.
   The script is kept at `docs/parked/generate-images.ts`; reviving it means
   re-adding both packages deliberately.
+
+## Dependabot decisions
+
+- **2026-09-16, #14 merged** (`73a5c68`): the routine group, 19 in-range updates; 568 tests and CI green.
+- **2026-09-16, #17 merged** (`69fb43d`): `nodemailer` 9.1.1 → 10.0.9; a prescription with a PDF sent through Mailpit arrived intact.
+- **2026-09-16, #15 closed, major ignored:** Nest 12 moves to ESM and Jest breaks; needs its own migration.
+- **2026-09-16, #16 closed, major ignored:** `webpack-cli` 7 dropped `--node-env`, which Nx passes; wait for Nx.
+- **2026-09-16, #18 closed, major ignored:** TypeScript 6 breaks on `baseUrl` in `apps/back-office/tsconfig.app.json`; revisit with the stack upgrade.
