@@ -1,13 +1,15 @@
 /**
- * Per-product copy for the group-C deliverables, keyed by product code.
+ * Per-product marketing copy for the group-C deliverables, keyed by product
+ * code: the category tag and the paragraph under the title.
  *
- * Copywriting rather than data: these are not fields on anything, nothing in
- * the back office edits them, and they are read by both `/pricing` and the
- * checkout page — which is why they live here rather than in one of the two.
- * The price is not among them: it comes from `DELIVERABLE_CATALOG`, the same
- * constant the API stamps onto an order, so no two screens can quote different
- * numbers. Making group C editable from the back office is a separate step
- * (`PLAN.md` 8c), and it is where these would go.
+ * Copywriting rather than data. Neither string carries a number, so neither
+ * goes stale when the client changes a price, and both are read by `/pricing`
+ * and the checkout page — which is why they live here rather than in one of
+ * the two.
+ *
+ * The title is NOT here. It is a column on `DeliverableCatalog` and comes off
+ * the API with the price, because the back office edits it (`PLAN.md` step 18)
+ * and two sources for one string is how they drift apart.
  */
 import type { DeliverableProduct } from '@olesia/shared';
 
@@ -15,18 +17,12 @@ import type { Bi } from './i18n-types';
 
 export interface DeliverableCopy {
   tag: Bi;
-  title: Bi;
   desc: Bi;
 }
 
 export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   menu_7: {
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: {
-      ro: 'Meniu personalizat · 7 zile',
-      en: 'Personalized menu · 7 days',
-      ru: 'Персональное меню · 7 дней',
-    },
     desc: {
       ro: 'Plan alimentar personalizat pe 7 zile, livrat în scris după un formular scurt.',
       en: 'A personalized 7-day meal plan, delivered in writing after a short form.',
@@ -35,11 +31,6 @@ export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   },
   menu_14: {
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: {
-      ro: 'Meniu personalizat · 14 zile',
-      en: 'Personalized menu · 14 days',
-      ru: 'Персональное меню · 14 дней',
-    },
     desc: {
       ro: 'Plan alimentar personalizat pe 14 zile, cu variație și liste de cumpărături.',
       en: 'A personalized 14-day meal plan, with variety and shopping lists.',
@@ -48,11 +39,6 @@ export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   },
   menu_30: {
     tag: { ro: 'Meniu', en: 'Menu', ru: 'Меню' },
-    title: {
-      ro: 'Meniu personalizat · 30 zile',
-      en: 'Personalized menu · 30 days',
-      ru: 'Персональное меню · 30 дней',
-    },
     desc: {
       ro: 'Plan alimentar personalizat pe 30 de zile, pentru obiective de durată.',
       en: 'A personalized 30-day meal plan, for longer-term goals.',
@@ -61,11 +47,6 @@ export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   },
   protocol_pednutri: {
     tag: { ro: 'Protocol', en: 'Protocol', ru: 'Протокол' },
-    title: {
-      ro: 'Protocol individualizat pediatrico-nutrițional',
-      en: 'Individual pediatric-nutrition protocol',
-      ru: 'Индивидуальный педиатрическо-нутрициологический протокол',
-    },
     desc: {
       ro: 'Protocol individualizat pe baza informațiilor și documentelor trimise, livrat în scris.',
       en: 'An individualized protocol built from the information and documents you send, delivered in writing.',
@@ -74,11 +55,6 @@ export const DELIVERABLE_COPY: Record<DeliverableProduct, DeliverableCopy> = {
   },
   protocol_complementary: {
     tag: { ro: 'Protocol', en: 'Protocol', ru: 'Протокол' },
-    title: {
-      ro: 'Protocol individualizat · alimentație complementară (sugari)',
-      en: 'Individual complementary-feeding protocol (infants)',
-      ru: 'Индивидуальный протокол прикорма (для грудничков)',
-    },
     desc: {
       ro: 'Protocol de diversificare individualizat pentru sugari, livrat în scris.',
       en: 'An individualized complementary-feeding protocol for infants, delivered in writing.',

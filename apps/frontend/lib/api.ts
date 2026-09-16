@@ -13,6 +13,7 @@ import type {
   LegalEntityDto,
   MaterialCategoryDto,
   PublicContactDto,
+  PublicDeliverableCatalogDto,
   PublicMaterialDto,
   PublicMediaAppearanceDto,
   PublicPostDto,
@@ -31,6 +32,7 @@ export type {
   FaqItemDto,
   MaterialCategoryDto,
   PublicContactDto,
+  PublicDeliverableCatalogDto,
   PublicMaterialDto,
   PublicMediaAppearanceDto,
   PublicPostDto,
@@ -178,6 +180,8 @@ const LEGAL_ENTITY_AT_BUILD: LegalEntityDto = {
 
 export const api = {
   services: () => getJson<PublicServiceDto[]>('/services', []),
+  deliverables: () =>
+    getJson<PublicDeliverableCatalogDto[]>('/deliverables', []),
   contacts: () => getJson<PublicContactDto[]>('/contacts', []),
   legalEntity: () =>
     getRequired<LegalEntityDto>(

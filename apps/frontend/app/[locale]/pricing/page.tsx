@@ -5,7 +5,6 @@ import { setRequestLocale } from 'next-intl/server';
 import { pageMetadata } from '@/lib/page-metadata';
 import { biFor, type Bi } from '@/lib/i18n-types';
 import { DELIVERABLE_COPY } from '@/lib/deliverable-content';
-import { DELIVERABLE_CATALOG } from '@olesia/shared';
 import { api, loc, serviceTag } from '../../../lib/api';
 import styles from '../../../components/sections/Services.module.css';
 import { CalendlyButton } from '@/components/ui/CalendlyButton';
@@ -62,8 +61,9 @@ export default async function PricingPage({
   setRequestLocale(locale);
   const en = locale === 'en';
   const ru = locale === 'ru';
-  const [services, hours] = await Promise.all([
+  const [services, deliverables, hours] = await Promise.all([
     api.services(),
+    api.deliverables(),
     api.workingHours(),
   ]);
   const slaInHours = formatSlaInHours(locale, hours.expressSlaMinutes);
@@ -243,41 +243,52 @@ export default async function PricingPage({
           <p className="mt-5 max-w-[52ch] text-[1.0125rem] leading-relaxed text-ink-soft text-pretty">
             {td.intro}
           </p>
-          <div className="mt-10 border-t border-[var(--rule)]">
-            {DELIVERABLE_CATALOG.map((entry, i) => {
-              const copy = DELIVERABLE_COPY[entry.code];
-              return (
-                <Reveal
-                  key={entry.code}
-                  as="div"
-                  className="grid items-start gap-x-8 gap-y-3 border-b border-[var(--rule)] py-6 md:grid-cols-[1fr_1.3fr_auto] md:gap-x-12"
-                  delay={i * 60}
-                >
-                  <div>
-                    <div className="mono text-[11px] uppercase tracking-[0.14em] text-sage-text">
-                      {lc(copy.tag)}
+          {deliverables.length === 0 ? (
+            <p className="mt-10 max-w-[52ch] text-[1.0125rem] leading-relaxed text-ink-soft text-pretty">
+              {t.unavailable}
+            </p>
+          ) : (
+            <div className="mt-10 border-t border-[var(--rule)]">
+              {deliverables.map((product, i) => {
+                const copy = DELIVERABLE_COPY[product.code];
+                return (
+                  <Reveal
+                    key={product.code}
+                    as="div"
+                    className="grid items-start gap-x-8 gap-y-3 border-b border-[var(--rule)] py-6 md:grid-cols-[1fr_1.3fr_auto] md:gap-x-12"
+                    delay={i * 60}
+                  >
+                    <div>
+                      <div className="mono text-[11px] uppercase tracking-[0.14em] text-sage-text">
+                        {lc(copy.tag)}
+                      </div>
+                      <h3 className="serif mt-1.5 text-[1.4rem] leading-snug text-pretty">
+                        {loc(
+                          locale,
+                          product.titleRo,
+                          product.titleEn,
+                          product.titleRu,
+                        )}
+                      </h3>
                     </div>
-                    <h3 className="serif mt-1.5 text-[1.4rem] leading-snug text-pretty">
-                      {lc(copy.title)}
-                    </h3>
-                  </div>
-                  <p className="text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
-                    {lc(copy.desc)}
-                  </p>
-                  <div className="flex items-center justify-between gap-6 md:flex-col md:items-end md:gap-2.5">
-                    <div className="serif text-[1.5rem] leading-none lining-nums">
-                      {formatEur(locale, entry.priceEur)}
+                    <p className="text-[0.95rem] leading-relaxed text-ink-soft text-pretty">
+                      {lc(copy.desc)}
+                    </p>
+                    <div className="flex items-center justify-between gap-6 md:flex-col md:items-end md:gap-2.5">
+                      <div className="serif text-[1.5rem] leading-none lining-nums">
+                        {formatEur(locale, product.priceEur)}
+                      </div>
+                      <OrderDeliverableButton
+                        code={product.code}
+                        label={td.order}
+                        className="mono inline-flex cursor-pointer items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
+                      />
                     </div>
-                    <OrderDeliverableButton
-                      code={entry.code}
-                      label={td.order}
-                      className="mono inline-flex cursor-pointer items-center gap-1.5 border-b border-ink pb-0.5 text-[11px] uppercase tracking-[0.1em] text-ink transition-colors hover:border-sage hover:text-sage focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sage"
-                    />
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
+                  </Reveal>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

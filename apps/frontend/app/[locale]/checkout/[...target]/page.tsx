@@ -13,7 +13,6 @@ import { formatEur, formatServicePrice } from '@/lib/service-price';
 import { formatSlaInHours } from '@/lib/working-hours';
 import { DELIVERABLE_COPY } from '@/lib/deliverable-content';
 import { biFor, type Bi } from '@/lib/i18n-types';
-import { deliverableEntry } from '@olesia/shared';
 
 /**
  * Never prerendered, never cached. Two reasons, and both are about money.
@@ -147,16 +146,20 @@ async function resolveSummary(
   }
 
   if (kind === 'deliverable' && rest.length === 1) {
-    const entry = deliverableEntry(rest[0]);
-    if (!entry) return null;
-    const copy = DELIVERABLE_COPY[entry.code];
+    const deliverables = await api.deliverables();
+    // The catalog decides this is on sale, the same way it does for EXPRESS
+    // above: a product the client has withdrawn is absent from this list, and
+    // a code she never had is too. Either way there is no checkout page for it.
+    const product = deliverables.find((d) => d.code === rest[0]);
+    if (!product) return null;
+    const copy = DELIVERABLE_COPY[product.code];
     return {
-      target: { kind: 'deliverable', product: entry.code },
+      target: { kind: 'deliverable', product: product.code },
       from: { label: lc(T.pricing), href: '/pricing' },
       heading: lc(T.deliverableHeading),
-      title: lc(copy.title),
+      title: loc(locale, product.titleRo, product.titleEn, product.titleRu),
       detail: lc(copy.desc),
-      price: formatEur(locale, entry.priceEur),
+      price: formatEur(locale, product.priceEur),
       caveat: lc(T.deliverableCaveat),
     };
   }

@@ -114,7 +114,8 @@ export enum ContactMessageStatus {
 
 /**
  * The group-C deliverable products (brief §2) — personalized menus and written
- * protocols. Stable codes; prices and labels live in `DELIVERABLE_CATALOG`.
+ * protocols. Stable codes; prices and titles live in the `DeliverableCatalog`
+ * table and are edited in the back office.
  */
 export enum DeliverableProduct {
   Menu7 = 'menu_7',
