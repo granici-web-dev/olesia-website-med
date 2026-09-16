@@ -1,7 +1,7 @@
 # Test inventory — what each suite pins
 
 Moved out of `TESTING.md` on 2026-09-16 so the posture document stays short.
-This is the per-suite record as of 2026-09-12 (512 tests then; 534 after step 17).
+This is the per-suite record as of 2026-09-12 (512 tests then; 534 after step 17; 554 after step 19).
 Regenerate the counts with `find apps packages -name '*.spec.*'` rather than
 trusting this file.
 
@@ -55,13 +55,15 @@ trusting this file.
 
 ## Patient data and GDPR
 
-| Suite                              | Tests | What it pins                                                                  |
-| ---------------------------------- | ----: | ----------------------------------------------------------------------------- |
-| `patients/erasure-targets.spec.ts` |     8 | The erasure plan against one row per table, including the rows that survived. |
-| `patients/interactions.spec.ts`    |     5 | Which branch each lead kind takes into the dossier timeline.                  |
-| `common/patient-email.spec.ts`     |     5 | The dedup key for a medical record.                                           |
-| `common/mask-email.spec.ts`        |     5 | The one email mask the logs rely on.                                          |
-| `mail/patient-templates.spec.ts`   |    12 | Which language a patient is written to in, and the fallback.                  |
+| Suite                              | Tests | What it pins                                                                                                      |
+| ---------------------------------- | ----: | ----------------------------------------------------------------------------------------------------------------- |
+| `patients/erasure-targets.spec.ts` |     9 | The erasure plan against one row per table, including the rows that survived.                                     |
+| `patients/interactions.spec.ts`    |     5 | Which branch each lead kind takes into the dossier timeline.                                                      |
+| `common/patient-email.spec.ts`     |     5 | The dedup key for a medical record.                                                                               |
+| `common/mask-email.spec.ts`        |     5 | The one email mask the logs rely on.                                                                              |
+| `mail/patient-templates.spec.ts`   |    17 | Which language a patient is written to in, and the fallback; prescription text verbatim, no name in the greeting. |
+| `patients/send-refusal.spec.ts`    |     6 | Why an entry cannot be emailed, in order: mail off before too large; exactly 10 MB passes.                        |
+| `patients/patient-locale.spec.ts`  |     3 | The patient's language is the newest lead's, across all four tables.                                              |
 
 ## What leaves the building
 

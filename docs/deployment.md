@@ -155,6 +155,18 @@ Optional but wanted before launch: `CALENDLY_*` (booking is dead without them)
 and `SMTP_*`. Without SMTP nothing is emailed at all — not the practice, not
 the patient. Leads are still saved; the back office says the mail did not go,
 and the EXPRESS answer offers a copy button instead of claiming it was sent.
+Sending a prescription or a document from a dossier answers `503
+mail_not_configured` and the dialog says so; no send is recorded.
+
+`DOCTOR_REPLY_TO_EMAIL` is optional: the Reply-To on those two messages. Empty
+means replies land in `SMTP_FROM`. Attachments are capped at 10 MB of file
+(`ATTACHMENT_MAX_BYTES`); re-check the provider's own message limit when the
+SMTP account exists (`docs/shape-send-prescription.md`, open question 3).
+
+To check patient mail locally without a provider, start Mailpit
+(`docker compose --profile mail up -d mailpit`), run the API with
+`SMTP_HOST=localhost SMTP_PORT=1025 SMTP_USER=dev SMTP_PASS=dev`, and read what
+left at `http://localhost:8025`.
 
 Payments — **all four blank means online payment is switched off**, which is the
 correct state until the acquirer contract exists, and the API logs one line at

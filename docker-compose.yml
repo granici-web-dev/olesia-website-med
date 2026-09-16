@@ -62,6 +62,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # Local SMTP for checking patient emails by hand; nothing leaves the machine
+  # (docs/shape-send-prescription.md). Opt-in, so a plain `up` does not start it:
+  #   docker compose --profile mail up -d mailpit
+  # then run the API with SMTP_HOST=localhost SMTP_PORT=1025 SMTP_USER=dev
+  # SMTP_PASS=dev and read the inbox at http://localhost:8025. The two AUTH
+  # flags exist because MailService builds no transport without a user and a
+  # password, and Mailpit refuses AUTH over plain SMTP unless told otherwise.
+  mailpit:
+    image: axllent/mailpit:v1.27
+    profiles: [mail]
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: '1'
+      MP_SMTP_AUTH_ALLOW_INSECURE: '1'
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
 volumes:
   pgdata:
   uploads:

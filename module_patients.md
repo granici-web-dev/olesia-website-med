@@ -79,6 +79,22 @@ All endpoints `@Roles(admin, editor)` (no public access).
 - `POST /patients/:id/documents` — multipart upload of a medical document.
 - `GET /patients/:id/documents/:docId` — **authenticated** download (streamed),
   NOT served from the public `/uploads` static path.
+- `POST /patients/:id/entries/:entryId/send` — body `{ locale }`, admin only.
+  Emails a prescription (text in the body) or a document (attachment, at most
+  10 MB) to the dossier's address. Added 2026-09-16, plan step 19; see below.
+
+### Sending to the patient (added 2026-09-16)
+
+Design and rejected alternatives: `docs/shape-send-prescription.md`. The
+recipient is always `Patient.email`, never typed. The language is chosen in the
+dialog, preselected from `PatientDto.lastKnownLocale` (the newest of the four
+lead tables). Refusals, in order: `entry_not_sendable`, `entry_empty` (422),
+`mail_not_configured` (503), `attachment_too_large` (422, with sizes),
+`mail_send_failed` (502). `PatientEntrySend` records who, when, the address and
+the language, written only after the transport accepted the message, so a
+database failure at that instant leaves an email without a row; accepted.
+Send rows cascade with the entry on erasure. Reply-To is `DOCTOR_REPLY_TO_EMAIL`
+when set.
 
 ## Back office — page "Pacienți"
 
