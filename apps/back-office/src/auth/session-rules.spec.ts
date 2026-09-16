@@ -8,6 +8,7 @@ import { ApiError } from '@/api/http';
 import {
   remainingSeconds,
   returnPath,
+  throttleSeconds,
   totpLockSeconds,
 } from '@/auth/session-rules';
 
@@ -51,6 +52,57 @@ describe('totpLockSeconds', () => {
 
   it('ignores anything that is not an API answer', () => {
     expect(totpLockSeconds(new Error('network_error'))).toBeNull();
+  });
+});
+
+describe('throttleSeconds', () => {
+  /**
+   * The route's own limiter: eight attempts a minute per IP, refused on the
+   * password step before any code is asked for. It reports the wait in
+   * `Retry-After` — which the API has to expose through CORS for the panel to
+   * see it at all — and says nothing in the body.
+   */
+  const throttled = (retryAfterSeconds?: number) =>
+    new ApiError(
+      429,
+      'ThrottlerException: Too Many Requests',
+      { statusCode: 429, message: 'ThrottlerException: Too Many Requests' },
+      retryAfterSeconds,
+    );
+
+  it('reads the wait off the Retry-After header', () => {
+    expect(throttleSeconds(throttled(60))).toBe(60);
+  });
+
+  it('still reports a throttle when the header never arrived', () => {
+    // The likeliest cause is CORS eating the header, and a one-second
+    // countdown that ends in another 429 beats "Încearcă din nou" on a form
+    // that will refuse for another minute.
+    expect(throttleSeconds(throttled())).toBe(1);
+  });
+
+  it('prefers a number the body reported over the header', () => {
+    const error = new ApiError(429, 'too_many', { retryAfterSeconds: 45 }, 60);
+    expect(throttleSeconds(error)).toBe(45);
+  });
+
+  it('leaves a locked account to totpLockSeconds', () => {
+    // Both are 429s and they are read in this order, so a lock must not be
+    // answered with the throttler's sentence.
+    const locked = new ApiError(429, 'totp_locked', {
+      message: 'totp_locked',
+      retryAfterSeconds: 120,
+    });
+    expect(throttleSeconds(locked)).toBeNull();
+    expect(totpLockSeconds(locked)).toBe(120);
+  });
+
+  it('ignores a rejected password, which is not a throttle', () => {
+    expect(throttleSeconds(new ApiError(401, 'Unauthorized'))).toBeNull();
+  });
+
+  it('ignores anything that is not an API answer', () => {
+    expect(throttleSeconds(new Error('network_error'))).toBeNull();
   });
 });
 

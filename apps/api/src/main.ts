@@ -170,6 +170,14 @@ async function bootstrap() {
       .split(',')
       .map((o) => o.trim()),
     credentials: true,
+    // `Retry-After` is not a CORS-safelisted response header, and it is the
+    // only place the throttler says how long a refused login must wait — the
+    // number the panel now counts down on (audit A13). The panel usually
+    // reaches the API same-origin, through the Vite proxy in development and
+    // nginx in production, where this changes nothing; it is for the origins
+    // `CORS_ORIGINS` lists, which are real setups and would otherwise get a
+    // countdown with no number in it.
+    exposedHeaders: ['Retry-After'],
   });
 
   // Swagger mounts as plain middleware, outside the guards, so in production

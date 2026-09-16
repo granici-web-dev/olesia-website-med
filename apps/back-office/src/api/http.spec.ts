@@ -70,6 +70,47 @@ describe('a refused request', () => {
   });
 });
 
+describe('a throttled request', () => {
+  /**
+   * `Retry-After` is the only place Nest's throttler says how long the wait
+   * is, and the login screen counts down on it. RFC 9110 allows a delay or a
+   * date; the API sends the first and a proxy in front of it may send the
+   * second, which would otherwise reach the countdown as `NaN`.
+   */
+  const refused = (headers: Record<string, string>) =>
+    new Response(JSON.stringify({ message: 'ThrottlerException' }), {
+      status: 429,
+      headers,
+    });
+
+  it('carries the wait as seconds', async () => {
+    answers(refused({ 'Retry-After': '60' }));
+    await expect(http.post('/auth/login', {})).rejects.toMatchObject({
+      status: 429,
+      retryAfterSeconds: 60,
+    });
+  });
+
+  it('turns an HTTP date into seconds from now', async () => {
+    const at = new Date(Date.now() + 42_000).toUTCString();
+    answers(refused({ 'Retry-After': at }));
+    const failure = await http.post('/auth/login', {}).catch((e) => e);
+    expect(failure.retryAfterSeconds).toBeGreaterThan(38);
+    expect(failure.retryAfterSeconds).toBeLessThanOrEqual(42);
+  });
+
+  it('leaves the wait undefined when the header is absent or unreadable', async () => {
+    answers(refused({}));
+    await expect(http.post('/auth/login', {})).rejects.toMatchObject({
+      retryAfterSeconds: undefined,
+    });
+    answers(refused({ 'Retry-After': 'soon' }));
+    await expect(http.post('/auth/login', {})).rejects.toMatchObject({
+      retryAfterSeconds: undefined,
+    });
+  });
+});
+
 describe('a request that never arrives', () => {
   it('is an ApiError with no HTTP status, not a raw TypeError', async () => {
     answers(() => {

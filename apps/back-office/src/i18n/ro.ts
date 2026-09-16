@@ -138,6 +138,8 @@ export const ro = {
     totpError: 'Cod incorect. Mai încearcă o dată.',
     totpLocked: (seconds: number) =>
       `Prea multe coduri greșite. Mai încearcă peste ${seconds} s.`,
+    throttled: (seconds: number) =>
+      `Prea multe încercări. Reîncearcă peste ${seconds} s.`,
     sessionExpired:
       'Sesiunea a expirat. Autentifică-te din nou ca să continui de unde ai rămas.',
     sessionReused:
@@ -397,6 +399,11 @@ export const ro = {
         n === 1
           ? 'Un serviciu cu programare nu are încă un eveniment Calendly asociat — rezervarea lui nu va funcționa.'
           : `${n} servicii cu programare nu au încă un eveniment Calendly asociat — rezervările lor nu vor funcționa.`,
+      /** Mapped, but the event is gone from the account or switched off there. */
+      unbookable: (names: string[]) =>
+        names.length === 1
+          ? `Serviciul „${names[0]}” este legat de un eveniment Calendly care nu mai există sau este dezactivat — rezervarea lui nu va funcționa.`
+          : `Aceste servicii sunt legate de evenimente Calendly care nu mai există sau sunt dezactivate, așa că rezervările lor nu vor funcționa: ${names.join(', ')}.`,
     },
 
     /** Mapping a service to a real Calendly event (§8.3). */
@@ -424,8 +431,23 @@ export const ro = {
     },
 
     active: {
-      on: 'Activ',
-      off: 'Inactiv',
+      on: 'Pe site',
+      off: 'Ascuns',
+    },
+
+    actions: {
+      menu: 'Acțiuni',
+      edit: 'Editează',
+      hide: 'Ascunde de pe site',
+      publish: 'Publică pe site',
+      delete: 'Șterge',
+    },
+
+    /** Hiding is one click away from a live page, so it is asked for. */
+    hide: {
+      title: 'Ascunzi serviciul de pe site?',
+      body: 'Serviciul dispare de pe site imediat. Programările și abonamentele existente rămân neatinse, iar serviciul poate fi publicat din nou oricând.',
+      cta: 'Ascunde',
     },
 
     columns: {

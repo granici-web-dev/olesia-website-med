@@ -6,10 +6,36 @@ export class ApiError extends Error {
     public readonly status: number,
     message: string,
     public readonly details?: unknown,
+    /**
+     * Seconds until the caller may try again, off the `Retry-After` header.
+     *
+     * Only a 429 carries one, and only the throttler sets it: the per-account
+     * 2FA lock reports its wait in the body instead. The panel needs both, so
+     * `session-rules` reads whichever is there.
+     */
+    public readonly retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+/**
+ * `Retry-After` as whole seconds, or undefined when there is nothing to read.
+ *
+ * RFC 9110 allows either a delay in seconds or an HTTP date, and Nest's
+ * throttler sends the first — a proxy in front of it may rewrite it as the
+ * second, so both are parsed here rather than after the first outage that
+ * turns a countdown into `NaN`.
+ */
+function retryAfterSeconds(res: Response): number | undefined {
+  const header = res.headers.get('Retry-After');
+  if (!header) return undefined;
+  const seconds = Number(header.trim());
+  if (Number.isFinite(seconds)) return seconds > 0 ? Math.ceil(seconds) : 0;
+  const at = Date.parse(header);
+  if (Number.isNaN(at)) return undefined;
+  return Math.max(0, Math.ceil((at - Date.now()) / 1000));
 }
 
 /**
@@ -242,7 +268,7 @@ async function request<T>(
         ? reported.join(', ')
         : String(reported);
     }
-    throw new ApiError(res.status, message, details);
+    throw new ApiError(res.status, message, details, retryAfterSeconds(res));
   }
 
   if (opts.blob) return (await res.blob()) as unknown as T;

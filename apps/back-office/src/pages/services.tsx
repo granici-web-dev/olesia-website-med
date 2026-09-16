@@ -2,6 +2,9 @@ import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  Eye,
+  EyeOff,
+  MoreHorizontal,
   Pencil,
   Plus,
   RefreshCw,
@@ -15,8 +18,14 @@ import { EmptyState } from '@/components/common/empty-state';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
@@ -70,6 +79,16 @@ export function ServicesPage() {
   const [formOpen, setFormOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Service | null>(null);
   const [deleting, setDeleting] = React.useState<Service | null>(null);
+  /**
+   * The service about to be taken off the site.
+   *
+   * Hiding one used to be a switch sitting beside the pencil, so the click
+   * that meant "open this for editing" and the click that meant "remove this
+   * from a live page" were a few pixels apart and neither asked (audit A13).
+   * Publishing still does not ask — it adds a page rather than removing one,
+   * and it is undone by the same menu.
+   */
+  const [hiding, setHiding] = React.useState<Service | null>(null);
 
   const usedCodes = React.useMemo(
     () => new Set(services.map((s) => s.code)),
@@ -92,6 +111,7 @@ export function ServicesPage() {
       setServiceActive(id, active),
     onSuccess: (svc) => {
       toast.success(svc.active ? t.toast.activated : t.toast.deactivated);
+      setHiding(null);
       invalidate();
     },
     onError: () => toast.error(t.toast.error),
@@ -235,36 +255,57 @@ export function ServicesPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Switch
-                        checked={s.active}
-                        disabled={activeMutation.isPending}
-                        onCheckedChange={(active) =>
-                          activeMutation.mutate({ id: s.id, active })
-                        }
-                        aria-label={s.active ? t.active.on : t.active.off}
-                      />
+                      {/* State, not a control: the word says which it is, so
+                          the row does not rely on the dimming alone. */}
+                      <Badge variant={s.active ? 'success' : 'muted'}>
+                        {s.active ? t.active.on : t.active.off}
+                      </Badge>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-0.5">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-muted-foreground"
-                          aria-label={ro.common.edit}
-                          onClick={() => openEdit(s)}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          aria-label={ro.common.delete}
-                          onClick={() => setDeleting(s)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-muted-foreground"
+                            aria-label={t.actions.menu}
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuItem onSelect={() => openEdit(s)}>
+                            <Pencil />
+                            {t.actions.edit}
+                          </DropdownMenuItem>
+                          {s.active ? (
+                            <DropdownMenuItem onSelect={() => setHiding(s)}>
+                              <EyeOff />
+                              {t.actions.hide}
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                activeMutation.mutate({
+                                  id: s.id,
+                                  active: true,
+                                })
+                              }
+                            >
+                              <Eye />
+                              {t.actions.publish}
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => setDeleting(s)}
+                          >
+                            <Trash2 />
+                            {t.actions.delete}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 );
@@ -283,6 +324,44 @@ export function ServicesPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
       />
+
+      <AlertDialog
+        open={hiding !== null}
+        onOpenChange={(open) => !open && setHiding(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.hide.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {hiding ? (
+                <>
+                  <span className="font-medium text-foreground">
+                    {hiding.titleRo}
+                  </span>{' '}
+                  — {t.hide.body}
+                </>
+              ) : (
+                t.hide.body
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={activeMutation.isPending}>
+              {ro.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={activeMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (hiding)
+                  activeMutation.mutate({ id: hiding.id, active: false });
+              }}
+            >
+              {t.hide.cta}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={deleting !== null}
@@ -342,7 +421,7 @@ function ServicesTableSkeleton() {
           </div>
           <Skeleton className="h-5 w-24 rounded-md" />
           <Skeleton className="ml-auto h-4 w-16" />
-          <Skeleton className="h-5 w-9 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-md" />
         </div>
       ))}
     </div>

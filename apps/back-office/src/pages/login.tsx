@@ -11,7 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BrandMark } from '@/components/common/brand-mark';
 import { useAuth } from '@/auth/auth-context';
-import { remainingSeconds, totpLockSeconds } from '@/auth/session-rules';
+import {
+  remainingSeconds,
+  throttleSeconds,
+  totpLockSeconds,
+} from '@/auth/session-rules';
 import type { SessionEndReason } from '@/api/http';
 import { paths } from '@/config/routes';
 import { ro } from '@/i18n/ro';
@@ -24,6 +28,13 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+
+/** The wait, in the words of whichever refusal caused it. */
+function lockMessage(kind: 'totp' | 'throttle', seconds: number): string {
+  return kind === 'throttle'
+    ? ro.login.throttled(seconds)
+    : ro.login.totpLocked(seconds);
+}
 
 /** What sent the user here, when it was not their own click on "Deconectare". */
 function sessionNotice(reason: SessionEndReason | undefined): string | null {
@@ -51,12 +62,20 @@ export function LoginPage() {
   /** Second step: the account has 2FA on, so a code is required. */
   const [needsTotp, setNeedsTotp] = React.useState(false);
   /**
-   * When the API refused further codes, and for how long. Counted down on the
-   * button rather than reported once: the doctor needs to see the wait ending,
-   * otherwise she keeps trying codes and each attempt pushes the lock further.
+   * When the API refused further attempts, for how long, and which refusal it
+   * was. Counted down on the button rather than reported once: the doctor
+   * needs to see the wait ending, otherwise she keeps trying and — in the
+   * `totp` case — each attempt pushes the lock further out.
+   *
+   * `throttle` is the route's own limiter and fires on the password, before
+   * any code is asked for; `totp` is the per-account brake on guessing codes.
+   * Same countdown, different sentence, because the remedy differs: one is
+   * "wait", the other is "wait, and then check you are reading the right
+   * authenticator".
    */
   const [lockedUntil, setLockedUntil] = React.useState<number | null>(null);
   const [lockedFor, setLockedFor] = React.useState(0);
+  const [lockKind, setLockKind] = React.useState<'totp' | 'throttle'>('totp');
 
   React.useEffect(() => {
     if (lockedUntil === null) return;
@@ -85,7 +104,16 @@ export function LoginPage() {
       const locked = totpLockSeconds(err);
       if (locked !== null) {
         setNeedsTotp(true);
+        setLockKind('totp');
         setLockedUntil(Date.now() + locked * 1000);
+        return;
+      }
+      // Checked after the account lock, which is also a 429: this is the one
+      // that is not about the second factor, so the code field stays as it is.
+      const throttled = throttleSeconds(err);
+      if (throttled !== null) {
+        setLockKind('throttle');
+        setLockedUntil(Date.now() + throttled * 1000);
         return;
       }
       // The API answers 401 `totp_required` when the account has 2FA on and no
@@ -209,7 +237,7 @@ export function LoginPage() {
                 role="alert"
                 className="rounded-md bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive"
               >
-                {lockedFor > 0 ? ro.login.totpLocked(lockedFor) : rootError}
+                {lockedFor > 0 ? lockMessage(lockKind, lockedFor) : rootError}
               </p>
             )}
 
@@ -224,7 +252,7 @@ export function LoginPage() {
                   {ro.login.submitting}
                 </>
               ) : lockedFor > 0 ? (
-                ro.login.totpLocked(lockedFor)
+                lockMessage(lockKind, lockedFor)
               ) : (
                 ro.login.submit
               )}
