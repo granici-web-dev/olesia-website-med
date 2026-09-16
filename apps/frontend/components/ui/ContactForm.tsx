@@ -236,7 +236,11 @@ export function ContactForm({ locale }: { locale: string }) {
             className={inputCls}
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
-            placeholder="adresa.ta@email.com"
+            placeholder={t(
+              'adresa.ta@email.com',
+              'your.address@email.com',
+              'email@example.com',
+            )}
             maxLength={FIELD_LIMITS.email}
             autoComplete="email"
             inputMode="email"

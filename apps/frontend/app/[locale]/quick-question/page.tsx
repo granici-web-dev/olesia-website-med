@@ -167,6 +167,17 @@ const EXAMPLES: Bi[] = [
   },
 ];
 
+/* What actually happens when somebody pays for an express question, said once
+   because the page says it twice — in the FAQ and in the closing band. Until
+   audit A13 both read "prin transfer bancar (deocamdată fără plată online)",
+   which had been untrue since the express checkout shipped: the button next to
+   them opens maib's hosted Checkout page. */
+const PAYMENT_ANSWER: Bi = {
+  ro: 'Cu cardul sau prin MIA, pe pagina securizată a băncii — noi nu vedem datele cardului. Confirmarea vine pe loc, iar întrebarea ajunge la medic imediat după ea.',
+  en: 'By card or through MIA, on the bank’s secure page — we never see your card details. The confirmation comes on the spot, and your question reaches the doctor right after it.',
+  ru: 'Картой или через MIA на защищённой странице банка — данные карты мы не видим. Подтверждение приходит сразу, и сразу после него вопрос уходит врачу.',
+};
+
 const FAQ: { q: Bi; a: Bi }[] = [
   {
     q: {
@@ -234,11 +245,7 @@ const FAQ: { q: Bi; a: Bi }[] = [
       en: 'How do I pay?',
       ru: 'Как происходит оплата?',
     },
-    a: {
-      ro: 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după trimiterea întrebării.',
-      en: 'By bank transfer (no online payment for now). You’ll get the details after sending your question.',
-      ru: 'Банковским переводом (пока без онлайн-оплаты). Реквизиты придут после отправки вопроса.',
-    },
+    a: PAYMENT_ANSWER,
   },
 ];
 
@@ -529,11 +536,7 @@ export default async function QuickQuestionPage({
               {ru ? 'Оплата' : en ? 'Payment' : 'Plată'}
             </p>
             <p className="max-w-[48ch] leading-relaxed text-ink-soft text-pretty">
-              {ru
-                ? 'Банковским переводом (пока без онлайн-оплаты). Реквизиты придут после отправки вопроса.'
-                : en
-                  ? 'By bank transfer (no online payment for now). You’ll get the details after sending your question.'
-                  : 'Prin transfer bancar (deocamdată fără plată online). Primești detaliile după trimiterea întrebării.'}
+              {lc(PAYMENT_ANSWER)}
             </p>
           </div>
           <div>

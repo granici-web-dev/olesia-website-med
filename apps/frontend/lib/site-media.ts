@@ -60,8 +60,32 @@ export async function siteMedia(): Promise<SiteMediaMap> {
   return resolved;
 }
 
-/** One slot, for a page that needs a single picture. */
+/**
+ * One slot, for a page whose layout needs a picture in it.
+ *
+ * A slot saved with a blank url falls back here: the six "about the doctor"
+ * bands are built around a portrait, and a hero with no video is not a page.
+ */
 export async function siteMediaAsset(key: string): Promise<SiteMediaAsset> {
   const all = await siteMedia();
-  return all[key] ?? FALLBACKS[key];
+  const asset = all[key] ?? FALLBACKS[key];
+  return asset?.url ? asset : FALLBACKS[key];
+}
+
+/**
+ * One slot, for a page that can do without it.
+ *
+ * The two accessors differ on one state, and the difference is the point: a
+ * slot the client has saved empty — `url` is a plain `@IsString()`, so the back
+ * office can point a slot at nothing — is *empty*, not "back to the committed
+ * asset". `/services` drew a 590×600 beige rectangle where its portrait should
+ * have been (audit A13); it asks this way now and drops the column instead.
+ * Serving the shipped 2026 photograph there would be exactly the remembered
+ * value `PRINCIPLES.md` rules out.
+ */
+export async function optionalSiteMediaAsset(
+  key: string,
+): Promise<SiteMediaAsset | null> {
+  const asset = (await siteMedia())[key];
+  return asset?.url ? asset : null;
 }

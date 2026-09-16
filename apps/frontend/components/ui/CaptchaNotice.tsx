@@ -36,11 +36,16 @@ export function CaptchaNotice({ className = '' }: { className?: string }) {
       ? 'Terms of Service'
       : 'Termenii de utilizare';
 
+  // Colour is inherited, not stated. The notice sits in four forms, and one of
+  // them is the footer signup on brown: a fixed `text-ink-soft` was 1.4:1 there
+  // (audit A13), and passing a colour in `className` would race the one already
+  // in the string. Inheriting at 70% reads as small print on cream (5.6:1) and
+  // on `--beige` (5.6:1) alike.
   const link =
-    'underline decoration-[var(--rule)] underline-offset-2 transition-colors hover:text-sage';
+    'underline decoration-current/40 underline-offset-2 transition-colors hover:decoration-current';
 
   return (
-    <p className={`text-[0.75rem] leading-relaxed text-ink-soft ${className}`}>
+    <p className={`text-[0.75rem] leading-relaxed opacity-70 ${className}`}>
       {text[0]}
       <a
         href="https://policies.google.com/privacy"

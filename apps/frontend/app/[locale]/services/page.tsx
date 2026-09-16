@@ -9,7 +9,7 @@ import { FreeConsult } from '@/components/sections/FreeConsult';
 import { Reveal } from '@/components/ui/Reveal';
 import { calendlyUrlFor } from '@/lib/calendly';
 import { btnDark, underlineLg, underline } from '@/components/ui/cta';
-import { siteMediaAsset } from '@/lib/site-media';
+import { optionalSiteMediaAsset } from '@/lib/site-media';
 import { api } from '@/lib/api';
 import { formatServiceDuration } from '@/lib/service-price';
 import { SERVICE_INCLUDED, fillIncluded } from '@/lib/service-content';
@@ -633,7 +633,7 @@ export default async function ServicesPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const [portrait, services, hours] = await Promise.all([
-    siteMediaAsset('portrait_services'),
+    optionalSiteMediaAsset('portrait_services'),
     api.services(),
     api.workingHours(),
   ]);
@@ -1111,9 +1111,19 @@ export default async function ServicesPage({
         </div>
       </section>
 
-      {/* 7 · About the doctor — content left, portrait right */}
-      <section className="shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:py-28">
-        <div className="md:sticky md:top-[133px] md:self-start">
+      {/* 7 · About the doctor — content left, portrait right, and one column
+         with no portrait at all. The slot can be empty (the client can point it
+         at nothing from the back office) and a two-column grid with an empty
+         second column is a 590×600 beige rectangle, which is what audit A13
+         photographed. */}
+      <section
+        className={`shell grid items-start gap-12 border-b border-[var(--rule)] py-20 md:gap-20 md:py-28 ${
+          portrait ? 'md:grid-cols-[1.05fr_0.95fr]' : ''
+        }`}
+      >
+        <div
+          className={portrait ? 'md:sticky md:top-[133px] md:self-start' : ''}
+        >
           <p className="eyebrow mb-4">{T.doctorEyebrow}</p>
           <SectionTitle
             a={ru ? 'Кто вас' : en ? "Who you'll" : 'Cine te'}
@@ -1141,33 +1151,35 @@ export default async function ServicesPage({
           </Link>
         </div>
 
-        <div className="md:max-w-none mx-auto w-full max-w-[420px]">
-          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#e9e1d0]">
-            <Image
-              src={portrait.url}
-              alt={
-                ru
-                  ? 'Д-р Олеся Жалба, врач-педиатр и специалист по питанию'
+        {portrait && (
+          <div className="md:max-w-none mx-auto w-full max-w-[420px]">
+            <div className="relative aspect-[4/5] w-full overflow-hidden bg-cream-2">
+              <Image
+                src={portrait.url}
+                alt={
+                  ru
+                    ? 'Д-р Олеся Жалба, врач-педиатр и специалист по питанию'
+                    : en
+                      ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
+                      : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
+                }
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 100vw, 45vw"
+              />
+            </div>
+            <div className="mono mt-4 flex justify-between text-[11px] uppercase tracking-[0.08em] text-ink-soft">
+              <span>Dr. Olesea Jalba</span>
+              <span>
+                {ru
+                  ? 'Онлайн · Где угодно'
                   : en
-                    ? 'Dr. Olesea Jalba, pediatrician and nutrition specialist'
-                    : 'Dr. Olesea Jalba, medic pediatru și specialist în nutriție'
-              }
-              fill
-              className="object-cover object-top"
-              sizes="(max-width: 768px) 100vw, 45vw"
-            />
+                    ? 'Online · Anywhere'
+                    : 'Online · Oriunde'}
+              </span>
+            </div>
           </div>
-          <div className="mono mt-4 flex justify-between text-[11px] uppercase tracking-[0.08em] text-ink-soft">
-            <span>Dr. Olesea Jalba</span>
-            <span>
-              {ru
-                ? 'Онлайн · Где угодно'
-                : en
-                  ? 'Online · Anywhere'
-                  : 'Online · Oriunde'}
-            </span>
-          </div>
-        </div>
+        )}
       </section>
 
       {/* 8 · FAQ — centered */}

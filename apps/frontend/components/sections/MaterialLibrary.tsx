@@ -402,15 +402,22 @@ export function MaterialLibrary({
                     <span className="mono absolute left-4 top-4 rounded-full border border-[var(--rule)] bg-paper/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-sage-text">
                       {catLabel[m.categorySlug]}
                     </span>
-                    <span
-                      className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
-                        m.access === 'free'
-                          ? 'bg-sage/15 text-sage-text'
-                          : 'bg-ink text-cream'
-                      }`}
-                    >
-                      {m.access === 'free' ? lc(T.free) : priceLabel(m)}
-                    </span>
+                    {/* A price is the loudest thing on the card and the one
+                        thing a card with no file cannot honour — twelve of them
+                        priced above a dead "ÎN CURÂND" is what audit A13
+                        photographed. "Gratuit" goes with it: neither is on
+                        offer yet, and the pill below says so once. */}
+                    {ready && (
+                      <span
+                        className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
+                          m.access === 'free'
+                            ? 'bg-sage/15 text-sage-text'
+                            : 'bg-ink text-cream'
+                        }`}
+                      >
+                        {m.access === 'free' ? lc(T.free) : priceLabel(m)}
+                      </span>
+                    )}
                     <span className="transition-transform duration-500 group-hover:scale-110">
                       <DocIcon />
                     </span>

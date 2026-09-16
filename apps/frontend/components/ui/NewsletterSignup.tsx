@@ -8,13 +8,24 @@ import { LeadError } from '@/lib/leads';
 import { describeLeadError } from '@/lib/form-errors';
 import { FIELD_LIMITS, isEmailLike } from '@/lib/validation';
 import { CaptchaNotice } from './CaptchaNotice';
+import { creamBox } from './cta';
 import { biFor, type Bi } from '@/lib/i18n-types';
+import styles from './NewsletterSignup.module.css';
 
 /* Newsletter signup (brief §6c). Posts to our own API, so there is nothing to
    configure and nothing to hide behind: the block rendered nowhere for as long
    as it waited on an endpoint variable nobody was ever going to set
    (audit A6, F3). Email + consent, with idle/submitting/success/error states.
-   Trilingual via the active locale. `source` tags where the signup happened. */
+   Trilingual via the active locale. `source` tags where the signup happened.
+
+   It is styled for the brown footer, which is where it is mounted and the
+   site's only dark surface. It used to carry cream-background colours — ink
+   text, an ink button — into `--beige`, which put every string on it between
+   1.27:1 and 1.46:1 and made Lighthouse score `color-contrast: 0` on every
+   page of the site (audit A13). Everything here is cream on brown at 5.6:1 or
+   better, and the submit button is the footer's own `creamBox`, so it reads as
+   a button rather than as a dark patch on a dark band. Mounting it on cream
+   would need a tone the component does not have yet; it has one caller. */
 
 const T: Record<string, Bi> = {
   title: {
@@ -89,7 +100,7 @@ export function NewsletterSignup({
   if (status === 'success') {
     return (
       <div className={className}>
-        <p className="text-[0.95rem] leading-relaxed text-ink">
+        <p className="text-[0.95rem] leading-relaxed text-cream">
           {lc(T.success)}
         </p>
       </div>
@@ -98,10 +109,10 @@ export function NewsletterSignup({
 
   return (
     <div className={className}>
-      <p className="serif text-[1.4rem] leading-snug tracking-[-0.01em] text-ink">
+      <p className="serif text-[1.4rem] leading-snug tracking-[-0.01em] text-cream">
         {lc(T.title)}
       </p>
-      <p className="mt-2 max-w-[42ch] text-[0.9rem] leading-relaxed text-ink-soft text-pretty">
+      <p className="mt-2 max-w-[42ch] text-[0.9rem] leading-relaxed text-cream/80 text-pretty">
         {lc(T.body)}
       </p>
 
@@ -115,29 +126,31 @@ export function NewsletterSignup({
             placeholder={lc(T.placeholder)}
             aria-label={lc(T.title)}
             maxLength={FIELD_LIMITS.email}
-            className="min-w-[220px] flex-1 border-b border-[var(--rule)] bg-transparent py-2 text-[0.95rem] text-ink placeholder:text-ink-soft focus:border-sage focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-text"
+            className="min-w-[220px] flex-1 border-b border-cream/45 bg-transparent py-2.5 text-[0.95rem] text-cream placeholder:text-cream/70 focus:border-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sage-soft)]"
           />
           <button
             type="submit"
             disabled={!valid || status === 'submitting'}
-            className="cursor-pointer bg-ink px-5 py-2.5 text-[12px] font-medium uppercase tracking-[0.06em] text-cream transition-colors hover:bg-sage disabled:cursor-not-allowed disabled:opacity-40"
+            className={`${creamBox} disabled:cursor-not-allowed disabled:opacity-55`}
           >
             {status === 'submitting' ? lc(T.sending) : lc(T.cta)}
           </button>
         </div>
 
-        <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
+        <label className="mt-4 flex cursor-pointer items-start gap-3 text-[0.85rem] leading-[1.6] text-cream/80">
+          {/* 24px so it clears the minimum tap target on a phone, which the
+              previous 14px box did not (audit A13). */}
           <input
             type="checkbox"
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
-            className="mt-0.5 size-3.5 shrink-0 accent-[var(--sage,#7a8b6f)]"
+            className={styles.checkbox}
           />
           <span>
             {lc(T.consent)}{' '}
             <Link
               href="/gdpr"
-              className="underline underline-offset-2 transition-colors hover:text-sage"
+              className="underline underline-offset-2 transition-colors hover:text-[var(--sage-soft)]"
             >
               {lc(T.privacy)}
             </Link>
@@ -145,15 +158,12 @@ export function NewsletterSignup({
         </label>
 
         {error && (
-          <p
-            role="alert"
-            className="mt-2 text-[0.85rem] text-[var(--walnut,#8a5a3a)]"
-          >
+          <p role="alert" className="mt-3 text-[0.85rem] text-danger-soft">
             {error}
           </p>
         )}
 
-        <CaptchaNotice className="mt-3" />
+        <CaptchaNotice className="mt-4" />
       </form>
     </div>
   );

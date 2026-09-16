@@ -1,0 +1,50 @@
+/* The consent checkbox, drawn rather than left to the platform.
+
+   It has to be 24px to be a tap target on a phone, and a 24px native checkbox
+   on the brown footer is a bright white square that outweighs the sentence
+   beside it. `accent-color` cannot help: it paints the checked state only.
+   Drawn here, the box is a cream outline at 4.6:1 on `--beige` and fills with
+   `--sage-soft` when it is ticked, at 6.6:1 — the same two colours the rest of
+   the footer uses. */
+.checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid rgba(245, 241, 234, 0.6);
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.checkbox:hover {
+  border-color: var(--sage-soft);
+}
+
+.checkbox:checked {
+  background: var(--sage-soft);
+  border-color: var(--sage-soft);
+}
+
+/* The tick is drawn on the box rather than shipped as an icon: one glyph, two
+   strokes, and no icon set imported for it. */
+.checkbox:checked::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  margin-top: -2px;
+  border: solid var(--sage-deep);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--sage-soft);
+  outline-offset: 2px;
+}

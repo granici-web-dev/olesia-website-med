@@ -75,11 +75,16 @@ export default async function PricingPage({
       : en
         ? 'Transparent pricing'
         : 'Tarife transparente',
+    // Not "confirmed manually": the express question and the personalized
+    // products go through the bank's hosted Checkout page, and the confirmation
+    // is the bank's callback, not a person reading a statement (audit A13).
+    // Scoped to "online", because the video consultations are still booked
+    // through Calendly and settled off the site.
     intro: ru
-      ? 'Без скрытых платежей. Оплату подтверждаем вручную после записи.'
+      ? 'Без скрытых платежей. Онлайн-оплата — картой или через MIA на защищённой странице банка, подтверждение приходит сразу.'
       : en
-        ? 'No hidden costs. Payment is confirmed manually after booking.'
-        : 'Fără costuri ascunse. Plata se confirmă manual după programare.',
+        ? 'No hidden costs. Online payments go by card or MIA on the bank’s secure page, and are confirmed on the spot.'
+        : 'Fără costuri ascunse. Plata online se face cu cardul sau prin MIA, pe pagina securizată a băncii, și se confirmă pe loc.',
     book: ru ? 'Записаться' : en ? 'Book' : 'Rezervă',
     included: ru ? 'Что входит' : en ? "What's included" : 'Ce include',
     unavailable: ru
@@ -99,10 +104,10 @@ export default async function PricingPage({
         ? 'Personalized products'
         : 'Produse personalizate',
     intro: ru
-      ? 'Оплата → короткая форма → готовый результат в письменном виде. Оплата подтверждается вручную.'
+      ? 'Оплата → короткая форма → готовый результат в письменном виде. Платите картой или через MIA на защищённой странице банка; подтверждение приходит сразу, а вслед за ним — личная ссылка для отправки данных.'
       : en
-        ? 'Pay → a short form → a finished result delivered in writing. Payment is confirmed manually.'
-        : 'Plată → un formular scurt → un rezultat finalizat, livrat în scris. Plata se confirmă manual.',
+        ? 'Pay → a short form → a finished result delivered in writing. You pay by card or MIA on the bank’s secure page; the confirmation comes on the spot, and with it a personal link for sending your details.'
+        : 'Plată → un formular scurt → un rezultat finalizat, livrat în scris. Plătești cu cardul sau prin MIA, pe pagina securizată a băncii; confirmarea vine pe loc, iar odată cu ea linkul personal prin care trimiți datele.',
     order: ru ? 'Заказать' : en ? 'Order' : 'Comandă',
   };
 

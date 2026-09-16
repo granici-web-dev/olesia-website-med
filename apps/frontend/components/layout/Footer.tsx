@@ -151,7 +151,8 @@ export async function Footer() {
         )}
       </div>
 
-      <div className="mt-12 border-t border-[var(--rule)] pt-10">
+      {/* `--rule` is an ink tint and drew nothing on brown. */}
+      <div className="mt-12 border-t border-cream/20 pb-4 pt-10">
         <NewsletterSignup source="footer" className="max-w-[520px]" />
       </div>
 

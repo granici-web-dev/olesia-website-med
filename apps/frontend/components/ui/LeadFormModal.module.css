@@ -153,25 +153,37 @@
   border-radius: 8px;
 }
 
+/* The site's primary action, shared by the lead modal and the three checkouts
+   — "Continuă spre plată" is the loudest button on the site. It was cream on
+   `--sage` at 3.62:1 and rounded 9px, which read as a telehealth pill and
+   failed AA (audit A13). It is `btnDark`'s pairing now, ink on cream at
+   13.9:1, with the square corners every other CTA on the site has. */
 .submit {
   margin-top: 4px;
   width: 100%;
-  padding: 13px 16px;
+  padding: 14px 16px;
   font: inherit;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #fdfbf6;
-  background: var(--sage);
+  color: var(--cream);
+  background: var(--ink);
   border: none;
-  border-radius: 9px;
+  border-radius: 0;
   cursor: pointer;
   transition:
     background 0.16s,
     transform 0.05s;
 }
 
+/* Not `--sage`: cream on it is 3.33:1, so the hover state would fail what the
+   resting state passes. `--sage-deep` keeps the green shift at 11.8:1. */
 .submit:hover {
   background: var(--sage-deep);
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
 }
 
 .submit:active {

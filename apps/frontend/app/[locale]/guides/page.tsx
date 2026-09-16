@@ -88,6 +88,16 @@ export default async function LibraryPage({
   const featured =
     materials.find((m) => m.flags.includes('recommended')) ?? materials[0];
 
+  // What the page is allowed to promise. Audit A13 found twelve cards reading
+  // "ÎN CURÂND" under a band promising a card payment and an instant download:
+  // every material was listed, none had a file, and nothing on the page said
+  // so. These two say what the shelf can actually do today, and the framing
+  // moves with the content instead of waiting for someone to remember it.
+  const anyDownloadable = materials.some((m) => m.hasFile);
+  const anyPurchasable = materials.some(
+    (m) => m.access === 'paid' && m.hasFile,
+  );
+
   const HOW = [
     {
       title: {
@@ -107,11 +117,17 @@ export default async function LibraryPage({
         en: 'Download or buy',
         ru: 'Скачайте или купите',
       },
-      text: {
-        ro: 'Materialele gratuite cer doar emailul; cele cu plată se achită cu cardul și se descarcă imediat.',
-        en: 'Free materials only ask for your email; paid ones are paid for by card and download straight away.',
-        ru: 'Для бесплатных нужен только email; платные оплачиваются картой и скачиваются сразу.',
-      },
+      text: anyPurchasable
+        ? {
+            ro: 'Materialele gratuite cer doar emailul; cele cu plată se achită cu cardul și se descarcă imediat.',
+            en: 'Free materials only ask for your email; paid ones are paid for by card and download straight away.',
+            ru: 'Для бесплатных нужен только email; платные оплачиваются картой и скачиваются сразу.',
+          }
+        : {
+            ro: 'Materialele gratuite cer doar emailul. Cele cu plată apar aici pe măsură ce sunt gata.',
+            en: 'Free materials only ask for your email. Paid ones appear here as they are finished.',
+            ru: 'Для бесплатных нужен только email. Платные появятся здесь по мере готовности.',
+          },
     },
     {
       title: {
@@ -171,11 +187,17 @@ export default async function LibraryPage({
                 )}
               </h1>
               <p className="mt-7 max-w-[44ch] text-[1.125rem] leading-[1.6] text-ink-soft text-pretty">
-                {ru
-                  ? 'Материалы о здоровье и питании ребёнка, написанные педиатром — бесплатные и платные. Ищите и фильтруйте по возрасту и теме.'
-                  : en
-                    ? 'Materials on your child’s health and nutrition, written by a pediatrician — free and paid. Search and filter by age and topic.'
-                    : 'Materiale despre sănătatea și alimentația copilului, scrise de un medic pediatru — gratuite și cu plată. Caută și filtrează după vârstă și temă.'}
+                {anyDownloadable
+                  ? ru
+                    ? 'Материалы о здоровье и питании ребёнка, написанные педиатром — бесплатные и платные. Ищите и фильтруйте по возрасту и теме.'
+                    : en
+                      ? 'Materials on your child’s health and nutrition, written by a pediatrician — free and paid. Search and filter by age and topic.'
+                      : 'Materiale despre sănătatea și alimentația copilului, scrise de un medic pediatru — gratuite și cu plată. Caută și filtrează după vârstă și temă.'
+                  : ru
+                    ? 'Материалы о здоровье и питании ребёнка, написанные педиатром. Библиотека пока наполняется — ниже видно, что скоро появится.'
+                    : en
+                      ? 'Materials on your child’s health and nutrition, written by a pediatrician. The library is still being filled — below is what is on the way.'
+                      : 'Materiale despre sănătatea și alimentația copilului, scrise de un medic pediatru. Biblioteca se completează — mai jos vezi ce urmează.'}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <a href="#library" className={btnDark}>
@@ -186,11 +208,17 @@ export default async function LibraryPage({
                       : 'Vezi biblioteca'}
                 </a>
                 <span className="mono inline-flex items-center rounded-full border border-[var(--rule)] px-3.5 py-1.5 text-[11px] uppercase tracking-[0.12em] text-sage-text">
-                  {ru
-                    ? 'Бесплатно и платно · PDF'
-                    : en
-                      ? 'Free & paid · PDF'
-                      : 'Gratuit & cu plată · PDF'}
+                  {anyDownloadable
+                    ? ru
+                      ? 'Бесплатно и платно · PDF'
+                      : en
+                        ? 'Free & paid · PDF'
+                        : 'Gratuit & cu plată · PDF'
+                    : ru
+                      ? 'В подготовке · PDF'
+                      : en
+                        ? 'In preparation · PDF'
+                        : 'În pregătire · PDF'}
                 </span>
               </div>
             </div>
@@ -208,21 +236,23 @@ export default async function LibraryPage({
                     <span className="mono absolute left-4 top-4 rounded-full border border-[var(--rule)] bg-paper/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-sage-text">
                       {catLabel(featured.categorySlug)}
                     </span>
-                    <span
-                      className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
-                        featured.access === 'free'
-                          ? 'bg-sage/15 text-sage-text'
-                          : 'bg-ink text-cream'
-                      }`}
-                    >
-                      {featured.access === 'free'
-                        ? ru
-                          ? 'Бесплатно'
-                          : en
-                            ? 'Free'
-                            : 'Gratuit'
-                        : `${featured.price ?? 0} €`}
-                    </span>
+                    {featured.hasFile && (
+                      <span
+                        className={`mono absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] ${
+                          featured.access === 'free'
+                            ? 'bg-sage/15 text-sage-text'
+                            : 'bg-ink text-cream'
+                        }`}
+                      >
+                        {featured.access === 'free'
+                          ? ru
+                            ? 'Бесплатно'
+                            : en
+                              ? 'Free'
+                              : 'Gratuit'
+                          : `${featured.price ?? 0} €`}
+                      </span>
+                    )}
                     <svg
                       viewBox="0 0 24 24"
                       width="40"
@@ -358,6 +388,16 @@ export default async function LibraryPage({
               </>
             )}
           </h2>
+
+          {!anyDownloadable && (
+            <p className="mt-5 max-w-[56ch] leading-relaxed text-cream/80 text-pretty">
+              {ru
+                ? 'Библиотека наполняется: материалы ниже уже собраны, но файлы ещё готовятся. Как только материал готов, он появляется здесь — бесплатный сразу по email, платный сразу после оплаты.'
+                : en
+                  ? 'The library is being filled: the materials below are lined up, but their files are still in preparation. As soon as one is ready it appears here — a free one straight after your email, a paid one straight after payment.'
+                  : 'Biblioteca se completează: materialele de mai jos sunt pregătite, dar fișierele lor încă se lucrează. Imediat ce un material e gata, apare aici — cel gratuit după email, cel cu plată după achitare.'}
+            </p>
+          )}
 
           <div className="relative mt-14 grid gap-x-8 gap-y-12 md:mt-16 md:grid-cols-3">
             <span
