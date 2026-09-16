@@ -2,10 +2,9 @@ import * as React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { DELIVERABLE_CATALOG } from '@olesia/shared';
 
 import {
   Sheet,
@@ -31,6 +30,8 @@ import { ro } from '@/i18n/ro';
 import { createOrder } from '@/features/orders/api';
 import { ordersQueryKey } from '@/features/orders/query-key';
 import type { OrderProduct } from '@/features/orders/types';
+import { fetchDeliverables } from '@/features/deliverables/api';
+import { deliverablesQueryKey } from '@/features/deliverables/query-key';
 
 const t = ro.orders;
 const f = t.form;
@@ -43,9 +44,10 @@ const f = t.form;
  * database, so the work happened and the panel knew nothing about it
  * (audit A10, F15).
  *
- * The price is not on this form. It is stamped from `DELIVERABLE_CATALOG`
- * server-side, the same catalog the public checkout reads, so a phone order
- * and a web order of the same product record the same amount.
+ * The price is not on this form. It is stamped from the `DeliverableCatalog`
+ * row server-side, the same catalog the public checkout reads, so a phone
+ * order and a web order of the same product record the same amount. The select
+ * offers only what is on sale, because the API refuses a withdrawn product.
  */
 export function OrderFormSheet({
   open,
@@ -56,12 +58,19 @@ export function OrderFormSheet({
 }) {
   const queryClient = useQueryClient();
 
+  const { data } = useQuery({
+    queryKey: deliverablesQueryKey,
+    queryFn: fetchDeliverables,
+  });
+  const products = React.useMemo(
+    () => (data ?? []).filter((d) => d.active),
+    [data],
+  );
+
   const schema = React.useMemo(
     () =>
       z.object({
-        product: z.enum(
-          DELIVERABLE_CATALOG.map((e) => e.code) as [string, ...string[]],
-        ),
+        product: z.string().min(1, f.required),
         clientName: z.string().trim().min(1, f.required),
         clientEmail: z.string().trim().email(f.invalidEmail),
         phone: z.string().trim().max(40),
@@ -75,7 +84,7 @@ export function OrderFormSheet({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      product: DELIVERABLE_CATALOG[0].code,
+      product: '',
       clientName: '',
       clientEmail: '',
       phone: '',
@@ -83,9 +92,11 @@ export function OrderFormSheet({
     },
   });
 
+  // The catalog arrives after the sheet opens, so the first product is picked
+  // when it lands rather than in `defaultValues`.
   React.useEffect(() => {
-    if (open) form.reset();
-  }, [open, form]);
+    if (open) form.reset({ product: products[0]?.code ?? '' });
+  }, [open, products, form]);
 
   const mutation = useMutation({
     mutationFn: (values: FormValues) =>
@@ -104,9 +115,11 @@ export function OrderFormSheet({
     onError: (err) => {
       const code = err instanceof ApiError ? err.message : '';
       toast.error(
-        code === 'unknown_deliverable_product'
+        code === 'deliverable_not_found'
           ? t.toast.unknownProduct
-          : t.toast.error,
+          : code === 'deliverable_not_for_sale'
+            ? t.toast.notForSale
+            : t.toast.error,
       );
     },
   });
@@ -140,9 +153,9 @@ export function OrderFormSheet({
                       <SelectValue placeholder={f.productPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {DELIVERABLE_CATALOG.map((entry) => (
-                        <SelectItem key={entry.code} value={entry.code}>
-                          {entry.titleRo} · {entry.priceEur} €
+                      {products.map((product) => (
+                        <SelectItem key={product.code} value={product.code}>
+                          {product.titleRo} · {product.priceEur} €
                         </SelectItem>
                       ))}
                     </SelectContent>

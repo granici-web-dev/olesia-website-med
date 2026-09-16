@@ -516,6 +516,74 @@ export const ro = {
     },
   },
 
+  /**
+   * Meniurile și protocoalele din grupul C, editate pe pagina Servicii.
+   * Cele cinci produse nu se adaugă și nu se șterg: se schimbă prețul,
+   * denumirile și ordinea (docs/shape-deliverable-catalog.md).
+   */
+  deliverables: {
+    title: 'Meniuri și protocoale',
+    subtitle:
+      'Produsele personalizate vândute de pe /pricing. Prețul și denumirile se schimbă de aici; lista de produse este fixă.',
+    refresh: 'Reîmprospătează',
+
+    active: {
+      on: 'La vânzare',
+      off: 'Retras',
+    },
+
+    actions: {
+      menu: 'Acțiuni',
+      edit: 'Editează',
+      withdraw: 'Retrage de la vânzare',
+      publish: 'Pune la vânzare',
+    },
+
+    withdraw: {
+      title: 'Retragi produsul de la vânzare?',
+      body: 'Produsul dispare imediat de pe site și nu mai poate fi comandat. Comenzile existente rămân neatinse, iar produsul poate fi pus la loc oricând.',
+      cta: 'Retrage',
+    },
+
+    columns: {
+      order: '#',
+      product: 'Produs',
+      price: 'Preț',
+      active: 'Vizibil',
+    },
+
+    empty: {
+      title: 'Catalogul este gol',
+      body: 'Cele cinci produse se adaugă la instalare. Rulează seed-ul bazei de date.',
+    },
+
+    form: {
+      title: 'Editează produsul',
+      subtitle: 'Prețul și denumirile afișate pe site, în trei limbi.',
+      price: 'Preț (EUR)',
+      priceHint:
+        'Euro întregi. 0 înseamnă „la cerere” și oprește plata online.',
+      titleRo: 'Denumire (RO)',
+      titleEn: 'Denumire (EN)',
+      titleRu: 'Denumire (RU)',
+      titleHint:
+        'Toate trei sunt obligatorii: site-ul afișează produsul în trei limbi.',
+      sortOrder: 'Ordine pe site',
+      save: 'Salvează',
+      saving: 'Se salvează…',
+      required: 'Câmp obligatoriu',
+      invalidNumber: 'Valoare invalidă',
+    },
+
+    toast: {
+      updated: 'Produsul a fost actualizat.',
+      activated: 'Produsul este la vânzare.',
+      deactivated: 'Produsul a fost retras de la vânzare.',
+      notFound: 'Produsul nu mai există în catalog.',
+      error: 'Acțiunea a eșuat. Încearcă din nou.',
+    },
+  },
+
   blog: {
     title: 'Blog',
     subtitle: 'Articole bilingve (RO/EN), categorii și status de publicare.',
@@ -1426,6 +1494,8 @@ export const ro = {
       created: 'Comanda a fost înregistrată.',
       deleted: 'Comanda a fost ștearsă.',
       unknownProduct: 'Produsul nu mai există în catalog.',
+      notForSale:
+        'Produsul a fost retras de la vânzare. Reîmprospătează lista și alege altul.',
       error: 'Nu am putut salva modificarea. Încearcă din nou.',
     },
   },

@@ -63,6 +63,7 @@ import { formatPrice } from '@/lib/format';
 import { groupForCode, ALL_CODES } from '@/features/services/format';
 import { servicesQueryKey } from '@/features/services/query-key';
 import { CalendlyStatus } from '@/features/services/calendly-status';
+import { DeliverablesCard } from '@/features/deliverables/deliverables-card';
 import type { Service, ServiceCode } from '@/features/services/types';
 
 const t = ro.services;
@@ -362,6 +363,11 @@ export function ServicesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* The group-C catalog: menus and protocols, priced here rather than in
+          a constant since PLAN.md step 18. Same page because "what I sell and
+          for how much" is one thing to look for. */}
+      <DeliverablesCard />
 
       <AlertDialog
         open={deleting !== null}
